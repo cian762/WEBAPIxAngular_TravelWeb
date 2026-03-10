@@ -1,0 +1,78 @@
+﻿{
+   "CodeGenerationMode": 4,
+   "ContextClassName": "TravelContext",
+   "ContextNamespace": null,
+   "FilterSchemas": false,
+   "IncludeConnectionString": false,
+   "IrregularWords": null,
+   "MinimumProductVersion": "2.6.1378",
+   "ModelNamespace": null,
+   "OutputContextPath": "Models\/Itinerary\/DBContext",
+   "OutputPath": "Models\/Itinerary\/DBModel",
+   "PluralRules": null,
+   "PreserveCasingWithRegex": true,
+   "ProjectRootNamespace": "TravelWeb_API",
+   "Schemas": null,
+   "SelectedHandlebarsLanguage": 2,
+   "SelectedToBeGenerated": 0,
+   "SingularRules": null,
+   "T4TemplatePath": null,
+   "Tables": [
+      {
+         "Name": "[Itinerary].[ActivityMapping]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Itinerary].[AIAnalyses]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Itinerary].[AIGenerationErrors]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Itinerary].[Itineraries]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Itinerary].[ItineraryComparisons]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Itinerary].[ItineraryItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[Itinerary].[ItineraryVersions]",
+         "ObjectType": 0
+      }
+   ],
+   "UiHint": null,
+   "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
+   "UseBoolPropertiesWithoutDefaultSql": false,
+   "UseDatabaseNames": false,
+   "UseDatabaseNamesForRoutines": true,
+   "UseDateOnlyTimeOnly": true,
+   "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
+   "UseFluentApiOnly": true,
+   "UseHandleBars": false,
+   "UseHierarchyId": false,
+   "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
+   "UseLegacyPluralizer": false,
+   "UseManyToManyEntity": false,
+   "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
+   "UseNoObjectFilter": false,
+   "UseNodaTime": false,
+   "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
+   "UseSchemaFolders": false,
+   "UseSchemaNamespaces": false,
+   "UseSpatial": false,
+   "UseT4": false,
+   "UseT4Split": false,
+   "UseTypedTvpParameters": true
+}

@@ -16,6 +16,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
+//Itinerary��DBContext�`�J
+builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 // µù¥U BoardDbContext¡A¨Ã«ü©w¨Ï¥Î SQL Server ¥H¤Î³s±µ¦r¦ê
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
