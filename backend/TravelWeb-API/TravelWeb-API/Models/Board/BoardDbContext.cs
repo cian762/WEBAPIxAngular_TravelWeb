@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace TravelWeb_API.Models;
+namespace TravelWeb_API.Models.Board;
 
 public partial class BoardDbContext : DbContext
 {

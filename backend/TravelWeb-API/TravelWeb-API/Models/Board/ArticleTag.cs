@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TravelWeb_API.Models;
+namespace TravelWeb_API.Models.Board;
 
 public partial class ArticleTag
 {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TravelWeb_API.Models;
+namespace TravelWeb_API.Models.Board;
 
-public partial class ArticleSource
+public partial class PostPhoto
 {
     public int ArticleId { get; set; }
 
-    public int Source { get; set; }
+    public string? Photo { get; set; }
 
     public virtual Article Article { get; set; } = null!;
 }
