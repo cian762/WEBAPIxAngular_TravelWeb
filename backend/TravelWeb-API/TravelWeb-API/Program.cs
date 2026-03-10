@@ -1,8 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.attraction;
-
-=======
-using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board;
@@ -22,8 +19,10 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AttractionsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-=======
+
 builder.Services.AddDbContext<MemberSystemContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
@@ -41,7 +40,7 @@ builder.Services.AddDbContext<BoardDbContext>(options =>
 
 
 var app = builder.Build();
-/////////////////////
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
