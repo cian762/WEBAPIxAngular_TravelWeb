@@ -1,9 +1,14 @@
-<<<<<<< HEAD
-=======
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.attraction;
 
->>>>>>> 431c6d0 (Attraction Commit)
+=======
+using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.MemberSystem;
+using TravelWeb_API.Models.ActivityModel;
+using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.TripProduct;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,17 +19,29 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-<<<<<<< HEAD
 
-=======
 builder.Services.AddDbContext<AttractionsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
->>>>>>> 431c6d0 (Attraction Commit)
+=======
+builder.Services.AddDbContext<MemberSystemContext>(options =>
+builder.Services.AddDbContext<ActivityDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
+//³o¬O¦æµ{°Ó«~ªº³s½u
+builder.Services.AddDbContext<TripDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+
+//Itinerary��DBContext�`�J
+builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+// µù¥U BoardDbContext¡A¨Ã«ü©w¨Ï¥Î SQL Server ¥H¤Î³s±µ¦r¦ê
+builder.Services.AddDbContext<BoardDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 
 
 var app = builder.Build();
+/////////////////////
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
