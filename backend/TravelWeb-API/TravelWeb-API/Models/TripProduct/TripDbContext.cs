@@ -457,7 +457,7 @@ public partial class TripDbContext : DbContext
                     j =>
                     {
                         j.HasKey("TripProductId", "TravelTagid");
-                        j.ToTable("TravelandProductRelation");
+                        j.ToTable("TravelandProductRelation","dbo");
                     });
         });
 
@@ -502,7 +502,7 @@ public partial class TripDbContext : DbContext
                     j =>
                     {
                         j.HasKey("ProductCode", "TicketCategoryId");
-                        j.ToTable("TripAndTicketRelation");
+                        j.ToTable("TripAndTicketRelation","dbo");
                         j.IndexerProperty<string>("ProductCode").HasMaxLength(50);
                     });
         });

@@ -1,12 +1,27 @@
 using Microsoft.EntityFrameworkCore;
-using TravelWeb_API.Models.attraction;
-using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.ActivityModel;
+using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct;
+using TravelWeb_API.Models.TripProduct.ITripProduct;
+using TravelWeb_API.Models.TripProduct.STripProduct;
 
 
 var builder = WebApplication.CreateBuilder(args);
+//設定CROS
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy =>
+        {
+            policy.AllowAnyOrigin()    // 允許任何來源（最鬆）
+                  .AllowAnyHeader()    // 允許任何標頭
+                  .AllowAnyMethod();   // 允許任何動詞 (GET, POST, etc.)
+        });
+});
 
 // Add services to the container.
 
@@ -43,6 +58,8 @@ builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelCon
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 //===================================================
+//行程商品表連線用DI
+builder.Services.AddScoped<ITripproductTable,TripproductTable >();
 
 
 var app = builder.Build();
@@ -56,6 +73,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(myAllowSpecificOrigins);
 
 app.UseAuthorization();
 
