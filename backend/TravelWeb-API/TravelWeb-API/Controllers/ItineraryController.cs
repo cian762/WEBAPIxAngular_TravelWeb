@@ -12,7 +12,7 @@ namespace TravelWeb_API.Controllers
 
         // POST 新增行程
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromBody] string memberId)
         {
 
         }

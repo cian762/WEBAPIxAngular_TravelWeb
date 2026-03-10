@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,8 +11,9 @@ builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
-
-
+//ItineraryªºDBContextª`¤J
+builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 
 var app = builder.Build();
