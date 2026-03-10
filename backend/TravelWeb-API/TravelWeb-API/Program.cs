@@ -1,8 +1,13 @@
 using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.attraction;
+
+=======
+using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board;
 using TravelWeb_API.Models.TripProduct;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +19,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+
+builder.Services.AddDbContext<AttractionsContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+=======
 builder.Services.AddDbContext<MemberSystemContext>(options =>
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
