@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.TripProduct;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,13 +12,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+//³o¬O¦æµ{°Ó«~ªº³s½u
+builder.Services.AddDbContext<TripDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
-//Itinerary��DBContext�`�J
+//Itinerary��DBContext�`�J
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+// µù¥U BoardDbContext¡A¨Ã«ü©w¨Ï¥Î SQL Server ¥H¤Î³s±µ¦r¦ê
+builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 
+
 var app = builder.Build();
+/////////////////////
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
