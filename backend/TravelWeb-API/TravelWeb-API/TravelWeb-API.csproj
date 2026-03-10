@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\ActivityModel\" />
     <Folder Include="Models\TripProduct\" />
   </ItemGroup>
 
