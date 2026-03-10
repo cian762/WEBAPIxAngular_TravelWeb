@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.TripProduct;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,12 +11,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+//這是行程商品的連線
+builder.Services.AddDbContext<TripDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 
 
 
 
 var app = builder.Build();
+/////////////////////
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
