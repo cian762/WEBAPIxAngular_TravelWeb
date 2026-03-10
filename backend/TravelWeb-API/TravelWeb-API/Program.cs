@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.Board;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,7 +12,9 @@ builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
-
+// 註冊 BoardDbContext，並指定使用 SQL Server 以及連接字串
+builder.Services.AddDbContext<BoardDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 
 
