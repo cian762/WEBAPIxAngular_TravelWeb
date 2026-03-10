@@ -4,6 +4,7 @@ using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board;
 using TravelWeb_API.Models.TripProduct;
+using TravelWeb_API.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +28,7 @@ builder.Services.AddDbContext<MemberSystemContext>(options =>
 //===================================================
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<ActivityInfoService>();
 
 //===================================================
 //³o¬O¦æµ{°Ó«~ªº³s½u

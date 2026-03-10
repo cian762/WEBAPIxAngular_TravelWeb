@@ -2,7 +2,7 @@
 
 namespace TravelWeb_API.DTO.ActivityDTO
 {
-    public class FilterActivityDTO
+    public class FilterActivityRequestDTO
     {
         public string? ActivityType { get; set; }
         public string? LaunchRegion { get; set; }
