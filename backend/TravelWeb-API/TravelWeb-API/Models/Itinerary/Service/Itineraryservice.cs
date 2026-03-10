@@ -22,7 +22,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     ItineraryName = dto.ItineraryName,
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,
-                    CreateTime = DateTime.Now
+                    CreateTime = DateTime.Now,
+                    Introduction = dto.Introduction
                 };
                 _context.Itineraries.Add(newItinerary);
                 await _context.SaveChangesAsync(); // 先存一次拿 ID

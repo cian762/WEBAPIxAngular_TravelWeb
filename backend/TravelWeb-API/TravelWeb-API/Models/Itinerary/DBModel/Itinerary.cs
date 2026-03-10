@@ -19,7 +19,7 @@ public partial class Itinerary
 
     public DateTime? EndTime { get; set; }
 
-    public string Introduction { get; set; }
+    public string? Introduction { get; set; }
 
     public DateTime? CreateTime { get; set; }
 

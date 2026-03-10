@@ -40,7 +40,7 @@ builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelCon
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 //===================================================
-
+builder.Services.AddScoped<TravelWeb_API.Models.Itinerary.Service.IItineraryservice, TravelWeb_API.Models.Itinerary.Service.ItineraryService>();
 
 var app = builder.Build();
 /////////////////////

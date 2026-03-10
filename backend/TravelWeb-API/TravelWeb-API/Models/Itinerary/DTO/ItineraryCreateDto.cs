@@ -14,7 +14,7 @@
     {
         public string GooglePlaceId { get; set; }
         public string Name { get; set; }
-        public string Address { get; set; }
+        public string? Address { get; set; }
         public decimal Latitude { get; set; }
         public decimal Longitude { get; set; }
     }
@@ -22,7 +22,7 @@
     public class ItineraryItemInputDto
     {
         public int? AttractionId { get; set; } // 若有值，代表是 DB 既有景點
-        public ExternalLocationDto ExternalLocation { get; set; } // 若有值，代表是 Google 新景點
-        public string UserNote { get; set; } // 使用者自訂備註
+        public ExternalLocationDto? ExternalLocation { get; set; } // 若有值，代表是 Google 新景點
+        public string? UserNote { get; set; } // 使用者自訂備註
     }
 }
