@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.TripProduct;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,6 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddDbContext<TripDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 
 
