@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
@@ -113,7 +114,37 @@ namespace TravelWeb_API.Services
 
         }
 
+        public PagedResponseDTO<ActivityInfoReponseDTO> SearchSpecificActivities(ActivityInfoParameters query)
+        {
+            if (!query.Keyword.IsNullOrEmpty()) 
+            {
+                //撈取符合 keyword 和狀態為非軟刪除的 Activity
+                var q = _dbContext.Activities
+                    .Include(a=>a.Types)
+                    .Include(a=>a.Regions)
+                    .Where(a => a.Title!.Contains(query.Keyword!) && a.SoftDelete == false)
+                    .AsEnumerable();
 
+                //拿到所有符合 keyword 的活動數量
+                var totalRecords = q.Count();
+
+                var ans = q
+                .Skip((query.PageNumber - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .Select(a => new ActivityInfoReponseDTO
+                {
+                    ActivityId = a.ActivityId,
+                    Title = a.Title,
+                    Type = a.Types.Select(t => t.ActivityType),
+                    Region = a.Regions.Select(r => r.RegionName),
+                    Start = a.StartTime,
+                    End = a.EndTime,
+                }).ToList();
+
+                return new PagedResponseDTO<ActivityInfoReponseDTO>(ans, query.PageNumber, query.PageSize, totalRecords);
+            }
+            return new PagedResponseDTO<ActivityInfoReponseDTO>(new List<ActivityInfoReponseDTO>(), 0, 0, 0);
+        }
 
     }
 }

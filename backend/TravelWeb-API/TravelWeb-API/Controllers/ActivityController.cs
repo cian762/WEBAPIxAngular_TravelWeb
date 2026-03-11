@@ -40,6 +40,12 @@ namespace TravelWeb_API.Controllers
 
 
 
+        //有條件的拉取活動資訊，且關鍵字必須完全符合
+        [HttpGet("Key")]
+        public ActionResult SearchByActiviteTitle([FromQuery] ActivityInfoParameters query) 
+        {
+            return Ok(_infoService.SearchSpecificActivities(query));
+        }
 
 
 

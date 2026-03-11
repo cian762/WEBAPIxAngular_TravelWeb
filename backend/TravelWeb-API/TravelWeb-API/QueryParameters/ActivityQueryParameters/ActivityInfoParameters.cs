@@ -4,6 +4,8 @@ namespace TravelWeb_API.QueryParameters.ActivityQueryParameters
 {
     public class ActivityInfoParameters
     {
+        public string? Keyword { get; set; }
+
         public string? Type { get; set; }
         public string? Region { get; set; }
         public DateOnly? Start { get; set; }
