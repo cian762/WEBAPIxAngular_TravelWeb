@@ -15,6 +15,21 @@ namespace TravelWeb_API.Controllers
         {
             _itineraryService = itineraryService;
         }
+        //GET透過行程ID取得行程資訊
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetbyItineraryId(int id)
+        {
+            if (id == 0)
+            {
+                return BadRequest("行程ID錯誤");
+            }
+            var result = await _itineraryService.GetItineraryDetailAsync(id);
+            if (result == null)
+            {
+                return NotFound("找不到該行程");
+            }
+            return Ok(result);
+        }
         // POST 新增行程
         [HttpPost]
         public async Task<IActionResult> CreateItinerary([FromBody] ItineraryCreateDto dto)
@@ -38,7 +53,7 @@ namespace TravelWeb_API.Controllers
 
                 // 4. 回傳 201 Created，並在 Header 附上查詢該行程的 URL
                 // (假設你有一個 GetById 的 Action)
-                return CreatedAtAction(null, new { id = newId }, new { id = newId, message = "行程建立成功" });
+                return CreatedAtAction("GetbyItineraryId", new { id = newId }, new { id = newId, message = "行程建立成功" });
             }
             catch (Exception ex)
             {
@@ -47,6 +62,41 @@ namespace TravelWeb_API.Controllers
                 return StatusCode(500, $"伺服器內部錯誤: {ex.Message}");
             }
         }
+
+        //POST修改行程，基於版本表與多個行程細項清單
+        [HttpPost("{id}/save-snapshot")]
+        public async Task<IActionResult> SaveItinerarySnapshot(int id, [FromBody] ItinerarySnapshotDto dto)
+        {
+            if (dto == null || dto.Items == null)
+            {
+                return BadRequest("傳入的行程內容為空");
+            }
+
+            // 2. 驗證行程 ID 是否合法
+            if (dto.ItineraryId <= 0)
+            {
+                return BadRequest("無效的行程識別碼");
+            }
+
+            try
+            {
+                // 3. 呼叫 Service 執行複雜的版本切換與存檔
+                int newVersionId = await _itineraryService.SaveItinerarySnapshotAsync(dto);
+
+                // 4. 回傳成功結果與新的版本 ID
+                return Ok(new
+                {
+                    success = true,
+                    message = "行程快照儲存成功，已產生新版本",
+                    versionId = newVersionId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"儲存快照時發生伺服器錯誤: {ex.Message}");
+            }
+        }
+
 
         // PUT api/<ItineraryController>/5
         [HttpPut("{id}")]

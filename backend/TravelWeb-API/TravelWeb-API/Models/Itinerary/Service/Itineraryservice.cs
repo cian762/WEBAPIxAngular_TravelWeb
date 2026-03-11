@@ -23,7 +23,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,
                     CreateTime = DateTime.Now,
-                    Introduction = dto.Introduction
+                    Introduction = dto.Introduction,
+                    CurrentStatus = "Active" // 預設為啟用狀態
                 };
                 _context.Itineraries.Add(newItinerary);
                 await _context.SaveChangesAsync(); // 先存一次拿 ID
@@ -33,6 +34,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     VersionNumber = 1, // 或者叫 v1.0
                     Creator = 1,
                     CreateTime = DateTime.Now,
+                    VersionRemark = "初始建立",
                     Source = "Manual", // 標記來源是手動建立
                     CurrentUsageStatus = "Y"    // 標記為當前使用版本
                 };
@@ -88,7 +90,9 @@ namespace TravelWeb_API.Models.Itinerary.Service
                         AttractionId = finalAttractionId,
                         SortOrder = currentOrder,
                         ContentDescription = input.UserNote ?? "自訂行程項目",
-                        DayNumber = 1 // 初始預設第一天
+                        DayNumber = 1, // 初始預設第一天
+                        StartTime = dto.StartTime,
+                        EndTime = dto.EndTime
                     };
                     _context.ItineraryItems.Add(newItem);
                     currentOrder += 100;
@@ -101,6 +105,106 @@ namespace TravelWeb_API.Models.Itinerary.Service
             catch (Exception)
             {
                 await transaction.RollbackAsync(); // 任何一步失敗，全部撤回
+                throw;
+            }
+        }
+
+        public async Task<ItineraryDetailDto> GetItineraryDetailAsync(int itineraryId)
+        {
+            var result = await _context.Itineraries
+                .Where(i => i.ItineraryId == itineraryId)
+                .Select(i => new ItineraryDetailDto
+                {
+                    ItineraryId = i.ItineraryId,
+                    ItineraryName = i.ItineraryName,
+                    // 抓取「當前使用中」的版本
+                    CurrentVersion = i.ItineraryVersions
+                        .Where(v => v.CurrentUsageStatus == "Y")
+                        .Select(v => new VersionDto
+                        {
+                            VersionId = v.VersionId,
+                            VersionNumber = (int)v.VersionNumber,
+                            // 抓取該版本下的所有項目，並依照 SortOrder 排序
+                            Items = v.ItineraryItems
+                                .OrderBy(item => item.SortOrder)
+                                .Select(item => new ItemDetailDto
+                                {
+                                    ItemId = item.ItemId,
+                                    SortOrder = (int)item.SortOrder,
+                                    ContentDescription = item.ContentDescription,
+                                    // 關鍵：從關聯的 Attraction 表抓取地點資訊
+                                    AttractionName = item.Attraction.Name,
+                                    Address = item.Attraction.Address,
+                                    Latitude = item.Attraction.Latitude,
+                                    Longitude = item.Attraction.Longitude,
+                                    StartTime = item.StartTime,
+                                    EndTime = item.EndTime
+                                }).ToList()
+                        }).FirstOrDefault()
+                }).FirstOrDefaultAsync();
+
+            return result;
+        }
+        public async Task<int> SaveItinerarySnapshotAsync(ItinerarySnapshotDto dto)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // 1. 處理版本切換：將該行程的所有舊版本設為 "N" (不使用)
+                var oldVersions = await _context.ItineraryVersions
+                    .Where(v => v.ItineraryId == dto.ItineraryId && v.CurrentUsageStatus == "Y")
+                    .ToListAsync();
+
+                int nextVersionNumber = 1;
+                if (oldVersions.Any())
+                {
+                    nextVersionNumber = oldVersions.Max(v => (int)v.VersionNumber) + 1;
+                    foreach (var v in oldVersions) v.CurrentUsageStatus = "N";
+                }
+
+                // 2. 建立新版本 (Snapshot)
+                var newVersion = new ItineraryVersion
+                {
+                    ItineraryId = dto.ItineraryId,
+                    VersionNumber = nextVersionNumber,
+                    CreateTime = DateTime.Now,
+                    Source = "Manual_Update",
+                    VersionRemark = dto.VersionNote ?? $"版本 {nextVersionNumber}",
+                    CurrentUsageStatus = "Y",
+                    Creator = 1 // 實務上從登入資訊取得
+                };
+                _context.ItineraryVersions.Add(newVersion);
+                await _context.SaveChangesAsync(); // 取得新 VersionId
+
+                // 3. 重新計算 SortOrder 並寫入 Items
+                // 按天數分組，每一天都從 100 開始重新編排
+                foreach (var dayGroup in dto.Items.OrderBy(x => x.DayNumber).ThenBy(x => x.StartTime).GroupBy(x => x.DayNumber))
+                {
+                    int currentSortOrder = 100;
+                    foreach (var item in dayGroup)
+                    {
+                        var newItem = new ItineraryItem
+                        {
+                            VersionId = newVersion.VersionId,
+                            AttractionId = item.AttractionId,
+                            DayNumber = dayGroup.Key,
+                            SortOrder = currentSortOrder,
+                            ContentDescription = item.ContentDescription,
+                            StartTime = item.StartTime,
+                            EndTime = item.EndTime
+                        };
+                        _context.ItineraryItems.Add(newItem);
+                        currentSortOrder += 100; // 間隔 100，為拖拉留空間
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return newVersion.VersionId;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
                 throw;
             }
         }

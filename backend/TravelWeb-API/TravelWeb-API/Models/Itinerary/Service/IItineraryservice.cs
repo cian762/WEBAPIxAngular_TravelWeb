@@ -6,5 +6,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
     public interface IItineraryservice
     {
         public Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto);
+        public Task<ItineraryDetailDto> GetItineraryDetailAsync(int itineraryId);
+        public Task<int> SaveItinerarySnapshotAsync(ItinerarySnapshotDto dto);
     }
 }
