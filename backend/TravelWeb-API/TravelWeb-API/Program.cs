@@ -3,6 +3,8 @@ using Microsoft.OpenApi.Models;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.Board.IService;
+using TravelWeb_API.Models.Board.Service;
 using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct;
 
@@ -72,6 +74,7 @@ builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelCon
 // µù¥U BoardDbContext¡A¨Ã«ü©w¨Ï¥Î SQL Server ¥H¤Î³s±µ¦r¦ê
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<IArticlesService, ArticleService>();
 //===================================================
 
 

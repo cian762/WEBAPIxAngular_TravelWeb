@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.Board.Service;
 using TravelWeb_API.Models.MemberSystem;
@@ -37,33 +38,59 @@ namespace TravelWeb_API.Controllers.Board
             return await _context.Articles.ToListAsync();
         }
 
-        // GET: api/Articles/5 瀏覽
+        // GET: api/PostsDetailed/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Article>> GetArticle(int id)
-        {
-            var article = await _context.Articles.FindAsync(id);
-
+        public async Task<ActionResult<PostDetailDto>> GetArticle(int id)
+        {            
+            Article? article=_ArticlesService.GetArtic(id);
             if (article == null)
             {
                 return NotFound();
             }
-
-            return article;
+            else 
+            {
+                if (article.ArticleId == 0)
+                {
+                    PostDetailDto postDetail = _ArticlesService.GetPostDetailed(article);
+                    return postDetail;
+                }
+                else if (article.ArticleId == 1)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
         }
-
         
 
+
+
+
         // POST: api/Articles 新增標頭
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Article>> PostArticle(byte Type,string UserId)
         {
+
             // 1. 建立文章，此時 article.ArticleId 是 0
             Article article = _ArticlesService.AddArtic(Type, UserId);
 
-            // 2. 建立 Post，並將 article 物件傳入
-            // EF 會在內部標記這兩個物件的「母子關係」
-            _ArticlesService.AddPost(article);
+            if (Type == 0)
+            {
+                //Post裡有article屬性
+                _ArticlesService.AddPost(article);
+            }
+            else if (Type == 1)
+            {
+
+            }
+            else
+            {
+                return BadRequest();
+            }
+            
 
             // 3. 執行 SaveChangesAsync
             // EF 非常聰明，它會：
@@ -77,7 +104,6 @@ namespace TravelWeb_API.Controllers.Board
         
 
         // PUT: api/Articles/5 修改標頭
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutArticle(int id, string Title, string PhotoUrl, byte Status)
         {

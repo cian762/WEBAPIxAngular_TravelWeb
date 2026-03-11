@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TravelWeb_API.Models.Board;
 
 public partial class Comment
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int CommentId { get; set; }
 
     public int ArticleId { get; set; }
 
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     public int? ParentId { get; set; }
 

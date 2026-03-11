@@ -149,10 +149,11 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<Comment>(entity =>
         {
+            entity.HasKey(e => e.CommentId);
+
             entity.ToTable("Comment", "Board");
 
             entity.Property(e => e.CommentId)
-                .ValueGeneratedNever()
                 .HasColumnName("CommentID");
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.Contents).HasMaxLength(100);
@@ -248,7 +249,7 @@ public partial class BoardDbContext : DbContext
         modelBuilder.Entity<Post>(entity =>
         {
             entity
-                .HasNoKey()
+                //.HasNoKey()
                 .ToTable("Post", "Board");
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
