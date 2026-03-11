@@ -1,4 +1,4 @@
-﻿namespace TravelWeb_API.Models.Board.DTO
+﻿namespace TravelWeb_API.Models.Board.Service
 {
     public class CommentsService
     {
