@@ -8,9 +8,12 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
     public class TripproductTable : ITripproductTable
     {
         private readonly TripDbContext _trip;
-        public TripproductTable(TripDbContext trip)
+        private readonly  string _mvcBaseUrl;
+        public TripproductTable(TripDbContext trip ,IConfiguration config)
         {
             _trip = trip;
+            _mvcBaseUrl = config["ExternalServices:MvcBackendUrl"]?.TrimEnd('/') ?? "";
+
         }
         //抓商品表的那張表給自己的DTO
         public async Task<IEnumerable<TripProductDTO>> GetAllAsync()
@@ -19,7 +22,9 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             {
                 TripProductId = p.TripProductId,
                 ProductName = p.ProductName,
-                CoverImage = p.CoverImage,
+                CoverImage = string.IsNullOrEmpty(p.CoverImage)
+                         ? ""
+                         : _mvcBaseUrl + p.CoverImage.Replace("~", ""),
                 DisplayPrice = p.DisplayPrice
             }).ToListAsync();
             return products;
