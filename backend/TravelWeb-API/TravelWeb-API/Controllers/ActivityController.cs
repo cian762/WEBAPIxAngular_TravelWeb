@@ -22,9 +22,9 @@ namespace TravelWeb_API.Controllers
         }
 
 
-        //拿取所有活動資訊
+        //首次載入時，拿取所有活動資訊
         [HttpGet]
-        public IActionResult GetActivities([FromQuery] ActivityInfoParameters query)
+        public IActionResult GetActivities([FromQuery] PagedQueryParameters query)
         {
             return Ok(_infoService.GetActivities(query));
         }
@@ -40,7 +40,7 @@ namespace TravelWeb_API.Controllers
 
 
 
-        //有條件的拉取活動資訊，且關鍵字必須完全符合
+        //有條件的拉取活動資訊，且必須包含關鍵字
         [HttpGet("Key")]
         public ActionResult SearchByActiviteTitle([FromQuery] ActivityInfoParameters query) 
         {

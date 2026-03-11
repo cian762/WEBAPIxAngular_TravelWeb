@@ -9,7 +9,7 @@
         public int TotalPages => (int)Math.Ceiling((double)TotalRecords / PageSize);
 
 
-        public PagedResponseDTO(IEnumerable<T> data, int pageNumber, int pageSize, int totalRecords)
+        public PagedResponseDTO(IEnumerable<T> data, int pageNumber, int totalRecords,int pageSize)
         {
             Data = data;
             PageNumber = pageNumber;
