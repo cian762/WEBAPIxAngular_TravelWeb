@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TravelWeb_API.Models.Board;
+namespace TravelWeb_API.Models.Board.DbSet;
 
 public partial class Comment
 {

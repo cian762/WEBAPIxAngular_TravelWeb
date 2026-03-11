@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.Board.DbSet;
 
 namespace TravelWeb_API.Models.Board;
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.MemberSystem;

@@ -1,4 +1,5 @@
-﻿using TravelWeb_API.Models.Board.DTO;
+﻿using TravelWeb_API.Models.Board.DbSet;
+using TravelWeb_API.Models.Board.DTO;
 
 namespace TravelWeb_API.Models.Board.IService
 {

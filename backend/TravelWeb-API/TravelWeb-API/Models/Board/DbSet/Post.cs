@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace TravelWeb_API.Models.Board;
+namespace TravelWeb_API.Models.Board.DbSet;
 
-public partial class JournalPage
+public partial class Post
 {
+    [Key]
     public int ArticleId { get; set; }
 
-    public int Date { get; set; }
+    public string? Contents { get; set; }
 
     public int? RegionId { get; set; }
 
