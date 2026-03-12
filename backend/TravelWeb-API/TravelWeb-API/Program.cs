@@ -1,13 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Mapster;
+using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.Board.Service;
+using TravelWeb_API.Models.Board;
 using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,14 +63,18 @@ builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 //===================================================
-//³o¬O¦æµ{°Ó«~ªº³s½u
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 //===================================================
-//Itinerary��DBContext�`�J
+#region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<TravelWeb_API.Models.Itinerary.Service.IItineraryservice, TravelWeb_API.Models.Itinerary.Service.ItineraryService>();
+var config = TypeAdapterConfig.GlobalSettings;
+builder.Services.AddSingleton(config);
+builder.Services.AddScoped<IMapper, ServiceMapper>();
+#endregion
 
 //===================================================
 // 註冊Board功能相關
@@ -77,7 +83,6 @@ builder.Services.AddDbContext<BoardDbContext>(options =>
 builder.Services.AddScoped<IArticlesService, ArticleService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
 //===================================================
-
 
 var app = builder.Build();
 /////////////////////
