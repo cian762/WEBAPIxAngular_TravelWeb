@@ -10,6 +10,7 @@ using TravelWeb_API.Models.Board.Service;
 using TravelWeb_API.Models.Board;
 using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct;
+using TravelWeb_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,9 @@ builder.Services.AddDbContext<MemberSystemContext>(options =>
 //===================================================
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<ActivityCardService>();
+builder.Services.AddScoped<ActivityInfoService>();
+builder.Services.AddScoped<ActivityTicketService>();
 
 //===================================================
 builder.Services.AddDbContext<TripDbContext>(options =>
@@ -86,6 +90,16 @@ builder.Services.AddScoped<ICommentsService, CommentsService>();
 
 var app = builder.Build();
 /////////////////////
+///
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ActivityDbContext>();
+    await dbContext.Database.CanConnectAsync();
+    await dbContext.Activities.FirstOrDefaultAsync();
+}
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
