@@ -2,20 +2,19 @@
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using TravelWeb_API.Models.MemberSystem;
-using TravelWeb_API.Models.attraction;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.Board.Service;
+using TravelWeb_API.Models.Itinerary.Service;
 using TravelWeb_API.Models.MemberSystem;
-using TravelWeb_API.Models.Board.Service;
-using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Services;
-using TravelWeb_API.Models.MemberSystem;
-using TravelWeb_API.Services;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 //設定CROS
@@ -96,6 +95,7 @@ builder.Services.AddScoped<TravelWeb_API.Models.Itinerary.Service.IItineraryserv
 var config = TypeAdapterConfig.GlobalSettings;
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
+builder.Services.AddScoped<IItineraryservice, ItineraryService>();
 #endregion
 
 //===================================================
@@ -110,7 +110,8 @@ builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
 //訂單連線用DI
 builder.Services.AddScoped<IOrder, SOrder>();
 
-
+// 1. 註冊 Cloudinary 服務（假設實作類別叫 CloudinaryService）
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 
 var app = builder.Build();
