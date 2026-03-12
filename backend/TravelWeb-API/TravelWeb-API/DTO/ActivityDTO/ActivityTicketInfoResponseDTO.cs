@@ -13,6 +13,8 @@
         public DateOnly? StartDate { get; set; }
         public DateOnly? ExpiryDate { get; set; }
         public int? CurrentPrice { get; set; }
-
+        
+        // 待加入的欄位
+        public int TicketStock { get; set; }
     }
 }

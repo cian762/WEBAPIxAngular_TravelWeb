@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.ActivityModel;
@@ -28,7 +28,9 @@ builder.Services.AddDbContext<MemberSystemContext>(options =>
 //===================================================
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<ActivityCardService>();
 builder.Services.AddScoped<ActivityInfoService>();
+builder.Services.AddScoped<ActivityTicketService>();
 
 //===================================================
 //³o¬O¦æµ{°Ó«~ªº³s½u

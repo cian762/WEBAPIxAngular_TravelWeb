@@ -12,11 +12,11 @@ namespace TravelWeb_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ActivityController : ControllerBase
+    public class ActivityCardController : ControllerBase
     {
-        private readonly ActivityInfoService _infoService;
+        private readonly ActivityCardService _infoService;
 
-        public ActivityController(ActivityInfoService infoService)
+        public ActivityCardController(ActivityCardService infoService)
         {
             _infoService = infoService;
         }
@@ -24,9 +24,9 @@ namespace TravelWeb_API.Controllers
 
         //首次載入時，拿取所有活動資訊
         [HttpGet]
-        public IActionResult GetActivities([FromQuery] PagedQueryParameters query)
+        public ActionResult GetActivities([FromQuery] PagedQueryParameters query)
         {
-            return Ok(_infoService.GetActivities(query));
+            return Ok(_infoService.GetCards(query));
         }
 
         
@@ -35,7 +35,7 @@ namespace TravelWeb_API.Controllers
         [HttpGet("Query")]
         public ActionResult GetSpecificActivies([FromQuery] ActivityInfoParameters query) 
         {
-            return Ok(_infoService.GetSpecificActivities(query));
+            return Ok(_infoService.GetSpecificCards(query));
         }
 
 
@@ -44,8 +44,9 @@ namespace TravelWeb_API.Controllers
         [HttpGet("Key")]
         public ActionResult SearchByActiviteTitle([FromQuery] ActivityInfoParameters query) 
         {
-            return Ok(_infoService.SearchSpecificActivities(query));
+            return Ok(_infoService.SearchSpecificCards(query));
         }
+
 
 
 
