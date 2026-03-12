@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using TravelWeb_API.Models.Board.DbSet;
 
-namespace TravelWeb_API.Models.Board;
+namespace TravelWeb_API.Models.Board.DbSet;
 
 public partial class BoardDbContext : DbContext
 {
@@ -52,9 +51,9 @@ public partial class BoardDbContext : DbContext
 
     public virtual DbSet<UserSearchHistory> UserSearchHistories { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Server=.;Database=Travel;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=.;Database=Travel;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,16 +74,16 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<ArticleFolder>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ArticleFolder", "Board");
+            entity.HasKey(e => new { e.UserId, e.ArticleId });
 
-            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.ToTable("ArticleFolder", "Board");
+
             entity.Property(e => e.UserId)
                 .HasMaxLength(50)
                 .HasColumnName("UserID");
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
 
-            entity.HasOne(d => d.Article).WithMany()
+            entity.HasOne(d => d.Article).WithMany(p => p.ArticleFolders)
                 .HasForeignKey(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ArticleFolder_Article");
@@ -150,19 +149,18 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.CommentId);
-
             entity.ToTable("Comment", "Board");
 
-            entity.Property(e => e.CommentId)
-                .HasColumnName("CommentID");
+            entity.Property(e => e.CommentId).HasColumnName("CommentID");
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.Contents).HasMaxLength(100);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.ParentId).HasColumnName("ParentID");
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(50)
+                .HasColumnName("UserID");
 
             entity.HasOne(d => d.Article).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.ArticleId)
@@ -172,14 +170,16 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<CommentLike>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("CommentLike", "Board");
+            entity.HasKey(e => new { e.CommentId, e.UserId });
+
+            entity.ToTable("CommentLike", "Board");
 
             entity.Property(e => e.CommentId).HasColumnName("CommentID");
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.UserId)
+                .HasMaxLength(50)
+                .HasColumnName("UserID");
 
-            entity.HasOne(d => d.Comment).WithMany()
+            entity.HasOne(d => d.Comment).WithMany(p => p.CommentLikes)
                 .HasForeignKey(d => d.CommentId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CommentLike_Comment");
@@ -201,16 +201,18 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<Journal>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("Journal", "Board");
+            entity.HasKey(e => e.ArticleId);
 
-            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.ToTable("Journal", "Board");
+
+            entity.Property(e => e.ArticleId)
+                .ValueGeneratedNever()
+                .HasColumnName("ArticleID");
             entity.Property(e => e.CoverId).HasColumnName("CoverID");
             entity.Property(e => e.TemplateId).HasColumnName("TemplateID");
 
-            entity.HasOne(d => d.Article).WithMany()
-                .HasForeignKey(d => d.ArticleId)
+            entity.HasOne(d => d.Article).WithOne(p => p.Journal)
+                .HasForeignKey<Journal>(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Journal_Article");
         });
@@ -233,15 +235,15 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<JournalPage>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("JournalPage", "Board");
+            entity.HasKey(e => new { e.ArticleId, e.Date });
+
+            entity.ToTable("JournalPage", "Board");
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.Date).HasDefaultValue(1);
             entity.Property(e => e.RegionId).HasColumnName("RegionID");
 
-            entity.HasOne(d => d.Article).WithMany()
+            entity.HasOne(d => d.Article).WithMany(p => p.JournalPages)
                 .HasForeignKey(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_JournalPage_Article");
@@ -249,16 +251,18 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity
-                //.HasNoKey()
-                .ToTable("Post", "Board");
+            entity.HasKey(e => e.ArticleId);
 
-            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.ToTable("Post", "Board");
+
+            entity.Property(e => e.ArticleId)
+                .ValueGeneratedNever()
+                .HasColumnName("ArticleID");
             entity.Property(e => e.Contents).HasMaxLength(500);
             entity.Property(e => e.RegionId).HasColumnName("RegionID");
 
-            entity.HasOne(d => d.Article).WithMany()
-                .HasForeignKey(d => d.ArticleId)
+            entity.HasOne(d => d.Article).WithOne(p => p.Post)
+                .HasForeignKey<Post>(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Post_Article");
         });

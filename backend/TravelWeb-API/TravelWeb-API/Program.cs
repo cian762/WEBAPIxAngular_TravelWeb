@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
-using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.Board.Service;
 using TravelWeb_API.Models.MemberSystem;
@@ -71,10 +71,11 @@ builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelCon
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 //===================================================
-// µù¥U BoardDbContext¡A¨Ã«ü©w¨Ï¥Î SQL Server ¥H¤Î³s±µ¦r¦ê
+// 註冊Board功能相關
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<IArticlesService, ArticleService>();
+builder.Services.AddScoped<ICommentsService, CommentsService>();
 //===================================================
 
 

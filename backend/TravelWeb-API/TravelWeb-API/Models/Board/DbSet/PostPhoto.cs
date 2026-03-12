@@ -7,7 +7,7 @@ public partial class PostPhoto
 {
     public int ArticleId { get; set; }
 
-    public string? Photo { get; set; }
+    public string Photo { get; set; } = null!;
 
     public virtual Article Article { get; set; } = null!;
 }

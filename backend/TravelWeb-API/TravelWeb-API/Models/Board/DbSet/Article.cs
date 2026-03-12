@@ -23,5 +23,15 @@ public partial class Article
 
     public string? PhotoUrl { get; set; }
 
+    public virtual ICollection<ArticleFolder> ArticleFolders { get; set; } = new List<ArticleFolder>();
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    public virtual Journal? Journal { get; set; }
+
+    public virtual ICollection<JournalPage> JournalPages { get; set; } = new List<JournalPage>();
+
+    public virtual Post? Post { get; set; }
+
+
 }

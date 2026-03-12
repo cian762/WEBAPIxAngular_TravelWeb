@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TravelWeb_API.Models.Board;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
@@ -20,14 +19,15 @@ namespace TravelWeb_API.Controllers.Board
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        private readonly IArticlesService _ArticlesService;
+        // private readonly IArticlesService _ArticlesService;
+        private readonly ICommentsService _commentsService;
 
         public CommentsController(BoardDbContext context,
-            IArticlesService noteService,
+            ICommentsService commentsService,
             MemberSystemContext memberDb)
         {
             _context = context;
-            _ArticlesService = noteService;
+            _commentsService = commentsService;
             _memberDb = memberDb;
         }
 
@@ -35,18 +35,38 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("{id}")]
         public async Task<ActionResult<List<CommentsDTO>>> GetComments(int id)
         {
-            var comments = _ArticlesService.GetComments(id);
+            var comments = _commentsService.GetComments(id);
             if (comments == null) return NotFound();
             return comments;
         }
 
-        // POST:新增留言
+        // POST:新增留言(沒媽)
         [HttpPost]
         public async Task<ActionResult<Comment>> PostComment(int articleID, string UserId, string contents)
         {
-            Comment comment = _ArticlesService.AddComment(articleID, UserId, contents);            
-            
+            Comment comment = _commentsService.AddComment(articleID, UserId, contents);
+
             return NoContent();
         }
+
+        // POST:新增留言(有媽)
+        [HttpPost("{id}")]
+        public async Task<ActionResult<Comment>> PostCommentWithParent(int articleID, string UserId, string contents, int parentID)
+        {
+            Comment comment = _commentsService.AddCommentWithParent(articleID, UserId, contents, parentID);
+
+            return NoContent();
+        }
+
+        // Put:點讚機制
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCommentLike(int commentID, string UserId)
+        {
+            bool isUserExist = _commentsService.CommentLike(commentID, UserId);
+            if (isUserExist) return NoContent();//只要有成功就改UI，或者再看看
+            return NotFound();
+        }
+
+
     }
 }

@@ -7,7 +7,7 @@ public partial class CommentLike
 {
     public int CommentId { get; set; }
 
-    public string UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
     public virtual Comment Comment { get; set; } = null!;
 }
