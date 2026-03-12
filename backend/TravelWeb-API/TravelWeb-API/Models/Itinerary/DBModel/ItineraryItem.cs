@@ -27,5 +27,7 @@ public partial class ItineraryItem
 
     public virtual ICollection<AigenerationError> AigenerationErrors { get; set; } = new List<AigenerationError>();
 
+    public virtual Attraction Attraction { get; set; }
+
     public virtual ItineraryVersion Version { get; set; }
 }
