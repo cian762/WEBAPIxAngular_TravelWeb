@@ -8,7 +8,7 @@ using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.QueryParameters.ActivityQueryParameters;
 using TravelWeb_API.Services;
 
-namespace TravelWeb_API.Controllers
+namespace TravelWeb_API.Controllers.Activity
 {
     [Route("api/[controller]")]
     [ApiController]

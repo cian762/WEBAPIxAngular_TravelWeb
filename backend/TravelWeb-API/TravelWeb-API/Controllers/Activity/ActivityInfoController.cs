@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TravelWeb_API.Services;
 
-namespace TravelWeb_API.Controllers
+namespace TravelWeb_API.Controllers.Activity
 {
     [Route("api/[controller]")]
     [ApiController]
