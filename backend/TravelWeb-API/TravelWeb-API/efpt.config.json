@@ -19,6 +19,10 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[Attractions].[Attractions]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[Itinerary].[ActivityMapping]",
          "ObjectType": 0
       },
