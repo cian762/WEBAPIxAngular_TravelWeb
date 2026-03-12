@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.attraction;
 
-namespace TravelWeb_API.Controllers
+namespace TravelWeb_API.Controllers.Attraction
 {
     
     [Route("api/[controller]")]
@@ -115,7 +115,7 @@ namespace TravelWeb_API.Controllers
             {
                 query = query.Where(a =>
                     a.Name.Contains(keyword) ||
-                    (a.Address != null && a.Address.Contains(keyword)));
+                    a.Address != null && a.Address.Contains(keyword));
             }
 
             // Step 1：先撈景點基本資料
@@ -151,8 +151,8 @@ namespace TravelWeb_API.Controllers
                 a.Latitude,
                 a.Longitude,
                 a.ViewCount,
-                RegionId = a.RegionId,
-                RegionName = a.Region.RegionName,
+                a.RegionId,
+                a.Region.RegionName,
                 MainImage = a.Images.Select(i => i.ImagePath).FirstOrDefault(),
                 Types = typeMappings
                     .Where(m => m.AttractionId == a.AttractionId)
@@ -216,8 +216,8 @@ namespace TravelWeb_API.Controllers
                 attraction.Longitude,
                 attraction.ViewCount,
                 LikeCount = likeCount,              // 詳細頁右上角 278 👍
-                RegionId = attraction.RegionId,
-                RegionName = attraction.Region.RegionName,
+                attraction.RegionId,
+                attraction.Region.RegionName,
                 Images = attraction.Images.Select(i => i.ImagePath).ToList(),
                 Types = types,
                 Products = attraction.AttractionProducts.Select(p => new
@@ -319,7 +319,7 @@ namespace TravelWeb_API.Controllers
                 a.Name,
                 a.Address,
                 a.ViewCount,
-                RegionName = a.Region.RegionName,
+                a.Region.RegionName,
                 MainImage = a.Images.Select(i => i.ImagePath).FirstOrDefault(),
                 Types = typeMappings
                     .Where(m => m.AttractionId == a.AttractionId)
