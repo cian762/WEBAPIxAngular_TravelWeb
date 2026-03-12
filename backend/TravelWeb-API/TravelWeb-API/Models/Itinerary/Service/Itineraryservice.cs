@@ -7,7 +7,12 @@ namespace TravelWeb_API.Models.Itinerary.Service
     public class ItineraryService : IItineraryservice
     {
         private readonly TravelContext _context;
-        public ItineraryService(TravelContext context) => _context = context;
+        private readonly ICloudinaryService _imageUploadService;
+        public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService)
+        {
+            _imageUploadService = cloudinaryService;
+            _context = context;
+        }
 
         public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto)
         {
@@ -147,6 +152,11 @@ namespace TravelWeb_API.Models.Itinerary.Service
         }
         public async Task<int> SaveItinerarySnapshotAsync(ItinerarySnapshotDto dto)
         {
+            string? imageUrl = null;
+            if (dto.ImageFile != null)
+            {
+                imageUrl = await _imageUploadService.UploadImageAsync(dto.ImageFile, "itinerary_covers");
+            }
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -154,6 +164,10 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 var oldVersions = await _context.ItineraryVersions
                     .Where(v => v.ItineraryId == dto.ItineraryId && v.CurrentUsageStatus == "Y")
                     .ToListAsync();
+                //上傳圖片
+                var itinerary = await _context.Itineraries.FindAsync(dto.ItineraryId);
+                if (itinerary == null) throw new Exception("找不到對應的行程主表"); // 拋出異常觸及 Catch 進行 Rollback
+                if (imageUrl != null) itinerary.ItineraryImage = imageUrl;
 
                 int nextVersionNumber = 1;
                 if (oldVersions.Any())

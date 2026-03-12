@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>TravelWeb_API</RootNamespace>
+    <UserSecretsId>397589cf-ec57-477d-9c64-6d0af49af41e</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CloudinaryDotNet" Version="1.28.0" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="Mapster.EFCore" Version="5.1.1" />

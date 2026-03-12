@@ -3,6 +3,7 @@
     public class ItinerarySnapshotDto
     {
         public int ItineraryId { get; set; }
+        public IFormFile ImageFile { get; set; }
         public string? VersionNote { get; set; } // 這次儲存的備註，例如「修正第二天行程」
 
         // 目前畫面上所有的景點清單 (已含 DayNumber 與前端排序順序)
