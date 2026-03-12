@@ -39,9 +39,15 @@ public partial class Attraction
 
     public bool IsDeleted { get; set; }
 
+    // ✅ 新增：點擊數
+    public int ViewCount { get; set; }
+
     public virtual ICollection<AttractionProduct> AttractionProducts { get; set; } = new List<AttractionProduct>();
 
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
+
+    // ✅ 新增：按讚導覽屬性
+    public virtual ICollection<AttractionLike> AttractionLikes { get; set; } = new List<AttractionLike>();
 
     public virtual TagsRegion Region { get; set; } = null!;
 }

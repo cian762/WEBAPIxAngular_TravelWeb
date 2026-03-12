@@ -39,6 +39,8 @@ public partial class AttractionsContext : DbContext
 
     public virtual DbSet<TicketType> TicketTypes { get; set; }
 
+    public virtual DbSet<AttractionLike> AttractionLikes { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -70,6 +72,9 @@ public partial class AttractionsContext : DbContext
                 .HasMaxLength(255)
                 .HasColumnName("google_place_id");
             entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+            entity.Property(e => e.ViewCount)
+               .HasDefaultValue(0)
+               .HasColumnName("view_count");
             entity.Property(e => e.Latitude)
                 .HasColumnType("decimal(10, 7)")
                 .HasColumnName("latitude");
@@ -356,6 +361,37 @@ public partial class AttractionsContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("ticket_type_name");
         });
+
+
+        // ── 第二處：在 OnModelCreating 最後、OnModelCreatingPartial 前面加入 ──
+        modelBuilder.Entity<AttractionLike>(entity =>
+        {
+            entity.HasKey(e => e.LikeId);
+
+            entity.ToTable("AttractionLikes", "Attractions");
+
+            entity.Property(e => e.LikeId).HasColumnName("like_id");
+            entity.Property(e => e.AttractionId).HasColumnName("attraction_id");
+            entity.Property(e => e.IpAddress)
+                .HasMaxLength(50)
+                .HasColumnName("ip_address");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.HasOne(d => d.Attraction)
+                .WithMany(p => p.AttractionLikes)
+                .HasForeignKey(d => d.AttractionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_AttractionLikes_Attractions");
+        });
+
+
+
+
+
+
 
         OnModelCreatingPartial(modelBuilder);
     }
