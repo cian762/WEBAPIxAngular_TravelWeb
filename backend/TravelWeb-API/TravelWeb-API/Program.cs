@@ -62,7 +62,8 @@ builder.Services.AddDbContext<BoardDbContext>(options =>
 builder.Services.AddScoped<ITripproductTable,TripproductTable >();
 //購物車連線DI
 builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
-
+//訂單連線用DI
+builder.Services.AddScoped<IOrder, SOrder>();
 
 var app = builder.Build();
 /////////////////////

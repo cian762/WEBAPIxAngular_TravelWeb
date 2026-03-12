@@ -13,7 +13,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
         public SShoppingCart(TripDbContext context,IConfiguration config)
         {
             _context = context;
-            _mvcBaseUrl = config["ExternalServices:MvcBackendUrl"]?.TrimEnd('/') ?? "";
+            _mvcBaseUrl = config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
         }
         //加入購物車的方法
         public async Task AddToCartAsync(AddToCartDTO dto)
@@ -86,7 +86,8 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     dto.ProductName = $"{trip.ProductName} ({trip.StartDate:yyyy/MM/dd} ~ {trip.EndDate:MM/dd})";
                     dto.Price = trip.Price ?? 0;
-                    dto.CoverImage = CartItemDTO.GetFullUrl(trip.CoverImage!, _mvcBaseUrl);
+                    string url ="/PImages" + trip.CoverImage!;
+                    dto.CoverImage = CartItemDTO.GetFullUrl(url,_mvcBaseUrl);
                     resultList.Add(dto);
                     continue;
                 }
@@ -109,6 +110,8 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     dto.ProductName = $"{attr.Name} ({attr.Title})";
                     dto.Price = attr.Price ?? 0;
                     dto.CoverImage = CartItemDTO.GetFullUrl(attr.CoverImage!, _mvcBaseUrl);
+
+   
                     resultList.Add(dto);
                     continue;
                 }
@@ -118,7 +121,8 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     .Where(t => t.ProductCode == item.ProductCode)
                     .Select(t => new {
                         t.ProductName,
-                        t.CoverImageUrl
+                        t.CoverImageUrl,
+                        t.CurrentPrice
                         // 直接拿這張表的圖片欄位！
                     })
                     .FirstOrDefaultAsync();
