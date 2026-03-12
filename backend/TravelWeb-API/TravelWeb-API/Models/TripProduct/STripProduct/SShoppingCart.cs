@@ -41,7 +41,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             }
             await _context.SaveChangesAsync();
         }
-        //刪除購物車的方法
+        //使用者按下「確定購買」或完成結單後。
         public async Task ClearCartAsync(string memberId)
         {
            var clear = await _context.ShoppingCarts.Where(u=>u.MemberId==memberId).ToListAsync();
@@ -136,42 +136,100 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             }
             return resultList;
         }
-
-        public Task RemoveItemAsync(int cartId)
+        //遊客跟使用者搬遷購物車內容
+        public async Task MigrateCartAsync(string guestId, string memberId)
         {
-            throw new NotImplementedException();
+            // 1. 安全檢查：如果 ID 一樣，直接結束
+            if (guestId == memberId) return;
+
+            // 2. 身分判定：利用我們約定的 "GUEST_" 前綴
+            if (!guestId.StartsWith("GUEST_"))
+            {
+                throw new Exception("無效的遊客識別碼");
+            }
+
+            // 3. 確保目標 memberId 真的存在於會員資料表 (避免把東西搬到不存在的帳號)
+            var isRealMember = await _context.MemberInformations
+                .AnyAsync(m => m.MemberId == memberId);
+
+            if (!isRealMember)
+            {
+                throw new Exception("目標會員帳號不存在");
+            }
+
+            // 4. 抓取遊客的所有購物車項目
+            var guestItems = await _context.ShoppingCarts
+                .Where(c => c.MemberId == guestId)
+                .ToListAsync();
+
+            if (!guestItems.Any()) return;
+
+            // 5. 抓取會員原本的購物車項目 (用來比對重複)
+            var memberItems = await _context.ShoppingCarts
+                .Where(c => c.MemberId == memberId)
+                .ToListAsync();
+
+            foreach (var guestItem in guestItems)
+            {
+                // 檢查會員是否買過同樣的產品 (ProductCode)
+                var duplicateItem = memberItems
+                    .FirstOrDefault(m => m.ProductCode == guestItem.ProductCode);
+
+                if (duplicateItem != null)
+                {
+                    // 如果重複，把遊客的數量加給會員，然後刪除遊客這筆
+                    duplicateItem.Quantity += guestItem.Quantity;
+                    _context.ShoppingCarts.Remove(guestItem);
+                }
+                else
+                {
+                    // 如果沒重複，直接把這筆遊客紀錄「過戶」給會員
+                    guestItem.MemberId = memberId;
+                }
+            }
+
+            // 6. 存檔
+            await _context.SaveChangesAsync();
+        }
+
+        //刪除購物車支援多選跟單選
+        public async Task RemoveItemsAsync(List<int> cartIds, string memberId)
+        {
+            // 1. 找出所有在 ID 清單內，且屬於該會員的購物車項目
+            var itemsToDelete = await _context.ShoppingCarts
+                .Where(c => cartIds.Contains(c.CartId) && c.MemberId == memberId)
+                .ToListAsync();
+
+            // 2. 如果有找到資料，執行批次刪除
+            if (itemsToDelete.Any())
+            {
+                _context.ShoppingCarts.RemoveRange(itemsToDelete);
+                await _context.SaveChangesAsync();
+            }
         }
         //修改購物車內容
-        public async Task UpdateQuantityAsync(UpdateCartQtyDTO dto)
+        public async Task UpdateQuantityAsync(UpdateCartQtyDTO dto,string memberId)
         {
-            // 1. 根據 CartId 找到購物車中的那一項
+            // 同時比對 CartId 與 MemberId
             var item = await _context.ShoppingCarts
-                .FirstOrDefaultAsync(c => c.CartId == dto.CartId);
+                .FirstOrDefaultAsync(c => c.CartId == dto.CartId && c.MemberId == memberId);
 
             if (item != null)
             {
-                // 2. 直接更新數量 (前端傳多少，我們就改多少)
-                item.Quantity = dto.Quantity;
-
-                //選項：如果數量被改為 0 或以下，通常可以直接刪除該項目
-                 if (dto.Quantity <= 0)
+                if (dto.Quantity <= 0)
                 {
                     _context.ShoppingCarts.Remove(item);
                 }
                 else
                 {
+                    item.Quantity = dto.Quantity;
                     _context.ShoppingCarts.Update(item);
                 }
-
-                _context.ShoppingCarts.Update(item);
-
-                // 3. 存檔
                 await _context.SaveChangesAsync();
             }
             else
             {
-                // 找不到資料時，看你要報錯還是直接跳過
-                throw new Exception("找不到該筆購物車項目");
+                throw new Exception("找不到該筆購物車項目或您無權限修改");
             }
         }
         

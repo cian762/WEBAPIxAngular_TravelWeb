@@ -40,6 +40,15 @@
             return mvcBaseUrl.TrimEnd('/') + cleanPath;
         }
     }
+    public class DeleteCartItemsDTO
+    {
+        public List<int> CartIds { get; set; } = new List<int>();
+    }
+    public class MigrateCartDto
+    {
+        public string GuestId { get; set; } = null!;
+        public string MemberId { get; set; } = null!;
+    }
     public class AddToCartDTO
     {
         public string? MemberId { get; set; }    // 哪個會員要買
@@ -49,6 +58,7 @@
     }
     public class UpdateCartQtyDTO
     {
+        public string? MemberId { get; set; }
         public int CartId { get; set; }  // 指定哪一筆購物車資料
         public int Quantity { get; set; } // 新的數量
     }

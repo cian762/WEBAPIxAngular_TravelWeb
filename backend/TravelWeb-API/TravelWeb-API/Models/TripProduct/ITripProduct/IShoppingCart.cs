@@ -11,13 +11,15 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
         Task AddToCartAsync(AddToCartDTO dto);
 
         // 3. 更新購物車數量 (例如在購物車頁面加減數量)
-        Task UpdateQuantityAsync(UpdateCartQtyDTO dto);
+        Task UpdateQuantityAsync(UpdateCartQtyDTO dto, string memberId);
 
         // 4. 刪除購物車單一項目
-        Task RemoveItemAsync(int cartId);
+        Task RemoveItemsAsync(List<int> cartIds, string memberId);
 
         // 5. 清空購物車
         Task ClearCartAsync(string memberId);
+        //遊客轉換到會員的
+        Task MigrateCartAsync(string guestId, string memberId);
 
 
 
