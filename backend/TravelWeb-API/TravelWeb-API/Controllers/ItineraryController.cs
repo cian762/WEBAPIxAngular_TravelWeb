@@ -104,10 +104,19 @@ namespace TravelWeb_API.Controllers
         {
         }
 
-        // DELETE api/<ItineraryController>/5
+        // DELETE刪除行程，更新行程狀態為「已刪除」
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
+            var success = await _itineraryService.SoftDeleteItineraryAsync(id);
+
+            if (!success)
+            {
+                return NotFound(new { message = $"找不到編號為 {id} 的行程" });
+            }
+
+            // 刪除成功，RESTful 慣例回傳 204
+            return NoContent();
         }
     }
 }

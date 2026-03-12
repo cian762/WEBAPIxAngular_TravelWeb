@@ -112,7 +112,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public async Task<ItineraryDetailDto> GetItineraryDetailAsync(int itineraryId)
         {
             var result = await _context.Itineraries
-                .Where(i => i.ItineraryId == itineraryId)
+                .Where(i => i.ItineraryId == itineraryId && i.CurrentStatus == "Active")
                 .Select(i => new ItineraryDetailDto
                 {
                     ItineraryId = i.ItineraryId,
@@ -133,7 +133,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                                     SortOrder = (int)item.SortOrder,
                                     ContentDescription = item.ContentDescription,
                                     // 關鍵：從關聯的 Attraction 表抓取地點資訊
-                                    AttractionName = item.Attraction.Name,
+                                    AttractionName = item.Attraction.Name != null ? item.Attraction.Name : "未知景點",
                                     Address = item.Attraction.Address,
                                     Latitude = item.Attraction.Latitude,
                                     Longitude = item.Attraction.Longitude,
@@ -207,6 +207,20 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+        public async Task<bool> SoftDeleteItineraryAsync(int itineraryId)
+        {
+            var itinerary = await _context.Itineraries
+        .FirstOrDefaultAsync(i => i.ItineraryId == itineraryId);
+
+            // 2. 如果找不到，回傳 false
+            if (itinerary == null) return false;
+
+            // 3. 修改狀態 (假設你的非啟用狀態標記為 "N" 或 "Deleted")
+            itinerary.CurrentStatus = "Inactive";
+
+            // 4. 存檔並回傳結果
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }
