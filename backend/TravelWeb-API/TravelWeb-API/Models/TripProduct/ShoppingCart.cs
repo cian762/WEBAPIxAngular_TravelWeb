@@ -17,7 +17,7 @@ public partial class ShoppingCart
 
     public DateTime? CreatedAt { get; set; }
 
-    public virtual MemberInformation Member { get; set; } = null!;
+    public virtual MemberInformation? Member { get; set; } 
 
     public virtual TicketCategory? TicketCategory { get; set; }
 }

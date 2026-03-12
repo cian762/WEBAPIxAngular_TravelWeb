@@ -369,10 +369,10 @@ public partial class TripDbContext : DbContext
             entity.Property(e => e.MemberId).HasMaxLength(50);
             entity.Property(e => e.ProductCode).HasMaxLength(50);
 
-            entity.HasOne(d => d.Member).WithMany(p => p.ShoppingCarts)
-                .HasForeignKey(d => d.MemberId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ShoppingCart_Member_Information");
+            //entity.HasOne(d => d.Member).WithMany(p => p.ShoppingCarts)
+            //    .HasForeignKey(d => d.MemberId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_ShoppingCart_Member_Information");
 
             entity.HasOne(d => d.TicketCategory).WithMany(p => p.ShoppingCarts)
                 .HasForeignKey(d => d.TicketCategoryId)
@@ -457,7 +457,7 @@ public partial class TripDbContext : DbContext
                     j =>
                     {
                         j.HasKey("TripProductId", "TravelTagid");
-                        j.ToTable("TravelandProductRelation");
+                        j.ToTable("TravelandProductRelation","dbo");
                     });
         });
 
@@ -502,7 +502,7 @@ public partial class TripDbContext : DbContext
                     j =>
                     {
                         j.HasKey("ProductCode", "TicketCategoryId");
-                        j.ToTable("TripAndTicketRelation");
+                        j.ToTable("TripAndTicketRelation","dbo");
                         j.IndexerProperty<string>("ProductCode").HasMaxLength(50);
                     });
         });

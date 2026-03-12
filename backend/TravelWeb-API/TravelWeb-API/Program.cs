@@ -1,18 +1,36 @@
-using Mapster;
+﻿using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using TravelWeb_API.Models.ActivityModel;
+using TravelWeb_API.Models.MemberSystem;
+using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.Board.Service;
-using TravelWeb_API.Models.Board;
 using TravelWeb_API.Models.MemberSystem;
-using TravelWeb_API.Models.TripProduct;
+using TravelWeb_API.Models.Board.Service;
+using TravelWeb_API.Models.Board;
+using TravelWeb_API.Models.TripProduct.ITripProduct;
+using TravelWeb_API.Models.TripProduct.STripProduct;
+using TravelWeb_API.Services;
+using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+//設定CROS
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy =>
+        {
+            policy.AllowAnyOrigin()    // 允許任何來源（最鬆）
+                  .AllowAnyHeader()    // 允許任何標頭
+                  .AllowAnyMethod();   // 允許任何動詞 (GET, POST, etc.)
+        });
+});
 
 // Add services to the container.
 
@@ -85,8 +103,15 @@ builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<IArticlesService, ArticleService>();
-builder.Services.AddScoped<ICommentsService, CommentsService>();
-//===================================================
+//行程商品表連線用DI
+builder.Services.AddScoped<ITripproductTable,TripproductTable >();
+//購物車連線DI
+builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
+//訂單連線用DI
+builder.Services.AddScoped<IOrder, SOrder>();
+
+
+
 
 var app = builder.Build();
 /////////////////////
@@ -117,6 +142,8 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+app.UseCors(myAllowSpecificOrigins);
 
 app.UseAuthorization();
 
