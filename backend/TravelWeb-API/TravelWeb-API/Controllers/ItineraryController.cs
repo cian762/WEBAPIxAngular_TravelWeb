@@ -30,6 +30,13 @@ namespace TravelWeb_API.Controllers
             }
             return Ok(result);
         }
+        //GET抓所有的歷史行程
+        [HttpGet("{id}/history")]
+        public async Task<IActionResult> GetHistory(int id)
+        {
+            var history = await _itineraryService.GetVersionHistoryAsync(id);
+            return Ok(history);
+        }
         // POST 新增行程
         [HttpPost]
         public async Task<IActionResult> CreateItinerary([FromBody] ItineraryCreateDto dto)

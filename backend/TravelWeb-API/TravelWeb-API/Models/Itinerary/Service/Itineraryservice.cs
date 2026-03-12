@@ -236,5 +236,57 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 4. 存檔並回傳結果
             return await _context.SaveChangesAsync() > 0;
         }
+        public async Task<List<ItineraryVersionHistoryDto>> GetVersionHistoryAsync(int itineraryId)
+        {
+            return await _context.ItineraryVersions
+                .Where(v => v.ItineraryId == itineraryId)
+                .OrderByDescending(v => v.VersionNumber) // 最新版本排在最前面
+                .Select(v => new ItineraryVersionHistoryDto
+                {
+                    VersionId = v.VersionId,
+                    VersionNumber = (int)v.VersionNumber,
+                    VersionRemark = v.VersionRemark,
+                    CreateTime = v.CreateTime,
+                    Source = v.Source,
+                    IsCurrent = v.CurrentUsageStatus == "Y"
+                })
+                .ToListAsync();
+        }
+        public async Task<ItineraryDetailDto> GetItemByVersionAsync(int versionId)
+        {
+            var result = await _context.ItineraryVersions
+                .Where(i => i.VersionId == versionId)
+                .Select(i => new ItineraryDetailDto
+                {
+                    ItineraryId = i.ItineraryId,
+                    ItineraryName = i.ItineraryName,
+                    // 抓取「當前使用中」的版本
+                    CurrentVersion = i.ItineraryVersions
+                        .Where(v => v.CurrentUsageStatus == "Y")
+                        .Select(v => new VersionDto
+                        {
+                            VersionId = v.VersionId,
+                            VersionNumber = (int)v.VersionNumber,
+                            // 抓取該版本下的所有項目，並依照 SortOrder 排序
+                            Items = v.ItineraryItems
+                                .OrderBy(item => item.SortOrder)
+                                .Select(item => new ItemDetailDto
+                                {
+                                    ItemId = item.ItemId,
+                                    SortOrder = (int)item.SortOrder,
+                                    ContentDescription = item.ContentDescription,
+                                    // 關鍵：從關聯的 Attraction 表抓取地點資訊
+                                    AttractionName = item.Attraction.Name != null ? item.Attraction.Name : "未知景點",
+                                    Address = item.Attraction.Address,
+                                    Latitude = item.Attraction.Latitude,
+                                    Longitude = item.Attraction.Longitude,
+                                    StartTime = item.StartTime,
+                                    EndTime = item.EndTime
+                                }).ToList()
+                        }).FirstOrDefault()
+                }).FirstOrDefaultAsync();
+
+            return result;
+        }
     }
 }

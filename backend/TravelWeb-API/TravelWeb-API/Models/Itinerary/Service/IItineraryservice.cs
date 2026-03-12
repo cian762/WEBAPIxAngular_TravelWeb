@@ -9,5 +9,6 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public Task<ItineraryDetailDto> GetItineraryDetailAsync(int itineraryId);
         public Task<int> SaveItinerarySnapshotAsync(ItinerarySnapshotDto dto);
         public Task<bool> SoftDeleteItineraryAsync(int itineraryId);
+        public Task<List<ItineraryVersionHistoryDto>> GetVersionHistoryAsync(int itineraryId);
     }
 }
