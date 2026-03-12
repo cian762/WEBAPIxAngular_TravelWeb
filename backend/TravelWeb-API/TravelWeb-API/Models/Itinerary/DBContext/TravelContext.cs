@@ -20,7 +20,9 @@ public partial class TravelContext : DbContext
 
     public virtual DbSet<AigenerationError> AigenerationErrors { get; set; }
 
-    public virtual DbSet<TravelWeb_API.Models.Itinerary.DBModel.Itinerary> Itineraries { get; set; }
+    public virtual DbSet<Attraction> Attractions { get; set; }
+
+    public virtual DbSet<DBModel.Itinerary> Itineraries { get; set; }
 
     public virtual DbSet<ItineraryComparison> ItineraryComparisons { get; set; }
 
@@ -106,7 +108,60 @@ public partial class TravelContext : DbContext
                 .HasConstraintName("FK_AIGenerationErrors_ItineraryVersions");
         });
 
-        modelBuilder.Entity<TravelWeb_API.Models.Itinerary.DBModel.Itinerary>(entity =>
+        modelBuilder.Entity<Attraction>(entity =>
+        {
+            entity.ToTable("Attractions", "Attractions");
+
+            entity.Property(e => e.AttractionId).HasColumnName("attraction_id");
+            entity.Property(e => e.Address)
+                .HasMaxLength(255)
+                .HasColumnName("address");
+            entity.Property(e => e.ApprovalStatus)
+                .HasDefaultValue(0)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Attractio__appro__7A3223E8")
+                .HasColumnName("approval_status");
+            entity.Property(e => e.AreaId)
+                .HasMaxLength(50)
+                .HasColumnName("area_id");
+            entity.Property(e => e.BusinessHours)
+                .HasMaxLength(500)
+                .HasColumnName("business_hours");
+            entity.Property(e => e.ClosedDaysNote)
+                .HasMaxLength(200)
+                .HasColumnName("closed_days_note");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+            entity.Property(e => e.GooglePlaceId)
+                .HasMaxLength(255)
+                .HasColumnName("google_place_id");
+            entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
+            entity.Property(e => e.Latitude)
+                .HasColumnType("decimal(10, 7)")
+                .HasColumnName("latitude");
+            entity.Property(e => e.Longitude)
+                .HasColumnType("decimal(10, 7)")
+                .HasColumnName("longitude");
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(255)
+                .HasColumnName("name");
+            entity.Property(e => e.OpendataId)
+                .HasMaxLength(100)
+                .HasColumnName("opendata_id");
+            entity.Property(e => e.Phone)
+                .HasMaxLength(50)
+                .HasColumnName("phone");
+            entity.Property(e => e.RegionId)
+                .HasAnnotation("Relational:DefaultConstraintName", "DF__Attractio__regio__793DFFAF")
+                .HasColumnName("RegionID");
+            entity.Property(e => e.TransportInfo).HasColumnName("transport_info");
+            entity.Property(e => e.Website)
+                .HasMaxLength(500)
+                .HasColumnName("website");
+        });
+
+        modelBuilder.Entity<DBModel.Itinerary>(entity =>
         {
             entity.HasKey(e => e.ItineraryId).HasName("PK__Itinerar__361216A6E8732ED0");
 
@@ -167,6 +222,10 @@ public partial class TravelContext : DbContext
             entity.Property(e => e.EndTime).HasColumnType("datetime");
             entity.Property(e => e.StartTime).HasColumnType("datetime");
             entity.Property(e => e.VersionId).HasColumnName("VersionID");
+
+            entity.HasOne(d => d.Attraction).WithMany(p => p.ItineraryItems)
+                .HasForeignKey(d => d.AttractionId)
+                .HasConstraintName("FK_ItineraryItems_Attractions");
 
             entity.HasOne(d => d.Version).WithMany(p => p.ItineraryItems)
                 .HasForeignKey(d => d.VersionId)

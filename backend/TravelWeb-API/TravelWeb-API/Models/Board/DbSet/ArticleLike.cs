@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace TravelWeb_API.Models.Board.DbSet;
+
+public partial class ArticleLike
+{
+    public int? ArticleId { get; set; }
+
+    public int? UserId { get; set; }
+
+    public virtual Article? Article { get; set; }
+}
