@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.AccessControl;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.QueryParameters.ActivityQueryParameters;
@@ -17,11 +18,11 @@ namespace TravelWeb_API.Services
             _dbContext = dbContext;
         }
 
-        public PagedResponseDTO<ActivityCardReponseDTO> GetCards(PagedQueryParameters q) 
+        public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetCards(PagedQueryParameters q) 
         {
             var totalRecords = _dbContext.Activities.Count(a => a.SoftDelete == false);
 
-            var ans = _dbContext.Activities
+            var ans = await _dbContext.Activities
                 .Where(a => a.SoftDelete == false)
                 .Skip((q.PageNumber - 1) * q.PageSize)
                 .Take(q.PageSize)
@@ -29,17 +30,17 @@ namespace TravelWeb_API.Services
                 {
                     ActivityId = a.ActivityId,
                     Title = a.Title,
-                    Type = a.Types.Select(t => t.ActivityType),
-                    Region = a.Regions.Select(r => r.RegionName),
+                    Type = a.Types.Select(t => t.ActivityType).ToList(),
+                    Region = a.Regions.Select(r => r.RegionName).ToList(),
                     Start = a.StartTime,
                     End = a.EndTime,
                 })
-                .ToList();
+                .ToListAsync();
 
             return new PagedResponseDTO<ActivityCardReponseDTO>(ans,q.PageNumber,q.PageSize,totalRecords);
         }
 
-        public PagedResponseDTO<ActivityCardReponseDTO> GetSpecificCards(ActivityInfoParameters q) 
+        public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetSpecificCards(ActivityInfoParameters q) 
         {
             var query = _dbContext.Activities
                 .Where(a => a.SoftDelete == false);
@@ -79,7 +80,7 @@ namespace TravelWeb_API.Services
             }
 
 
-            var ans = query
+            var ans = await query
                 .Skip((q.PageNumber - 1) * q.PageSize)
                 .Take(q.PageSize)
                 .Select(a => new ActivityCardReponseDTO
@@ -90,41 +91,38 @@ namespace TravelWeb_API.Services
                     Region = a.Regions.Select(r => r.RegionName),
                     Start = a.StartTime,
                     End = a.EndTime,
-                }).ToList();
+                })
+                .ToListAsync();
 
             return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, q.PageSize, totalRecords);
 
         }
 
-        public PagedResponseDTO<ActivityCardReponseDTO>? SearchSpecificCards(ActivityInfoParameters query)
+        public async Task<List<string?>?> SearchSpecificCards(string searchText)
         {
-            if (query.Keyword.IsNullOrEmpty()) return null;
-            
-            //撈取符合 keyword 和狀態為非軟刪除的 Activity
-            var q = _dbContext.Activities
-                .Include(a=>a.Types)
-                .Include(a=>a.Regions)
-                .Where(a => a.Title!.Contains(query.Keyword!) && a.SoftDelete == false)
-                .AsEnumerable();
+            if (searchText.IsNullOrEmpty()) return null;
 
-            //拿到所有符合 keyword 的活動數量
-            var totalRecords = q.Count();
+            var ans = await _dbContext.Activities
+                .Where(a => a.SoftDelete == false)
+                .Where(a => a.Title!.StartsWith(searchText))
+                .OrderBy(a => a.Title!.Length)
+                .Select(a => a.Title)
+                .ToListAsync();
 
-            var ans = q
-            .OrderBy(a=>a.ActivityId)
-            .Skip((query.PageNumber - 1) * query.PageSize)
-            .Take(query.PageSize)
-            .Select(a => new ActivityCardReponseDTO
+            //如果 ans 數量小於 5 個，就再抓取其他 Title 首字不為 searchText，但 Title Body 中包含關鍵字的活動
+            if (ans.Count < 5)
             {
-                ActivityId = a.ActivityId,
-                Title = a.Title,
-                Type = a.Types.Select(t => t.ActivityType),
-                Region = a.Regions.Select(r => r.RegionName),
-                Start = a.StartTime,
-                End = a.EndTime,
-            }).ToList();
+                var containsSuggestions = await _dbContext.Activities
+                    .Where(p => !p.Title!.StartsWith(searchText) && p.Title.Contains(searchText))
+                    .Take(5)
+                    .Select(a => a.Title)
+                    .ToListAsync();
 
-            return new PagedResponseDTO<ActivityCardReponseDTO>(ans, query.PageNumber, query.PageSize, totalRecords);
+                ans.AddRange(containsSuggestions);
+            }
+
+
+            return ans;
         }
 
 

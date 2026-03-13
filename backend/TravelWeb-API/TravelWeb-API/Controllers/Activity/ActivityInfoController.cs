@@ -16,9 +16,10 @@ namespace TravelWeb_API.Controllers.Activity
 
 
         [HttpGet]
-        public ActionResult GetSpecificActivityInfo(int activityId)
+        public async Task<ActionResult> GetSpecificActivityInfo(int activityId)
         {
-            var result = _activityInfoService.GetSpecificActivityInfo(activityId);
+            var result = await _activityInfoService.GetSpecificActivityInfo(activityId);
+            if (result == null) return NotFound();
             return Ok(result);
         }
     }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Services;
 
@@ -18,17 +19,17 @@ namespace TravelWeb_API.Controllers.Activity
 
 
         [HttpGet]
-        public ActionResult<ActivityTicketInfoResponseDTO> GetTicketInfo([FromQuery] string productCode) 
+        public async Task<ActionResult<ActivityTicketInfoResponseDTO>> GetTicketInfo([FromQuery] string productCode) 
         {
-            var result = _TicketService.GetTicketInfo(productCode);
+            var result = await _TicketService.GetTicketInfo(productCode);
             if(result == null) return NotFound();
             return Ok(result);
         }
 
         [HttpGet("Suggest")]
-        public ActionResult<ActivityCardReponseDTO> GetProductSuggestion([FromQuery] string ActivityType)
+        public async Task<ActionResult<ActivityCardReponseDTO>> GetProductSuggestion([FromQuery] string ActivityType)
         {
-            var result = _TicketService.GetProductSuggestion(ActivityType);
+            var result = await _TicketService.GetProductSuggestion(ActivityType);
             if (result == null) return NotFound();
             return Ok(result);
         }
