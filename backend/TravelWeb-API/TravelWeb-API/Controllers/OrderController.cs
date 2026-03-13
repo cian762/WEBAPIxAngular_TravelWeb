@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TravelWeb_API.Models.TripProduct;
+using TravelWeb_API.Models.TripProduct.ITripProduct;
 
 namespace TravelWeb_API.Controllers
 {
@@ -8,18 +9,13 @@ namespace TravelWeb_API.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly TripDbContext _trip;
-        public OrderController(TripDbContext trip) {
-            _trip = trip;
+        private readonly IOrder _order;
+        public OrderController(IOrder order) {
+            _order = order;
 
         }
 
-        [HttpGet]
-        public IActionResult Test ()
-        {
-            return Ok( _trip.TripProducts.FirstOrDefault());
-        }
-
+     
 
 
 
