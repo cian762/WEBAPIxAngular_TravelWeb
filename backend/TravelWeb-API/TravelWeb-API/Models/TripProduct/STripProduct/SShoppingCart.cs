@@ -133,7 +133,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     dto.Price = (decimal)act.CurrentPrice!;
 
                     // 直接把這張表的 ActivityImageUrl 丟進去處理
-                    dto.CoverImage = CartItemDTO.GetFullUrl(act.CoverImageUrl!, _mvcBaseUrl);
+                    dto.CoverImage =act.CoverImageUrl;
 
                     resultList.Add(dto);
                 }
