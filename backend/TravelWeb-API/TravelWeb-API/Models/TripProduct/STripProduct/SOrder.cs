@@ -13,16 +13,29 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
          _context = context;
         }
 
-        public async Task<IEnumerable<CreateOrderDto>> CheckOrder(CreateOrderDto dto, string member)
+        public Task<bool> CancelOrderAsync(int orderId, string memberId)
         {
-           var order = await _context.Orders.Where(s=>s.MemberId==member).Select(o=>new CreateOrderDto { 
-             MemberId = o.MemberId,
-             ContactEmail = o.ContactEmail!,
-             ContactName = o.ContactName!,
-             ContactPhone = o.ContactPhone!,
-             CustomerNote = o.CustomerNote!,
-           }).ToListAsync();
-            return  order;
+            throw new NotImplementedException();
+        }
+
+        public Task<int> CreateOrderAsync(CreateOrderDto dto, string memberId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OrderDetailDto> GetCheckoutPreviewAsync(CreateOrderDto dto, string memberId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<OrderListDto>> GetMemberOrdersAsync(string memberId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OrderDetailDto?> GetOrderDetailAsync(int orderId, string memberId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
