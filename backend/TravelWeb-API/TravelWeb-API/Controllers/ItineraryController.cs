@@ -55,11 +55,11 @@ namespace TravelWeb_API.Controllers
 
             try
             {
-                // 3. 呼叫你剛寫好的 Service 邏輯
+                // 3. 呼叫 Service 邏輯
                 int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto);
 
                 // 4. 回傳 201 Created，並在 Header 附上查詢該行程的 URL
-                // (假設你有一個 GetById 的 Action)
+
                 return CreatedAtAction("GetbyItineraryId", new { id = newId }, new { id = newId, message = "行程建立成功" });
             }
             catch (Exception ex)
