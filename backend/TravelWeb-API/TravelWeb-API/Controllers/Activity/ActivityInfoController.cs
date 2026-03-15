@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TravelWeb_API.Services;
 
-namespace TravelWeb_API.Controllers
+namespace TravelWeb_API.Controllers.Activity
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -16,9 +16,10 @@ namespace TravelWeb_API.Controllers
 
 
         [HttpGet]
-        public ActionResult GetSpecificActivityInfo(int activityId)
+        public async Task<ActionResult> GetSpecificActivityInfo(int activityId)
         {
-            var result = _activityInfoService.GetSpecificActivityInfo(activityId);
+            var result = await _activityInfoService.GetSpecificActivityInfo(activityId);
+            if (result == null) return NotFound();
             return Ok(result);
         }
     }
