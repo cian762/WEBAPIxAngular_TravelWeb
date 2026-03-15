@@ -103,6 +103,9 @@ builder.Services.AddScoped<IItineraryservice, ItineraryService>();
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<IArticlesService, ArticleService>();
+builder.Services.AddScoped<ICommentsService, CommentsService>();
+//===================================================
+
 //行程商品表連線用DI
 builder.Services.AddScoped<ITripproductTable,TripproductTable >();
 //購物車連線DI

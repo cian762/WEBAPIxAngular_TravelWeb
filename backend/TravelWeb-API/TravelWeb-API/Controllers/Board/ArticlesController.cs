@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,6 +32,7 @@ namespace TravelWeb_API.Controllers.Board
             _memberDb = memberDb;
         }
 
+        //要分頁
         // GET: api/Articles 瀏覽(全部文章之瀑布流)
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Article>>> GetArticles()
@@ -92,6 +94,14 @@ namespace TravelWeb_API.Controllers.Board
                 return NotFound();
         }
 
+        [HttpGet("test")]
+        public IActionResult TaskArtcle()        
+        {
+            var list = _context.Articles.ToList();
+            var result = 
+                list.Select(l => new Test { Title = l.Title, content = l.CreatedAt.ToString()}).ToList();
+            return Ok(result);
+        }
         
     }
 }

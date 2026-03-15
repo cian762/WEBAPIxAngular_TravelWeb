@@ -50,7 +50,7 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         // POST:新增留言(有媽)
-        [HttpPost("{id}")]
+        [HttpPost("reply")]
         public async Task<ActionResult<Comment>> PostCommentWithParent(int articleID, string UserId, string contents, int parentID)
         {
             Comment comment = _commentsService.AddCommentWithParent(articleID, UserId, contents, parentID);
