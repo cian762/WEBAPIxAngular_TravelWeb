@@ -1,4 +1,5 @@
-﻿using TravelWeb_API.DTO.ActivityDTO;
+﻿using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
 
 namespace TravelWeb_API.Services
@@ -11,13 +12,13 @@ namespace TravelWeb_API.Services
             _activityDbContext = activityDbContext;
         }
 
-        public ActivityInfoResponseDTO? GetSpecificActivityInfo(int activityId) 
+        public async Task<ActivityInfoResponseDTO?> GetSpecificActivityInfo(int activityId) 
         {
-            var check = _activityDbContext.Activities.Any(a => a.ActivityId == activityId);
+            var check = await _activityDbContext.Activities.AnyAsync(a => a.ActivityId == activityId);
 
             if (!check) return null;
 
-            var result = _activityDbContext.Activities
+            var result = await _activityDbContext.Activities
                 .Where(a=> a.ActivityId == activityId)
                 .Select(a=> new ActivityInfoResponseDTO 
                 {
@@ -28,10 +29,9 @@ namespace TravelWeb_API.Services
                     EndTime = a.EndTime,
                     Address = a.Address,
                     OfficialLink = a.OfficialLink,
-                    //用LINQ的Select方法從ActivityImages集合中選取ImageUrl屬性，並將結果轉換為List<string>
                     Images = a.ActivityImages.Select(a=> a.ImageUrl).ToList(),
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
             return result;
         }
     }
