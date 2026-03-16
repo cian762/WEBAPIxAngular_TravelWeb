@@ -34,6 +34,18 @@ namespace TravelWeb_API.Services
                     Region = a.Regions.Select(r => r.RegionName).ToList(),
                     Start = a.StartTime,
                     End = a.EndTime,
+                    CoverImageUrl = a.ActivityImages
+                                    .Where(i => i.IsCoverImage != false)
+                                    .Select(i => i.ImageUrl)
+                                    .FirstOrDefault(),
+                    ViewCount = a.ViewCount,
+                    CommentCount = a.Reviews.Count(),
+                    AverageRating = (float) (a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),
+                    ReferencePrice = a.ActivityTicketDetails
+                    .Where(d=>d.ProductCodeNavigation.TicketCategoryId == 2)
+                    .Select(d => d.ProductCodeNavigation.CurrentPrice)
+                    .FirstOrDefault() ?? 0,
+
                 })
                 .ToListAsync();
 
