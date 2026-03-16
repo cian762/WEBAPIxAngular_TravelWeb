@@ -62,4 +62,16 @@
         public int CartId { get; set; }  // 指定哪一筆購物車資料
         public int Quantity { get; set; } // 新的數量
     }
+    public class CreateOrderItemDto
+    {
+       
+        public string ?ProductCode { get; set; }
+
+        // 2. 購買數量
+        public int Quantity { get; set; }
+
+
+       
+        public string ?ProductName { get; set; }
+    }
 }

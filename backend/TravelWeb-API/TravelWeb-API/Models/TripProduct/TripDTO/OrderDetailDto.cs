@@ -18,11 +18,13 @@
     }
     public class OrderItemDetailDto
     {
+        public int OrderItemId { get; set; }
         public string ProductCode { get; set; } = null!;
-        public string ProductName { get; set; } = null!; // 來自快照
-        public string? ProductImage { get; set; }        // 來自 TripProducts 關聯
-
-        // 該商品下的票種明細 (例如：成人票 x2, 學生票 x1)
+        public string ProductName { get; set; } = null!;
+        public string? ProductImage { get; set; }
+        public int Quantity { get; set; }
+        public DateOnly? TripStartDate { get; set; }
+        public DateOnly? TripEndDate { get; set; }
         public List<OrderTicketDetailDto> Tickets { get; set; } = new();
     }
 

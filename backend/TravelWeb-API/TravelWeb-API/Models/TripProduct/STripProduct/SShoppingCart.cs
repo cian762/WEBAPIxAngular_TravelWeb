@@ -158,7 +158,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
             if (!isRealMember)
             {
-                throw new Exception("目標會員帳號不存在");
+                throw new Exception("會員帳號不存在");
             }
 
             // 4. 抓取遊客的所有購物車項目

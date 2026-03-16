@@ -12,5 +12,6 @@
         public string FirstItemName { get; set; } = null!;
         public string? FirstItemImage { get; set; }
         public int TotalItemCount { get; set; } // 總共買了幾項商品
+       
     }
 }

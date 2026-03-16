@@ -12,6 +12,7 @@ using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
+using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
 
 
@@ -109,10 +110,15 @@ builder.Services.AddScoped<ITripproductTable,TripproductTable >();
 builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
 //訂單連線用DI
 builder.Services.AddScoped<IOrder, SOrder>();
+//綠界連線用DI
+builder.Services.AddScoped<IECPay, SECPay>();
 
 // 1. 註冊 Cloudinary 服務（假設實作類別叫 CloudinaryService）
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-
+//綠界
+builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
+// 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 /////////////////////
