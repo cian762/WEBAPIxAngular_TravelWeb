@@ -31,8 +31,8 @@ export class AttractionsHomeComponent {
       label: '中部地區',
       description: '日月潭的湖光山色、八卦山、梨山、獅頭山等，都可充分感受臺灣多元文化及豐富自然景觀。苗栗、台中、彰化、南投、雲林皆有精彩可期。',
       cities: [
-        { name: '苗栗縣', regionIds: [20], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
-        { name: '台中市', regionIds: [21], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
+        { name: '苗栗縣', regionIds: [21], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
+        { name: '台中市', regionIds: [20], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
         { name: '彰化縣', regionIds: [22], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
         { name: '南投縣', regionIds: [23], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
         { name: '雲林縣', regionIds: [24], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
@@ -42,10 +42,10 @@ export class AttractionsHomeComponent {
       label: '南部地區',
       description: '探訪濃厚的歷史文化：品嚐傳統美食小吃、一睹世界級日出奇景；也可刺激水上活動，近覽太平洋壯闊景觀。',
       cities: [
-        { name: '嘉義縣', regionIds: [30], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
-        { name: '嘉義市', regionIds: [31], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
-        { name: '台南市', regionIds: [32], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
-        { name: '高雄市', regionIds: [33], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
+        { name: '嘉義縣', regionIds: [33], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
+        { name: '嘉義市', regionIds: [32], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
+        { name: '台南市', regionIds: [31], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
+        { name: '高雄市', regionIds: [30], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
         { name: '屏東縣', regionIds: [34], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
       ]
     },
@@ -75,7 +75,7 @@ export class AttractionsHomeComponent {
   selectRegion(i: number): void { this.activeRegion = i; }
 
   goToCity(city: CityCard): void {
-    this.router.navigate(['/contact/list'], {
+    this.router.navigate(['/attractions/list'], {
       queryParams: { regionIds: city.regionIds.join(','), cityName: city.name }
     });
   }
