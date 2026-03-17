@@ -7,7 +7,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using TravelWeb_API.Models;
-using TravelWeb_API.Models.MemberSystem; // 👉 如果您的 Context 放在這裡，請確認命名空間是否正確
+using TravelWeb_API.Models.MemberSystem;
+using TravelWeb_API.DTO.MemberSystemDto;
 
 namespace TravelWeb_API.Controllers
 {
@@ -22,12 +23,6 @@ namespace TravelWeb_API.Controllers
         {
             _context = context;
             _configuration = configuration;
-        }
-
-        public class LoginRequestDto
-        {
-            public string Account { get; set; }  // 可以是 Email 或 MemberCode
-            public string Password { get; set; }
         }
 
         [HttpPost("login")]
