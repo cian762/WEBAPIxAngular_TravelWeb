@@ -106,7 +106,11 @@ builder.Services.AddSwaggerGen(
         {
             Title = "TravelWeb-API",
             //Version = "版本"
-        }); 
+        });
+        x.SwaggerDoc("Board", new OpenApiInfo
+        {
+            Title = "Board"           
+        });
 
         x.DocInclusionPredicate((docName, apiDesc) =>
         {

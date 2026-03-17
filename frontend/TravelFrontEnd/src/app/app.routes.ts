@@ -5,6 +5,7 @@ export const routes: Routes = [
   {
     path: 'ActivityInfo',
     loadComponent: () => import('./Activity/Component/info-card/info-card').then(m => m.InfoCard)
+  },
 {
     path: '',
     loadComponent: () =>
@@ -36,24 +37,14 @@ export const routes: Routes = [
     ],
   },
  // 景點介紹結束
-
-
-
-
-
-
-
-// 所有不認識的路徑會導向首頁
-  { path: '**', redirectTo: '' },
-
-
-
-  {
+{
     path: 'itinerary',
     loadComponent: () => import('./Itinerary/component/index-itinerary/index-itinerary').then(m => m.IndexItinerary),
     children: [{
       path: 'change',
       loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ChangeItineraryItem)
     }]
-  }
+  },
+// 所有不認識的路徑會導向首頁
+  { path: '**', redirectTo: '' },
 ];
