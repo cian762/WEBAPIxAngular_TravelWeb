@@ -37,6 +37,26 @@ namespace TravelWeb_API.Controllers.Attraction
         }
 
 
+        // ────────────────────────────────────────────
+        // GET /api/attractiontype/{id}
+        // 取得單一分類（可選，備用）
+        // ────────────────────────────────────────────
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTypeById(int id)
+        {
+            var type = await _dbContext.AttractionTypeCategories
+                .Where(t => t.AttractionTypeId == id)
+                .Select(t => new
+                {
+                    t.AttractionTypeId,
+                    t.AttractionTypeName
+                })
+                .FirstOrDefaultAsync();
 
+            if (type == null)
+                return NotFound(new { message = "找不到此景點類型" });
+
+            return Ok(type);
+        }
     }
 }
