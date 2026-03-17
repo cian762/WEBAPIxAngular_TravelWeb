@@ -1,0 +1,107 @@
+<!-- 景點首頁 -->
+
+<!-- Hero Banner -->
+<section class="att-hero">
+  <div class="att-hero__overlay">
+    <div class="att-hero__content">
+      <div class="att-hero__icon">🗼</div>
+      <h1 class="att-hero__title">觀光景點</h1>
+      <p class="att-hero__sub">探索台灣之美，400+ 精選景點等你發現</p>
+    </div>
+  </div>
+</section>
+
+<!-- 主內容 -->
+<section class="att-main">
+  <div class="container">
+    <div class="row align-items-start g-5">
+
+      <!-- 左欄：介紹文字 + 統計 + SVG 地圖 -->
+      <div class="col-lg-4">
+        <h2 class="intro-headline">The Heart of Asia<br>旅行台灣 就是現在</h2>
+        <p class="intro-body">
+          臺灣因地理資源豐沛，擁有許多特殊地形及奇特的地理景觀。北部的麥北角、北海岸及宜蘭地區，擁有奇異特殊海岸地形，拍達山景水秀、天藍海深；在中南部地區，日月潭的湖光山色、八卦山蠶業，都可充分感受臺灣多元文化及豐富自然景觀。
+        </p>
+        <p class="intro-body">去著、賞著、體驗的臺灣，熱情歡迎您！</p>
+
+        <!-- 統計數字 -->
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="stat-num">400+</span>
+            <span class="stat-lbl">精選景點</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num">22</span>
+            <span class="stat-lbl">縣市地區</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-num">8</span>
+            <span class="stat-lbl">景點類型</span>
+          </div>
+        </div>
+
+        <!-- 台灣地圖 SVG -->
+        <div class="tw-map-wrap">
+          <svg viewBox="0 0 220 340" class="tw-map">
+            <ellipse cx="128" cy="55" rx="44" ry="36"
+              class="map-area" [class.active]="activeRegion===0"
+              (click)="selectRegion(0)" />
+            <text x="128" y="58" class="map-label" (click)="selectRegion(0)">北部</text>
+
+            <ellipse cx="116" cy="125" rx="42" ry="36"
+              class="map-area" [class.active]="activeRegion===1"
+              (click)="selectRegion(1)" />
+            <text x="116" y="128" class="map-label" (click)="selectRegion(1)">中部</text>
+
+            <ellipse cx="103" cy="193" rx="38" ry="36"
+              class="map-area" [class.active]="activeRegion===2"
+              (click)="selectRegion(2)" />
+            <text x="103" y="196" class="map-label" (click)="selectRegion(2)">南部</text>
+
+            <rect x="152" y="78" width="34" height="122" rx="10"
+              class="map-area" [class.active]="activeRegion===3"
+              (click)="selectRegion(3)" />
+            <text x="169" y="142" class="map-label" (click)="selectRegion(3)">東部</text>
+
+            <circle cx="48" cy="265" r="20"
+              class="map-area" [class.active]="activeRegion===4"
+              (click)="selectRegion(4)" />
+            <text x="48" y="268" class="map-label" (click)="selectRegion(4)">離島</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 右欄：地區 Tabs + 城市卡片 -->
+      <div class="col-lg-8">
+        <!-- 地區按鈕 -->
+        <div class="region-tabs">
+          <button
+            *ngFor="let r of regions; let i = index"
+            class="region-btn"
+            [class.active]="activeRegion === i"
+            (click)="selectRegion(i)">
+            {{ r.label }}
+          </button>
+        </div>
+
+        <!-- 地區描述 -->
+        <p class="region-desc">{{ currentRegion.description }}</p>
+
+        <!-- 城市卡片 -->
+        <div class="city-grid">
+          <div class="city-card" *ngFor="let city of currentRegion.cities"
+            (click)="goToCity(city)">
+            <div class="city-card__img">
+              <img [src]="city.imageUrl" [alt]="city.name"
+                onerror="this.src='assets/img/package/package2.jpg'">
+            </div>
+            <div class="city-card__overlay">
+              <span class="city-card__name">{{ city.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
