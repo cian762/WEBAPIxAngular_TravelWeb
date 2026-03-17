@@ -41,11 +41,15 @@ public partial class TripDbContext : DbContext
 
     public virtual DbSet<PaymentTransaction> PaymentTransactions { get; set; }
 
+    public virtual DbSet<ProductInventoryStatus> ProductInventoryStatuses { get; set; }
+
     public virtual DbSet<Resource> Resources { get; set; }
 
     public virtual DbSet<ResourcesImage> ResourcesImages { get; set; }
 
     public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
+
+    public virtual DbSet<StockInRecord> StockInRecords { get; set; }
 
     public virtual DbSet<TicketCategory> TicketCategories { get; set; }
 
@@ -59,7 +63,6 @@ public partial class TripDbContext : DbContext
 
     public virtual DbSet<TripSchedule> TripSchedules { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -86,8 +89,11 @@ public partial class TripDbContext : DbContext
             entity.ToTable("Activities", "Activity");
 
             entity.Property(e => e.ActivityId).HasColumnName("ActivityID");
+            entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
+            entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.Title).HasMaxLength(50);
             entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+            entity.Property(e => e.ViewCount).HasDefaultValue(0);
         });
 
         modelBuilder.Entity<ActivityImage>(entity =>
@@ -148,6 +154,7 @@ public partial class TripDbContext : DbContext
                 .HasColumnName("phone");
             entity.Property(e => e.RegionId).HasColumnName("RegionID");
             entity.Property(e => e.TransportInfo).HasColumnName("transport_info");
+            entity.Property(e => e.ViewCount).HasColumnName("view_count");
             entity.Property(e => e.Website)
                 .HasMaxLength(500)
                 .HasColumnName("website");
@@ -330,6 +337,32 @@ public partial class TripDbContext : DbContext
                 .HasConstraintName("FK_Payments_Orders");
         });
 
+        modelBuilder.Entity<ProductInventoryStatus>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("ProductInventoryStatus", "Attractions");
+
+            entity.Property(e => e.DailyLimit).HasColumnName("daily_limit");
+            entity.Property(e => e.InventoryMode)
+                .HasMaxLength(20)
+                .HasDefaultValue("UNLIMITED")
+                .HasColumnName("inventory_mode");
+            entity.Property(e => e.LastUpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("last_updated_at");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.SoldQuantity)
+                .HasDefaultValue(0)
+                .HasColumnName("sold_quantity");
+
+            entity.HasOne(d => d.Product).WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductInventoryStatus_AttractionProducts");
+        });
+
         modelBuilder.Entity<Resource>(entity =>
         {
             entity.HasKey(e => e.ResourceId).HasName("PK__Resource__4ED1816F8DB494E7");
@@ -369,14 +402,48 @@ public partial class TripDbContext : DbContext
             entity.Property(e => e.MemberId).HasMaxLength(50);
             entity.Property(e => e.ProductCode).HasMaxLength(50);
 
-            //entity.HasOne(d => d.Member).WithMany(p => p.ShoppingCarts)
-            //    .HasForeignKey(d => d.MemberId)
-            //    .OnDelete(DeleteBehavior.ClientSetNull)
-            //    .HasConstraintName("FK_ShoppingCart_Member_Information");
-
             entity.HasOne(d => d.TicketCategory).WithMany(p => p.ShoppingCarts)
                 .HasForeignKey(d => d.TicketCategoryId)
                 .HasConstraintName("FK_ShoppingCart_TicketCategories");
+        });
+
+        modelBuilder.Entity<StockInRecord>(entity =>
+        {
+            entity.HasKey(e => e.StockInId).HasName("PK__StockInR__F657737DB034425D");
+
+            entity.ToTable("StockInRecords", "Attractions");
+
+            entity.Property(e => e.StockInId).HasColumnName("stock_in_id");
+            entity.Property(e => e.InventoryType)
+                .HasMaxLength(20)
+                .HasDefaultValue("VIRTUAL")
+                .HasColumnName("inventory_type");
+            entity.Property(e => e.ProductCode)
+                .HasMaxLength(50)
+                .HasColumnName("product_code");
+            entity.Property(e => e.ProductType)
+                .HasMaxLength(20)
+                .HasColumnName("product_type");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.RemainingStock).HasColumnName("remaining_stock");
+            entity.Property(e => e.Remarks)
+                .HasMaxLength(500)
+                .HasColumnName("remarks");
+            entity.Property(e => e.StockInDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnName("stock_in_date");
+            entity.Property(e => e.SupplierName)
+                .HasMaxLength(100)
+                .HasColumnName("supplier_name");
+            entity.Property(e => e.UnitCost)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("unit_cost");
+
+            entity.HasOne(d => d.ProductCodeNavigation).WithMany(p => p.StockInRecords)
+                .HasPrincipalKey(p => p.ProductCode)
+                .HasForeignKey(d => d.ProductCode)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_StockInRecords_AttractionProducts");
         });
 
         modelBuilder.Entity<TicketCategory>(entity =>

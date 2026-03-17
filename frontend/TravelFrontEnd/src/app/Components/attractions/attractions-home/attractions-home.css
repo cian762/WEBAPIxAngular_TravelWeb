@@ -1,0 +1,146 @@
+/* Hero */
+.att-hero {
+  height: 340px;
+  background: url('/assets/img/banner/banner.jpg') center / cover no-repeat;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.att-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.55));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.att-hero__content { text-align: center; color: #fff; position: relative; z-index: 1; }
+.att-hero__icon    { font-size: 2.8rem; margin-bottom: 6px; }
+.att-hero__title   { font-size: 2.5rem; font-weight: 800; letter-spacing: 6px; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.att-hero__sub     { font-size: 1rem; margin-top: 8px; opacity: 0.85; }
+
+/* Main */
+.att-main { padding: 60px 0; }
+
+/* 介紹文字 */
+.intro-headline {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #222;
+  border-left: 4px solid #e84611;
+  padding-left: 14px;
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+.intro-body { font-size: 0.88rem; color: #666; line-height: 1.85; margin-bottom: 10px; }
+
+/* 統計數字 */
+.stats-row { display: flex; gap: 16px; margin: 24px 0 30px; }
+.stat-box {
+  flex: 1;
+  text-align: center;
+  background: #fff8f5;
+  border: 1px solid #ffe0d5;
+  border-radius: 10px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+}
+.stat-num { font-size: 1.7rem; font-weight: 800; color: #e84611; }
+.stat-lbl { font-size: 0.78rem; color: #666; margin-top: 2px; }
+
+/* 台灣地圖 */
+.tw-map-wrap { padding: 10px 10px 0; }
+.tw-map { width: 100%; max-width: 190px; display: block; margin: 0 auto; }
+.map-area {
+  fill: #d0d0d0;
+  cursor: pointer;
+  stroke: #fff;
+  stroke-width: 2;
+  transition: fill 0.22s;
+}
+.map-area:hover  { fill: #f4a98a; }
+.map-area.active { fill: #e84611; }
+.map-label {
+  font-size: 13px;
+  fill: #fff;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  font-weight: 700;
+}
+
+/* 地區 Tabs */
+.region-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.region-btn {
+  border: 1.5px solid #ccc;
+  background: #fff;
+  color: #666;
+  border-radius: 22px;
+  padding: 7px 20px;
+  font-size: 0.87rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.region-btn.active,
+.region-btn:hover { background: #e84611; border-color: #e84611; color: #fff; }
+
+/* 地區描述 */
+.region-desc {
+  font-size: 0.88rem;
+  color: #666;
+  line-height: 1.75;
+  min-height: 54px;
+  margin-bottom: 20px;
+}
+
+/* 城市卡片格 */
+.city-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 576px) {
+  .city-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 城市卡片 */
+.city-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  transition: transform 0.22s, box-shadow 0.22s;
+}
+.city-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.city-card__img { padding-top: 65%; position: relative; }
+.city-card__img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+.city-card:hover .city-card__img img { transform: scale(1.06); }
+.city-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+  transition: background 0.22s;
+}
+.city-card:hover .city-card__overlay { background: rgba(232,70,17,0.55); }
+.city-card__name {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
