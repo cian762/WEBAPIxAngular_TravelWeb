@@ -6,10 +6,10 @@ namespace TravelWeb_API.QueryParameters.ActivityQueryParameters
     {
         public string? Keyword { get; set; }
 
-        public string? Type { get; set; }
-        public string? Region { get; set; }
-        public DateOnly? Start { get; set; }
-        public DateOnly? End { get; set; }
+        public string[]? Type { get; set; } = null;
+        public string[]? Region { get; set; } = null;
+        public DateOnly? Start { get; set; } = null;
+        public DateOnly? End { get; set; } = null;
 
         [Range(1, int.MaxValue, ErrorMessage = "頁碼必須大於 0")]
         public int PageNumber { get; set; } = 1;

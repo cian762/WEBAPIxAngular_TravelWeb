@@ -106,7 +106,6 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
 
 
   submit() {
-
     if (this.selectRegions.includes('全部')) {
       this.selectRegions = [];
     }
@@ -138,11 +137,14 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
   }
 
   clear() {
+    this.getInitData();
     this.selectTypes = ['全部'];
     this.selectRegions = ['全部'];
     this.startDate = null;
     this.endDate = null;
-    this.getInitData();
+    this.fpInstance?.clear();
+    console.log(this.startDate);
+    console.log(this.endDate);
   }
 
   formatDate(dateInfo: Date | null) {

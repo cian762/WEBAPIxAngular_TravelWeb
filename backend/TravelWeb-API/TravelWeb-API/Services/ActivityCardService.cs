@@ -57,21 +57,20 @@ namespace TravelWeb_API.Services
             var query = _dbContext.Activities
                 .Where(a => a.SoftDelete == false);
 
-            var totalRecords = query.Count();
-
-            if (!q.Type.IsNullOrEmpty())
+            if (q.Type != null && q.Type.Length > 0)
             {
-                query = query.Where(a => a.Types.Any(t => t.ActivityType == q.Type));
+                query = query.Where(a => a.Types.Any(t => q.Type!.Contains(t.ActivityType)));
             }
 
-            if (!q.Region.IsNullOrEmpty())
+            if (q.Region != null && q.Region.Length > 0)
             {
-                query = query.Where(a => a.Regions.Any(r => r.RegionName == q.Region));
+                query = query.Where(a => a.Regions.Any(r => q.Region!.Contains(r.RegionName)));
+                   
             }
 
             if (q.Start != null && q.End != null)
             {
-                query = query.Where(a => a.StartTime >= q.Start && a.EndTime <= q.End);
+                query = query.Where(a =>a.StartTime <= q.End && a.EndTime >= q.Start);
             }
 
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
@@ -105,6 +104,8 @@ namespace TravelWeb_API.Services
                     End = a.EndTime,
                 })
                 .ToListAsync();
+
+            var totalRecords = ans.Count();
 
             return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, totalRecords, q.PageSize);
 

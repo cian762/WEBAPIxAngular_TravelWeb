@@ -14,13 +14,17 @@ export class CardInfoService {
   }
 
   FilterCardInfo(query: queryParameters) {
-    const params = new HttpParams()
-      .set('type', query.type.toString())
-      .set('region', query.region.toString())
-      .set('start', query.start ?? '')
-      .set('end', query.end ?? '');
+
+    let params = new HttpParams();
+    query.type.forEach(r => { params = params.append('type', r) });
+    query.region.forEach(r => { params = params.append('region', r) });
+    params.set('start', query.start ?? '');
+    params.set('end', query.end ?? '');
+
     return this.http.get<paginationInterface>('https://localhost:7276/api/ActivityCard/Query', {
       params
     });
   }
+
+
 }
