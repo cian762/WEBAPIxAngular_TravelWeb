@@ -5,7 +5,7 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
     public interface IOrder
     {
         // 1. 建立訂單：處理 4 張表寫入與 Transaction，回傳產生的 OrderId
-        Task<int> CreateOrderAsync(CreateOrderDto dto, string memberId);
+        Task<Order>CreateOrderAsync(CreateOrderDto dto, string memberId);
 
         // 2. 訂單預覽：在正式下單前，計算金額與確認商品清單 (不寫入資料庫)
         Task<OrderDetailDto> GetCheckoutPreviewAsync(CreateOrderDto dto, string memberId);

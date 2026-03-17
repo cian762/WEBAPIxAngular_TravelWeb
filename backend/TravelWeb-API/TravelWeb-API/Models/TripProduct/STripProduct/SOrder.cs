@@ -42,8 +42,8 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             // 如果目前的狀態（例如：已經是 Completed 或 Active）不能取消，則回傳失敗
             return false;
         }
-        // 1. 建立訂單：處理 3 張表寫入與 Transaction，回傳產生的 OrderId
-        public  async Task<int> CreateOrderAsync(CreateOrderDto dto, string memberId)
+        // 1. 建立訂單：處理 4 張表寫入與 Transaction，回傳產生的 OrderId
+        public  async Task<Order> CreateOrderAsync(CreateOrderDto dto, string memberId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -119,6 +119,30 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                         startDate = tripSchedule.StartDate;
                         endDate = tripSchedule.EndDate;
                     }
+                    else
+                    {
+                        // --- 情況 B：如果是「景點/活動」 (只動 StockInRecords) ---
+                        var stockRecord = await _context.StockInRecords
+                            .FirstOrDefaultAsync(s => s.ProductCode == item.ProductCode);
+
+                        if (stockRecord != null)
+                        {
+                            // 1. 檢查剩餘庫存是否足夠
+                            if (stockRecord.RemainingStock < item.Quantity)
+                            {
+                                throw new Exception($"商品庫存不足，目前僅剩 {stockRecord.RemainingStock} 份");
+                            }
+
+                            // 2. 只有一個動作：更新 [remaining_stock] (原本 1000 變成 999)
+                            // [quantity] 會因為你沒寫它，在 SaveChanges 時保持 1000 不動
+                            stockRecord.RemainingStock -= item.Quantity;
+                        }
+                        else
+                        {
+                            // 預防萬一：如果連進貨紀錄都沒有，代表這商品還沒準備好
+                            throw new Exception($"系統找不到商品 [{item.ProductCode}] 的庫存紀錄");
+                        }
+                    }
 
                     var orderItem = new OrderItem
                     {
@@ -154,7 +178,20 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return order.OrderId;
+                // 5. 建立初始交易紀錄 (為了追蹤即將發起的綠界支付)
+                var paymentTransaction = new PaymentTransaction
+                {
+                    OrderId = order.OrderId,
+                    PaymentProvider = "綠界科技",
+                    PaidAmount = order.TotalAmount,
+                    TransactionStatus = "待處理", // 標記為待處理
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.PaymentTransactions.Add(paymentTransaction);
+                await _context.SaveChangesAsync(); // 再次儲存交易紀錄
+
+                return order; // 此時 order 物件裡已經包含 OrderId 了
             }
             catch (Exception ex)
             {
