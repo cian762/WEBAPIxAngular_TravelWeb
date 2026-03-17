@@ -1,0 +1,55 @@
+<div class="container mt-4">
+  <div class="card shadow-lg border-0 rounded-4">
+    <div class="card-body p-4">
+
+      <!-- 標題 -->
+      <h4 class="card-title mb-4 text-primary fw-bold">
+        ✨ 建立新行程
+      </h4>
+
+      <form>
+
+        <!-- 行程名稱 -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">行程名稱</label>
+          <input type="text" class="form-control form-control-lg" placeholder="例如：台北一日遊~" [(ngModel)]="ItineraryName"
+            name="tripName" />
+        </div>
+
+        <!-- 時間 -->
+        <div class="row">
+          <!-- 開始時間 -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">開始時間</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="startDateTime" name="startDateTime" />
+          </div>
+
+          <!-- 結束時間 -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">結束時間</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="endDateTime" name="endDateTime" />
+          </div>
+        </div>
+
+        <!-- 地點 -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">地點</label>
+          <input #locationInput type="text" class="form-control form-control-lg" placeholder="輸入地點（支援 Google 地圖）"
+            [(ngModel)]="location" name="location" />
+        </div>
+
+        <!-- 按鈕區 -->
+        <div class="d-flex gap-3">
+
+          <button type="button" class="btn btn-outline-success btn-lg flex-fill" (click)="createByAI()">
+            🤖 AI建立
+          </button>
+
+          <button type="button" class="btn btn-primary btn-lg flex-fill" (click)="createTrip()">
+            ➕ 建立行程
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
