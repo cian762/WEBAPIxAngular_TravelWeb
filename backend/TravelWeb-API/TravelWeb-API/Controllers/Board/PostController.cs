@@ -33,8 +33,10 @@ namespace TravelWeb_API.Controllers.Board
 
         // GET: api/PostsDetailed 瀏覽Post
         [HttpGet("{id}")]
-        public async Task<ActionResult<PostDetailDto>> GetPostDetail(Article article)
+        public async Task<ActionResult<PostDetailDto>> GetPostDetail(int id)
         {
+            Article? article = _context.Articles.Include(a => a.Post).FirstOrDefault(x => x.ArticleId == id);
+            if (article == null) return NotFound();
             PostDetailDto postDetail =
                 _ArticlesService.GetPostDetailed(article);
             if (postDetail == null) return NotFound();

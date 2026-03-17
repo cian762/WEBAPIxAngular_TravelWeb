@@ -33,11 +33,17 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         //要分頁
-        // GET: api/Articles 瀏覽(全部文章之瀑布流)
+        // GET: api/Articles 瀏覽(全部文章之瀑布流)async Task<ActionResult<IEnumerable<Article>>>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticles()
+        public IActionResult GetArticles()
+        { 
+            return Ok(_context.Articles.Select(a=>new { a.Title }).ToList());
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetArticlesByID(int id)
         {
-            return await _context.Articles.ToListAsync();
+            return Ok(_context.Articles.FirstOrDefault(x=>x.ArticleId == id));
         }
 
         //// GET: api/Articles 瀏覽(單一文章詳情)
@@ -99,7 +105,7 @@ namespace TravelWeb_API.Controllers.Board
         {
             var list = _context.Articles.ToList();
             var result = 
-                list.Select(l => new Test { Title = l.Title, content = l.CreatedAt.ToString()}).ToList();
+                list.Select(l => new Test { Title = l.Title,PhotoUrl=l.PhotoUrl,UserName =l.UserId}).ToList();
             return Ok(result);
         }
         
