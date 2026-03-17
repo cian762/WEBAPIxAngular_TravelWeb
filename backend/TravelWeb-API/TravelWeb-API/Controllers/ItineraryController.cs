@@ -30,6 +30,13 @@ namespace TravelWeb_API.Controllers
             }
             return Ok(result);
         }
+        //GET抓所有的歷史行程
+        [HttpGet("{id}/history")]
+        public async Task<IActionResult> GetHistory(int id)
+        {
+            var history = await _itineraryService.GetVersionHistoryAsync(id);
+            return Ok(history);
+        }
         // POST 新增行程
         [HttpPost]
         public async Task<IActionResult> CreateItinerary([FromBody] ItineraryCreateDto dto)
@@ -48,11 +55,11 @@ namespace TravelWeb_API.Controllers
 
             try
             {
-                // 3. 呼叫你剛寫好的 Service 邏輯
+                // 3. 呼叫 Service 邏輯
                 int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto);
 
                 // 4. 回傳 201 Created，並在 Header 附上查詢該行程的 URL
-                // (假設你有一個 GetById 的 Action)
+
                 return CreatedAtAction("GetbyItineraryId", new { id = newId }, new { id = newId, message = "行程建立成功" });
             }
             catch (Exception ex)
@@ -98,10 +105,20 @@ namespace TravelWeb_API.Controllers
         }
 
 
-        // PUT api/<ItineraryController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // GET 基於版本找該版本的所有ITEM
+        [HttpGet("{VerId}/item")]
+        public async Task<IActionResult> GetitembyVer(int VerId)
         {
+            if (VerId == 0)
+            {
+                return BadRequest("沒有該行程");
+            }
+            var result = _itineraryService.GetItemByVersionAsync(VerId);
+            if (result == null)
+            {
+                return BadRequest("沒有該行程");
+            }
+            return Ok(result);
         }
 
         // DELETE刪除行程，更新行程狀態為「已刪除」
