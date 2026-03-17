@@ -105,10 +105,20 @@ namespace TravelWeb_API.Controllers
         }
 
 
-        // PUT api/<ItineraryController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // GET 基於版本找該版本的所有ITEM
+        [HttpGet("{VerId}/item")]
+        public async Task<IActionResult> GetitembyVer(int VerId)
         {
+            if (VerId == 0)
+            {
+                return BadRequest("沒有該行程");
+            }
+            var result = _itineraryService.GetItemByVersionAsync(VerId);
+            if (result == null)
+            {
+                return BadRequest("沒有該行程");
+            }
+            return Ok(result);
         }
 
         // DELETE刪除行程，更新行程狀態為「已刪除」
