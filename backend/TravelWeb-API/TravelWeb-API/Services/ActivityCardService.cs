@@ -90,6 +90,7 @@ namespace TravelWeb_API.Services
                 query = query.OrderBy(a => a.ActivityId);
             }
 
+            var totalRecords = query.Count();
 
             var ans = await query
                 .Skip((q.PageNumber - 1) * q.PageSize)
@@ -98,14 +99,23 @@ namespace TravelWeb_API.Services
                 {
                     ActivityId = a.ActivityId,
                     Title = a.Title,
-                    Type = a.Types.Select(t => t.ActivityType),
-                    Region = a.Regions.Select(r => r.RegionName),
+                    Type = a.Types.Select(t => t.ActivityType).ToList(),
+                    Region = a.Regions.Select(r => r.RegionName).ToList(),
                     Start = a.StartTime,
                     End = a.EndTime,
+                    CoverImageUrl = a.ActivityImages
+                                    .Where(i => i.IsCoverImage != false)
+                                    .Select(i => i.ImageUrl)
+                                    .FirstOrDefault(),
+                    ViewCount = a.ViewCount,
+                    CommentCount = a.Reviews.Count(),
+                    AverageRating = (float)(a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),
+                    ReferencePrice = a.ActivityTicketDetails
+                    .Where(d => d.ProductCodeNavigation.TicketCategoryId == 2)
+                    .Select(d => d.ProductCodeNavigation.CurrentPrice)
+                    .FirstOrDefault() ?? 0,
                 })
                 .ToListAsync();
-
-            var totalRecords = ans.Count();
 
             return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, totalRecords, q.PageSize);
 

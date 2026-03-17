@@ -18,13 +18,19 @@ export class CardInfoService {
     let params = new HttpParams();
     query.type.forEach(r => { params = params.append('type', r) });
     query.region.forEach(r => { params = params.append('region', r) });
-    params.set('start', query.start ?? '');
-    params.set('end', query.end ?? '');
+    params = params.set('start', query.start ?? '');
+    params = params.set('end', query.end ?? '');
+    params = params.set('pagenumber', query.pagenumber);
+    params = params.set('orderbypopularity', query.orderbypopularity);
+    params = params.set('islatest', query.islatest);
+    params = params.set('isobsolete', query.isobsolete);
+    params = params.set('pagesize', query.pagesize);
 
     return this.http.get<paginationInterface>('https://localhost:7276/api/ActivityCard/Query', {
       params
     });
   }
+
 
 
 }
