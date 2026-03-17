@@ -1,4 +1,5 @@
-﻿using TravelWeb_API.DTO.ActivityDTO;
+﻿using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.TripProduct;
 
@@ -13,12 +14,12 @@ namespace TravelWeb_API.Services
             _dbContext = dbContext;
         }
 
-        public ActivityTicketInfoResponseDTO? GetTicketInfo(string productCode)
+        public async Task<ActivityTicketInfoResponseDTO?> GetTicketInfo(string productCode)
         {
-            var ticket = _dbContext.AcitivityTickets.Any(t => t.ProductCode == productCode);
+            var ticket = await _dbContext.AcitivityTickets.AnyAsync(t => t.ProductCode == productCode);
             if (!ticket) return null;
 
-            var result = _dbContext.AcitivityTickets
+            var result = await _dbContext.AcitivityTickets
                 .Where(t => t.ProductCode == productCode)
                 .Select(t => new ActivityTicketInfoResponseDTO
                 {
@@ -32,19 +33,21 @@ namespace TravelWeb_API.Services
                     CurrentPrice = t.CurrentPrice,
                     TicketStock = 0, //待連結庫存欄位
                     Notes = null,//待新增對應欄位
-                }).FirstOrDefault();
+                })
+                .FirstOrDefaultAsync();
 
             return result;
         }
 
-        public List<ActivityCardReponseDTO>? GetProductSuggestion(string activityType)
+        public async Task<List<ActivityCardReponseDTO>?> GetProductSuggestion(string activityType)
         {
-            var typeCheck = _dbContext.TagsActivityTypes.Any(t => t.ActivityType == activityType);
+            var typeCheck = await _dbContext.TagsActivityTypes.AnyAsync(t => t.ActivityType == activityType);
 
             if (!typeCheck) return null;
 
-            var result = _dbContext.Activities
+            var result = await _dbContext.Activities
                 .Where(a => a.SoftDelete == false && a.Types.Any(t => t.ActivityType == activityType))
+                .OrderByDescending(a => a.StartTime) //這邊往後要改成以閱覽數當排序基準
                 .Select(a => new ActivityCardReponseDTO {
                     ActivityId = a.ActivityId,
                     Title = a.Title,
@@ -52,10 +55,9 @@ namespace TravelWeb_API.Services
                     Region = a.Regions.Select(r => r.RegionName),
                     Start = a.StartTime,
                     End = a.EndTime,
-                    //CoverImageUrl = a.ActivityImages.FirstOrDefault(i => i.IsCoverImage==true).ImageUrl,
+                    CoverImageUrl = a.ActivityImages.FirstOrDefault(i => i.IsCoverImage==true)!.ImageUrl,
                 })
-                .OrderByDescending(a => a.Start) //這邊往後要改成以閱覽數當排序基準
-                .ToList();
+                .ToListAsync();
 
             return result;
         }
