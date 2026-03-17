@@ -12,12 +12,16 @@ using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
+using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 
 
 var builder = WebApplication.CreateBuilder(args);
-//設定CROS
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -25,72 +29,119 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.AllowAnyOrigin()    // 允許任何來源（最鬆）
-                  .AllowAnyHeader()    // 允許任何標頭
-                  .AllowAnyMethod();   // 允許任何動詞 (GET, POST, etc.)
+            policy.AllowAnyOrigin() 
+                  .AllowAnyHeader()  
+                  .AllowAnyMethod();  
         });
 });
 
-// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var signKey = jwtSettings["SignKey"];
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.IncludeErrorDetails = true;
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings["Issuer"],
+
+            ValidateAudience = true,
+            ValidAudience = jwtSettings["Audience"],
+
+            ValidateLifetime = true,
+
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey)),
+
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TravelWeb_API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "請在下方輸入您的 JWT Token \n\n (注意：不需要輸入 Bearer 這個字，直接貼上 Token 即可)"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+
 builder.Services.AddSwaggerGen(
     x =>
     {
-        x.SwaggerDoc("Board", new OpenApiInfo
-        {
-            Title = "Board",
-            Version = "版本"
-        });
+
         x.SwaggerDoc("TravelWeb-API", new OpenApiInfo
         {
             Title = "TravelWeb-API",
             //Version = "版本"
         });
-        
+        x.SwaggerDoc("Board", new OpenApiInfo
+        {
+            Title = "Board"           
+        });
+
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
-            // 1. 如果該 API 有設定 GroupName，則必須與 DocName 完全匹配
             if (!string.IsNullOrEmpty(apiDesc.GroupName))
             {
                 return apiDesc.GroupName == docName;
             }
 
-            // 2. 如果該 API 沒設定 GroupName，則通通塞進 "other" 這組
             return docName == "TravelWeb-API";
         });
     }
     );
 
-//builder.Services.AddDbContext<>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-
-//===================================================
 builder.Services.AddDbContext<AttractionsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-//===================================================
 builder.Services.AddDbContext<MemberSystemContext>(options =>
  options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
-//===================================================
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<ActivityCardService>();
 builder.Services.AddScoped<ActivityInfoService>();
 builder.Services.AddScoped<ActivityTicketService>();
 
-//===================================================
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
-//===================================================
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<TravelWeb_API.Models.Itinerary.Service.IItineraryservice, TravelWeb_API.Models.Itinerary.Service.ItineraryService>();
 var config = TypeAdapterConfig.GlobalSettings;
 builder.Services.AddSingleton(config);
@@ -98,25 +149,31 @@ builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddScoped<IItineraryservice, ItineraryService>();
 #endregion
 
-//===================================================
-// 註冊Board功能相關
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<IArticlesService, ArticleService>();
+builder.Services.AddScoped<ICommentsService, CommentsService>();
+//===================================================
+
 //行程商品表連線用DI
 builder.Services.AddScoped<ITripproductTable,TripproductTable >();
-//購物車連線DI
 builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
+//行程商品表連線用DI
+builder.Services.AddScoped<ITripproductTable, TripproductTable>();
+//購物車連線DI
+builder.Services.AddScoped<IShoppingCart, SShoppingCart>();
 //訂單連線用DI
 builder.Services.AddScoped<IOrder, SOrder>();
+//綠界連線用DI
+builder.Services.AddScoped<IECPay, SECPay>();
 
-// 1. 註冊 Cloudinary 服務（假設實作類別叫 CloudinaryService）
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-
+//綠界
+builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
+// 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
-/////////////////////
-///
 
 using (var scope = app.Services.CreateScope())
 {
@@ -127,7 +184,6 @@ using (var scope = app.Services.CreateScope())
 
 
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -136,7 +192,7 @@ if (app.Environment.IsDevelopment())
     {
         x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
-        
+
     }
     );
 }
@@ -145,6 +201,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors(myAllowSpecificOrigins);
+
+app.UseAuthentication(); 
 
 app.UseAuthorization();
 

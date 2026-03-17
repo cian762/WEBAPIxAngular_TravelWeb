@@ -13,6 +13,8 @@ public partial class ActivityTicketDetail
 
     public string? TermsOfService { get; set; }
 
+    public string? Note { get; set; }
+
     public virtual Activity? Activity { get; set; }
 
     public virtual AcitivityTicket ProductCodeNavigation { get; set; } = null!;

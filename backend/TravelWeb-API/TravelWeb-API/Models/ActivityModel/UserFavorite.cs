@@ -11,5 +11,7 @@ public partial class UserFavorite
 
     public int? ActivityId { get; set; }
 
+    public bool IsFavorite { get; set; }
+
     public virtual Activity? Activity { get; set; }
 }

@@ -11,9 +11,10 @@ namespace TravelWeb_API.Models.Board.Service
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        public ArticleService(BoardDbContext context)
+        public ArticleService(BoardDbContext context, MemberSystemContext memberDb)
         {
             _context = context;
+            _memberDb=memberDb;
         }
 
         public Article AddArtic(byte Type,string UserId)
@@ -80,10 +81,11 @@ namespace TravelWeb_API.Models.Board.Service
 
         public PostDetailDto? GetPostDetailed(Article article)
         {           
-            if (article.Type == 0 && article.Post != null)
-            {
+            if(article.Type == 0 && article.Post != null)
+                {
                 Post post = article.Post;
-                MemberInformation author = new MemberInformation();
+                MemberInformation? author = 
+                    _memberDb.MemberInformations.FirstOrDefault(x=>x.MemberId==article.UserId);
                 PostDetailDto postDetail = new PostDetailDto();
                 postDetail.Type = article.Type;
                 postDetail.Title = article.Title;
