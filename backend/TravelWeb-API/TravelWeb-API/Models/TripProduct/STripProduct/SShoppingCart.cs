@@ -86,7 +86,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     dto.ProductName = $"{trip.ProductName} ({trip.StartDate:yyyy/MM/dd} ~ {trip.EndDate:MM/dd})";
                     dto.Price = trip.Price ?? 0;
-                    string url ="/PImages" + trip.CoverImage!;
+                    string url ="/PImages/" + trip.CoverImage!;
                     dto.CoverImage = CartItemDTO.GetFullUrl(url,_mvcBaseUrl);
                     resultList.Add(dto);
                     continue;

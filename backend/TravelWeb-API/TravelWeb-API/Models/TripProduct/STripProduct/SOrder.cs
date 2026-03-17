@@ -256,7 +256,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
                 if (trip != null)
                 {
-                    itemDto.ProductImage = CartItemDTO.GetFullUrl("/PImages" + trip.CoverImage, _mvcBaseUrl);
+                    itemDto.ProductImage = CartItemDTO.GetFullUrl("/PImages/" + trip.CoverImage, _mvcBaseUrl);
                     itemDto.TripStartDate = trip.StartDate;
                     itemDto.TripEndDate = trip.EndDate;
                 }
@@ -335,7 +335,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     if (trip != null)
                     {
                         // 處理路徑：/PImages + 檔名
-                        imageUrl = CartItemDTO.GetFullUrl("/PImages" + trip, _mvcBaseUrl);
+                        imageUrl = CartItemDTO.GetFullUrl("/PImages/" + trip, _mvcBaseUrl);
                     }
                     else
                     {
@@ -420,7 +420,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
                 // --- 3. 圖片抓取邏輯 (跟列表一致) ---
                 var trip = await _context.TripSchedules.Where(s => s.ProductCode == item.ProductCode).Select(s => s.TripProduct.CoverImage).FirstOrDefaultAsync();
-                if (trip != null) itemDto.ProductImage = CartItemDTO.GetFullUrl("/PImages" + trip, _mvcBaseUrl);
+                if (trip != null) itemDto.ProductImage = CartItemDTO.GetFullUrl("/PImages/" + trip, _mvcBaseUrl);
                 else
                 {
                     var attr = await _context.AttractionProducts.Where(a => a.ProductCode == item.ProductCode).Select(a => a.Attraction.Images.Select(img => img.ImagePath).FirstOrDefault()).FirstOrDefaultAsync();

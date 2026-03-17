@@ -39,7 +39,7 @@ export class Shoppingcart implements OnInit {
     this.http.get<any[]>(`${this.apiUrl}/${memberId}`).subscribe({
       next: (data) => {
         this.cartItems = data;
-        console.log(data);
+
 
         // 既然你說後端有算，但這支 API 目前回傳的是 IEnumerable (陣列)
         // 我們先在前端把每一項的 (單價 * 數量) 加總起來顯示在右側
@@ -49,10 +49,17 @@ export class Shoppingcart implements OnInit {
         console.log('成功拿到購物車資料：', data);
       },
       error: (err) => {
-        console.error('呼叫 API 失敗，請檢查 CORS 或後端是否啟動', err);
+        console.error('系統錯誤~購物車無資料', err);
         this.isLoading = false;
       }
     });
+  }
+  delectCart() {
+    let url = 'https://localhost:7276/api/ShoppingCart/remove-items';
+    this.http.delete(url).subscribe({
+
+    })
+
   }
 
 }
