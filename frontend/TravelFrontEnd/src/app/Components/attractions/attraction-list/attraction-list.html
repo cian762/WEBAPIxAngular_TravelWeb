@@ -1,0 +1,109 @@
+<!-- 景點列表頁 -->
+
+<!-- 麵包屑 -->
+<div class="breadcrumb-bar">
+  <div class="container">
+    <a routerLink="/">首頁</a>
+    <span class="sep">›</span>
+    <a routerLink="/contact">景點</a>
+    <span class="sep">›</span>
+    <span class="current">{{ cityName }}</span>
+  </div>
+</div>
+
+<!-- 類型 Tab -->
+<div class="type-nav">
+  <div class="container">
+    <div class="type-nav__inner">
+      <button
+        *ngFor="let t of types"
+        class="type-btn"
+        [class.active]="activeTypeId === t.attractionTypeId"
+        (click)="selectType(t.attractionTypeId)">
+        <span class="type-btn__icon">{{ getTypeIcon(t.attractionTypeName) }}</span>
+        <span class="type-btn__name">{{ t.attractionTypeName }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 搜尋列 -->
+<div class="search-bar">
+  <div class="container">
+    <div class="search-bar__inner">
+      <input
+        type="text"
+        [(ngModel)]="keyword"
+        (keyup.enter)="onSearch()"
+        placeholder="搜尋景點名稱或地址..."
+        class="search-bar__input">
+      <button class="search-bar__btn" (click)="onSearch()">
+        <i class="fa fa-search"></i>
+      </button>
+    </div>
+    <p class="result-hint" *ngIf="!loading">
+      共找到 <strong>{{ attractions.length }}</strong> 個景點
+    </p>
+  </div>
+</div>
+
+<!-- 景點卡片 -->
+<section class="list-section">
+  <div class="container">
+
+    <!-- Loading -->
+    <div class="loading-box" *ngIf="loading">
+      <div class="spinner-border text-warning" role="status"></div>
+      <p>載入中...</p>
+    </div>
+
+    <!-- 無資料 -->
+    <div class="empty-box" *ngIf="!loading && attractions.length === 0">
+      <p>找不到符合條件的景點，請嘗試其他分類</p>
+    </div>
+
+    <!-- 卡片格 -->
+    <div class="row g-4" *ngIf="!loading && attractions.length > 0">
+      <div class="col-xl-3 col-lg-4 col-md-6" *ngFor="let a of attractions">
+        <div class="att-card" (click)="goToDetail(a)">
+
+          <!-- 圖片 -->
+          <div class="att-card__img-wrap">
+            <img [src]="getMainImage(a)" [alt]="a.name"
+              onerror="this.src='assets/img/package/package2.jpg'">
+            <div class="att-card__view-badge">
+              <i class="fa fa-eye"></i> {{ a.viewCount | number }}
+            </div>
+          </div>
+
+          <!-- 內容 -->
+          <div class="att-card__body">
+            <h5 class="att-card__title">{{ a.name }}</h5>
+
+            <div class="att-card__types" *ngIf="a.types?.length">
+              <span class="badge-type" *ngFor="let t of a.types">
+                {{ t.attractionTypeName }}
+              </span>
+            </div>
+
+            <div class="att-card__footer">
+              <span class="att-card__addr" *ngIf="a.address">
+                <i class="fa fa-map-marker"></i>
+                {{ a.address.length > 14 ? (a.address | slice:0:14) + '...' : a.address }}
+              </span>
+              <button class="att-card__like"
+                [class.liked]="a.isLiked"
+                (click)="toggleLike($event, a)">
+                <i class="fa" [class.fa-heart]="a.isLiked"
+                  [class.fa-heart-o]="!a.isLiked"></i>
+                {{ a.likeCount || 0 }}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
