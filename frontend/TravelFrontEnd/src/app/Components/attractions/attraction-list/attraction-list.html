@@ -1,3 +1,6 @@
+對！結構跑掉了，直接把整個 `attraction-list.html` 清空，重新貼這個正確版本：
+
+```html
 <!-- 景點列表頁 -->
 
 <!-- 麵包屑 -->
@@ -15,10 +18,7 @@
 <div class="type-nav">
   <div class="container">
     <div class="type-nav__inner">
-      <button
-        *ngFor="let t of types"
-        class="type-btn"
-        [class.active]="activeTypeId === t.attractionTypeId"
+      <button *ngFor="let t of types" class="type-btn" [class.active]="activeTypeId === t.attractionTypeId"
         (click)="selectType(t.attractionTypeId)">
         <span class="type-btn__icon">{{ getTypeIcon(t.attractionTypeName) }}</span>
         <span class="type-btn__name">{{ t.attractionTypeName }}</span>
@@ -31,11 +31,7 @@
 <div class="search-bar">
   <div class="container">
     <div class="search-bar__inner">
-      <input
-        type="text"
-        [(ngModel)]="keyword"
-        (keyup.enter)="onSearch()"
-        placeholder="搜尋景點名稱或地址..."
+      <input type="text" [(ngModel)]="keyword" (keyup.enter)="onSearch()" placeholder="搜尋景點名稱或地址..."
         class="search-bar__input">
       <button class="search-bar__btn" (click)="onSearch()">
         <i class="fa fa-search"></i>
@@ -69,8 +65,7 @@
 
           <!-- 圖片 -->
           <div class="att-card__img-wrap">
-            <img [src]="getMainImage(a)" [alt]="a.name"
-              onerror="this.src='assets/img/package/package2.jpg'">
+            <img [src]="getMainImage(a)" [alt]="a.name" onerror="this.src='assets/img/b1.jpg';this.onerror=null;">
             <div class="att-card__view-badge">
               <i class="fa fa-eye"></i> {{ a.viewCount | number }}
             </div>
@@ -91,11 +86,8 @@
                 <i class="fa fa-map-marker"></i>
                 {{ a.address.length > 14 ? (a.address | slice:0:14) + '...' : a.address }}
               </span>
-              <button class="att-card__like"
-                [class.liked]="a.isLiked"
-                (click)="toggleLike($event, a)">
-                <i class="fa" [class.fa-heart]="a.isLiked"
-                  [class.fa-heart-o]="!a.isLiked"></i>
+              <button class="att-card__like" [class.liked]="a.isLiked" (click)="toggleLike($event, a)">
+                <i class="fa" [class.fa-heart]="a.isLiked" [class.fa-heart-o]="!a.isLiked"></i>
                 {{ a.likeCount || 0 }}
               </button>
             </div>

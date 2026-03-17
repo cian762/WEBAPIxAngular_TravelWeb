@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -31,12 +31,13 @@ export class AttractionListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private svc: AttractionService
-  ) {}
+    private svc: AttractionService,
+    private cdr: ChangeDetectorRef   // ← 加這個
+  ) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(p => {
-      this.cityName  = p['cityName'] || '全部景點';
+      this.cityName = p['cityName'] || '全部景點';
       this.regionIds = p['regionIds']
         ? String(p['regionIds']).split(',').map(Number)
         : [];
@@ -55,11 +56,13 @@ export class AttractionListComponent implements OnInit {
     this.loading = true;
     this.svc.getAttractions({
       regionId: this.regionIds[0] ?? undefined,
-      typeId:   this.activeTypeId || undefined,
-      keyword:  this.keyword || undefined,
+      typeId: this.activeTypeId || undefined,
+      keyword: this.keyword || undefined,
     }).subscribe(data => {
+      console.log('收到資料:', data);  // ← 加這行
       this.attractions = data;
       this.loading = false;
+      this.cdr.detectChanges();   // ← 加這行
     });
   }
 
@@ -68,9 +71,10 @@ export class AttractionListComponent implements OnInit {
   getTypeIcon(name: string): string { return this.typeIcons[name] ?? '📍'; }
 
   getMainImage(a: Attraction): string {
-    return a.images?.length
-      ? `http://localhost:7276${a.images[0].imagePath}`
-      : 'assets/img/package/package2.jpg';
+    if (a.mainImage) {
+      return `https://localhost:7276${a.mainImage}`;
+    }
+    return 'assets/img/b1.jpg';
   }
 
   goToDetail(a: Attraction): void {
@@ -81,7 +85,7 @@ export class AttractionListComponent implements OnInit {
     e.stopPropagation();
     this.svc.toggleLike(a.attractionId).subscribe(res => {
       a.likeCount = res.likeCount;
-      a.isLiked   = res.isLiked;
+      a.isLiked = res.isLiked;
     });
   }
 }

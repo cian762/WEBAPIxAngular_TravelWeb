@@ -14,6 +14,7 @@ export interface Attraction {
   viewCount: number;
   likeCount?: number;
   isLiked?: boolean;
+  mainImage?: string;        // ← 加這行（列表頁用）
   images?: AttractionImage[];
   types?: AttractionType[];
 }
