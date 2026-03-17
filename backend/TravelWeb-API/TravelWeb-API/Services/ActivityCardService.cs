@@ -49,7 +49,7 @@ namespace TravelWeb_API.Services
                 })
                 .ToListAsync();
 
-            return new PagedResponseDTO<ActivityCardReponseDTO>(ans,q.PageNumber,q.PageSize,totalRecords);
+            return new PagedResponseDTO<ActivityCardReponseDTO>(ans,q.PageNumber,totalRecords, q.PageSize);
         }
 
         public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetSpecificCards(ActivityInfoParameters q) 
@@ -106,7 +106,7 @@ namespace TravelWeb_API.Services
                 })
                 .ToListAsync();
 
-            return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, q.PageSize, totalRecords);
+            return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, totalRecords, q.PageSize);
 
         }
 
