@@ -252,41 +252,34 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 })
                 .ToListAsync();
         }
-        //public async Task<ItineraryDetailDto> GetItemByVersionAsync(int versionId)
-        //{
-        //    var result = await _context.ItineraryVersions
-        //        .Where(i => i.VersionId == versionId)
-        //        .Select(i => new ItineraryDetailDto
-        //        {
-        //            ItineraryId = i.ItineraryId,
-        //            ItineraryName = i.ItineraryName,
-        //            // 抓取「當前使用中」的版本
-        //            CurrentVersion = i.ItineraryVersions
-        //                .Where(v => v.CurrentUsageStatus == "Y")
-        //                .Select(v => new VersionDto
-        //                {
-        //                    VersionId = v.VersionId,
-        //                    VersionNumber = (int)v.VersionNumber,
-        //                    // 抓取該版本下的所有項目，並依照 SortOrder 排序
-        //                    Items = v.ItineraryItems
-        //                        .OrderBy(item => item.SortOrder)
-        //                        .Select(item => new ItemDetailDto
-        //                        {
-        //                            ItemId = item.ItemId,
-        //                            SortOrder = (int)item.SortOrder,
-        //                            ContentDescription = item.ContentDescription,
-        //                            // 關鍵：從關聯的 Attraction 表抓取地點資訊
-        //                            AttractionName = item.Attraction.Name != null ? item.Attraction.Name : "未知景點",
-        //                            Address = item.Attraction.Address,
-        //                            Latitude = item.Attraction.Latitude,
-        //                            Longitude = item.Attraction.Longitude,
-        //                            StartTime = item.StartTime,
-        //                            EndTime = item.EndTime
-        //                        }).ToList()
-        //                }).FirstOrDefault()
-        //        }).FirstOrDefaultAsync();
-
-        //    return result;
-        //}
+        public async Task<VersionDto> GetItemByVersionAsync(int versionId)
+        {
+#pragma warning disable CS8603 // 可能有 Null 參考傳回。
+            return await _context.ItineraryVersions
+        .Where(v => v.VersionId == versionId)
+        .Select(v => new VersionDto
+        {
+            VersionId = v.VersionId,
+            VersionNumber = (int)v.VersionNumber,
+            VersionName = v.VersionRemark,
+            // 抓取該版本底下的所有細項
+            Items = v.ItineraryItems
+                .OrderBy(item => item.DayNumber)
+                .ThenBy(item => item.SortOrder)
+                .Select(item => new ItemDetailDto
+                {
+                    ItemId = item.ItemId,
+                    AttractionName = item.Attraction.Name,
+                    DayNumber = (int)item.DayNumber,
+                    SortOrder = (int)item.SortOrder,
+                    StartTime = item.StartTime,
+                    EndTime = item.EndTime,
+                    ContentDescription = item.ContentDescription,
+                    AttractionId = (int)item.AttractionId
+                    // ... 其他你需要的欄位
+                }).ToList()
+        }).FirstOrDefaultAsync();
+#pragma warning restore CS8603 // 可能有 Null 參考傳回。
+        }
     }
 }
