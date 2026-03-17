@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
+using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 
 namespace TravelWeb_API.Controllers
@@ -14,9 +15,10 @@ namespace TravelWeb_API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrder _order;
-        public OrderController(IOrder order) {
+        private readonly IECPay _ecpay;
+        public OrderController(IOrder order, IECPay ecpay) {
             _order = order;
-
+            _ecpay = ecpay;
         }
 
         [HttpPut("cancel/{orderId}/{memberId}")]
@@ -47,24 +49,28 @@ namespace TravelWeb_API.Controllers
         {
             try
             {
-                // 1. 從 Token 中抓取 MemberId (這是最安全的做法)
-                // 假設你的 Claim 類型是 NameIdentifier
-                //var memberId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
                 if (string.IsNullOrEmpty(memberId))
                 {
                     return Unauthorized("找不到會員資訊");
                 }
 
-                // 2. 呼叫 Service
-                int orderId = await _order.CreateOrderAsync(dto, memberId);
+                // 1. 呼叫 Service 建立訂單 (現在回傳的是整個 Order 物件)
+                var order = await _order.CreateOrderAsync(dto, memberId);
 
-                // 3. 回傳 201 Created 並告知訂單 ID
-                return Ok(new { Message = "訂單建立成功", OrderId = orderId });
+                // 2. 呼叫 SECPay 服務產生綠界 HTML
+                // 這會用到 order 裡的 OrderId 和 TotalAmount
+                string paymentForm = _ecpay.GetPaymentForm(order);
+
+                // 3. 回傳包含金流表單的物件
+                return Ok(new
+                {
+                    Message = "訂單建立成功，準備跳轉支付",
+                    OrderId = order.OrderId,
+                    PaymentForm = paymentForm // 這串給前端執行
+                });
             }
             catch (Exception ex)
             {
-                // 這裡可以記錄 log
                 return BadRequest(new { Message = ex.Message });
             }
         }
