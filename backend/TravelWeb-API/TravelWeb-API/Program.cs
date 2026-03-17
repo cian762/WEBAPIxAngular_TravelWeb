@@ -42,17 +42,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(
     x =>
     {
-        x.SwaggerDoc("Board", new OpenApiInfo
-        {
-            Title = "Board",
-            Version = "版本"
-        });
+
         x.SwaggerDoc("TravelWeb-API", new OpenApiInfo
         {
             Title = "TravelWeb-API",
             //Version = "版本"
+        }); x.SwaggerDoc("Board", new OpenApiInfo
+        {
+            Title = "Board",
+            Version = "版本"
         });
-        
+
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
             // 1. 如果該 API 有設定 GroupName，則必須與 DocName 完全匹配
@@ -92,6 +92,7 @@ builder.Services.AddDbContext<TripDbContext>(options =>
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<TravelWeb_API.Models.Itinerary.Service.IItineraryservice, TravelWeb_API.Models.Itinerary.Service.ItineraryService>();
 var config = TypeAdapterConfig.GlobalSettings;
 builder.Services.AddSingleton(config);
@@ -105,9 +106,9 @@ builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<IArticlesService, ArticleService>();
 //行程商品表連線用DI
-builder.Services.AddScoped<ITripproductTable,TripproductTable >();
+builder.Services.AddScoped<ITripproductTable, TripproductTable>();
 //購物車連線DI
-builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
+builder.Services.AddScoped<IShoppingCart, SShoppingCart>();
 //訂單連線用DI
 builder.Services.AddScoped<IOrder, SOrder>();
 //綠界連線用DI
@@ -142,7 +143,7 @@ if (app.Environment.IsDevelopment())
     {
         x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
-        
+
     }
     );
 }
