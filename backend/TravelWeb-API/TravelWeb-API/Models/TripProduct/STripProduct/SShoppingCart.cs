@@ -130,10 +130,10 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 if (act != null)
                 {
                     dto.ProductName = act.ProductName;
-                    dto.Price = 0;
+                    dto.Price = (decimal)act.CurrentPrice!;
 
                     // 直接把這張表的 ActivityImageUrl 丟進去處理
-                    dto.CoverImage = CartItemDTO.GetFullUrl(act.CoverImageUrl!, _mvcBaseUrl);
+                    dto.CoverImage =act.CoverImageUrl;
 
                     resultList.Add(dto);
                 }
@@ -158,7 +158,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
             if (!isRealMember)
             {
-                throw new Exception("目標會員帳號不存在");
+                throw new Exception("會員帳號不存在");
             }
 
             // 4. 抓取遊客的所有購物車項目

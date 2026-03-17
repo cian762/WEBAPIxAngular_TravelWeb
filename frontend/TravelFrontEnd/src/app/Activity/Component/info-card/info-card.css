@@ -1,0 +1,24 @@
+.card {
+  height: 100%;
+}
+
+.activity-card-img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  display: block;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  min-height: 30px;
+  line-height: 1.4;
+}
+
+.isActive {
+  background-color: paleturquoise;
+}

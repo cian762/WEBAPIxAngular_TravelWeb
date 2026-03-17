@@ -47,6 +47,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 await _context.SaveChangesAsync(); // 取得 VersionID
                 // 2. 處理景點 (ItemsToPush)
                 int currentOrder = 100;
+                if (dto.ItemsToPush == null || !dto.ItemsToPush.Any())
+                    throw new Exception("至少要一個景點");
                 foreach (var input in dto.ItemsToPush)
                 {
                     int finalAttractionId;
@@ -128,14 +130,14 @@ namespace TravelWeb_API.Models.Itinerary.Service
                         .Select(v => new VersionDto
                         {
                             VersionId = v.VersionId,
-                            VersionNumber = (int)v.VersionNumber,
+                            VersionNumber = v.VersionNumber ?? 0,
                             // 抓取該版本下的所有項目，並依照 SortOrder 排序
                             Items = v.ItineraryItems
                                 .OrderBy(item => item.SortOrder)
                                 .Select(item => new ItemDetailDto
                                 {
                                     ItemId = item.ItemId,
-                                    SortOrder = (int)item.SortOrder,
+                                    SortOrder = item.SortOrder ?? 0,
                                     ContentDescription = item.ContentDescription,
                                     // 關鍵：從關聯的 Attraction 表抓取地點資訊
                                     AttractionName = item.Attraction.Name != null ? item.Attraction.Name : "未知景點",
@@ -172,7 +174,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 int nextVersionNumber = 1;
                 if (oldVersions.Any())
                 {
-                    nextVersionNumber = oldVersions.Max(v => (int)v.VersionNumber) + 1;
+                    nextVersionNumber = oldVersions.Max(v => (v.VersionNumber ?? 0) + 1);
                     foreach (var v in oldVersions) v.CurrentUsageStatus = "N";
                 }
 
@@ -235,6 +237,51 @@ namespace TravelWeb_API.Models.Itinerary.Service
 
             // 4. 存檔並回傳結果
             return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<List<ItineraryVersionHistoryDto>> GetVersionHistoryAsync(int itineraryId)
+        {
+            return await _context.ItineraryVersions
+                .Where(v => v.ItineraryId == itineraryId)
+                .OrderByDescending(v => v.VersionNumber) // 最新版本排在最前面
+                .Select(v => new ItineraryVersionHistoryDto
+                {
+                    VersionId = v.VersionId,
+                    VersionNumber = v.VersionNumber ?? 0,
+                    VersionRemark = v.VersionRemark,
+                    CreateTime = (DateTime)v.CreateTime,
+                    Source = v.Source,
+                    IsCurrent = v.CurrentUsageStatus == "Y"
+                })
+                .ToListAsync();
+        }
+        public async Task<VersionDto> GetItemByVersionAsync(int versionId)
+        {
+#pragma warning disable CS8603 // 可能有 Null 參考傳回。
+            return await _context.ItineraryVersions
+        .Where(v => v.VersionId == versionId)
+        .Select(v => new VersionDto
+        {
+            VersionId = v.VersionId,
+            VersionNumber = v.VersionNumber ?? 0,
+            VersionName = v.VersionRemark,
+            // 抓取該版本底下的所有細項
+            Items = v.ItineraryItems
+                .OrderBy(item => item.DayNumber)
+                .ThenBy(item => item.SortOrder)
+                .Select(item => new ItemDetailDto
+                {
+                    ItemId = item.ItemId,
+                    AttractionName = item.Attraction.Name,
+                    DayNumber = item.DayNumber ?? 0,
+                    SortOrder = item.SortOrder ?? 0,
+                    StartTime = item.StartTime,
+                    EndTime = item.EndTime,
+                    ContentDescription = item.ContentDescription,
+                    AttractionId = item.AttractionId ?? 0
+                    // ... 其他你需要的欄位
+                }).ToList()
+        }).FirstOrDefaultAsync();
+#pragma warning restore CS8603 // 可能有 Null 參考傳回。
         }
     }
 }

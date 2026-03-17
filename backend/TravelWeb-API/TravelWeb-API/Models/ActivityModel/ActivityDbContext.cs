@@ -35,6 +35,10 @@ public partial class ActivityDbContext : DbContext
 
     public virtual DbSet<PersonalizedRecommendation> PersonalizedRecommendations { get; set; }
 
+    public virtual DbSet<ProductReview> ProductReviews { get; set; }
+
+    public virtual DbSet<ReviewImage> ReviewImages { get; set; }
+
     public virtual DbSet<TagsActivityType> TagsActivityTypes { get; set; }
 
     public virtual DbSet<TagsRegion> TagsRegions { get; set; }
@@ -42,6 +46,7 @@ public partial class ActivityDbContext : DbContext
     public virtual DbSet<TicketCategory> TicketCategories { get; set; }
 
     public virtual DbSet<UserFavorite> UserFavorites { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +92,8 @@ public partial class ActivityDbContext : DbContext
             entity.ToTable("Activities", "Activity");
 
             entity.Property(e => e.ActivityId).HasColumnName("ActivityID");
+            entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
+            entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.Title).HasMaxLength(50);
             entity.Property(e => e.UpdateAt).HasColumnType("datetime");
 
@@ -107,6 +114,25 @@ public partial class ActivityDbContext : DbContext
                         j.ToTable("Activity_Region", "Activity");
                         j.IndexerProperty<int>("ActivityId").HasColumnName("ActivityID");
                         j.IndexerProperty<int>("RegionId").HasColumnName("RegionID");
+                    });
+
+            entity.HasMany(d => d.Reviews).WithMany(p => p.Activities)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ReviewActivityRelation",
+                    r => r.HasOne<ProductReview>().WithMany()
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_ReviewID_ReviewActivity_Activities"),
+                    l => l.HasOne<Activity>().WithMany()
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_ActivityID_ReviewActivity_Activities"),
+                    j =>
+                    {
+                        j.HasKey("ActivityId", "ReviewId").HasName("PK_ReviewActivity");
+                        j.ToTable("ReviewActivityRelation", "Activity");
+                        j.IndexerProperty<int>("ActivityId").HasColumnName("ActivityID");
+                        j.IndexerProperty<int>("ReviewId").HasColumnName("ReviewID");
                     });
 
             entity.HasMany(d => d.Types).WithMany(p => p.Activities)
@@ -258,6 +284,36 @@ public partial class ActivityDbContext : DbContext
             entity.HasOne(d => d.Activity).WithMany(p => p.PersonalizedRecommendations)
                 .HasForeignKey(d => d.ActivityId)
                 .HasConstraintName("FK_個人化推薦_活動表");
+        });
+
+        modelBuilder.Entity<ProductReview>(entity =>
+        {
+            entity.HasKey(e => e.ReviewId).HasName("PK__ProductR__74BC79AE4C5EFFD1");
+
+            entity.ToTable("ProductReview", "Activity");
+
+            entity.Property(e => e.ReviewId).HasColumnName("ReviewID");
+            entity.Property(e => e.CreateDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.MemberId)
+                .HasMaxLength(50)
+                .HasColumnName("MemberID");
+            entity.Property(e => e.Title).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<ReviewImage>(entity =>
+        {
+            entity.HasKey(e => e.ImageSetId).HasName("PK__ReviewIm__34D3A22BCC50099A");
+
+            entity.ToTable("ReviewImage", "Activity");
+
+            entity.Property(e => e.ImageSetId).HasColumnName("ImageSetID");
+            entity.Property(e => e.PublicId).HasColumnName("PublicID");
+            entity.Property(e => e.ReviewId).HasColumnName("ReviewID");
+
+            entity.HasOne(d => d.Review).WithMany(p => p.ReviewImages)
+                .HasForeignKey(d => d.ReviewId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReviewID_ProductReview_ReviewImage");
         });
 
         modelBuilder.Entity<TagsActivityType>(entity =>

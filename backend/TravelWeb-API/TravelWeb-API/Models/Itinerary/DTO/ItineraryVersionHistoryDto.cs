@@ -9,5 +9,7 @@
         public string? Source { get; set; }
         public bool IsCurrent { get; set; } // 是否為目前使用中的版本 (CurrentUsageStatus == "Y")
     }
+
 }
+
 
