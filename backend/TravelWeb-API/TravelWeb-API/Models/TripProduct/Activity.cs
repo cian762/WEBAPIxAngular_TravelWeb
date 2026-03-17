@@ -23,6 +23,14 @@ public partial class Activity
 
     public bool? SoftDelete { get; set; }
 
+    public string? Propaganda { get; set; }
+
+    public decimal? Longitude { get; set; }
+
+    public decimal? Latitude { get; set; }
+
+    public int? ViewCount { get; set; }
+
     public virtual ICollection<ActivityImage> ActivityImages { get; set; } = new List<ActivityImage>();
 
     public virtual ICollection<TripItineraryItem> TripItineraryItems { get; set; } = new List<TripItineraryItem>();

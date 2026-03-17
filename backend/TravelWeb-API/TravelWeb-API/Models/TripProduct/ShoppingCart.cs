@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TravelWeb_API.Models.TripProduct;
 
@@ -17,8 +16,6 @@ public partial class ShoppingCart
     public int? Quantity { get; set; }
 
     public DateTime? CreatedAt { get; set; }
-
-    public virtual MemberInformation? Member { get; set; } 
 
     public virtual TicketCategory? TicketCategory { get; set; }
 }

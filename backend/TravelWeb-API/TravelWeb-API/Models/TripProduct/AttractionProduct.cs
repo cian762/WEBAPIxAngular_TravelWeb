@@ -30,4 +30,6 @@ public partial class AttractionProduct
     public bool IsDeleted { get; set; }
 
     public virtual Attraction Attraction { get; set; } = null!;
+
+    public virtual ICollection<StockInRecord> StockInRecords { get; set; } = new List<StockInRecord>();
 }
