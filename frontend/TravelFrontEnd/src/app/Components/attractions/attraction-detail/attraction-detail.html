@@ -1,0 +1,185 @@
+<!-- 景點詳細頁 -->
+
+<!-- Loading -->
+<div class="loading-wrap" *ngIf="loading">
+  <div class="spinner-border text-warning"></div>
+  <p>載入中...</p>
+</div>
+
+<div class="detail-page" *ngIf="!loading && attraction">
+  <div class="container py-4">
+
+    <!-- 麵包屑 -->
+    <div class="bread mb-3">
+      <a routerLink="/">首頁</a> ›
+      <a routerLink="/contact">景點</a> ›
+      <span>{{ attraction.name }}</span>
+    </div>
+
+    <!-- 標題列 -->
+    <div class="detail-header mb-4">
+      <div>
+        <h1 class="detail-title">{{ attraction.name }}</h1>
+        <div class="detail-meta">
+          <span class="meta-region" *ngIf="attraction.regionName">{{ attraction.regionName }}</span>
+          <span class="meta-type" *ngFor="let t of attraction.types">{{ t.attractionTypeName }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="view-count">
+          <i class="fa fa-eye"></i> {{ attraction.viewCount | number }}
+        </span>
+        <button class="fav-btn" [class.liked]="attraction.isLiked" (click)="toggleLike()">
+          <i class="fa" [class.fa-heart]="attraction.isLiked"
+            [class.fa-heart-o]="!attraction.isLiked"></i>
+          加入最愛 {{ attraction.likeCount || 0 }}
+        </button>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- 左：圖片 -->
+      <div class="col-lg-7">
+        <div class="img-slider">
+          <img [src]="mainImage" [alt]="attraction.name" class="img-slider__main"
+            onerror="this.src='assets/img/package/package2.jpg'">
+          <button class="img-slider__btn img-slider__btn--prev"
+            (click)="prevImg()" *ngIf="imageCount > 1">
+            <i class="fa fa-chevron-left"></i>
+          </button>
+          <button class="img-slider__btn img-slider__btn--next"
+            (click)="nextImg()" *ngIf="imageCount > 1">
+            <i class="fa fa-chevron-right"></i>
+          </button>
+          <div class="img-slider__counter" *ngIf="imageCount > 1">
+            {{ currentImgIdx + 1 }} / {{ imageCount }}
+          </div>
+        </div>
+
+        <!-- 縮圖列 -->
+        <div class="thumb-row" *ngIf="imageCount > 1">
+          <img
+            *ngFor="let img of attraction.images; let i = index"
+            [src]="'http://localhost:7276' + img.imagePath"
+            [class.active]="currentImgIdx === i"
+            (click)="currentImgIdx = i"
+            onerror="this.src='assets/img/package/package2.jpg'"
+            [alt]="attraction.name">
+        </div>
+      </div>
+
+      <!-- 右：資訊卡 -->
+      <div class="col-lg-5">
+        <div class="info-card">
+
+          <!-- 天氣 -->
+          <div class="weather-row">
+            <div class="weather-item">
+              <span class="w-icon">⛅</span>
+              <div>
+                <div class="w-label">今天天氣</div>
+                <div class="w-val">{{ weather.temp }} °C</div>
+              </div>
+            </div>
+            <div class="weather-item">
+              <span class="w-icon">☂️</span>
+              <div>
+                <div class="w-label">降雨機率</div>
+                <div class="w-val">{{ weather.rain }}%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AQI -->
+          <div class="aqi-row">
+            <span class="aqi-emoji">😊</span>
+            <div>
+              <div class="aqi-label">環境空氣品質指數 AQI</div>
+              <div class="aqi-val">{{ weather.aqi }} {{ weather.aqiLabel }}</div>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <!-- 聯絡資訊 -->
+          <div class="info-row" *ngIf="attraction.phone">
+            <i class="fa fa-phone info-icon"></i>
+            <span>{{ attraction.phone }}</span>
+          </div>
+          <div class="info-row" *ngIf="attraction.address">
+            <i class="fa fa-map-marker info-icon"></i>
+            <span>{{ attraction.address }}</span>
+          </div>
+          <div class="info-row" *ngIf="attraction.website">
+            <i class="fa fa-link info-icon"></i>
+            <a [href]="attraction.website" target="_blank">官方網站 🔗</a>
+          </div>
+
+          <hr class="divider">
+
+          <!-- 開放時間 -->
+          <div *ngIf="attraction.businessHours" class="hours-block">
+            <div class="hours-title">⏰ 開放時間</div>
+            <div class="hours-text">{{ attraction.businessHours }}</div>
+          </div>
+          <div *ngIf="attraction.closedDaysNote" class="closed-note">
+            公休：{{ attraction.closedDaysNote }}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 功能 Tabs -->
+    <div class="func-tabs mt-5">
+      <button *ngFor="let t of tabs"
+        class="func-tab"
+        [class.active]="activeTab === t.key"
+        (click)="activeTab = t.key">
+        {{ t.icon }} {{ t.label }}
+      </button>
+    </div>
+
+    <!-- Tab 內容 -->
+    <div class="tab-body mt-4">
+
+      <div *ngIf="activeTab === 'feature'">
+        <p *ngIf="attraction.address"><strong>地址：</strong>{{ attraction.address }}</p>
+        <p *ngIf="attraction.businessHours"><strong>開放時間：</strong>{{ attraction.businessHours }}</p>
+      </div>
+
+      <div *ngIf="activeTab === 'transport'">
+        <h5 class="tab-sec-title">🗺️ 地圖導航</h5>
+        <div class="map-wrap mb-3">
+          <iframe [src]="mapUrl | safeUrl" width="100%" height="360"
+            style="border:0;border-radius:10px;"
+            allowfullscreen loading="lazy"></iframe>
+        </div>
+        <button class="nav-btn" (click)="openNav()">一鍵導航到目的地 🔗</button>
+        <div class="mt-4" *ngIf="attraction.transportInfo">
+          <h6 class="tab-sec-title">🚌 交通資訊</h6>
+          <p class="transport-text">{{ attraction.transportInfo }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'accessible'">
+        <div class="accessible-item">
+          <i class="fa fa-wheelchair"></i>
+          無障礙設施（詳細資訊請洽詢現場服務人員）
+        </div>
+      </div>
+
+      <div *ngIf="activeTab === 'nearby'">
+        <p class="tab-placeholder">周邊餐廳、住宿等資訊</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 找不到 -->
+<div class="not-found" *ngIf="!loading && !attraction">
+  <p>找不到此景點</p>
+  <a routerLink="/contact" class="btn btn-warning mt-3">返回景點首頁</a>
+</div>
