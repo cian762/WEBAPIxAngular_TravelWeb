@@ -12,6 +12,7 @@ using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
+using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -100,16 +101,13 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddSwaggerGen(
     x =>
     {
-        x.SwaggerDoc("Board", new OpenApiInfo
-        {
-            Title = "Board",
-            Version = "版本"
-        });
+
         x.SwaggerDoc("TravelWeb-API", new OpenApiInfo
         {
             Title = "TravelWeb-API",
-        });
-        
+            //Version = "版本"
+        }); 
+
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
             if (!string.IsNullOrEmpty(apiDesc.GroupName))
@@ -139,6 +137,7 @@ builder.Services.AddDbContext<TripDbContext>(options =>
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+builder.Services.AddScoped<CloudinaryService>();
 builder.Services.AddScoped<TravelWeb_API.Models.Itinerary.Service.IItineraryservice, TravelWeb_API.Models.Itinerary.Service.ItineraryService>();
 var config = TypeAdapterConfig.GlobalSettings;
 builder.Services.AddSingleton(config);
@@ -151,10 +150,20 @@ builder.Services.AddDbContext<BoardDbContext>(options =>
 builder.Services.AddScoped<IArticlesService, ArticleService>();
 builder.Services.AddScoped<ITripproductTable,TripproductTable >();
 builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
+//行程商品表連線用DI
+builder.Services.AddScoped<ITripproductTable, TripproductTable>();
+//購物車連線DI
+builder.Services.AddScoped<IShoppingCart, SShoppingCart>();
+//訂單連線用DI
 builder.Services.AddScoped<IOrder, SOrder>();
+//綠界連線用DI
+builder.Services.AddScoped<IECPay, SECPay>();
 
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-
+//綠界
+builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
+// 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -175,7 +184,7 @@ if (app.Environment.IsDevelopment())
     {
         x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
-        
+
     }
     );
 }

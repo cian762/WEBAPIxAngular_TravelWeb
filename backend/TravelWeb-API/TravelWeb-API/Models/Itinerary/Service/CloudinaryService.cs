@@ -42,5 +42,14 @@ namespace TravelWeb_API.Models.Itinerary.Service
 
             return null;
         }
+        public async Task<DeletionResult> DeletePhotoAsync(string publicId)
+        {
+            var deleteParams = new DeletionParams(publicId);
+
+            // 呼叫 Cloudinary API 執行刪除
+            var result = await _cloudinary.DestroyAsync(deleteParams);
+
+            return result;
+        }
     }
 }

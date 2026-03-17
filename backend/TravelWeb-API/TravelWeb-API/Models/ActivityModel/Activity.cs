@@ -23,6 +23,14 @@ public partial class Activity
 
     public bool? SoftDelete { get; set; }
 
+    public string? Propaganda { get; set; }
+
+    public decimal? Longitude { get; set; }
+
+    public decimal? Latitude { get; set; }
+
+    public int ViewCount { get; set; }
+
     public virtual ActivityAnalytic? ActivityAnalytic { get; set; }
 
     public virtual ICollection<ActivityEditLog> ActivityEditLogs { get; set; } = new List<ActivityEditLog>();
@@ -40,6 +48,8 @@ public partial class Activity
     public virtual ICollection<UserFavorite> UserFavorites { get; set; } = new List<UserFavorite>();
 
     public virtual ICollection<TagsRegion> Regions { get; set; } = new List<TagsRegion>();
+
+    public virtual ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
 
     public virtual ICollection<TagsActivityType> Types { get; set; } = new List<TagsActivityType>();
 }

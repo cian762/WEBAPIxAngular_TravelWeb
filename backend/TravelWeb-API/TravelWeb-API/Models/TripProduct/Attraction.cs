@@ -39,6 +39,8 @@ public partial class Attraction
 
     public bool IsDeleted { get; set; }
 
+    public int ViewCount { get; set; }
+
     public virtual ICollection<AttractionProduct> AttractionProducts { get; set; } = new List<AttractionProduct>();
 
     public virtual ICollection<Image> Images { get; set; } = new List<Image>();
