@@ -19,7 +19,6 @@ export interface CartItem {
 })
 
 export class Shoppingcart implements OnInit {
-  private readonly apiUrl = 'https://localhost:7276/api/ShoppingCart'
   constructor(private http: HttpClient) { }
   cartItems: any[] = [];
   isLoading: boolean = true;
@@ -36,7 +35,7 @@ export class Shoppingcart implements OnInit {
 
     // 使用字串插值把 memberId 接在 URL 後面
     // 最終會發送：https://localhost:7276/api/ShoppingCart/Briana03
-    this.http.get<any[]>(`${this.apiUrl}/${memberId}`).subscribe({
+    this.http.get<any[]>(`https://localhost:7276/api/ShoppingCart/${memberId}`).subscribe({
       next: (data) => {
         this.cartItems = data;
 
