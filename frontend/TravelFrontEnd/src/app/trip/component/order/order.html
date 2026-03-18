@@ -20,40 +20,49 @@
         <div class="alert alert-light border-0 d-flex align-items-center mb-4 p-2 text-muted"
           style="font-size: 0.875rem;" role="alert">
           <i class="bi bi-clock-history me-2"></i>
+          <span>請填寫正確資料以確保收到憑證</span>
         </div>
 
         <h3 class="fw-bold mb-3">輸入您的個人資料</h3>
         <p class="text-muted mb-4" style="font-size: 0.875rem;"><i class="bi bi-lock-fill me-1"></i> 我們保護您的隱私安全。</p>
 
-        <form [formGroup]="orderForm">
+        <form [formGroup]="orderForm" (ngSubmit)="onCheckout()">
           <p class="text-danger mb-2" style="font-size: 0.75rem;">* 必填欄位</p>
 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label text-secondary" style="font-size: 0.875rem;">訂購者姓名 *</label>
-              <input formControlName="ContactName" type="text" class="form-control rounded-3" placeholder="例如:王先生">
+              <input formControlName="contactName" type="text" class="form-control rounded-3"
+                [class.is-invalid]="orderForm.get('contactName')?.invalid && orderForm.get('contactName')?.touched"
+                placeholder="例如:王先生">
             </div>
+
             <div class="col-12 mb-3">
               <label class="form-label text-secondary" style="font-size: 0.875rem;">電子郵件 *</label>
-              <input formControlName="ContactEmail" type="email" class="form-control rounded-3"
+              <input formControlName="contactEmail" type="email" class="form-control rounded-3"
+                [class.is-invalid]="orderForm.get('contactEmail')?.invalid && orderForm.get('contactEmail')?.touched"
                 placeholder="example@mail.com">
             </div>
 
             <div class="col-12 mb-4">
               <label class="form-label text-secondary" style="font-size: 0.875rem;">手機號碼 *</label>
               <div class="input-group">
-                <input formControlName="ContactPhone" type="tel" class="form-control" placeholder="請輸入手機號碼">
+                <input formControlName="contactPhone" type="tel" class="form-control rounded-3"
+                  [class.is-invalid]="orderForm.get('contactPhone')?.invalid && orderForm.get('contactPhone')?.touched"
+                  placeholder="請輸入手機號碼">
               </div>
             </div>
+
             <div class="col-12 mb-3">
               <label class="form-label text-secondary" style="font-size: 0.875rem;">訂單備註</label>
-              <textarea formControlName=" CustomerNote" class="form-control rounded-3 mt-2" rows="4"
+              <textarea formControlName="customerNote" class="form-control rounded-3 mt-2" rows="4"
                 placeholder="有特別的需求嗎？例如：過敏需求、嬰兒車位置...等"></textarea>
             </div>
 
             <div class="col-12 d-grid mb-4">
-              <button type="button" class="btn btn-dark btn-lg py-3 fw-bold rounded-pill shadow">
-                結帳
+              <button type="submit" class="btn btn-dark btn-lg py-3 fw-bold rounded-pill shadow" [disabled]="isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isLoading ? '處理中...' : '確認訂購並結帳' }}
               </button>
             </div>
           </div>
@@ -76,37 +85,43 @@
       <div class="p-4 bg-white shadow-sm rounded-4 sticky-top" style="top: 20px;">
         <h4 class="fw-bold mb-4">訂單摘要</h4>
 
-        <div class="row mb-4">
+        <div *ngFor="let item of previewData?.items" class="row mb-4 align-items-center">
           <div class="col-4">
-            <div class="ratio ratio-1x1 bg-light rounded-3 overflow-hidden">
-              <div class="d-flex align-items-center justify-content-center text-muted"
-                style="font-size: 10px; background: #eee;">行程圖片</div>
+            <div class="ratio ratio-1x1 bg-light rounded-3 overflow-hidden shadow-sm">
+              <img *ngIf="item.productImage" [src]="item.productImage" class="img-fluid object-fit-cover" alt="行程圖片">
+              <div *ngIf="!item.productImage" class="d-flex align-items-center justify-content-center text-muted"
+                style="font-size: 10px; background: #eee;">無圖片</div>
             </div>
           </div>
           <div class="col-8">
-            <h6 class="fw-bold mb-1" style="font-size: 0.9rem; line-height: 1.4;">海德 卡梅爾：導覽美食之旅 (含 5 道正常餐)</h6>
-          </div>
-        </div>
+            <h6 class="fw-bold mb-1" style="font-size: 0.9rem; line-height: 1.4;">{{ item.productName }}</h6>
 
-        <div class="mb-4" style="font-size: 0.875rem;">
-          <div class="d-flex mb-2">
-            <i class="bi bi-calendar-check me-2 text-muted"></i>
-            <span class="text-muted">開始時間: 2026年2月3日 週五 11:00</span>
+            <div class="mt-2" style="font-size: 0.875rem;">
+              <div class="d-flex mb-1" *ngIf="item.tripStartDate">
+                <i class="bi bi-calendar-check me-2 text-muted"></i>
+                <span class="text-muted">{{ item.tripStartDate | date:'yyyy年MM月dd日' }}</span>
+              </div>
+              <div class="d-flex mb-1" *ngFor="let ticket of item.tickets">
+                <i class="bi bi-people me-2 text-muted"></i>
+                <span class="text-muted">{{ ticket.quantity }} 位 {{ ticket.ticketName }}</span>
+              </div>
+            </div>
           </div>
-          <div class="d-flex mb-1">
-            <i class="bi bi-people me-2 text-muted"></i>
-            <span class="text-muted">1 位成人 (15 - 99 歲)</span>
-          </div>
-          <a href="#" class="ms-4 text-primary text-decoration-none" style="font-size: 0.75rem;">修訂並更新我的旅遊人選</a>
         </div>
 
         <div class="border-top pt-3 mb-4">
           <div class="d-flex justify-content-between align-items-end">
-            <div class="fw-bold">總計</div>
+            <div class="fw-bold text-secondary">總計</div>
             <div class="text-end">
-              <div class="fw-bold fs-4 text-dark">台幣$122.26</div>
+              <div class="fw-bold fs-4 text-primary">
+                {{ (previewData?.totalAmount || 0) | currency:'TWD':'symbol':'1.0-0' }}
+              </div>
             </div>
           </div>
+        </div>
+
+        <div class="small text-muted text-center">
+          <i class="bi bi-shield-lock-fill me-1"></i> 安全支付保證
         </div>
       </div>
     </div>

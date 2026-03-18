@@ -176,7 +176,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 }
 
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                
 
                 // 5. 建立初始交易紀錄 (為了追蹤即將發起的綠界支付)
                 var paymentTransaction = new PaymentTransaction
@@ -190,6 +190,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
                 _context.PaymentTransactions.Add(paymentTransaction);
                 await _context.SaveChangesAsync(); // 再次儲存交易紀錄
+                await transaction.CommitAsync();
 
                 return order; // 此時 order 物件裡已經包含 OrderId 了
             }
