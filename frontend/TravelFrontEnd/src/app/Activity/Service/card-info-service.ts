@@ -9,10 +9,6 @@ import { queryParameters } from '../Component/info-card/info-card';
 export class CardInfoService {
   constructor(private http: HttpClient) { }
 
-  getCardInfo() {
-    return this.http.get<paginationInterface>('https://localhost:7276/api/ActivityCard');
-  }
-
   FilterCardInfo(query: queryParameters) {
 
     let params = new HttpParams();
@@ -21,16 +17,18 @@ export class CardInfoService {
     params = params.set('start', query.start ?? '');
     params = params.set('end', query.end ?? '');
     params = params.set('pagenumber', query.pagenumber);
-    params = params.set('orderbypopularity', query.orderbypopularity);
-    params = params.set('islatest', query.islatest);
-    params = params.set('isobsolete', query.isobsolete);
+    params = params.set('orderbyparam', query.orderbyparam);
     params = params.set('pagesize', query.pagesize);
+    params = params.set('keyword', query.keyword);
 
     return this.http.get<paginationInterface>('https://localhost:7276/api/ActivityCard/Query', {
       params
     });
   }
 
-
-
+  keywordSuggestion(keyword: string) {
+    let params = new HttpParams();
+    params = params.set('serachtext', keyword);
+    return this.http.get<string[]>('https://localhost:7276/api/ActivityCard/Keyword', { params });
+  }
 }

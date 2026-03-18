@@ -53,9 +53,16 @@ namespace TravelWeb_API.Services
         }
 
         public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetSpecificCards(ActivityInfoParameters q) 
-        {
+       {
             var query = _dbContext.Activities
-                .Where(a => a.SoftDelete == false);
+                .Include(a=>a.Reviews)
+                .Where(a => a.SoftDelete == false)
+                .AsNoTracking();
+
+            if (q.Keyword != null)
+            {
+                query = query.Where(a => a.Title == q.Keyword);
+            }
 
             if (q.Type != null && q.Type.Length > 0)
             {
@@ -73,21 +80,20 @@ namespace TravelWeb_API.Services
                 query = query.Where(a =>a.StartTime <= q.End && a.EndTime >= q.Start);
             }
 
-            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-            
-            //if(OrderByPopularity) result = result.OrderByDescending(a => a.Popularity);
 
-            if (q.IsLatest)
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+            if (q.OrderByParam == "hot")
             {
-                query = query.OrderBy(a => EF.Functions.DateDiffDay(today, a.StartTime));
+                query = query.OrderByDescending(a => a.Reviews.Any()? a.Reviews.Select(r=>r.ReviewId).Count() : 0);
             }
-            else if (q.IsObsolete)
+            else if (q.OrderByParam == "rating")
             {
-                query = query.OrderBy(a => a.StartTime);
+                query = query.OrderByDescending(a => a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0);
             }
-            else
+            else if (q.OrderByParam == "latest")
             {
-                query = query.OrderBy(a => a.ActivityId);
+                query = query.OrderBy(a => Math.Abs(EF.Functions.DateDiffDay(today, a.StartTime)!.Value));
             }
 
             var totalRecords = query.Count();
@@ -130,6 +136,7 @@ namespace TravelWeb_API.Services
                 .Where(a => a.Title!.StartsWith(searchText))
                 .OrderBy(a => a.Title!.Length)
                 .Select(a => a.Title)
+                .Take(5)
                 .ToListAsync();
 
             //如果 ans 數量小於 5 個，就再抓取其他 Title 首字不為 searchText，但 Title Body 中包含關鍵字的活動

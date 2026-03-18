@@ -17,8 +17,6 @@ namespace TravelWeb_API.QueryParameters.ActivityQueryParameters
         [Range(1, 50, ErrorMessage = "每頁筆數限制在 1-50 之間")]
         public int PageSize { get; set; } = 12;
 
-        public bool OrderByPopularity { get; set; } = false;
-        public bool IsLatest { get; set; } = false;
-        public bool IsObsolete { get; set; } = false;
+        public string OrderByParam { get; set; } = "latest";
     }
 }

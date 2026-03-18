@@ -14,7 +14,20 @@
       <div class="col-lg-5">
         <div class="filter-group">
           <label class="filter-group__label">關鍵字</label>
-          <input class="form-control custom-input" type="search" placeholder="輸入活動名稱、景點、主題..." aria-label="Search">
+          <input class="form-control custom-input" type="search" placeholder="輸入活動名稱、景點、主題..." aria-label="Search"
+            [(ngModel)]="keyword" (ngModelChange)="OnKeyWordChange($event)" (mousedown)="onMouseDown()"
+            (blur)="onMouseLeave()">
+
+          @if(this.searchResult && isFocus){
+          <div style="background-color: yellow;">
+            <ul>
+              @for(res of searchResult; track $index)
+              {
+              <li (mousedown)="onClickKeyword(res)">{{ res }}</li>
+              }
+            </ul>
+          </div>
+          }
         </div>
 
         <div class="filter-group mt-4">
@@ -93,9 +106,14 @@
       <div class="col-lg-6 d-flex justify-content-lg-end">
         <div class="sort-box">
           <span class="sort-box__label">排序條件</span>
-          <button class="btn sort-btn">熱門討論</button>
-          <button class="btn sort-btn">最近時間</button>
-          <button class="btn sort-btn">較舊時間</button>
+
+          @for(rule of sortCollection; track $index){
+          <button (click)="toggleSortRule(rule.label)" [class.isActive]="currentSortParam === rule.label"
+            class="btn filter-chip">{{
+            rule.value }}</button>
+          }
+
+
         </div>
       </div>
     </div>

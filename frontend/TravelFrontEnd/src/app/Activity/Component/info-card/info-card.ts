@@ -1,16 +1,18 @@
 import { pageInterface } from './../../Interface/pageInterface';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import flatpickr from 'flatpickr';
 import { CardInfoService } from '../../Service/card-info-service';
 import { CardInfoModel } from '../../Interface/cardInterface';
 import { DatePipe, NgClass } from '@angular/common';
 import { __classPrivateFieldGet } from 'tslib';
+import { FormsModule } from '@angular/forms';
+
 
 
 @Component({
   selector: 'app-info-card',
-  imports: [DatePipe, NgClass],
+  imports: [DatePipe, NgClass, FormsModule],
   templateUrl: './info-card.html',
   styleUrl: './info-card.css',
 })
@@ -42,8 +44,69 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
   currentPage: number = 1;
   pageNumbers: number[] = [];
 
+  currentSortParam: string = 'latest';
+
+  sortCollection = [
+    { label: 'latest', value: '即將開跑' },
+    { label: 'hot', value: '熱門討論' },
+    { label: 'rating', value: '深獲好評' },
+  ];
+
+  keyword: string = '';
+  searchResult: string[] = [];
+  selectKeyword: string = "";
+  isFocus: boolean = false;
+
+  //當輸入框被滑鼠點下關注時
+  onMouseDown() {
+    this.isFocus = true;
+    console.log('mouseDown的focus', this.isFocus);
+  }
+
+  //當輸入框被離開關注時
+  onMouseLeave() {
+    this.isFocus = false;
+    console.log('mouseLeave的focus', this.isFocus);
+
+    if (!this.keyword) {
+      this.searchResult = [];
+    }
+    console.log(this.searchResult);
+  }
+
+  //當輸入值發生改變，發 API 拉相關的活動名稱
+  OnKeyWordChange(value: string) {
+
+    //如果關鍵字為 falsy value，就把搜尋結果清空，應對使用者已輸入後用 backspace 清空的情況
+    if (!value) {
+      this.searchResult = [];
+      this.loadCards(1);
+      return;
+    }
+
+    if (value && value.trim()) {
+      this.cardService.keywordSuggestion(value.trim())
+        .subscribe((res) => {
+          this.searchResult = res;
+        })
+    }
+  }
+
+  //壓下相符活動名稱後，清空搜尋結果，並且將輸入框名稱補全
+  onClickKeyword(res: string) {
+    this.selectKeyword = res;
+    this.keyword = this.selectKeyword;
+    this.searchResult = [];
+    //打出 API 找特定活動內容
+    this.loadCards(1);
+  }
 
 
+
+  toggleSortRule(rule: string) {
+    this.currentSortParam = rule;
+    this.loadCards(1);
+  }
 
   toggleDefaultChoiceA(): boolean {
     if (this.selectRegions.length > 0) {
@@ -94,11 +157,13 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
       }
     });
   }
+
   ngOnDestroy(): void {
     this.fpInstance?.destroy();
   }
 
 
+  //傳送挾帶資訊的 API，參數內容要注意
   loadCards(page: number = 1) {
     const query = new queryParameters();
     query.type = this.selectTypes;
@@ -106,12 +171,19 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     query.start = this.formatDate(this.startDate);
     query.end = this.formatDate(this.endDate);
     query.pagenumber = page;
-    query.pagesize = 8;
+    query.pagesize = 4;
+    query.orderbyparam = this.currentSortParam;
+    query.keyword = this.keyword;
 
+
+    console.log('query送出去的內容: ', query);
     this.cardService.FilterCardInfo(query).subscribe((res) => {
+
+      //1. 拿回來的資料分裝進 cardData Model
       this.cardData = res.data;
       console.log(this.cardData);
 
+      //2. 拿回來的資料分裝進 pageData Model
       this.pageData = {
         pageNumber: res.pageNumber,
         pageSize: res.pageSize,
@@ -148,6 +220,9 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     this.startDate = null;
     this.endDate = null;
     this.fpInstance?.clear();
+    this.currentSortParam = 'latest';
+    this.keyword = '';
+
 
     this.currentPage = 1;
     this.loadCards(1);
@@ -176,9 +251,6 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
-
-
-
   formatDate(dateInfo: Date | null) {
     if (!dateInfo) return '';
     const date = String(dateInfo.getDate()).padStart(2, '0');
@@ -193,9 +265,8 @@ export class queryParameters {
   region: string[] = [];
   start: string = '';
   end: string = '';
+  orderbyparam: string = '';
+  keyword: string = '';
   pagenumber: number = 1;
   pagesize: number = 8;
-  orderbypopularity: boolean = false;
-  islatest: boolean = false;
-  isobsolete: boolean = false;
 }

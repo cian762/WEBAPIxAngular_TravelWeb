@@ -35,7 +35,6 @@ namespace TravelWeb_API.Controllers.Activity
         [HttpGet("Query")]
         public async Task<ActionResult> GetSpecificActivies([FromQuery] ActivityInfoParameters query) 
         {
-            Console.WriteLine(query);
             return Ok(await _infoService.GetSpecificCards(query));
         }
 

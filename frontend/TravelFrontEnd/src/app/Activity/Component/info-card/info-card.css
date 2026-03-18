@@ -20,12 +20,9 @@
 }
 
 .isActive {
-  background-color: paleturquoise;
+  background-color: #3b82f6;
 }
 
-.activity-page {
-  background-color: #f8fafc;
-}
 
 /* Panel */
 .search-panel,
@@ -155,16 +152,15 @@
 }
 
 .sort-btn {
-  background: #fff;
   border: 1px solid #d1d5db;
   border-radius: 999px;
   padding: 8px 16px;
   font-weight: 600;
-  color: #374151;
+  color: black;
 }
 
 .sort-btn:hover {
-  background: #f8fafc;
+
   border-color: #94a3b8;
 }
 
