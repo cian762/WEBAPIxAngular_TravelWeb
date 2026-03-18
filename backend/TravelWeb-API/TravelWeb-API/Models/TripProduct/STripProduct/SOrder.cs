@@ -43,13 +43,13 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             return false;
         }
         // 1. 建立訂單：處理 4 張表寫入與 Transaction，回傳產生的 OrderId
-        public  async Task<Order> CreateOrderAsync(CreateOrderDto dto, string memberId)
+        public async Task<Order> CreateOrderAsync(CreateOrderDto dto, string memberId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                // 1. 決定商品清單來源 (直接購買 或 購物車)
+                // 1. 決定商品清單來源 (不變)
                 var itemsToProcess = dto.DirectBuyItems;
                 if (itemsToProcess == null || !itemsToProcess.Any())
                 {
@@ -65,10 +65,10 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
                 if (!itemsToProcess.Any()) throw new Exception("結帳清單不可為空");
 
-                // 2. 算錢 (根據 ProductCode + TicketCategoryId)
+                // 2. 算錢 (不變)
                 decimal totalAmount = await InternalCalculateTotalAsync(itemsToProcess);
 
-                // 3. 建立訂單主檔
+                // 3. 建立訂單主檔 (暫時不要 SaveChanges)
                 var order = new Order
                 {
                     MemberId = memberId,
@@ -78,42 +78,28 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     ContactEmail = dto.ContactEmail,
                     CustomerNote = dto.CustomerNote,
                     CreatedAt = DateTime.Now,
-                    OrderStatus = OrderStatusNames.Pending, // 使用你的常數
+                    OrderStatus = OrderStatusNames.Pending,
                     PaymentStatus = "Unpaid"
                 };
-
                 _context.Orders.Add(order);
-                await _context.SaveChangesAsync(); // 取得 OrderId
 
                 // 4. 處理訂單明細
                 foreach (var item in itemsToProcess)
                 {
-                    // A. 抓產品大名快照 (如：阿里山三日遊)
                     var productName = await GetProductNameSnapshotAsync(item.ProductCode!);
-
-                    // 2. 處理行程專有的開始/結束日期
                     DateOnly? startDate = null;
                     DateOnly? endDate = null;
 
-                    // 去 TripSchedules 找找看有沒有這個 Code (如果是行程才有值)
                     var tripSchedule = await _context.TripSchedules
                         .FirstOrDefaultAsync(ts => ts.ProductCode == item.ProductCode);
 
                     if (tripSchedule != null)
                     {
-                        // 如果進到這裡，代表它是行程 (Trip)
-                        // 檢查 MaxCapacity 是否有設定 (有些行程可能沒設限，如果是 NULL 就跳過)
                         if (tripSchedule.MaxCapacity.HasValue)
                         {
                             int currentSold = tripSchedule.SoldQuantity ?? 0;
                             int remaining = tripSchedule.MaxCapacity.Value - currentSold;
-
-                            if (remaining < item.Quantity)
-                            {
-                                throw new Exception($"行程 [{item.ProductCode}] 剩餘名額不足！(僅剩 {remaining} 位)");
-                            }
-
-                            // 執行扣位子
+                            if (remaining < item.Quantity) throw new Exception($"行程 [{item.ProductCode}] 剩餘名額不足！");
                             tripSchedule.SoldQuantity = currentSold + item.Quantity;
                         }
                         startDate = tripSchedule.StartDate;
@@ -121,53 +107,33 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     }
                     else
                     {
-                        // --- 情況 B：如果是「景點/活動」 (只動 StockInRecords) ---
-                        var stockRecord = await _context.StockInRecords
-                            .FirstOrDefaultAsync(s => s.ProductCode == item.ProductCode);
-
+                        var stockRecord = await _context.StockInRecords.FirstOrDefaultAsync(s => s.ProductCode == item.ProductCode);
                         if (stockRecord != null)
                         {
-                            // 1. 檢查剩餘庫存是否足夠
-                            if (stockRecord.RemainingStock < item.Quantity)
-                            {
-                                throw new Exception($"商品庫存不足，目前僅剩 {stockRecord.RemainingStock} 份");
-                            }
-
-                            // 2. 只有一個動作：更新 [remaining_stock] (原本 1000 變成 999)
-                            // [quantity] 會因為你沒寫它，在 SaveChanges 時保持 1000 不動
+                            if (stockRecord.RemainingStock < item.Quantity) throw new Exception($"商品庫存不足");
                             stockRecord.RemainingStock -= item.Quantity;
-                        }
-                        else
-                        {
-                            // 預防萬一：如果連進貨紀錄都沒有，代表這商品還沒準備好
-                            throw new Exception($"系統找不到商品 [{item.ProductCode}] 的庫存紀錄");
                         }
                     }
 
+                    // 💡 關鍵點 A：改用物件關聯
                     var orderItem = new OrderItem
                     {
-                        OrderId = order.OrderId,
+                        Order = order, // ✅ 這裡直接給物件，不要給 OrderId
                         ProductCode = item.ProductCode,
                         ProductNameSnapshot = productName,
-                        // 這裡填入日期，如果不是行程，這兩個變數就會是 null
                         StartDateSnapshot = startDate,
                         EndDateSnapshot = endDate
                     };
-
                     _context.OrderItems.Add(orderItem);
-                    await _context.SaveChangesAsync(); // 產生 OrderItemId
+                    // ❌ 刪除這裡的 SaveChangesAsync()
 
-                    // B. 抓票種名稱 (如：老人票、小孩票)
-                    var ticketCat = await _context.TicketCategories
-                        .FirstOrDefaultAsync(tc => tc.TicketCategoryId == item.TicketCategoryId);
-
-                    // C. 抓單價 (老人票跟成人票如果價格不同，需從對應表抓)
+                    var ticketCat = await _context.TicketCategories.FirstOrDefaultAsync(tc => tc.TicketCategoryId == item.TicketCategoryId);
                     var unitPrice = await GetSpecificUnitPriceAsync(item.ProductCode!, (int)item.TicketCategoryId!);
 
-                    // D. 存入票種明細表 (OrderItemTicket)
+                    // 💡 關鍵點 B：改用物件關聯
                     _context.OrderItemTickets.Add(new OrderItemTicket
                     {
-                        OrderItemId = orderItem.OrderItemId,
+                        OrderItem = orderItem, // ✅ 這裡直接給物件，EF 會自動處理 OrderItemId
                         TicketCategoryId = (int)item.TicketCategoryId!,
                         TicketNameSnapshot = ticketCat?.CategoryName ?? "一般票",
                         UnitPrice = unitPrice,
@@ -175,29 +141,30 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     });
                 }
 
-                await _context.SaveChangesAsync();
-                
-
-                // 5. 建立初始交易紀錄 (為了追蹤即將發起的綠界支付)
+                // 5. 建立初始交易紀錄
                 var paymentTransaction = new PaymentTransaction
                 {
-                    OrderId = order.OrderId,
+                    Order = order, // ✅ 一樣給物件
                     PaymentProvider = "綠界科技",
                     PaidAmount = order.TotalAmount,
-                    TransactionStatus = "待處理", // 標記為待處理
+                    TransactionStatus = "待處理",
                     CreatedAt = DateTime.Now
                 };
-
                 _context.PaymentTransactions.Add(paymentTransaction);
-                await _context.SaveChangesAsync(); // 再次儲存交易紀錄
+
+                // 💡 最終魔幻時刻：一次存檔，一次 Commit
+                // EF Core 會自動幫你排順序：先存 Order 拿 ID -> 填入 OrderItem -> 拿 ID -> 填入 Ticket
+                await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return order; // 此時 order 物件裡已經包含 OrderId 了
+                return order;
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                throw new Exception($"訂單建立失敗: {ex.Message}");
+                // 挖出真正底層的錯誤 (例如：欄位太長、外鍵失敗)
+                var detailedMsg = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message;
+                throw new Exception($"訂單建立失敗: {detailedMsg}");
             }
         }
         // 2. 訂單預覽：在正式下單前，計算金額與確認商品清單 (不寫入資料庫)

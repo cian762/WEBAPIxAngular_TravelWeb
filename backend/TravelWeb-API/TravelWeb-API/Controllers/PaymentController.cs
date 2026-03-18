@@ -38,36 +38,37 @@ namespace TravelWeb_API.Controllers
         [Consumes("application/x-www-form-urlencoded")]
         public async Task<IActionResult> EcpayReturn([FromForm] Dictionary<string, string> formData)
         {
-            // 1. 驗證
+            // 1. 驗證 CheckMacValue
             if (!_ecpayService.ValidateCheckMacValue(formData))
             {
+                // 如果失敗，會噴 400，這就是你之前在 ngrok 看到的錯誤
                 return BadRequest("CheckMacValue 驗證失敗");
             }
 
-            // 2. 判斷付款成功
+            // 2. 判斷付款狀態 (RtnCode == 1 代表成功)
             if (formData["RtnCode"] == "1")
             {
-                string merchantTradeNo = formData["MerchantTradeNo"]; // 例如: TW000002T143158
+                string merchantTradeNo = formData["MerchantTradeNo"];
 
-                // 較安全的拆法：拿掉前兩碼 TW，然後取到 T 之前的所有數字
-                string idPart = merchantTradeNo.Substring(2).Split('T')[0];
-
+                // 解析訂單 ID (照你原本的邏輯)
+                string idPart = merchantTradeNo.Replace("TW", "").Split('T')[0];
                 if (int.TryParse(idPart, out int orderId))
                 {
-                    // 更新 Orders
                     var order = await _tripDbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
-                    if (order != null && order.PaymentStatus != "已付款") // 防止重複更新
+
+                    if (order != null && order.PaymentStatus != "已付款")
                     {
+                        // 更新訂單
                         order.PaymentStatus = "已付款";
                         order.OrderStatus = "已處理";
 
-                        // 更新 Transaction
+                        // 更新交易紀錄
                         var transaction = await _tripDbContext.PaymentTransactions
                             .FirstOrDefaultAsync(t => t.OrderId == orderId && t.TransactionStatus == "待處理");
 
                         if (transaction != null)
                         {
-                            transaction.ProviderTransactionNo = formData["TradeNo"];
+                            transaction.ProviderTransactionNo = formData["TradeNo"]; // 綠界的交易序號
                             transaction.TransactionStatus = "成功";
                             transaction.CompletedAt = DateTime.Now;
                         }
@@ -77,7 +78,9 @@ namespace TravelWeb_API.Controllers
                 }
             }
 
+            // 3. 💡 成功後必須回傳 1|OK，否則綠界會一直重發通知
             return Content("1|OK");
         }
     }
+
 }

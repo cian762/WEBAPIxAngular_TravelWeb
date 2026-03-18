@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
@@ -18,20 +19,20 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             var ecpaySection = _config.GetSection("ECPay");
 
             // 組合商品名稱
-            string itemName = string.Join("#", order.OrderItems.Select(oi => oi.ProductNameSnapshot));
+            string itemName = string.Join("|", order.OrderItems.Select(oi => oi.ProductNameSnapshot));
             if (itemName.Length > 200) itemName = itemName.Substring(0, 197) + "...";
 
             var parameters = new Dictionary<string, string>
             {
                 { "MerchantID", ecpaySection["MerchantID"]! },
-                { "MerchantTradeNo", $"TW{order.OrderId:D6}T{DateTime.Now:HHmmss}" },
+                { "MerchantTradeNo",$"TW{order.OrderId}{DateTime.Now:MMddHH}"},
                 { "MerchantTradeDate", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") },
                 { "PaymentType", "aio" },
                 { "TotalAmount", ((int)order.TotalAmount!).ToString() },
-                { "TradeDesc", "TravelWeb 訂單支付" },
+                { "TradeDesc", "TravelWeb" },
                 { "ItemName", itemName },
                 { "ReturnURL", ecpaySection["ReturnURL"]! },
-                { "OrderResultURL", ecpaySection["ClientBackURL"]! },
+                { "ClientBackURL", ecpaySection["ClientBackURL"]! },
                 { "ChoosePayment", "ALL" },
                 { "EncryptType", "1" }
             };
@@ -41,36 +42,60 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
         }
 
         // 2. 驗證回傳的檢查碼
+        // 驗證綠界回傳的 CheckMacValue
         public bool ValidateCheckMacValue(Dictionary<string, string> formData)
         {
-            var dict = new Dictionary<string, string>(formData);
-            if (!dict.ContainsKey("CheckMacValue")) return false;
+            if (!formData.ContainsKey("CheckMacValue")) return false;
 
-            string originalValue = dict["CheckMacValue"];
-            dict.Remove("CheckMacValue");
+            string receivedValue = formData["CheckMacValue"];
 
-            return originalValue == GenerateCheckMacValue(dict);
+            // 1. 複製一份資料並移除 CheckMacValue 本身，才不會參與雜湊計算
+            var checkDict = new Dictionary<string, string>(formData);
+            checkDict.Remove("CheckMacValue");
+
+            // 2. 使用相同的邏輯算出雜湊值
+            string calculatedValue = GenerateCheckMacValue(checkDict);
+
+            // 3. 比對是否一致 (不區分大小寫較安全)
+            return string.Equals(receivedValue, calculatedValue, StringComparison.OrdinalIgnoreCase);
         }
-
         // --- 以下為私有輔助方法 ---
-
         private string GenerateCheckMacValue(Dictionary<string, string> parameters)
         {
             var ecpaySection = _config.GetSection("ECPay");
             string hashKey = ecpaySection["HashKey"]!;
             string hashIV = ecpaySection["HashIV"]!;
 
-            var sortedParams = parameters.OrderBy(p => p.Key).Select(p => $"{p.Key}={p.Value}");
+            // 1. 字典排序並串接 (過濾掉 CheckMacValue 且確保沒有 Null)
+            var sortedParams = parameters
+                .Where(p => p.Key != "CheckMacValue" && !string.IsNullOrEmpty(p.Value))
+                .OrderBy(p => p.Key)
+                .Select(p => $"{p.Key}={p.Value}");
+
             string rawData = $"HashKey={hashKey}&{string.Join("&", sortedParams)}&HashIV={hashIV}";
 
-            // 綠界特有的編碼取代規則
+            // 2. URL Encode 並處理特殊符號
+            // 使用 WebUtility.UrlEncode 或 HttpUtility.UrlEncode 都可以，但後續取代要小心
             string encodedData = HttpUtility.UrlEncode(rawData).ToLower();
-            encodedData = encodedData.Replace("%2d", "-").Replace("%5f", "_").Replace("%2e", ".").Replace("%21", "!")
-                                     .Replace("%2a", "*").Replace("%28", "(").Replace("%29", ")");
 
-            using var sha256 = SHA256.Create();
-            byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(encodedData));
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
+            // 綠界專屬取代規則
+            encodedData = encodedData
+                .Replace("%20", "+")
+                .Replace("%2d", "-")
+                .Replace("%5f", "_")
+                .Replace("%2e", ".")
+                .Replace("%21", "!")
+                .Replace("%2a", "*")
+                .Replace("%28", "(")
+                .Replace("%29", ")");
+
+            // 3. SHA256 加密
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(encodedData));
+                // 直接用 BitConverter 或 StringBuilder 轉大寫
+                return BitConverter.ToString(hashBytes).Replace("-", "").ToUpper();
+            }
         }
 
         private string GenerateHtmlForm(string actionUrl, Dictionary<string, string> parameters)
