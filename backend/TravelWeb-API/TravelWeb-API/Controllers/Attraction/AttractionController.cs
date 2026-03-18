@@ -113,9 +113,13 @@ namespace TravelWeb_API.Controllers.Attraction
             // 關鍵字搜尋
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                query = query.Where(a =>
-                    a.Name.Contains(keyword) ||
-                    a.Address != null && a.Address.Contains(keyword));
+                //搜景點名稱和地址
+                //query = query.Where(a =>
+                //    a.Name.Contains(keyword) ||
+                //    a.Address != null && a.Address.Contains(keyword));
+
+                //只搜景點名稱
+                query = query.Where(a => a.Name.Contains(keyword));
             }
 
             // Step 1：先撈景點基本資料

@@ -19,10 +19,10 @@ export class AttractionDetailComponent implements OnInit {
   currentImgIdx = 0;
 
   tabs = [
-    { key: 'feature',    label: '景點特色', icon: '🏞️' },
-    { key: 'transport',  label: '如何前往', icon: '🚌' },
+    { key: 'feature', label: '景點特色', icon: '🏞️' },
+    { key: 'transport', label: '如何前往', icon: '🚌' },
     { key: 'accessible', label: '友善指引', icon: '♿' },
-    { key: 'nearby',     label: '周邊資訊', icon: '📍' },
+    { key: 'nearby', label: '周邊資訊', icon: '📍' },
   ];
 
   weather = { temp: 24, rain: 10, aqi: 35, aqiLabel: '良好' };
@@ -30,7 +30,7 @@ export class AttractionDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private svc: AttractionService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -46,9 +46,9 @@ export class AttractionDetailComponent implements OnInit {
 
   get mainImage(): string {
     if (this.attraction?.images?.length) {
-      return `http://localhost:7276${this.attraction.images[this.currentImgIdx].imagePath}`;
+      return `https://localhost:7285${this.attraction.images[this.currentImgIdx]}`;//port改成7285，且刪除[this.currentImgIdx]後的.imagePath
     }
-    return 'assets/img/package/package2.jpg';
+    return 'https://placehold.co/600x400?text=No+Image'; // ← 這裡也換掉';
   }
 
   get imageCount(): number { return this.attraction?.images?.length ?? 0; }
@@ -65,9 +65,15 @@ export class AttractionDetailComponent implements OnInit {
     this.svc.toggleLike(this.attraction.attractionId).subscribe(res => {
       if (this.attraction) {
         this.attraction.likeCount = res.likeCount;
-        this.attraction.isLiked   = res.isLiked;
+        this.attraction.isLiked = res.isLiked;
       }
     });
+  }
+
+
+  addToFavorite(): void {
+    // 之後串會員 API，目前先提示
+    alert('請先登入會員');
   }
 
   openNav(): void {

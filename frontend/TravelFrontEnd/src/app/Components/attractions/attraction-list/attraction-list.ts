@@ -18,6 +18,11 @@ export class AttractionListComponent implements OnInit {
   cityName = '';
   regionIds: number[] = [];
   activeTypeId = 0;
+  // 在 activeTypeId = 0; 下面加
+  activeTab: 'attractions' | 'activities' | 'itineraries' = 'attractions';
+  switchTab(tab: 'attractions' | 'activities' | 'itineraries'): void {
+    this.activeTab = tab;
+  }
   keyword = '';
   loading = true;
 
@@ -72,13 +77,13 @@ export class AttractionListComponent implements OnInit {
 
   getMainImage(a: Attraction): string {
     if (a.mainImage) {
-      return `https://localhost:7276${a.mainImage}`;
+      return `https://localhost:7285${a.mainImage}`;//port改成7285
     }
     return 'assets/img/b1.jpg';
   }
 
   goToDetail(a: Attraction): void {
-    this.router.navigate(['/contact/detail', a.attractionId]);
+    this.router.navigate(['/attractions/detail', a.attractionId]);
   }
 
   toggleLike(e: Event, a: Attraction): void {
