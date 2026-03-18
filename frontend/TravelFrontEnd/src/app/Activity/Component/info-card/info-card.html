@@ -12,18 +12,21 @@
     <div class="row g-4">
       <!-- Left Filters -->
       <div class="col-lg-5">
-        <div class="filter-group">
+        <div class="filter-group mt-4 search-autocomplete">
           <label class="filter-group__label">關鍵字</label>
-          <input class="form-control custom-input" type="search" placeholder="輸入活動名稱、景點、主題..." aria-label="Search"
-            [(ngModel)]="keyword" (ngModelChange)="OnKeyWordChange($event)" (mousedown)="onMouseDown()"
-            (blur)="onMouseLeave()">
 
-          @if(this.searchResult && isFocus){
-          <div style="background-color: yellow;">
-            <ul>
-              @for(res of searchResult; track $index)
-              {
-              <li (mousedown)="onClickKeyword(res)">{{ res }}</li>
+          <input class="form-control custom-input" type="search" placeholder="輸入活動名稱、主題..." aria-label="Search"
+            [(ngModel)]="keyword" (ngModelChange)="OnKeyWordChange($event)" (mousedown)="onMouseDown()"
+            (blur)="onMouseLeave()" />
+
+          @if (searchResult.length > 0 && isFocus) {
+          <div class="autocomplete-dropdown">
+            <ul class="autocomplete-list">
+              @for (res of searchResult; track $index) {
+              <li class="autocomplete-item" (mousedown)="onClickKeyword(res)">
+                <i class="bi bi-search autocomplete-icon"></i>
+                <span>{{ res }}</span>
+              </li>
               }
             </ul>
           </div>
@@ -127,7 +130,7 @@
             <img [src]="card.coverImageUrl" class="card-img-top activity-card__image" alt="activity image">
           </div>
 
-          <div class="card-body activity-card__body">
+          <div class="card-body activity-card__body" [routerLink]="'/ActivityInfo/'+ card.activityId">
             <a class="activity-card__title">{{ card.title }}</a>
 
             <div class="activity-card__date">

@@ -1,6 +1,6 @@
 import { pageInterface } from './../../Interface/pageInterface';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import flatpickr from 'flatpickr';
 import { CardInfoService } from '../../Service/card-info-service';
 import { CardInfoModel } from '../../Interface/cardInterface';
@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-info-card',
-  imports: [DatePipe, NgClass, FormsModule],
+  imports: [DatePipe, NgClass, FormsModule, RouterLink],
   templateUrl: './info-card.html',
   styleUrl: './info-card.css',
 })
