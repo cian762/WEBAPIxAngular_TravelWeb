@@ -58,7 +58,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                         .Select(c => new AddToCartDTO
                         {
                             ProductCode = c.ProductCode,
-                            Quantity = c.Quantity ?? 1,
+                            Quantity = c.Quantity ?? 2,
                             TicketCategoryId = c.TicketCategoryId ?? 0
                         }).ToListAsync();
                 }

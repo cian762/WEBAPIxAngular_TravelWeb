@@ -4,8 +4,6 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
 {
     public interface ITripproductTable
     {
-        // 1. 取得初始頁面的所有產品 (不帶條件)
-        Task<IEnumerable<TripProductDTO>> GetAllAsync();
 
         // 2. 核心功能：根據前端傳來的 DTO 條件進行搜尋
         // 傳入搜尋條件 (QueryDTO)，回傳產品清單 (ProductDTO)
@@ -27,6 +25,9 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
         public int TotalCount { get; set; } // 搜尋結果的總筆數
         public IEnumerable<T> ?Data { get; set; } // 當前頁面的資料內容
     }
+    //=============================================================================================
+    //這裡是商品詳細頁
+
 
 
 }

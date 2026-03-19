@@ -33,7 +33,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 { "ItemName", itemName },
                 { "ReturnURL", ecpaySection["ReturnURL"]! },
                 { "ClientBackURL", ecpaySection["ClientBackURL"]! },
-                { "ChoosePayment", "ALL" },
+                { "ChoosePayment", "Credit" },
                 { "EncryptType", "1" }
             };
 
