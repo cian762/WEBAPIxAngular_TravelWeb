@@ -1,20 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { BoardServe } from '../board-serve';
 import { PostDetailDto } from '../interface/PostDetailDto';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-post-detail',
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
 export class PostDetail implements OnInit {
-  constructor(private Serve: BoardServe) {
+  constructor(private Serve: BoardServe, private route: ActivatedRoute) {
 
   }
+  id = 0;
   ngOnInit(): void {
-    this.Serve.getArticleDetailAPI(2).subscribe((d) => {
-      this.post = d;
+    this.route.paramMap.subscribe(p => {
+      this.id = Number(p.get('id'));
+      console.log(this.id);
+      this.Serve.getArticleDetailAPI(this.id).subscribe((d) => {
+        this.post = d;
+      });
     });
   }
 

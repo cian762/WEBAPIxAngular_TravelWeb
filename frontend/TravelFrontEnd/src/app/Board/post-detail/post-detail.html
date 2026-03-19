@@ -3,7 +3,6 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-8 posts-list">
-
         <!-- 內文區在這 -->
         <div class="single-post row">
           <div class="col-lg-12">
@@ -238,6 +237,8 @@
           </form>
         </div>
       </div>
+
+      <!-- 側欄在這 -->
       <div class="col-lg-4 sidebar-widgets">
         <div class="widget-wrap">
           <div class="single-sidebar-widget search-widget">
@@ -248,9 +249,9 @@
             </form>
           </div>
           <div class="single-sidebar-widget user-info-widget">
-            <img src="img/blog/user-info.png" alt="">
+            <img [src]="post?.avatarUrl" class="user-info rounded-circle" alt="">
             <a href="#">
-              <h4>Charlie Barber</h4>
+              <h4>{{post?.authorName}}</h4>
             </a>
             <p>
               Senior blog writer

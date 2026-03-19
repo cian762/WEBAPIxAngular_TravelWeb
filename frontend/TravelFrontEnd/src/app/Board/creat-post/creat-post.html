@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="col-8 mx-auto my-5">
+    <form [formGroup]="form">
+      <div class="mb-3">
+        <div class="border rounded-2 border-2 border-dashed p-4 text-center">
+          點擊上傳圖片<i class="bi bi-images"></i>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControlInput1" class="form-label">文章標題</label>
+        <input type="email" class="form-control" formControlName="title" placeholder="請輸入標題">
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControlTextarea1" class="form-label">文章內文</label>
+        <textarea class="form-control" formControlName="content" placeholder="請輸入內文" rows="3"></textarea>
+      </div>
+    </form>
+
+    <div class="my-3">
+      <label class="form-label">上傳文章圖片</label>
+      <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+
+      <div *ngIf="previewUrl" class="mt-3">
+        <img [src]="previewUrl" style="width: 200px; height: 200px; object-fit: cover;" class="border rounded">
+      </div>
+    </div>
+    <a href="#" class="genric-btn danger-border radius">刪除文章</a>
+    <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
+
+    <a class="genric-btn success circle">測試用</a>
+
+  </div>
+</div>

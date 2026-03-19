@@ -44,12 +44,13 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostPost(Article article)
+        public async Task<ActionResult<int>> PostPost(int id)
         {
+            var article=_context.Articles.FirstOrDefault(a => a.ArticleId == id);
             if (article.Type == 0)
             {
                 _ArticlesService.AddPost(article);
-                return NoContent();
+                return article.ArticleId;
             }
             else if (article.Type == 1)
             {
@@ -63,24 +64,29 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         // PUT: api/Articles/5 修改文章
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutArticle(
-            int id, string? Title, string? PhotoUrl, byte Status,
-            string? content, int? regionId,
-            List<string>? photoUrlList)
+        [HttpPut("{id}")] 
+        public async Task<ActionResult<bool>> PutArticle(PostUpdateDto postUpdate)
         {
             //修改快速串文
-            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == id).Type;
+            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == postUpdate.id).Type;
             bool isUpdateSuccess =
-                await _ArticlesService.UpdateArtic(id, Title, PhotoUrl, Status);
-            if (isUpdateSuccess)
+                await _ArticlesService.UpdateArtic(
+                    postUpdate.id,
+                    postUpdate.Title, 
+                    postUpdate.PhotoUrl, 
+                    postUpdate.Status);
+            if (!isUpdateSuccess)
                 return NotFound();
             else
             {
                 if (type == 0)
                 {
-                    bool isUpdatePostSuccess = await _ArticlesService.UpdatePost(id, content, regionId, photoUrlList);
-                    if (isUpdatePostSuccess) return NoContent();
+                    bool isUpdatePostSuccess = await _ArticlesService.UpdatePost(
+                        postUpdate.id,
+                        postUpdate.content, 
+                        postUpdate.regionId,
+                        postUpdate.photoUrlList);//, photoUrlList
+                    if (isUpdatePostSuccess) return true;
                     return NotFound();
                 }
                 else if (type == 1)
