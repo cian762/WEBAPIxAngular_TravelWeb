@@ -8,12 +8,12 @@ namespace TravelWeb_API.Models.Itinerary.Service
     {
         private readonly TravelContext _context;
         private readonly ICloudinaryService _imageUploadService;
-        private readonly IHttpContextAccessor _httpAccessor;
-        public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService, IHttpContextAccessor httpAccessor)
+
+        public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService)
         {
             _imageUploadService = cloudinaryService;
             _context = context;
-            _httpAccessor = httpAccessor;
+
         }
         /*建立主表包含物件*/
         public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto)

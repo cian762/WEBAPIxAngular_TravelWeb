@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
@@ -148,16 +146,17 @@ var config = TypeAdapterConfig.GlobalSettings;
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddScoped<IItineraryservice, ItineraryService>();
-builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
+builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        // 自動將屬性名稱轉為小寫開頭 (camelCase)，符合 Angular 習慣
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        // 忽略掉循環引用
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
+//builder.Services.AddControllers()
+//    .AddJsonOptions(options =>
+//    {
+//        // 自動將屬性名稱轉為小寫開頭 (camelCase)，符合 Angular 習慣
+//        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+//        // 忽略掉循環引用
+//        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+//    });
 #endregion
 
 builder.Services.AddDbContext<BoardDbContext>(options =>
