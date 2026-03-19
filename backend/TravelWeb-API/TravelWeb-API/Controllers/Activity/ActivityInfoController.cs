@@ -22,5 +22,8 @@ namespace TravelWeb_API.Controllers.Activity
             if (result == null) return NotFound();
             return Ok(result);
         }
+
+
+
     }
 }

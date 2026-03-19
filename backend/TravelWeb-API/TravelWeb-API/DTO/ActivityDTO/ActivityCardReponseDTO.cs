@@ -11,6 +11,7 @@
         public string? CoverImageUrl { get; set; }
         public int ReferencePrice { get; set; }
 
+
         //待加入的欄位
         public int ViewCount { get; set; }
         public int SellCount { get; set; }

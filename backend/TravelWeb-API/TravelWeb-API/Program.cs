@@ -129,6 +129,7 @@ builder.Services.AddDbContext<AttractionsContext>(options =>
 builder.Services.AddDbContext<MemberSystemContext>(options =>
  options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
+#region ActivityDI
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<ActivityCardService>();
@@ -137,6 +138,7 @@ builder.Services.AddScoped<ActivityTicketService>();
 
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+#endregion
 
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>

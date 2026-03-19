@@ -1,1 +1,322 @@
-<p>activity-intro works!</p>
+<div class="activity-detail-page container py-4">
+
+  <!-- Hero 區 -->
+  <section class="hero-gallery card-section mb-4">
+    <div class="row g-3">
+
+      <div class="col-lg-7">
+        <!-- 放主圖 -->
+        <div class="gallery-main">
+          <img src="" alt="活動主圖">
+        </div>
+
+      </div>
+
+      <div class="col-lg-5">
+        <div class="row g-3">
+
+          <!-- 用迴圈放附圖 -->
+          <div class="col-6">
+            <div class="gallery-thumb">
+              <img src="" alt="活動副圖1">
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="gallery-thumb">
+              <img src="" alt="活動副圖2">
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="gallery-thumb">
+              <img src="" alt="活動副圖3">
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="gallery-thumb">
+              <img src="" alt="活動副圖4">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 活動摘要 -->
+  <section class="activity-summary card-section mb-4">
+    <div class="row g-4 align-items-start">
+      <div class="col-lg-8">
+        <div class="summary-content">
+          <div class="summary-badges mb-3">
+            <span class="summary-badge">放分類標籤</span>
+          </div>
+
+          <h1 class="activity-title mb-3">活動標題</h1>
+          <div class="mb-3 fs-5">
+            <i class="bi bi-calendar-event me-2"></i>
+            2026/03/20 - 2026/03/21
+          </div>
+          <div class="activity-meta mb-3">
+            <div class="meta-item">
+              <i class="bi bi-geo-alt"></i>
+              <span>活動地址</span>
+            </div>
+            <div class="meta-item">
+              <i class="bi bi-star-fill"></i>
+              <span>4.8</span>
+              <span class="meta-light">(234 則評論)</span>
+            </div>
+            <div class="meta-item">
+              <i class="bi bi-bag-check"></i>
+              <span>已售 1,250+</span>
+            </div>
+          </div>
+
+
+          <div class="highlight-box mt-4">
+            <h3 class="highlight-title">行程亮點</h3>
+            <ul class="highlight-list">
+              <li>用 for 迴圈跑多點簡述</li>
+              <li>用 for 迴圈跑多點簡述</li>
+              <li>用 for 迴圈跑多點簡述</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="booking-card">
+          <p class="booking-label">最低價格</p>
+          <div class="booking-price mb-3">NT$ 1,280 <span>起</span></div>
+
+          <div class="booking-info mb-3">
+            <div>取消政策：依方案規定</div>
+            <div>憑證形式：電子憑證</div>
+          </div>
+
+          <button class="btn btn-primary w-100 booking-btn" (click)="FindBookMark('product-list')">立即預訂</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 商品列表 -->
+  <section id="product-list" class="card-section mb-4">
+    <div class="section-title-wrap">
+      <h2 class="section-title">票券與方案</h2>
+    </div>
+
+    <div class="product-list-wrap">
+      <div class="ticket-card mb-3">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-3">
+            <div class="ticket-image">
+              <img src="" alt="門票簡圖">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="ticket-content">
+              <h3 class="ticket-title">方案名稱 / 門票簡介</h3>
+              <p class="ticket-desc">
+                放方案描述，例如適用時段、是否含導覽、是否可即買即用等資訊。
+              </p>
+              <div class="ticket-tags">
+                <span>即買即用</span>
+                <span>電子票</span>
+                <span>可取消</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <div class="ticket-action">
+              <div class="ticket-price">NT$ 999</div>
+              <button class="btn btn-outline-primary w-100">選擇方案</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <!-- 主內容 -->
+    <div class="col-lg-9">
+      <!-- 活動介紹 -->
+      <section id="data" class="card-section mb-4">
+        <div class="section-title-wrap">
+          <h2 class="section-title">活動介紹</h2>
+        </div>
+
+        <article class="article-content">
+          <h3>活動特色</h3>
+          <p>
+            這裡放活動完整描述，包含活動內容、體驗方式、適合族群、流程說明等。
+          </p>
+
+          <figure class="content-figure">
+            <img src="" alt="活動介紹圖片">
+            <figcaption>圖片說明文字</figcaption>
+          </figure>
+
+          <p>
+            若有多段介紹，可再拆成不同段落，讓頁面更像正式商業網站的內容呈現。
+          </p>
+        </article>
+      </section>
+
+      <!-- 地圖 -->
+      <section id="google-map" class="card-section mb-4">
+        <div class="section-title-wrap">
+          <h2 class="section-title">地圖指引</h2>
+        </div>
+
+        <div class="map-info-box mb-3">
+          <div class="map-place-name">地點名稱</div>
+          <div class="map-address">地址：台北市信義區松壽路 12 號</div>
+        </div>
+
+        <div class="map-frame">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3614.9000931519636!2d121.54144275941348!3d25.037464346924693!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442abd149394c53%3A0x51ab5a80533e862!2z5Y-w5YyX56aP6I-v5aSn6aOv5bqX!5e0!3m2!1szh-TW!2stw!4v1773889962931!5m2!1szh-TW!2stw"
+            width="100%" height="420" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+
+        <div class="route-box mt-3">
+          路線指引
+        </div>
+      </section>
+
+      <!-- 評論 -->
+      <section id="guest-book" class="card-section mb-4">
+        <div class="section-title-wrap d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h2 class="section-title mb-0">旅客評論</h2>
+        </div>
+
+        <div class="review-score">
+          <span class="score-number"> <i class="bi bi-star-fill me-1"></i>4.4</span>
+          <span class="score-text">整體評價</span>
+        </div>
+        <div class="review-filter mt-3 mb-4">
+          <button class="btn btn-light btn-sm">最高評分</button>
+          <button class="btn btn-light btn-sm">最低評分</button>
+          <button class="btn btn-light btn-sm">最新</button>
+          <button class="btn btn-light btn-sm">圖片優先</button>
+        </div>
+
+        <div class="review-item">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div class="review-user">
+                <img src="" alt="使用者頭貼" class="review-avatar">
+                <div>
+                  <div class="review-name">使用者名稱</div>
+                  <div class="review-date">2026/03/19</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-9">
+              <div class="review-body">
+                <div class="review-rating">★★★★★</div>
+                <h4 class="review-title">評論標題</h4>
+                <p class="review-text">
+                  這裡放評論內容，描述體驗感受、是否值得推薦、服務品質等。
+                </p>
+
+                <div class="review-images">
+                  <img src="" alt="評論照片">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 問題回報 -->
+      <section id="report" class="card-section mb-4">
+        <div class="section-title-wrap">
+          <h2 class="section-title">問題回報</h2>
+        </div>
+
+        <form class="report-form">
+          <label class="form-label">請描述你遇到的問題</label>
+          <textarea class="form-control mb-3" rows="5" placeholder="例如：活動資訊錯誤、地圖位置有誤、票券內容與實際不符..."></textarea>
+          <button class="btn btn-danger">送出回報</button>
+        </form>
+      </section>
+
+      <!-- 推薦活動 -->
+      <section id="suggestion" class="card-section">
+        <div class="section-title-wrap">
+          <h2 class="section-title">你可能也會喜歡</h2>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mt-1">
+          <div class="col">
+            <div class="activity-card card h-100 border-0 shadow-sm">
+              <div class="activity-card__image-wrap">
+                <img class="card-img-top activity-card__image" alt="activity image">
+              </div>
+
+              <div class="card-body activity-card__body">
+                <a class="activity-card__title">推薦活動標題</a>
+
+                <div class="activity-card__date">
+                  <i class="bi bi-calendar-event me-2"></i>
+                  2026/03/20 - 2026/03/21
+                </div>
+
+                <div class="activity-card__stats mt-3">
+                  <div class="rating-block">
+                    <span class="rating-block__score">
+                      <i class="bi bi-star-fill me-1"></i>4.8
+                    </span>
+                    <span class="rating-block__text"> 86 則評論</span>
+                  </div>
+                  <div class="booking-text">已售 320+</div>
+
+                </div>
+
+
+                <div class="activity-card__bottom mt-3">
+                  <div class="view-block">
+                    <i class="bi bi-eye-fill me-1"></i> 1,200
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-footer activity-card__footer">
+                <div class="tag-list">
+                  <span class="tag-item">親子</span>
+                  <span class="tag-item">戶外</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 側邊欄 -->
+    <div class="col-lg-3">
+      <aside class="side-nav card-section sticky-sidebar">
+        <h3 class="side-nav-title">快速導覽</h3>
+        <ul class="side-nav-list">
+          <li><a (click)="FindBookMark('product-list')">票券方案</a></li>
+          <li><a (click)="FindBookMark('data')">活動介紹</a></li>
+          <li><a (click)="FindBookMark('google-map')">地圖指引</a></li>
+          <li><a (click)="FindBookMark('guest-book')">旅客評論</a></li>
+          <li><a (click)="FindBookMark('report')">問題回報</a></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</div>
