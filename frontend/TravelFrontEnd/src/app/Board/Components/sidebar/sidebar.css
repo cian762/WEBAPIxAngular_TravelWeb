@@ -1,6 +1,6 @@
-.cover {
-  width: 730px !important;
-  height: auto;
+.user-info {
+  width: 120px;
+  height: 120px;
   object-fit: cover;
   /* 關鍵：等比例縮放並裁切，不變形 */
   object-position: center;

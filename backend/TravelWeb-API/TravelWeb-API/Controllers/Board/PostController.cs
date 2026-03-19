@@ -65,16 +65,17 @@ namespace TravelWeb_API.Controllers.Board
 
         // PUT: api/Articles/5 修改文章
         [HttpPut("{id}")] 
-        public async Task<ActionResult<bool>> PutArticle(PostUpdateDto postUpdate)
+        public async Task<ActionResult<bool>> PutArticle(int id, [FromBody] PostUpdateDto updateDto)
         {
+
             //修改快速串文
-            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == postUpdate.id).Type;
+            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == updateDto.id).Type;
             bool isUpdateSuccess =
                 await _ArticlesService.UpdateArtic(
-                    postUpdate.id,
-                    postUpdate.Title, 
-                    postUpdate.PhotoUrl, 
-                    postUpdate.Status);
+                    updateDto.id,
+                    updateDto.Title, 
+                    updateDto.PhotoUrl, 
+                    updateDto.Status);
             if (!isUpdateSuccess)
                 return NotFound();
             else
@@ -82,10 +83,10 @@ namespace TravelWeb_API.Controllers.Board
                 if (type == 0)
                 {
                     bool isUpdatePostSuccess = await _ArticlesService.UpdatePost(
-                        postUpdate.id,
-                        postUpdate.content, 
-                        postUpdate.regionId,
-                        postUpdate.photoUrlList);//, photoUrlList
+                        updateDto.id,
+                        updateDto.content, 
+                        updateDto.regionId,
+                        updateDto.photoUrlList);//, photoUrlList
                     if (isUpdatePostSuccess) return true;
                     return NotFound();
                 }

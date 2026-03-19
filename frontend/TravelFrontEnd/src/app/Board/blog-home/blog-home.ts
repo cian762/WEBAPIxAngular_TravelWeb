@@ -40,5 +40,9 @@ export class BlogHome implements OnInit {
     });
   }
 
+  goToUpdate(id: number): void {
+    this.router.navigate(['Board', 'creat', id]);
+  }
+
 
 }

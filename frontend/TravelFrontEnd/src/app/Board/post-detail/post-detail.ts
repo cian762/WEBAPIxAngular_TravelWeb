@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { BoardServe } from '../board-serve';
 import { PostDetailDto } from '../interface/PostDetailDto';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Sidebar } from "../Components/sidebar/sidebar";
 
 @Component({
   selector: 'app-post-detail',
-  imports: [RouterModule],
+  imports: [RouterModule, Sidebar],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })

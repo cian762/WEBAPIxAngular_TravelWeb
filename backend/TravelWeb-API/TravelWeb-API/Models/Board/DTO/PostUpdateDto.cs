@@ -11,4 +11,6 @@
         public List<string>? photoUrlList { get; set; }
 
     }
+  
+
 }

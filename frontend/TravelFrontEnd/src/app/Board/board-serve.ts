@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ArticleData } from './interface/ArticleData';
 import { PostDetailDto } from './interface/PostDetailDto';
@@ -25,7 +25,10 @@ export class BoardServe {
   }
 
   putPostAPI(id: number, para: any) {
-    return this.http.put(`https://localhost:7276/api/Post/${id}`, para);
+
+    return this.http.put(
+      `https://localhost:7276/api/Post/${id}`, para);
+
   }
 }
 
