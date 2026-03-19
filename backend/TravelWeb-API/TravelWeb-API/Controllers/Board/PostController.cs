@@ -44,13 +44,12 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         [HttpPost]
-        public async Task<ActionResult<int>> PostPost(int id)
+        public async Task<IActionResult> PostPost(Article article)
         {
-            var article=_context.Articles.FirstOrDefault(a => a.ArticleId == id);
             if (article.Type == 0)
             {
                 _ArticlesService.AddPost(article);
-                return article.ArticleId;
+                return NoContent();
             }
             else if (article.Type == 1)
             {
@@ -64,29 +63,24 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         // PUT: api/Articles/5 修改文章
-        [HttpPut("{id}")] 
-        public async Task<ActionResult<bool>> PutArticle(PostUpdateDto postUpdate)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutArticle(
+            int id, string? Title, string? PhotoUrl, byte Status,
+            string? content, int? regionId,
+            List<string>? photoUrlList)
         {
             //修改快速串文
-            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == postUpdate.id).Type;
+            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == id).Type;
             bool isUpdateSuccess =
-                await _ArticlesService.UpdateArtic(
-                    postUpdate.id,
-                    postUpdate.Title, 
-                    postUpdate.PhotoUrl, 
-                    postUpdate.Status);
-            if (!isUpdateSuccess)
+                await _ArticlesService.UpdateArtic(id, Title, PhotoUrl, Status);
+            if (isUpdateSuccess)
                 return NotFound();
             else
             {
                 if (type == 0)
                 {
-                    bool isUpdatePostSuccess = await _ArticlesService.UpdatePost(
-                        postUpdate.id,
-                        postUpdate.content, 
-                        postUpdate.regionId,
-                        postUpdate.photoUrlList);//, photoUrlList
-                    if (isUpdatePostSuccess) return true;
+                    bool isUpdatePostSuccess = await _ArticlesService.UpdatePost(id, content, regionId, photoUrlList);
+                    if (isUpdatePostSuccess) return NoContent();
                     return NotFound();
                 }
                 else if (type == 1)

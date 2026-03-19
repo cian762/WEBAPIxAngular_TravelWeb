@@ -80,11 +80,15 @@ namespace TravelWeb_API.Controllers.Board
 
         // POST: api/Articles 新增標頭
         [HttpPost]
-        public async Task<ActionResult<int>> PostArticle(byte Type, string UserId)
+        public async Task<ActionResult<Article>> PostArticle(byte Type, string UserId)
         {
             Article article = _ArticlesService.AddArtic(Type, UserId);
             await _context.SaveChangesAsync();
-            return article.ArticleId;
+            return CreatedAtAction(
+                   "GetArticle",                       // 1. Action 名稱：指向「查詢單一資料」的那個方法
+                   new { id = article.ArticleId },    // 2. 路由參數：用來填補 GetArticle 所需的 id
+                   article                            // 3. 回傳內容：要把整份物件秀給前端看
+                     );
         }
 
 
@@ -101,7 +105,7 @@ namespace TravelWeb_API.Controllers.Board
         {
             var list = _context.Articles.ToList();
             var result = 
-                list.Select(l => new Test {ArticleId=l.ArticleId, Title = l.Title,PhotoUrl=l.PhotoUrl,UserName =l.UserId}).ToList();
+                list.Select(l => new Test { Title = l.Title,PhotoUrl=l.PhotoUrl,UserName =l.UserId}).ToList();
             return Ok(result);
         }
         

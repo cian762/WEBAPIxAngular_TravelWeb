@@ -19,10 +19,10 @@ export class AttractionDetailComponent implements OnInit {
   currentImgIdx = 0;
 
   tabs = [
-    { key: 'feature', label: '景點特色', icon: '🏞️' },
-    { key: 'transport', label: '如何前往', icon: '🚌' },
+    { key: 'feature',    label: '景點特色', icon: '🏞️' },
+    { key: 'transport',  label: '如何前往', icon: '🚌' },
     { key: 'accessible', label: '友善指引', icon: '♿' },
-    { key: 'nearby', label: '周邊資訊', icon: '📍' },
+    { key: 'nearby',     label: '周邊資訊', icon: '📍' },
   ];
 
   weather = { temp: 24, rain: 10, aqi: 35, aqiLabel: '良好' };
@@ -30,7 +30,7 @@ export class AttractionDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private svc: AttractionService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -65,7 +65,7 @@ export class AttractionDetailComponent implements OnInit {
     this.svc.toggleLike(this.attraction.attractionId).subscribe(res => {
       if (this.attraction) {
         this.attraction.likeCount = res.likeCount;
-        this.attraction.isLiked = res.isLiked;
+        this.attraction.isLiked   = res.isLiked;
       }
     });
   }

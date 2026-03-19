@@ -137,10 +137,10 @@ namespace TravelWeb_API.Models.Board.Service
                 {
                     _context.PostPhotos.Remove(p);
                 }
-                //foreach (var p in photos)
-                //{
-                //    _context.PostPhotos.Add(new PostPhoto { ArticleId = id, Photo = p });
-                //}
+                foreach (var p in photos)
+                {
+                    _context.PostPhotos.Add(new PostPhoto { ArticleId = id, Photo = p });
+                }
                 await _context.SaveChangesAsync();
                 return true;
             }

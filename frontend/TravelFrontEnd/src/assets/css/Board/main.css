@@ -67,9 +67,9 @@
 }
 
 /* Smooth scroll */
-/* :root {
+:root {
   scroll-behavior: smooth;
-} */
+}
 
 /*--------------------------------------------------------------
 # General Styling & Shared Classes

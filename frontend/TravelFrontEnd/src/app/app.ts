@@ -7,11 +7,10 @@ import { Footer } from "./footer/footer";
 import { Banner } from "./banner/banner";
 import { PostDetail } from "./Board/post-detail/post-detail";
 import { Shoppingcart } from './trip/component/shoppingcart/shoppingcart';
-import { CreatPost } from './Board/creat-post/creat-post';
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, TestUse, RouterLink, Shoppingcart, BlogHome, Header, Footer, Banner, PostDetail, CreatPost],
+  selector: 'app-root', 
+  imports: [RouterOutlet, TestUse, RouterLink,Shoppingcart, BlogHome, Header, Footer, Banner, PostDetail],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
