@@ -16,6 +16,7 @@ export class AttractionsHomeComponent {
   regions: RegionGroup[] = [
     {
       label: '北部地區',
+      mapImage: '北部.png',   // ← 加這行
       description: '您可以探訪臺灣最多元的城市魅力——臺北101與故宮博物院、前往歷史典藏文物欣賞；踏走迪化街老街、九份、淡水等充滿懷舊的歷史勝地。',
       cities: [
         { name: '臺北市', regionIds: [10], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
@@ -29,6 +30,7 @@ export class AttractionsHomeComponent {
     },
     {
       label: '中部地區',
+      mapImage: '中部.png',
       description: '日月潭的湖光山色、八卦山、梨山、獅頭山等，都可充分感受臺灣多元文化及豐富自然景觀。苗栗、台中、彰化、南投、雲林皆有精彩可期。',
       cities: [
         { name: '苗栗縣', regionIds: [21], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
@@ -40,6 +42,7 @@ export class AttractionsHomeComponent {
     },
     {
       label: '南部地區',
+      mapImage: '南部.png',
       description: '探訪濃厚的歷史文化：品嚐傳統美食小吃、一睹世界級日出奇景；也可刺激水上活動，近覽太平洋壯闊景觀。',
       cities: [
         { name: '嘉義縣', regionIds: [33], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
@@ -51,6 +54,7 @@ export class AttractionsHomeComponent {
     },
     {
       label: '東部地區',
+      mapImage: '東部.png',
       description: '壯觀的太魯閣峽谷、美麗的花東縱谷，以及台東都蘭山、綠島等，是享受大自然洗禮的最佳去處。',
       cities: [
         { name: '花蓮縣', regionIds: [40], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },
@@ -59,6 +63,7 @@ export class AttractionsHomeComponent {
     },
     {
       label: '離島地區',
+      mapImage: '離島.png',
       description: '澎湖、金門、馬祖各具獨特的自然景觀和歷史文化，是尋訪純淨海洋與閩南文化的好去處。',
       cities: [
         { name: '澎湖縣', regionIds: [50], imageUrl: 'assets/img/attractionCity/newtaipei.jpg' },

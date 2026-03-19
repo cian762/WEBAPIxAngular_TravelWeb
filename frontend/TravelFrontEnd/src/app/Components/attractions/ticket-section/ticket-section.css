@@ -1,0 +1,192 @@
+/* 售票區 loading */
+.ts-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+/* 無票種 */
+.ts-empty {
+  padding: 48px 0;
+  text-align: center;
+  color: #999;
+  font-size: 1rem;
+}
+
+/* 票種列表 */
+.ts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 單張票卡 */
+.ts-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 24px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 14px;
+  background: #fff;
+  transition: box-shadow 0.2s;
+}
+
+.ts-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.ts-card.sold-out {
+  opacity: 0.5;
+  background: #f8f8f8;
+}
+
+/* 左側資訊 */
+.ts-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.ts-card__type-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 0.78rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.ts-card__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.ts-card__meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.ts-card__id {
+  background: #f0f0f0;
+  padding: 1px 8px;
+  border-radius: 4px;
+}
+
+.ts-card__code {
+  background: #e8f4ff;
+  color: #1565c0;
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* 庫存提示 */
+.ts-card__stock {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.ts-card__stock--low {
+  color: #e65100;
+  font-weight: 600;
+}
+
+.ts-card__stock--out {
+  color: #c62828;
+  font-weight: 700;
+}
+
+/* 右側操作區 */
+.ts-card__action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  min-width: 160px;
+}
+
+.ts-card__price {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #e84611;
+}
+
+/* 數量選擇 */
+.ts-card__qty {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ts-qty-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f5f5f5;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #333;
+}
+
+.ts-qty-btn:hover {
+  background: #ebebeb;
+}
+
+.ts-qty-val {
+  width: 40px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* 加入購物車按鈕 */
+.ts-cart-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #e84611;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  white-space: nowrap;
+}
+
+.ts-cart-btn:hover:not(:disabled) {
+  background: #c73a0e;
+}
+
+.ts-cart-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* RWD */
+@media (max-width: 576px) {
+  .ts-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ts-card__action {
+    align-items: flex-start;
+    width: 100%;
+  }
+}

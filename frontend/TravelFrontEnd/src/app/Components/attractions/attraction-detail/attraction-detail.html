@@ -139,11 +139,13 @@
     <!-- Tab 內容 -->
     <div class="tab-body mt-4">
 
+      <!-- 景點特色 -->
       <div *ngIf="activeTab === 'feature'">
         <p *ngIf="attraction.address"><strong>地址：</strong>{{ attraction.address }}</p>
         <p *ngIf="attraction.businessHours"><strong>開放時間：</strong>{{ attraction.businessHours }}</p>
       </div>
 
+      <!-- 如何前往 -->
       <div *ngIf="activeTab === 'transport'">
         <h5 class="tab-sec-title">🗺️ 地圖導航</h5>
         <div class="map-wrap mb-3">
@@ -157,13 +159,12 @@
         </div>
       </div>
 
-      <div *ngIf="activeTab === 'accessible'">
-        <div class="accessible-item">
-          <i class="fa fa-wheelchair"></i>
-          無障礙設施（詳細資訊請洽詢現場服務人員）
-        </div>
+      <!-- 售票區 -->
+      <div *ngIf="activeTab === 'tickets'">
+        <app-ticket-section [attractionId]="attraction.attractionId" />
       </div>
 
+      <!-- 周邊資訊 -->
       <div *ngIf="activeTab === 'nearby'">
         <p class="tab-placeholder">周邊餐廳、住宿等資訊</p>
       </div>

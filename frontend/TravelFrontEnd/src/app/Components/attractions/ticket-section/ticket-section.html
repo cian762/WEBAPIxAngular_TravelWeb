@@ -1,0 +1,60 @@
+<!-- 售票區 -->
+
+<!-- 載入中 -->
+<div class="ts-loading" *ngIf="loading">
+  <div class="spinner-border text-warning"></div>
+  <span>票種資訊載入中...</span>
+</div>
+
+<!-- 無票種 -->
+<div class="ts-empty" *ngIf="!loading && products.length === 0">
+  <span>🎫 目前無可購買票種</span>
+</div>
+
+<!-- 票種列表 -->
+<div class="ts-list" *ngIf="!loading && products.length > 0">
+
+  <div class="ts-card" *ngFor="let p of products" [class.sold-out]="isSoldOut(p.productCode)">
+
+    <!-- 左：票種資訊 -->
+    <div class="ts-card__info">
+      <div class="ts-card__type-badge">{{ p.ticketTypeName || '一般票' }}</div>
+      <div class="ts-card__title">{{ p.title }}</div>
+      <div class="ts-card__meta">
+        <span class="ts-card__id">ID: {{ p.productId }}</span>
+        <span class="ts-card__code">{{ p.productCode }}</span>
+      </div>
+      <div class="ts-card__stock" [class.ts-card__stock--low]="isLowStock(p.productCode)"
+        [class.ts-card__stock--out]="isSoldOut(p.productCode)">
+        <ng-container *ngIf="!stockLoaded[p.productCode]">
+          庫存載入中...
+        </ng-container>
+        <ng-container *ngIf="stockLoaded[p.productCode] && !isSoldOut(p.productCode)">
+          <span *ngIf="isLowStock(p.productCode)">⚠️ 剩餘庫存：{{ stockMap[p.productCode] }} 張</span>
+          <span *ngIf="!isLowStock(p.productCode)">剩餘庫存：{{ stockMap[p.productCode] }} 張</span>
+        </ng-container>
+        <ng-container *ngIf="isSoldOut(p.productCode)">
+          已售完
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- 右：價格 + 數量 + 按鈕 -->
+    <div class="ts-card__action">
+      <div class="ts-card__price">
+        NT$ {{ p.price | number }}
+      </div>
+
+      <div class="ts-card__qty" *ngIf="!isSoldOut(p.productCode)">
+        <button class="ts-qty-btn" (click)="decQty(p.productId)">−</button>
+        <span class="ts-qty-val">{{ qtyMap[p.productId] }}</span>
+        <button class="ts-qty-btn" (click)="incQty(p)">＋</button>
+      </div>
+
+      <button class="ts-cart-btn" (click)="addToCart(p)" [disabled]="isSoldOut(p.productCode)">
+        {{ isSoldOut(p.productCode) ? '已售完' : '加入購物車' }}
+      </button>
+    </div>
+
+  </div>
+</div>

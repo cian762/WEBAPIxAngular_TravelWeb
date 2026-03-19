@@ -4,11 +4,27 @@ import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Attraction, AttractionType } from './attraction.models';
 
+export interface AttractionProduct {
+  productId: number;
+  productCode: string;
+  title: string;
+  price: number | null;
+  maxPurchaseQuantity: number | null;
+  status: string;
+  ticketTypeCode: number | null;
+  ticketTypeName: string | null;
+}
+
+export interface StockResult {
+  productCode: string;
+  remainingStock: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AttractionService {
   private apiUrl = 'https://localhost:7276/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // 取得所有景點
   getAttractions(params?: {
@@ -19,8 +35,8 @@ export class AttractionService {
   }): Observable<Attraction[]> {
     let p = new HttpParams();
     if (params?.regionId) p = p.set('regionId', params.regionId);
-    if (params?.typeId)   p = p.set('typeId', params.typeId);
-    if (params?.keyword)  p = p.set('keyword', params.keyword);
+    if (params?.typeId) p = p.set('typeId', params.typeId);
+    if (params?.keyword) p = p.set('keyword', params.keyword);
     return this.http.get<Attraction[]>(`${this.apiUrl}/Attraction`, { params: p })
       .pipe(catchError(() => of([])));
   }
@@ -48,5 +64,21 @@ export class AttractionService {
   getAttractionsByType(typeId: number): Observable<Attraction[]> {
     return this.http.get<Attraction[]>(`${this.apiUrl}/Attraction/bytype/${typeId}`)
       .pipe(catchError(() => of([])));
+  }
+
+  // ── 票務相關 ──────────────────────────────────────────
+
+  // 取得某景點所有上架票種
+  getProductsByAttraction(attractionId: number): Observable<AttractionProduct[]> {
+    return this.http.get<AttractionProduct[]>(
+      `${this.apiUrl}/AttractionProduct/byattraction/${attractionId}`
+    ).pipe(catchError(() => of([])));
+  }
+
+  // 取得單一票種庫存（以 StockInRecords.remaining_stock 加總）
+  getStock(productCode: string): Observable<StockResult> {
+    return this.http.get<StockResult>(
+      `${this.apiUrl}/AttractionProduct/stock/${productCode}`
+    ).pipe(catchError(() => of({ productCode, remainingStock: 0 })));
   }
 }

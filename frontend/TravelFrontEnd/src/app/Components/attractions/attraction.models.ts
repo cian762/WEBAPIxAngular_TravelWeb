@@ -33,6 +33,7 @@ export interface AttractionType {
 
 export interface RegionGroup {
   label: string;
+  mapImage: string;   // ← 加這行
   description: string;
   cities: CityCard[];
 }

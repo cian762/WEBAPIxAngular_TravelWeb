@@ -10,7 +10,15 @@
     <span class="current">{{ cityName }}</span>
   </div>
 </div>
-
+<!-- Tag 標題（只有從 tag 點進來才顯示） -->
+<div class="tag-title-bar" *ngIf="isFromTag">
+  <div class="container">
+    <h2 class="tag-title">{{ cityName }}</h2>
+    <a routerLink="/attractions/tags" class="tags-link-top">
+      景點標籤列表 <span class="tag-hash">#</span>
+    </a>
+  </div>
+</div>
 <!-- 大 Tab：觀光景點 / 當期活動 / 遊程推薦 -->
 <div class="main-tabs">
   <div class="container">
@@ -32,13 +40,13 @@
 <ng-container *ngIf="activeTab === 'attractions'">
 
   <!-- 類型 Tab -->
-  <div class="type-nav">
+  <div class="type-nav" *ngIf="!isFromTag">
     <div class="container">
       <div class="type-nav__inner">
-        <button *ngFor="let t of types" class="type-btn" [class.active]="activeTypeId === t.attractionTypeId"
-          (click)="selectType(t.attractionTypeId)">
-          <span class="type-btn__icon">{{ getTypeIcon(t.attractionTypeName) }}</span>
-          <span class="type-btn__name">{{ t.attractionTypeName }}</span>
+        <button *ngFor="let t of customTabs; let i = index" class="type-btn" [class.active]="activeTabIdx === i"
+          (click)="switchCustomTab(i)">
+          <span class="type-btn__icon">{{ t.icon }}</span>
+          <span class="type-btn__name">{{ t.label }}</span>
         </button>
       </div>
     </div>
@@ -47,12 +55,15 @@
   <!-- 搜尋列 -->
   <div class="search-bar">
     <div class="container">
-      <div class="search-bar__inner">
-        <input type="text" [(ngModel)]="keyword" (keyup.enter)="onSearch()" placeholder="搜尋景點名稱..."
-          class="search-bar__input">
-        <button class="search-bar__btn" (click)="onSearch()">
-          <i class="fa fa-search"></i>
-        </button>
+      <div class="search-bar__top">
+        <div class="search-bar__inner">
+          <input type="text" [(ngModel)]="keyword" (keyup.enter)="onSearch()" placeholder="搜尋景點名稱..."
+            class="search-bar__input">
+          <button class="search-bar__btn" (click)="onSearch()">
+            <i class="fa fa-search"></i>
+          </button>
+        </div>
+
       </div>
       <p class="result-hint" *ngIf="!loading">
         共找到 <strong>{{ attractions.length }}</strong> 個景點
@@ -94,22 +105,12 @@
               <h5 class="att-card__title">{{ a.name }}</h5>
 
               <div class="att-card__types" *ngIf="a.types?.length">
-                <span class="badge-type" *ngFor="let t of a.types">
+                <span class="badge-type" *ngFor="let t of a.types"
+                  (click)="selectType(t.attractionTypeId, t.attractionTypeName); $event.stopPropagation()">
                   {{ t.attractionTypeName }}
                 </span>
               </div>
 
-              <div class="att-card__footer">
-                <!-- 以下是景點list那一頁顯示地址，很醜先拿掉-->
-                <!-- <span class="att-card__addr" *ngIf="a.address">
-                  <i class="fa fa-map-marker"></i>
-                  {{ a.address.length > 14 ? (a.address | slice:0:14) + '...' : a.address }}
-                </span> -->
-                <button class="att-card__like" [class.liked]="a.isLiked" (click)="toggleLike($event, a)">
-                  <i class="fa" [class.fa-heart]="a.isLiked" [class.fa-heart-o]="!a.isLiked"></i>
-                  {{ a.likeCount || 0 }}
-                </button>
-              </div>
             </div>
 
           </div>

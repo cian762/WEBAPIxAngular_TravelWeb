@@ -270,15 +270,17 @@
   padding: 2px 8px;
   font-size: 0.74rem;
   font-weight: 600;
+  display: inline-block;
+  /* ← 確保有這行 */
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.att-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 10px;
-  margin-top: auto;
+.badge-type:hover {
+  background-color: #e84c3d;
+  color: #fff;
+  transform: translateY(-2px);
+
 }
 
 .att-card__addr {
@@ -291,19 +293,65 @@
   margin-right: 3px;
 }
 
-.att-card__like {
-  background: none;
-  border: none;
-  color: #bbb;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: color 0.2s;
+.search-bar__top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 620px;
+}
+
+.search-bar__inner {
+  flex: 1;
+  /* 讓搜尋框佔滿剩餘空間 */
+}
+
+.tags-link {
   display: flex;
   align-items: center;
   gap: 4px;
+  font-size: 0.85rem;
+  color: #e84c3d;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.att-card__like.liked,
-.att-card__like:hover {
-  color: #e74c3c;
+.tag-hash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #e84c3d;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+}
+
+.tag-title-bar {
+  padding: 24px 0 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.tag-title-bar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tag-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.tags-link-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #e84c3d;
+  text-decoration: none;
+  font-weight: 600;
 }

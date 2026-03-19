@@ -127,5 +127,17 @@ namespace TravelWeb_API.Controllers.Attraction
 
             return Ok(types);
         }
+
+        // GET /api/attractionproduct/stock/{productCode}
+        // 回傳該 productCode 的 remaining_stock 加總
+        [HttpGet("stock/{productCode}")]
+        public async Task<IActionResult> GetStock(string productCode)
+        {
+            var stock = await _dbContext.StockInRecords
+                .Where(s => s.ProductCode == productCode)
+                .SumAsync(s => (int?)s.RemainingStock) ?? 0;
+
+            return Ok(new { productCode, remainingStock = stock });
+        }
     }
 }

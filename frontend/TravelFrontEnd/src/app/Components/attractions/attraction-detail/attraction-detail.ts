@@ -4,11 +4,12 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { AttractionService } from '../attraction.service';
 import { SafeUrlPipe } from '../safe-url.pipe';
 import { Attraction } from '../attraction.models';
+import { TicketSectionComponent } from '../ticket-section/ticket-section';
 
 @Component({
   selector: 'app-attraction-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, SafeUrlPipe],
+  imports: [CommonModule, RouterModule, SafeUrlPipe, TicketSectionComponent],
   templateUrl: './attraction-detail.html',
   styleUrls: ['./attraction-detail.css']
 })
@@ -21,7 +22,7 @@ export class AttractionDetailComponent implements OnInit {
   tabs = [
     { key: 'feature', label: '景點特色', icon: '🏞️' },
     { key: 'transport', label: '如何前往', icon: '🚌' },
-    { key: 'accessible', label: '友善指引', icon: '♿' },
+    { key: 'tickets', label: '售票區', icon: '🎟️' },
     { key: 'nearby', label: '周邊資訊', icon: '📍' },
   ];
 
@@ -46,9 +47,9 @@ export class AttractionDetailComponent implements OnInit {
 
   get mainImage(): string {
     if (this.attraction?.images?.length) {
-      return `https://localhost:7285${this.attraction.images[this.currentImgIdx]}`;//port改成7285，且刪除[this.currentImgIdx]後的.imagePath
+      return `https://localhost:7285${this.attraction.images[this.currentImgIdx]}`;
     }
-    return 'https://placehold.co/600x400?text=No+Image'; // ← 這裡也換掉';
+    return 'https://placehold.co/600x400?text=No+Image';
   }
 
   get imageCount(): number { return this.attraction?.images?.length ?? 0; }
@@ -70,9 +71,7 @@ export class AttractionDetailComponent implements OnInit {
     });
   }
 
-
   addToFavorite(): void {
-    // 之後串會員 API，目前先提示
     alert('請先登入會員');
   }
 
