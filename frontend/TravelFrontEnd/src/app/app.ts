@@ -8,10 +8,11 @@ import { Banner } from "./banner/banner";
 import { PostDetail } from "./Board/post-detail/post-detail";
 import { Shoppingcart } from './trip/component/shoppingcart/shoppingcart';
 import { Order } from "./trip/component/order/order";
+import { Product } from "./trip/component/product/product";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TestUse, RouterLink, Shoppingcart, BlogHome, Header, Footer, Banner, PostDetail, Order],
+  imports: [RouterOutlet, TestUse, RouterLink, Shoppingcart, BlogHome, Header, Footer, Banner, PostDetail, Order, Product],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

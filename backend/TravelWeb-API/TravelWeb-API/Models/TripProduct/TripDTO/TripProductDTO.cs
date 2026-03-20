@@ -24,7 +24,7 @@
 
         // 分頁必備
         public int Page { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
+        public int PageSize { get; set; } = 16;
 
         // 排序方式 (例如: 1 = 價格由低到高, 2 = 點擊次數由高到低)
         public int? SortType { get; set; }

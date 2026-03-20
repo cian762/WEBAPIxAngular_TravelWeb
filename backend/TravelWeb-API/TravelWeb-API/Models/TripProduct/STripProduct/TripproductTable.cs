@@ -12,22 +12,8 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
         public TripproductTable(TripDbContext trip ,IConfiguration config)
         {
             _trip = trip;
-            _mvcBaseUrl = config["ExternalServices:MvcBackendUrl"]?.TrimEnd('/') ?? "";
+            _mvcBaseUrl = config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
 
-        }
-        //抓商品表的那張表給自己的DTO
-        public async Task<IEnumerable<TripProductDTO>> GetAllAsync()
-        {
-            var products = await _trip.TripProducts.Select(p => new TripProductDTO
-            {
-                TripProductId = p.TripProductId,
-                ProductName = p.ProductName,
-                CoverImage = string.IsNullOrEmpty(p.CoverImage)
-                         ? ""
-                         : _mvcBaseUrl + p.CoverImage.Replace("~", ""),
-                DisplayPrice = p.DisplayPrice
-            }).ToListAsync();
-            return products;
         }
         //抓所有地區表
         public async Task<IEnumerable<RegionListDTO>> GetRegionsAllAsync()
@@ -38,12 +24,6 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 RegionName = r.RegionName
             }).ToListAsync();
             return rogin;
-        }
-
-
-        public Task<IEnumerable<ProductQueryDTO>> GetTagAll()
-        {
-            throw new NotImplementedException();
         }
         // 取得所有標籤，給前端畫按鈕用
         public async Task<IEnumerable<TagListDTO>> GetTagsAllAsync()
@@ -65,6 +45,9 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             // 1. 篩選地區
             if (queryDto.RegionId.HasValue)
                 query = query.Where(p => p.RegionId == queryDto.RegionId);
+            //價錢篩選
+            if (queryDto.MaxPrice.HasValue)
+                query = query.Where(p => p.DisplayPrice <= queryDto.MaxPrice);
 
             // 2. 篩選標籤 (多對多直接寫法)
             if (queryDto.TagIds != null && queryDto.TagIds.Any())
@@ -105,7 +88,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     TripProductId = x.p.TripProductId,
                     ProductName = x.p.ProductName,
-                    CoverImage = x.p.CoverImage,
+                    CoverImage = _mvcBaseUrl+"/PImages/"+x.p.CoverImage,
                     DisplayPrice = x.p.DisplayPrice,
                     RegionName = x.r.RegionName, // 這裡從 Join 的 r 拿名稱
                     DurationDays = x.p.DurationDays
@@ -114,5 +97,11 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             return new PagedResult<TripProductDTO> { TotalCount = totalCount, Data = pagedData };
 
         }
+        //=====================================================
+        //這裡是商品詳細頁
+
+
+
+
     }
 }
