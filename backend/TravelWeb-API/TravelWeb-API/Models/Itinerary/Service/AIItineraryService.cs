@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TravelWeb_API.Models.Itinerary.DBContext;
 using TravelWeb_API.Models.Itinerary.DBModel;
 using TravelWeb_API.Models.Itinerary.DTO;
@@ -56,12 +57,18 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 設定：忽略大小寫差異
             var options = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
             };
-
+            if (string.IsNullOrEmpty(jsonResult)) throw new Exception("AI 未回傳任何內容");
             // 使用設定進行轉型
             var result = JsonSerializer.Deserialize<AiItineraryResult>(jsonResult, options);
-
+            if (result?.Itinerary == null || !result.Itinerary.Any())
+            {
+                // 如果行程是空的，把原因寫進版本備註，方便你從 DB 看到底發生什麼事
+                var reason = result?.UnplacedPois?.FirstOrDefault()?.Reason ?? "AI 判定無法生成可行行程";
+                throw new Exception($"AI 規劃失敗：{reason}");
+            }
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -96,7 +103,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 // 3. 處理行程項目 (巢狀迴圈：天 -> 活動)
                 foreach (var day in result.Itinerary)
                 {
-                    int currentOrder = 1;
+                    int currentOrder = 100;
                     foreach (var item in day.Schedule)
                     {
                         _context.ItineraryItems.Add(new ItineraryItem
@@ -105,24 +112,25 @@ namespace TravelWeb_API.Models.Itinerary.Service
                             // 【後果 2】：如果是 AI 生成的通用項 (如午餐)，PoiId 為 null 是正常的
                             AttractionId = item.PoiId,
                             DayNumber = day.Day,
-                            SortOrder = currentOrder++,
+                            SortOrder = currentOrder,
                             ContentDescription = item.Details,
                             // 【後果 3】：轉換為絕對時間
                             StartTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.Start),
                             EndTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.End),
                             ActivityId = item.Type
                         });
+                        currentOrder += 100;
                     }
                 }
 
-                //// 4. 存入 AI 分析報告
-                //_context.Aianalyses.Add(new Aianalysis
-                //{
-                //    VersionId = aiVersion.VersionId,
-                //    FeasibilityScore = result.Summary.AnalysisMetrics.OverallFeasibility,
-                //    FatigueIndex = result.Summary.AnalysisMetrics.OverallFatigue,
-                //    AnalysisTime = DateTime.Now
-                //});
+                // 4. 存入 AI 分析報告
+                _context.Aianalyses.Add(new Aianalysis
+                {
+                    VersionId = aiVersion.VersionId,
+                    FeasibilityScore = result.Summary.AnalysisMetrics.OverallFeasibility,
+                    FatigueIndex = result.Summary.AnalysisMetrics.OverallFatigue,
+                    AnalysisTime = DateTime.Now
+                });
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

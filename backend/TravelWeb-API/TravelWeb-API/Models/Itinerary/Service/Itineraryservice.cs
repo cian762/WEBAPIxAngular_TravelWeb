@@ -126,6 +126,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 {
                     ItineraryId = i.ItineraryId,
                     ItineraryName = i.ItineraryName,
+                    ItineraryImage = i.ItineraryImage ?? "https://res.cloudinary.com/dcyrbbv4w/image/upload/v1773284561/cld-sample-2.jpg",
                     // 抓取「當前使用中」的版本
                     CurrentVersion = i.ItineraryVersions
                         .Where(v => v.CurrentUsageStatus == "Y")
