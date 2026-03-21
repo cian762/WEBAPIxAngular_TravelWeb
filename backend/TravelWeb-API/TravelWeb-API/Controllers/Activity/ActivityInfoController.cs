@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Services;
 
 namespace TravelWeb_API.Controllers.Activity
@@ -9,20 +10,54 @@ namespace TravelWeb_API.Controllers.Activity
     public class ActivityInfoController : ControllerBase
     {
         private readonly ActivityInfoService _activityInfoService;
-        public ActivityInfoController(ActivityInfoService activityInfoService)
+        private readonly GoogleRouteForActivityService _googleRouteForActivityService;
+
+        public ActivityInfoController(ActivityInfoService activityInfoService, GoogleRouteForActivityService googleRouteForActivityService)
         {
             _activityInfoService = activityInfoService;
+            _googleRouteForActivityService = googleRouteForActivityService;
         }
 
 
-        [HttpGet]
-        public async Task<ActionResult> GetSpecificActivityInfo(int activityId)
+        [HttpGet("{activityId}")]
+        public async Task<ActionResult> GetSpecificActivityInfo([FromRoute] int activityId)
         {
             var result = await _activityInfoService.GetSpecificActivityInfo(activityId);
             if (result == null) return NotFound();
             return Ok(result);
         }
 
+
+        [HttpGet("{activitiyId}/Reviews")]
+        public async Task<ActionResult> GetRelatedReviews([FromRoute] int activitiyId)
+        {
+            var result = await _activityInfoService.GetRelatedReviews(activitiyId);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+
+        [HttpGet("{activityId}/Tickets")]
+        public async Task<ActionResult> GetRelatedTickets([FromRoute] int activityId)
+        {
+            var result = await _activityInfoService.GetRelatedTickets(activityId);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPost("RoutePlan")]
+        public async Task<ActionResult<RouteResponseDTO>> GetRoute([FromBody] RouteRequestDTO request) 
+        {
+            var result = await _googleRouteForActivityService.ComputeRouteAsync(request);
+
+            if (result == null)
+            {
+                return BadRequest("查無路線");
+            }
+
+            return Ok(result);
+
+        }
 
 
     }

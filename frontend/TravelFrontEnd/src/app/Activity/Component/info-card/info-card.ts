@@ -195,7 +195,6 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
       this.currentPage = res.pageNumber;
       this.generatePageNumbers();
 
-      this.cdr.detectChanges();
     });
   }
 

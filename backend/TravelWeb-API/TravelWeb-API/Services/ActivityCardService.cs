@@ -18,40 +18,6 @@ namespace TravelWeb_API.Services
             _dbContext = dbContext;
         }
 
-        public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetCards(PagedQueryParameters q) 
-        {
-            var totalRecords = _dbContext.Activities.Count(a => a.SoftDelete == false);
-
-            var ans = await _dbContext.Activities
-                .Where(a => a.SoftDelete == false)
-                .Skip((q.PageNumber - 1) * q.PageSize)
-                .Take(q.PageSize)
-                .Select(a => new ActivityCardReponseDTO
-                {
-                    ActivityId = a.ActivityId,
-                    Title = a.Title,
-                    Type = a.Types.Select(t => t.ActivityType).ToList(),
-                    Region = a.Regions.Select(r => r.RegionName).ToList(),
-                    Start = a.StartTime,
-                    End = a.EndTime,
-                    CoverImageUrl = a.ActivityImages
-                                    .Where(i => i.IsCoverImage != false)
-                                    .Select(i => i.ImageUrl)
-                                    .FirstOrDefault(),
-                    ViewCount = a.ViewCount,
-                    CommentCount = a.Reviews.Count(),
-                    AverageRating = (float) (a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),
-                    ReferencePrice = a.ActivityTicketDetails
-                    .Where(d=>d.ProductCodeNavigation.TicketCategoryId == 2)
-                    .Select(d => d.ProductCodeNavigation.CurrentPrice)
-                    .FirstOrDefault() ?? 0,
-
-                })
-                .ToListAsync();
-
-            return new PagedResponseDTO<ActivityCardReponseDTO>(ans,q.PageNumber,totalRecords, q.PageSize);
-        }
-
         public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetSpecificCards(ActivityInfoParameters q) 
        {
             var query = _dbContext.Activities
@@ -99,6 +65,7 @@ namespace TravelWeb_API.Services
             var totalRecords = query.Count();
 
             var ans = await query
+                .Where(a => a.EndTime >= today)
                 .Skip((q.PageNumber - 1) * q.PageSize)
                 .Take(q.PageSize)
                 .Select(a => new ActivityCardReponseDTO
@@ -115,7 +82,7 @@ namespace TravelWeb_API.Services
                                     .FirstOrDefault(),
                     ViewCount = a.ViewCount,
                     CommentCount = a.Reviews.Count(),
-                    AverageRating = (float)(a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),
+                    AverageRating = (float)Math.Round((a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),1),
                     ReferencePrice = a.ActivityTicketDetails
                     .Where(d => d.ProductCodeNavigation.TicketCategoryId == 2)
                     .Select(d => d.ProductCodeNavigation.CurrentPrice)

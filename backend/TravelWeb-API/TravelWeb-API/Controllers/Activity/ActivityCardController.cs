@@ -23,14 +23,7 @@ namespace TravelWeb_API.Controllers.Activity
         }
 
 
-        //首次載入時，拿取所有活動資訊
-        [HttpGet]
-        public async Task<ActionResult> GetActivities([FromQuery] PagedQueryParameters query)
-        {
-            return Ok(await _infoService.GetCards(query));
-        }
 
-        
         //有條件的拉取活動資訊
         //填入的日期格式要是 YYYY-MM-DD
         [HttpGet("Query")]

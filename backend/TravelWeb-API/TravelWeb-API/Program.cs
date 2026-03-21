@@ -135,10 +135,12 @@ builder.Services.AddDbContext<ActivityDbContext>(options =>
 builder.Services.AddScoped<ActivityCardService>();
 builder.Services.AddScoped<ActivityInfoService>();
 builder.Services.AddScoped<ActivityTicketService>();
+builder.Services.AddHttpClient<GoogleRouteForActivityService>();
+#endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-#endregion
+
 
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>

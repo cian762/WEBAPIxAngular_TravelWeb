@@ -7,39 +7,21 @@
       <div class="col-lg-7">
         <!-- 放主圖 -->
         <div class="gallery-main">
-          <img src="" alt="活動主圖">
+          <img [src]="activityInfo.images[0]" alt="活動主圖">
         </div>
-
       </div>
 
       <div class="col-lg-5">
         <div class="row g-3">
 
           <!-- 用迴圈放附圖 -->
+          @for (img of activityInfo.images.slice(1); track $index) {
           <div class="col-6">
             <div class="gallery-thumb">
-              <img src="" alt="活動副圖1">
+              <img [src]="img" [alt]="'活動副圖'+$index">
             </div>
           </div>
-
-          <div class="col-6">
-            <div class="gallery-thumb">
-              <img src="" alt="活動副圖2">
-            </div>
-          </div>
-
-          <div class="col-6">
-            <div class="gallery-thumb">
-              <img src="" alt="活動副圖3">
-            </div>
-          </div>
-
-          <div class="col-6">
-            <div class="gallery-thumb">
-              <img src="" alt="活動副圖4">
-            </div>
-          </div>
-
+          }
         </div>
       </div>
     </div>
@@ -49,26 +31,31 @@
   <!-- 活動摘要 -->
   <section class="activity-summary card-section mb-4">
     <div class="row g-4 align-items-start">
-      <div class="col-lg-8">
+      <div class="col-lg-5">
         <div class="summary-content">
           <div class="summary-badges mb-3">
-            <span class="summary-badge">放分類標籤</span>
+            @for (item of activityInfo.regions; track $index) {
+            <span class="summary-badge">{{ '# '+item }}</span>
+            }
+            @for (item of activityInfo.types; track $index) {
+            <span class="summary-badge">{{ '# '+item }}</span>
+            }
           </div>
 
-          <h1 class="activity-title mb-3">活動標題</h1>
+          <h1 class="activity-title mb-3">{{activityInfo.title}}</h1>
           <div class="mb-3 fs-5">
             <i class="bi bi-calendar-event me-2"></i>
-            2026/03/20 - 2026/03/21
+            {{activityInfo.startTime}} ~ {{activityInfo.endTime}}
           </div>
           <div class="activity-meta mb-3">
             <div class="meta-item">
               <i class="bi bi-geo-alt"></i>
-              <span>活動地址</span>
+              <span>{{ activityInfo.address}}</span>
             </div>
             <div class="meta-item">
               <i class="bi bi-star-fill"></i>
-              <span>4.8</span>
-              <span class="meta-light">(234 則評論)</span>
+              <span>{{reviewsPackage.averageRating}}</span>
+              <span class="meta-light">({{reviewsPackage.commentCount}} 則評論)</span>
             </div>
             <div class="meta-item">
               <i class="bi bi-bag-check"></i>
@@ -77,28 +64,15 @@
           </div>
 
 
-          <div class="highlight-box mt-4">
-            <h3 class="highlight-title">行程亮點</h3>
-            <ul class="highlight-list">
-              <li>用 for 迴圈跑多點簡述</li>
-              <li>用 for 迴圈跑多點簡述</li>
-              <li>用 for 迴圈跑多點簡述</li>
-            </ul>
-          </div>
         </div>
       </div>
 
-      <div class="col-lg-4">
-        <div class="booking-card">
-          <p class="booking-label">最低價格</p>
-          <div class="booking-price mb-3">NT$ 1,280 <span>起</span></div>
-
-          <div class="booking-info mb-3">
-            <div>取消政策：依方案規定</div>
-            <div>憑證形式：電子憑證</div>
-          </div>
-
-          <button class="btn btn-primary w-100 booking-btn" (click)="FindBookMark('product-list')">立即預訂</button>
+      <div class="col-lg-7">
+        <div class="highlight-box mt-4">
+          <h3 class="highlight-title">行程亮點</h3>
+          <ul class="highlight-list">
+            <li>{{activityInfo.description}}</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -111,6 +85,7 @@
     </div>
 
     <div class="product-list-wrap">
+      @for (product of productInfoCollection; track $index) {
       <div class="ticket-card mb-3">
         <div class="row g-3 align-items-center">
           <div class="col-md-3">
@@ -121,9 +96,10 @@
 
           <div class="col-md-6">
             <div class="ticket-content">
-              <h3 class="ticket-title">方案名稱 / 門票簡介</h3>
+              <h3 class="ticket-title">{{product.productName}}</h3>
               <p class="ticket-desc">
-                放方案描述，例如適用時段、是否含導覽、是否可即買即用等資訊。
+                {{product.notes}}
+                這邊還有notes
               </p>
               <div class="ticket-tags">
                 <span>即買即用</span>
@@ -135,18 +111,20 @@
 
           <div class="col-md-3">
             <div class="ticket-action">
-              <div class="ticket-price">NT$ 999</div>
+              <div class="ticket-price">NT$ {{product.currentPrice}}</div>
               <button class="btn btn-outline-primary w-100">選擇方案</button>
             </div>
           </div>
         </div>
       </div>
+      }
     </div>
   </section>
 
   <div class="row g-4">
     <!-- 主內容 -->
     <div class="col-lg-9">
+
       <!-- 活動介紹 -->
       <section id="data" class="card-section mb-4">
         <div class="section-title-wrap">
@@ -168,6 +146,7 @@
             若有多段介紹，可再拆成不同段落，讓頁面更像正式商業網站的內容呈現。
           </p>
         </article>
+
       </section>
 
       <!-- 地圖 -->
@@ -177,20 +156,57 @@
         </div>
 
         <div class="map-info-box mb-3">
-          <div class="map-place-name">地點名稱</div>
-          <div class="map-address">地址：台北市信義區松壽路 12 號</div>
+          <div class="map-place-name">活動位置</div>
+          <div class="map-address">地址：{{activityInfo.address}}</div>
+          <div class="d-flex gap-2 mb-3">
+            <button class="btn btn-primary" (click)="getCurrentLocation()">
+              取得當前定位
+            </button>
+
+            <select class="form-select w-auto" [(ngModel)]="selectedTravelMode">
+              <option value="DRIVE">開車</option>
+              <option value="WALK">步行</option>
+              <option value="BICYCLE">單車</option>
+            </select>
+
+            <button class="btn btn-success" (click)="getRoute()">
+              規劃路線
+            </button>
+          </div>
         </div>
 
+
         <div class="map-frame">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3614.9000931519636!2d121.54144275941348!3d25.037464346924693!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442abd149394c53%3A0x51ab5a80533e862!2z5Y-w5YyX56aP6I-v5aSn6aOv5bqX!5e0!3m2!1szh-TW!2stw!4v1773889962931!5m2!1szh-TW!2stw"
-            width="100%" height="420" style="border:0;" allowfullscreen="" loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
+          <div #mapContainer class="map-container"></div>
         </div>
 
         <div class="route-box mt-3">
-          路線指引
+          <div *ngIf="routeOptions.length === 0">
+            尚未規劃路線
+          </div>
+
+          <div *ngFor="let route of routeOptions; let i = index" class="route-option-card mb-3"
+            [class.active]="i === selectedRouteIndex" (click)="drawSelectedRoute(i)">
+
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="route-title">
+                  {{ route.summary || ('路線 ' + (i + 1)) }}
+                </div>
+
+                <div class="route-subtitle">
+                  <span *ngIf="route.routeLabels.includes('DEFAULT_ROUTE')">
+                    這是目前最佳路線
+                  </span>
+                </div>
+              </div>
+
+              <div class="text-end">
+                <div class="route-time">{{ route.durationText }}</div>
+                <div class="route-distance">{{ route.distanceText }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -201,7 +217,7 @@
         </div>
 
         <div class="review-score">
-          <span class="score-number"> <i class="bi bi-star-fill me-1"></i>4.4</span>
+          <span class="score-number"> <i class="bi bi-star-fill me-1"></i>{{reviewsPackage.averageRating}}</span>
           <span class="score-text">整體評價</span>
         </div>
         <div class="review-filter mt-3 mb-4">
@@ -212,31 +228,43 @@
         </div>
 
         <div class="review-item">
-          <div class="row g-3">
+
+          @if(reviewsPackage.commentCount!=0){
+          @for (review of reviewsPackage.reviews; track $index) {
+          <div class="row g-3 mb-2">
             <div class="col-md-3">
               <div class="review-user">
                 <img src="" alt="使用者頭貼" class="review-avatar">
                 <div>
-                  <div class="review-name">使用者名稱</div>
-                  <div class="review-date">2026/03/19</div>
+                  <div class="review-name">{{review.memberId}}</div>
+                  <div class="review-date">{{review.createDate}}</div>
                 </div>
               </div>
             </div>
 
             <div class="col-md-9">
               <div class="review-body">
-                <div class="review-rating">★★★★★</div>
-                <h4 class="review-title">評論標題</h4>
+                <div class="review-rating">{{'★'.repeat(review.rating) }}</div>
+                <h4 class="review-title">{{review.title}}</h4>
                 <p class="review-text">
-                  這裡放評論內容，描述體驗感受、是否值得推薦、服務品質等。
+                  {{review.comment}}
                 </p>
 
+                @for (img of review.reviewImages; track $index) {
                 <div class="review-images">
-                  <img src="" alt="評論照片">
+                  <img [src]="img" alt="評論照片">
                 </div>
+                }
+
               </div>
             </div>
           </div>
+          <hr>
+          }
+          }
+          @else {
+          <p class="text-center fs-3">目前尚未有任何評論</p>
+          }
         </div>
       </section>
 
@@ -247,7 +275,9 @@
         </div>
 
         <form class="report-form">
-          <label class="form-label">請描述你遇到的問題</label>
+          <label class="form-label">個人 Email:</label>
+          <input type="text" class="form-control mb-3" placeholder="請填入個人電子郵件">
+          <label class="form-label">請描述您遇到的問題</label>
           <textarea class="form-control mb-3" rows="5" placeholder="例如：活動資訊錯誤、地圖位置有誤、票券內容與實際不符..."></textarea>
           <button class="btn btn-danger">送出回報</button>
         </form>
@@ -259,48 +289,63 @@
           <h2 class="section-title">你可能也會喜歡</h2>
         </div>
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mt-1">
-          <div class="col">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-1">
+
+          <!-- 用for迴圈去跑推薦項目 -->
+          @for (suggest of suggestionCollection; track $index) {
+          <div class="col" [routerLink]="['/ActivityInfo', suggest.activityId]">
             <div class="activity-card card h-100 border-0 shadow-sm">
               <div class="activity-card__image-wrap">
-                <img class="card-img-top activity-card__image" alt="activity image">
+                <img [src]="suggest.coverImageUrl" class="card-img-top activity-card__image" alt="activity image">
               </div>
 
               <div class="card-body activity-card__body">
-                <a class="activity-card__title">推薦活動標題</a>
+                <a class="activity-card__title">{{suggest.title}}</a>
 
                 <div class="activity-card__date">
                   <i class="bi bi-calendar-event me-2"></i>
-                  2026/03/20 - 2026/03/21
+                  {{suggest.start}} ~ {{suggest.end}}
                 </div>
 
                 <div class="activity-card__stats mt-3">
                   <div class="rating-block">
                     <span class="rating-block__score">
-                      <i class="bi bi-star-fill me-1"></i>4.8
+                      <i class="bi bi-star-fill me-1"></i>{{suggest.averageRating}}
                     </span>
-                    <span class="rating-block__text"> 86 則評論</span>
+                    <span class="rating-block__text">({{suggest.commentCount}})</span>
                   </div>
                   <div class="booking-text">已售 320+</div>
 
                 </div>
 
 
-                <div class="activity-card__bottom mt-3">
+                <div class="activity-card__bottom mt-3 d-flex justify-content-between">
                   <div class="view-block">
-                    <i class="bi bi-eye-fill me-1"></i> 1,200
+                    <i class="bi bi-eye-fill me-1"></i> {{suggest.viewCount}}
+                  </div>
+                  <div>
+                    <p class="fs-2 text-warning"><strong>{{suggest.referencePrice?"NT$ "+
+                        suggest.referencePrice:"免費參加"}}</strong></p>
                   </div>
                 </div>
               </div>
 
               <div class="card-footer activity-card__footer">
                 <div class="tag-list">
-                  <span class="tag-item">親子</span>
-                  <span class="tag-item">戶外</span>
+                  @for (region of suggest.region; track $index) {
+                  <span class="tag-item"># {{region}}</span>
+                  }
+                  @for (type of suggest.type; track $index) {
+                  <span class="tag-item"># {{type}}</span>
+                  }
                 </div>
               </div>
             </div>
           </div>
+          }
+
+
+
         </div>
       </section>
     </div>
@@ -308,7 +353,7 @@
     <!-- 側邊欄 -->
     <div class="col-lg-3">
       <aside class="side-nav card-section sticky-sidebar">
-        <h3 class="side-nav-title">快速導覽</h3>
+        <h2 class="side-nav-title">快速導覽</h2>
         <ul class="side-nav-list">
           <li><a (click)="FindBookMark('product-list')">票券方案</a></li>
           <li><a (click)="FindBookMark('data')">活動介紹</a></li>
