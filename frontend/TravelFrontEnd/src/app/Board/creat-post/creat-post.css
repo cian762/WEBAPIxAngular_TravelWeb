@@ -8,6 +8,8 @@
   margin: 0 auto;
 }
 
+
+/* ===========以下為圖片輪播之樣式=========== */
 /* 主圖樣式 */
 .main-display {
   width: 100%;
@@ -75,15 +77,16 @@
 .thumb-item.active {
   opacity: 1;
   border-color: #007bff;
-  /* 你的主題藍色 */
+
 }
 
 .thumb-item:hover {
   opacity: 0.8;
 }
 
-/* --- 組件的 CSS 檔案 (.css 或 .scss) --- */
+/* ===========以上為圖片輪播之樣式=========== */
 
+/* ===========以下為設定封面按鈕之樣式=========== */
 /* 1. 設定外層容器為基準點 */
 ::ng-deep .cover-upload-container {
   position: relative;
@@ -96,7 +99,7 @@
   /* 移除 padding，讓圖片貼齊邊框 */
 }
 
-/* 2. 圖片樣式（包含你剛問的 object-fit: cover） */
+/* 2. 圖片樣式（包含 object-fit: cover） */
 ::ng-deep .cover-photo {
   width: 100%;
   height: 300px;
@@ -127,6 +130,10 @@
   padding: 0 15px !important;
 }
 
+/* ===========以上為設定封面按鈕之樣式=========== */
+
+
+/* ===========以下為上傳圖片按鈕樣式=========== */
 /* 1. 定義上傳區域的基礎與懸停樣式 */
 .upload-label {
   cursor: pointer;
@@ -164,6 +171,11 @@
   /* 淡淡的陰影 */
 }
 
+/* ===========以上為上傳圖片按鈕樣式=========== */
+
+
+
+/* ===========以下為權限下拉式選單之樣式=========== */
 /* 1. 先幫所有選項留出左側圖標的空間 */
 ::ng-deep .nice-select .current {
   padding-left: 25px !important;
@@ -219,3 +231,5 @@
   font-family: "bootstrap-icons";
   margin-right: 8px;
 }
+
+/* ===========以上為權限下拉式選單之樣式=========== */

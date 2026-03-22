@@ -12,8 +12,16 @@ export class BoardServe {
   constructor(private http: HttpClient) {
 
   }
-  getArticleAPI() {
-    return this.http.get<ArticleData[]>('https://localhost:7276/api/Board/Articles/test');
+  getArticleAPI(para: number) {
+    return this.http.get(`https://localhost:7276/api/Board/Articles/Bypage/${para}`);
+  }
+
+  getArticleByKeyword(page: number, keyword: string) {
+    return this.http.get(`https://localhost:7276/api/Board/Articles/search?page=${page}&keyword=${keyword}`);
+  }
+
+  getArticleByDate(page: number, startTime: Date, endTime: Date) {
+    return this.http.get(`https://localhost:7276/api/Board/Articles/searchByDate?page=${page}&startTime=${startTime}&endTime=${endTime}`);
   }
 
   getArticleDetailAPI(para: number) {

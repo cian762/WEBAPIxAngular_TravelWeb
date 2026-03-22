@@ -7,9 +7,24 @@
         <div class="single-post row">
           <div class="col-lg-12">
             <div class="feature-img">
-              <img class="img-fluid" [src]="post?.cover" alt="">
+              <div class="mb-3">
+                <div class="custom-slider-container">
+                  <div class="main-display cover-upload-container">
+                    <img class="img-fluid fade-in" [src]="allPhotoList[selectedIndex]">
+                  </div>
+                  <div class="thumb-nav">
+                    @for (img of allPhotoList; track $index) {
+                    <div class="thumb-item" [class.active]="$index === selectedIndex" (click)="setIndex($index)">
+                      <img [src]="img">
+                    </div>
+                    }
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+
           <div class="col-lg-3  col-md-3 meta-details">
             <ul class="tags">
               <li><a href="#">Food,</a></li>
@@ -33,6 +48,7 @@
               </ul>
             </div>
           </div>
+
           <div class="col-lg-9 col-md-9">
             <h3 class="mt-20 mb-20">{{post?.title}}</h3>
             <p class="excert">

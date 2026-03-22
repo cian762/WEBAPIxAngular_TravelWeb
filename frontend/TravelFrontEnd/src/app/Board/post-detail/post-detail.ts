@@ -16,15 +16,29 @@ export class PostDetail implements OnInit {
 
   }
   id = 0;
+  selectedIndex = 0;
+  allPhotoList: string[] = [];
+
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
       this.id = Number(p.get('id'));
       this.Serve.getArticleDetailAPI(this.id).subscribe((d) => {
         this.post = d;
-        console.log(this.id);
+        if (d.cover) {
+          this.allPhotoList?.push(d.cover);
+        }
+        if (d.postPhoto) {
+          this.allPhotoList?.push(...d.postPhoto);
+          console.log(this.id);
+        }
+
       });
     });
   }
 
   post?: PostDetailDto;
+
+  setIndex(index: number) {
+    this.selectedIndex = index;
+  }
 }

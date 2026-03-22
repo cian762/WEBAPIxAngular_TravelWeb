@@ -20,14 +20,14 @@ namespace TravelWeb_API.Controllers.Board
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        private readonly IPostService _ArticlesService;
+        private readonly IPostService _PostService;
 
         public PostController(BoardDbContext context,
             IPostService noteService,
             MemberSystemContext memberDb)
         {
             _context = context;
-            _ArticlesService = noteService;
+            _PostService = noteService;
             _memberDb = memberDb;
         }
 
@@ -38,7 +38,7 @@ namespace TravelWeb_API.Controllers.Board
             Article? article = _context.Articles.Include(a => a.Post).FirstOrDefault(x => x.ArticleId == id);
             if (article == null) return NotFound();
             PostDetailDto postDetail =
-                _ArticlesService.GetPostDetailed(article);
+                _PostService.GetPostDetailed(article);
             if (postDetail == null) return NotFound();
             return postDetail;
         }
@@ -49,7 +49,7 @@ namespace TravelWeb_API.Controllers.Board
             var article=_context.Articles.FirstOrDefault(a => a.ArticleId == id);
             if (article.Type == 0)
             {
-                _ArticlesService.AddPost(article);
+                _PostService.AddPost(article);
                 return article.ArticleId;
             }
             else if (article.Type == 1)
@@ -71,7 +71,7 @@ namespace TravelWeb_API.Controllers.Board
             //修改快速串文
             byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == updateDto.id).Type;
             bool isUpdateSuccess =
-                await _ArticlesService.UpdateArtic(
+                await _PostService.UpdateArtic(
                     updateDto.id,
                     updateDto.Title, 
                     updateDto.PhotoUrl, 
@@ -82,7 +82,7 @@ namespace TravelWeb_API.Controllers.Board
             {
                 if (type == 0)
                 {
-                    bool isUpdatePostSuccess = await _ArticlesService.UpdatePost(
+                    bool isUpdatePostSuccess = await _PostService.UpdatePost(
                         updateDto.id,
                         updateDto.content, 
                         updateDto.regionId,

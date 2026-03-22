@@ -51,11 +51,20 @@
                 </span>
               </a>
             </li>
-            <li class="page-item"><a href="#" class="page-link">01</a></li>
+
+
+            @for (p of pageNumbers; track p) {
+            <li class="page-item" [class.active]="currentPage === p">
+              <a href="#" class="page-link" (click)="changePage(p, $event)">{{p}}</a>
+            </li>
+            }
+
+            <!-- <li class="page-item"><a href="#" class="page-link">01</a></li>
             <li class="page-item active"><a href="#" class="page-link">02</a></li>
             <li class="page-item"><a href="#" class="page-link">03</a></li>
             <li class="page-item"><a href="#" class="page-link">04</a></li>
-            <li class="page-item"><a href="#" class="page-link">09</a></li>
+            <li class="page-item"><a href="#" class="page-link">09</a></li> -->
+
             <li class="page-item">
               <a href="#" class="page-link" aria-label="Next">
                 <span aria-hidden="true">
@@ -66,15 +75,20 @@
           </ul>
         </nav>
       </div>
+
+
       <div class="col-lg-4 sidebar-widgets">
         <div class="widget-wrap">
+
           <div class="single-sidebar-widget search-widget">
-            <form class="search-form" action="#">
+            <form class="search-form">
               <input placeholder="Search Posts" name="search" type="text" onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Search Posts'">
-              <button type="submit"><i class="fa fa-search"></i></button>
+                onblur="this.placeholder = 'Search Posts'" [(ngModel)]="Keyword">
+              <button type="submit" (click)="searchByKeyword()"><i class="fa fa-search"></i></button>
             </form>
           </div>
+
+
           <div class="single-sidebar-widget user-info-widget">
             <img src="img/blog/user-info.png" alt="">
             <a href="#">
@@ -239,6 +253,35 @@
     </div><!-- End post-content Area -->
   </div>
 </section><!-- End post-content Area -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- <section id="blog-posts" class="blog-posts section">
 

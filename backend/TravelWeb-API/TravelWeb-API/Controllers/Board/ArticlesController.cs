@@ -11,6 +11,7 @@ using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.Board.Service;
 using TravelWeb_API.Models.MemberSystem;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TravelWeb_API.Controllers.Board
 {
@@ -22,22 +23,31 @@ namespace TravelWeb_API.Controllers.Board
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
         private readonly IPostService _PostService;
+        private readonly IArticleService _ArticleService;
         
         public ArticlesController(BoardDbContext context,
             IPostService noteService,
+            IArticleService articleService,
             MemberSystemContext memberDb)
         {
             _context = context;
             _PostService = noteService;
+            _ArticleService = articleService;
             _memberDb = memberDb;
         }
 
         //要分頁
         // GET: api/Articles 瀏覽(全部文章之瀑布流)async Task<ActionResult<IEnumerable<Article>>>
-        [HttpGet]
-        public IActionResult GetArticles()
-        { 
-            return Ok(_context.Articles.Select(a=>new { a.Title }).ToList());
+        [HttpGet("Bypage/{page}")]
+        public IActionResult GetArticlesByDate(int page)
+        {
+            var totalCount = _context.Articles.Count();
+            var result=_ArticleService.GetArticles(page);
+            return Ok(new
+            {
+                totalCount = totalCount,
+                articleList = result
+            });
         }
 
         [HttpGet("{id}")]
@@ -46,29 +56,32 @@ namespace TravelWeb_API.Controllers.Board
             return Ok(_context.Articles.FirstOrDefault(x=>x.ArticleId == id));
         }
 
-        //// GET: api/Articles 瀏覽(單一文章詳情)
-        //[HttpGet]
-        //public async Task<ActionResult<Article>> GetArticleByID(int id)
-        //{
-        //    Article? article = _ArticlesService.GetArticle(id);
-        //    if(article==null)return NotFound();
-        //    return article;
-        //}
 
 
-        //// GET:用標題KeyWord搜尋
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Article>>> GetArticlesByTitle(string KeyWord)
-        //{
-        //    return await _context.Articles.ToListAsync();
-        //}
+        // GET:用標題KeyWord搜尋
+        [HttpGet("search")]
+        public IActionResult GetArticlesByTitle([FromQuery]int page, [FromQuery] string keyword)
+        {            
+            var result = _ArticleService.ArticlesByKeyword(page, keyword);
+            return Ok(new
+            {
+                totalCount = result.Item2,
+                articleList = result.Item1
+            });
+        }
 
-        //// GET:用作者搜尋
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Article>>> GetArticlesByAuthor(string AuthorID)
-        //{
-        //    return await _context.Articles.ToListAsync();
-        //}
+        //// GET:用日期搜尋
+        [HttpGet("searchByDate")]
+        public IActionResult GetArticlesByDate(int page, DateTime startTime, DateTime endTime)
+        {
+            
+            var result = _ArticleService.ArticlesByDate(page, startTime, endTime);
+            return Ok(new
+            {
+                totalCount = result.Item2,
+                articleList = result.Item1
+            });
+        }
 
         //// GET:綜合搜尋
         //[HttpGet]
