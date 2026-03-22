@@ -4,17 +4,18 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Tripproduct } from '../../services/tripproduct';
 import { ProductQueryDTO, RegionListDTO, TagListDTO, TripProductDTO } from '../../models/tripproduct.model';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 
 
 
 @Component({
   selector: 'app-product',
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule],
   templateUrl: './product.html',
   styleUrl: './product.css',
 })
 export class Product implements OnInit {
-  constructor(private tripService: Tripproduct) { }
+  constructor(private tripService: Tripproduct, private router: Router) { }
   isExpanded = false; // 控制標籤是否展開
   displayLimit = 10;
   // 存放下拉選單與按鈕資料
@@ -68,6 +69,10 @@ export class Product implements OnInit {
     }
     this.query.page = 1; // 篩選變動時回到第一頁
     this.onSearch();
+  }
+  viewDetail(productId: number) {
+
+    this.router.navigate(['/trip-detail', productId]);
   }
 
 

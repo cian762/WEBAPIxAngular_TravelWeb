@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 export interface CartItem {
   cartId: number;
   productCode: string;
@@ -13,7 +14,7 @@ export interface CartItem {
 @Component({
   selector: 'app-shoppingcart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './shoppingcart.html',
   styleUrl: './shoppingcart.css',
 })

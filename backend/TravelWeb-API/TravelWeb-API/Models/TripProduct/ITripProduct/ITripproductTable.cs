@@ -15,7 +15,13 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
 
         // 4. 取得所有地區 (供前端渲染地區切換)
         Task<IEnumerable<RegionListDTO>> GetRegionsAllAsync();
+        //=============================================================================================
+        //這裡是商品詳細頁
+        Task<ProductBasicDto?> GetBasicInfoAsync(int id);
+        Task<IEnumerable<ProductScheduleDto>> GetSchedulesAsync(int id);
+        Task<IEnumerable<ProductItineraryDto>> GetItineraryAsync(int id);
     }
+
 
     // 額外定義簡單的 DTO 給選單使用
     public class TagListDTO { public int TagId { get; set; } public string ?TagName { get; set; } }
@@ -25,9 +31,6 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
         public int TotalCount { get; set; } // 搜尋結果的總筆數
         public IEnumerable<T> ?Data { get; set; } // 當前頁面的資料內容
     }
-    //=============================================================================================
-    //這裡是商品詳細頁
-
-
+  
 
 }

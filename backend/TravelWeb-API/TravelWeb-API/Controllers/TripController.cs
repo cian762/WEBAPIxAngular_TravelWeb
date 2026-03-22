@@ -52,7 +52,34 @@ namespace TravelWeb_API.Controllers
         //=====================================================
         //這裡是商品詳細頁
 
+        // 1. 取得商品基本資訊
+        // GET: api/TripProduct/5/basic
+        [HttpGet("{id}/basic")]
+        public async Task<ActionResult<ProductBasicDto>> GetBasicInfo(int id)
+        {
+            var result = await _tripproduct.GetBasicInfoAsync(id);
+            if (result == null) return NotFound("找不到該行程商品");
 
+            return Ok(result);
+        }
+
+        // 2. 取得出發日期與價格 (Schedules)
+        // GET: api/TripProduct/5/schedules
+        [HttpGet("{id}/schedules")]
+        public async Task<ActionResult<IEnumerable<ProductScheduleDto>>> GetSchedules(int id)
+        {
+            var result = await _tripproduct.GetSchedulesAsync(id);
+            return Ok(result);
+        }
+
+        // 3. 取得行程細節 (Itinerary)
+        // GET: api/TripProduct/5/itinerary
+        [HttpGet("{id}/itinerary")]
+        public async Task<ActionResult<IEnumerable<ProductItineraryDto>>> GetItinerary(int id)
+        {
+            var result = await _tripproduct.GetItineraryAsync(id);
+            return Ok(result);
+        }
 
 
     }

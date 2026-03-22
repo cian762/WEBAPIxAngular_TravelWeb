@@ -34,3 +34,30 @@ export interface TagListDTO {
   tagId: number;
   tagName: string;
 }
+// 1. 商品基本資訊
+export interface ProductBasic {
+  tripProductId: number;
+  productName: string;
+  coverImage: string | null;
+  description: string | null;
+  regionName: string;
+  tags: string[];
+}
+
+// 2. 出發日期與價格
+export interface ProductSchedule {
+  productCode: string;
+  startDate: string; // 注意：API 回傳的 DateOnly/DateTime 在前端會變成 ISO 字串
+  price: number;
+  availableStock: number;
+}
+
+// 3. 行程細節 (包含多圖輪播)
+export interface ProductItinerary {
+  dayNumber: number;
+  sortOrder: number;
+  defaultDescription: string | null;
+  customText: string | null;
+  resourceName: string | null;
+  resourceUrls: string[]; // 對應後端的 List<string>
+}
