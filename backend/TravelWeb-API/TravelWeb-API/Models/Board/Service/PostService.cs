@@ -7,11 +7,11 @@ using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Models.Board.Service
 {
-    public class ArticleService : IArticlesService
+    public class PostService : IPostService
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        public ArticleService(BoardDbContext context, MemberSystemContext memberDb)
+        public PostService(BoardDbContext context, MemberSystemContext memberDb)
         {
             _context = context;
             _memberDb=memberDb;
@@ -99,7 +99,7 @@ namespace TravelWeb_API.Models.Board.Service
                     .Select(p => p.Photo).ToList();
                 postDetail.AuthorName = author.Name;
                 postDetail.AvatarUrl = author.AvatarUrl;
-
+                postDetail.Status = article.Status; 
                 return postDetail;
             }
 
@@ -137,10 +137,10 @@ namespace TravelWeb_API.Models.Board.Service
                 {
                     _context.PostPhotos.Remove(p);
                 }
-                //foreach (var p in photos)
-                //{
-                //    _context.PostPhotos.Add(new PostPhoto { ArticleId = id, Photo = p });
-                //}
+                foreach (var p in photos)
+                {
+                    _context.PostPhotos.Add(new PostPhoto { ArticleId = id, Photo = p });
+                }
                 await _context.SaveChangesAsync();
                 return true;
             }

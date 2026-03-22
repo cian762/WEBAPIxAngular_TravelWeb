@@ -21,14 +21,14 @@ namespace TravelWeb_API.Controllers.Board
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        private readonly IArticlesService _ArticlesService;
-
+        private readonly IPostService _PostService;
+        
         public ArticlesController(BoardDbContext context,
-            IArticlesService noteService,
+            IPostService noteService,
             MemberSystemContext memberDb)
         {
             _context = context;
-            _ArticlesService = noteService;
+            _PostService = noteService;
             _memberDb = memberDb;
         }
 
@@ -82,7 +82,7 @@ namespace TravelWeb_API.Controllers.Board
         [HttpPost]
         public async Task<ActionResult<int>> PostArticle(byte Type, string UserId)
         {
-            Article article = _ArticlesService.AddArtic(Type, UserId);
+            Article article = _PostService.AddArtic(Type, UserId);
             await _context.SaveChangesAsync();
             return article.ArticleId;
         }

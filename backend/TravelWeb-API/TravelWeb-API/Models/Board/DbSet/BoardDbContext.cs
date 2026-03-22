@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Models.Board.DbSet;
 
@@ -51,12 +52,29 @@ public partial class BoardDbContext : DbContext
 
     public virtual DbSet<UserSearchHistory> UserSearchHistories { get; set; }
 
+    public virtual DbSet<MemberInformation> MemberInformations { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        //=> optionsBuilder.UseSqlServer("Server=.;Database=Travel;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True");
+    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+    //=> optionsBuilder.UseSqlServer("Server=.;Database=Travel;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+       
+
+        modelBuilder.Entity<MemberInformation>(entity =>
+        {
+            // 1. 指定主鍵
+            entity.HasKey(e => e.MemberId);
+
+            // 2. 修正資料表名稱與 Schema
+            // 如果資料庫裡這張表是在 dbo 底下，就寫 "dbo"；如果是 Member 底下，就寫 "Member"
+            entity.ToTable("Member_Information", "Member");
+
+            // 3. 忽略你不想管的關聯 (避免連鎖報錯)
+            entity.Ignore(e => e.MemberComplaints);            
+        });
+
         modelBuilder.Entity<Article>(entity =>
         {
             entity.ToTable("Article", "Board");
@@ -166,6 +184,20 @@ public partial class BoardDbContext : DbContext
                 .HasForeignKey(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Comment_Article");
+
+            // 自我引用配置
+            entity.HasOne(d => d.Parent)                  // 每個子留言有一個「母物件」
+                .WithMany(p => p.InverseParent)           // 每個母留言有多個「子物件」
+                .HasForeignKey(d => d.ParentId)           // 外鍵是 ParentID
+                .OnDelete(DeleteBehavior.ClientSetNull)   // 限制刪除行為
+                .HasConstraintName("FK_Comment_Comment"); // 與資料庫一致的約束名稱           
+
+            entity.HasOne(d => d.MemberInformation)          // Comment 有一個 MemberInformation
+        .WithMany()                                  // 如果 Member 沒寫 ICollection<Comment>，這裡就留空 WithMany()
+        .HasForeignKey(d => d.UserId)                // 外鍵是 Comment 裡的 UserId
+        .HasPrincipalKey(m => m.MemberId)            // 指向 MemberInformation 的主鍵 (確認一下 Member 的 PK 叫什麼)
+        .OnDelete(DeleteBehavior.ClientSetNull)      // 刪除行為
+        .HasConstraintName("FK_Comment_Member_Information");
         });
 
         modelBuilder.Entity<CommentLike>(entity =>
@@ -269,9 +301,8 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<PostPhoto>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("PostPhotos", "Board");
+            entity.HasKey(e => e.ID);
+            entity.ToTable("PostPhotos", "Board");
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
 

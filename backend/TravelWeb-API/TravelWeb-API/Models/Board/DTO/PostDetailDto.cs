@@ -10,7 +10,8 @@
         
         public string? Contents { get; set; }
         public int? RegionId { get; set; }
-        public List<string?>? PostPhoto;
+        public List<string>? PostPhoto { get; set; }
+        public byte Status { get; set; }
 
         public string? AvatarUrl { get; set; }
         public string? AuthorName { get; set; }

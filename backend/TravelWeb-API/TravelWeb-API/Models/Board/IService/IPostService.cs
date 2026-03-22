@@ -4,7 +4,7 @@ using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Models.Board.IService
 {
-    public interface IArticlesService
+    public interface IPostService
     {
         //Artic(標題物件)
         public Article AddArtic(byte Type,string UserId);

@@ -151,7 +151,7 @@ builder.Services.AddScoped<IItineraryservice, ItineraryService>();
 
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-builder.Services.AddScoped<IArticlesService, ArticleService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
 //===================================================
 

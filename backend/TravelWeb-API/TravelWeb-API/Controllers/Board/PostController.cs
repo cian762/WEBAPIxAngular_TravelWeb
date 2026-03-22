@@ -20,10 +20,10 @@ namespace TravelWeb_API.Controllers.Board
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        private readonly IArticlesService _ArticlesService;
+        private readonly IPostService _ArticlesService;
 
         public PostController(BoardDbContext context,
-            IArticlesService noteService,
+            IPostService noteService,
             MemberSystemContext memberDb)
         {
             _context = context;

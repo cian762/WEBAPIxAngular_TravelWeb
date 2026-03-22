@@ -26,12 +26,16 @@ export class CreatPost implements OnInit {
 
   }
   id = 0;
-  photoUrl?: string;
-  file?: File;
-  photoView?: string;
   post?: PostDetailDto;
+
+  coverUrl?: string;
   photoUrlList: string[] = [];
+
+  fileList: File[] = [];
+
+  photoList: string[] = [];
   selectedIndex: number = 0;
+  coverIndex: number = 0;
 
   setIndex(index: number) {
     this.selectedIndex = index;
@@ -59,19 +63,28 @@ export class CreatPost implements OnInit {
     content: new FormControl(this.post?.contents),
     status: new FormControl(),
     regionId: new FormControl(),
-    photoUrlList: new FormArray([
-      new FormControl(''),
-    ]),
   })
 
   FormReset(post: any) {
     this.form.reset({
       title: post.title,
       content: post.contents,
+      status: post.status
     });
-  }
-  test() {
-
+    this.updateSelect();
+    // 使用 ... 把 postPhoto 陣列拆開來，平鋪進去
+    this.coverUrl = post.cover;
+    const photos = [];
+    // 如果封面有值，塞進第一個
+    if (post.cover) {
+      photos.push(post.cover);
+    }
+    // 如果其他照片有值且是陣列，展開塞進去
+    if (post.postPhoto && post.postPhoto.length > 0) {
+      photos.push(...post.postPhoto);
+    }
+    this.photoUrlList = photos;
+    this.photoList = photos;
   }
 
   ngAfterViewInit() {
@@ -92,19 +105,7 @@ export class CreatPost implements OnInit {
       const newValue = event.target.value;
       // 手動將新值塞回 Angular 表單
       this.form.patchValue({ status: Number(newValue) });
-      console.log('當前抓到的值：', this.form.get('status')?.value);
     });
-
-    setTimeout(() => {
-      $('.your-class').slick({
-        dots: true,
-        infinite: true,
-        speed: 300,
-        slidesToShow: 1,
-        adaptiveHeight: true
-      });
-    }, 0);
-    this.tryInitSlick();
   }
 
   // 4. 當你從 API 拿到資料 (this.post) 要回顯時
@@ -117,22 +118,26 @@ export class CreatPost implements OnInit {
 
 
   async onCreat() {
-    if (this.file) {
-      await this.uploadImage(this.file);
-    }
+    await this.uploadAllParallel();
     const formValue = this.form.value;
-
+    console.log("this.coverIndex", this.coverIndex);
+    this.coverUrl = this.photoUrlList[this.coverIndex];
+    console.log("this.coverUrl onCreat", this.coverUrl);
+    console.log(this.photoUrlList);
+    this.photoUrlList = this.photoUrlList.filter((url, i) => i !== this.coverIndex);
+    console.log(this.photoUrlList);
     // 將巢狀的表單資料 攤平成後端要的格式
     const postUpdateDto = {
       id: this.id,
       title: formValue.title ?? null,
-      photoUrl: this.photoUrl ?? null,
+      photoUrl: this.coverUrl ?? null,
       status: Number(formValue.status || 0), // 確保一定是數字 0-255，不要給空值
       content: formValue.content ?? null,
       regionId: formValue.regionId ?? null,
-      // 直接拿 Array
-      photoUrlList: formValue.photoUrlList
+      photoUrlList: this.photoUrlList ?? null
     };
+
+    console.log(postUpdateDto);
     const isSuccess = await this.isUploadSuccess(this.id, postUpdateDto);
     if (isSuccess) {
       alert('成功');
@@ -143,33 +148,15 @@ export class CreatPost implements OnInit {
 
 
   onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.file = file;
-      // 2. 建立 FileReader 物件
-      const reader = new FileReader();
-      // 3. 定義讀取完成後的動作 (這是一個非同步事件)
-      reader.onload = () => {
-        // reader.result 包含了 base64 的圖片資料
-        this.photoView = reader.result as string;
+    const files = Array.from(event.target.files as FileList);
+    if (files.length === 0) return;
 
-        // 建立一個臨時的預覽網址 (Blob URL)
-        const newPhotoUrl = URL.createObjectURL(file);
+    // 1. 直接同步產生所有預覽網址 (不需透過 FileReader)
+    const newPhotoUrls = files.map(file => URL.createObjectURL(file));
 
-        // 把新網址加進陣列 (使用展開運算子確保 Angular 偵測到變化)
-        this.photoUrlList = [...this.photoUrlList, newPhotoUrl];
-
-        // 選中最新上傳的那張圖
-        this.selectedIndex = this.photoUrlList.length - 1;
-      };
-
-      // 4. 開始讀取檔案，並轉換成 Data URL (base64)
-      reader.readAsDataURL(file);
-    } else {
-      // 如果使用者取消選擇，清空預覽
-      // this.photoView = null;
-      // this.selectedFile = null;
-    }
+    // 2. 一次更新兩個陣列，保證順序跟選取時一模一樣
+    this.fileList = [...this.fileList, ...files];
+    this.photoList = [...this.photoList, ...newPhotoUrls];
   }
 
   async isUploadSuccess(id: number, para: any) {
@@ -186,6 +173,28 @@ export class CreatPost implements OnInit {
     }
   }
 
+  async uploadAllParallel() {
+    // 1. 建立一個任務清單 (Promises 陣列)
+    const uploadTasks = this.fileList.map((f) =>
+      this.uploadImage(f)
+    );
+
+    try {
+      // 2. 啟動所有任務，並等待「全部」完成，得到所有網址
+      const allUrls = await Promise.all(uploadTasks);
+      // 3. 過濾掉封面，剩下的就是一般圖片網址
+
+      this.photoUrlList = [
+        ...this.photoUrlList,
+        ...allUrls
+      ];
+      console.log('所有圖片上傳完成！');
+
+    } catch (err) {
+      console.error('其中一張上傳失敗，整個程序停止', err);
+    }
+  }
+
   async uploadImage(file: File) {
     const formData = new FormData();
     formData.append('file', file);
@@ -197,8 +206,6 @@ export class CreatPost implements OnInit {
       // 使用 firstValueFrom 將 Observable 轉為 Promise
       // 程式會在這裡停住，直到拿到 API 回傳值
       const res = await firstValueFrom(this.http.post<any>(url, formData));
-      this.photoUrl = res.secure_url;
-      console.log('上傳成功，網址為：', res.secure_url);
 
       return res.secure_url;
     } catch (err) {
@@ -229,6 +236,11 @@ export class CreatPost implements OnInit {
         // this.tryInitSlick();
       }
     }, 300);
+  }
+
+
+  selectCover() {
+    this.coverIndex = this.selectedIndex;
   }
 
 

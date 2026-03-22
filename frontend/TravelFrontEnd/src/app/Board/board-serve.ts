@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { ArticleData } from './interface/ArticleData';
 import { PostDetailDto } from './interface/PostDetailDto';
 import { switchMap } from 'rxjs/operators';
+import { CommentsDTO } from './interface/CommentsDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -19,9 +20,18 @@ export class BoardServe {
     return this.http.get<PostDetailDto>(`https://localhost:7276/api/Post/${para}`);
   }
 
+  getComments(para: number) {
+    return this.http.get<CommentsDTO[]>(`https://localhost:7276/api/Board/Comments/${para}`);
+  }
+
   postPostAPI(UserID: string) {
     return this.http.post<number>(`https://localhost:7276/api/Board/Articles?Type=0&UserId=${UserID}`, null).pipe(
       switchMap(result => this.http.post<number>(`https://localhost:7276/api/Post?id=${result}`, null)));
+  }
+
+  postCommentAPI(para: any) {
+    return this.http.post
+      (`https://localhost:7276/api/Board/Comments/PostComment`, para)
   }
 
   putPostAPI(id: number, para: any) {
