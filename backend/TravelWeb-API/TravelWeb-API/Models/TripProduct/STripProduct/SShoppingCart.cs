@@ -41,7 +41,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             }
             await _context.SaveChangesAsync();
         }
-        //使用者按下「確定購買」或完成結單後。
+        //使用者按下「確定購買」或完成結單後清空。
         public async Task ClearCartAsync(string memberId)
         {
            var clear = await _context.ShoppingCarts.Where(u=>u.MemberId==memberId).ToListAsync();
@@ -86,7 +86,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     dto.ProductName = $"{trip.ProductName} ({trip.StartDate:yyyy/MM/dd} ~ {trip.EndDate:MM/dd})";
                     dto.Price = trip.Price ?? 0;
-                    string url ="/PImages" + trip.CoverImage!;
+                    string url ="/PImages/" + trip.CoverImage!;
                     dto.CoverImage = CartItemDTO.GetFullUrl(url,_mvcBaseUrl);
                     resultList.Add(dto);
                     continue;
@@ -140,7 +140,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             }
             return resultList;
         }
-        //遊客跟使用者搬遷購物車內容
+        //遊客跟使用者搬遷購物車內容========這支目前用不到了
         public async Task MigrateCartAsync(string guestId, string memberId)
         {
             // 1. 安全檢查：如果 ID 一樣，直接結束

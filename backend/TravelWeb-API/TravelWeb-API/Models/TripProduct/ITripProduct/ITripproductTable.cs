@@ -4,8 +4,6 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
 {
     public interface ITripproductTable
     {
-        // 1. 取得初始頁面的所有產品 (不帶條件)
-        Task<IEnumerable<TripProductDTO>> GetAllAsync();
 
         // 2. 核心功能：根據前端傳來的 DTO 條件進行搜尋
         // 傳入搜尋條件 (QueryDTO)，回傳產品清單 (ProductDTO)
@@ -17,7 +15,13 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
 
         // 4. 取得所有地區 (供前端渲染地區切換)
         Task<IEnumerable<RegionListDTO>> GetRegionsAllAsync();
+        //=============================================================================================
+        //這裡是商品詳細頁
+        Task<ProductBasicDto?> GetBasicInfoAsync(int id);
+        Task<IEnumerable<ProductScheduleDto>> GetSchedulesAsync(int id);
+        Task<IEnumerable<ProductItineraryDto>> GetItineraryAsync(int id);
     }
+
 
     // 額外定義簡單的 DTO 給選單使用
     public class TagListDTO { public int TagId { get; set; } public string ?TagName { get; set; } }
@@ -27,6 +31,6 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
         public int TotalCount { get; set; } // 搜尋結果的總筆數
         public IEnumerable<T> ?Data { get; set; } // 當前頁面的資料內容
     }
-
+  
 
 }

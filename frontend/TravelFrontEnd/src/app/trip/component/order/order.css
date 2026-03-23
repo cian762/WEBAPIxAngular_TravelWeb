@@ -1,0 +1,22 @@
+/* 1. 針對右側會捲動的「訂單摘要」卡片 */
+.sticky-top {
+  /* 這裡設為 100，遠低於導覽列的 1030 */
+  z-index: 100 !important;
+
+  /* 設定停駐位置，要留出導覽列的高度（假設導覽列高 70px） */
+  top: 90px !important;
+}
+
+/* 2. 針對左側「輸入資料」的卡片 */
+.shadow-sm,
+.card {
+  /* 有些陰影類別會帶有 position: relative，我們強制降低它的層級 */
+  position: relative;
+  z-index: 10 !important;
+}
+
+/* 3. 確保整個組件的容器層級也是低的 */
+.container {
+  position: relative;
+  z-index: 1;
+}

@@ -178,7 +178,7 @@ builder.Services.AddScoped<IOrder, SOrder>();
 builder.Services.AddScoped<IECPay, SECPay>();
 
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-//綠界
+//////綠界
 builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
 // 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
 builder.Services.AddHttpClient();
