@@ -22,7 +22,7 @@ export const routes: Routes = [
 
   // 景點介紹開始
   {
-    path: 'contact',
+    path: 'attractions',  // ← 改這裡
     children: [
       {
         path: '',
@@ -42,6 +42,12 @@ export const routes: Routes = [
           import('./Components/attractions/attraction-detail/attraction-detail')
             .then(m => m.AttractionDetailComponent),
       },
+      {
+        path: 'tags',
+        loadComponent: () =>
+          import('./Components/attractions/attraction-tags/attraction-tags')
+            .then(m => m.AttractionTagsComponent),
+      }
     ],
   },
   // 景點介紹結束

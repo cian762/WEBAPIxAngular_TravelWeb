@@ -1,0 +1,29 @@
+.tags-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 24px;
+}
+
+.tags-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tag-item {
+  padding: 8px 18px;
+  border: 1.5px solid #e84c3d;
+  border-radius: 20px;
+  background: none;
+  color: #e84c3d;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag-item:hover {
+  background: #e84c3d;
+  color: #fff;
+  transform: translateY(-2px);
+}
