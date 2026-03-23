@@ -28,5 +28,7 @@
 
         public List<string?> Images { get; set; } = new List<string?>();
 
+        public int SellCount { get; set; } = 0;
+
     }
 }

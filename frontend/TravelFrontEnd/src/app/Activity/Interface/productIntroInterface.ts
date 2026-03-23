@@ -1,5 +1,5 @@
 export interface productInfoInterface {
-  productCode: number,
+  productCode: string,
   productName: string,
   currentPrice: number,
   notes: string,

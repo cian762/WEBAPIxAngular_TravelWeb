@@ -1,5 +1,5 @@
 import { pageInterface } from './../../Interface/pageInterface';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, resolveForwardRef, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import flatpickr from 'flatpickr';
 import { CardInfoService } from '../../Service/card-info-service';
@@ -7,6 +7,7 @@ import { CardInfoModel } from '../../Interface/cardInterface';
 import { DatePipe, NgClass } from '@angular/common';
 import { __classPrivateFieldGet } from 'tslib';
 import { FormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, map, of, Subject, switchMap } from 'rxjs';
 
 
 
@@ -54,6 +55,7 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
 
   keyword: string = '';
   searchResult: string[] = [];
+  private keywordSubject = new Subject<string>();
   selectKeyword: string = "";
   isFocus: boolean = false;
 
@@ -76,21 +78,9 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
 
   //當輸入值發生改變，發 API 拉相關的活動名稱
   OnKeyWordChange(value: string) {
-
-    //如果關鍵字為 falsy value，就把搜尋結果清空，應對使用者已輸入後用 backspace 清空的情況
-    if (!value) {
-      this.searchResult = [];
-      this.loadCards(1);
-      return;
-    }
-
-    if (value && value.trim()) {
-      this.cardService.keywordSuggestion(value.trim())
-        .subscribe((res) => {
-          this.searchResult = res;
-        })
-    }
+    this.keywordSubject.next(value);
   }
+
 
   //壓下相符活動名稱後，清空搜尋結果，並且將輸入框名稱補全
   onClickKeyword(res: string) {
@@ -140,6 +130,20 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
   };
 
   ngOnInit(): void {
+    this.keywordSubject.pipe(
+      map(value => value.trim()),
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap(keyword => {
+        if (!keyword) {
+          this.loadCards(1);
+          return of([]);
+        }
+        return this.cardService.keywordSuggestion(keyword);
+      })
+    ).subscribe(res => {
+      this.searchResult = res;
+    });
     this.loadCards(1);
   }
 

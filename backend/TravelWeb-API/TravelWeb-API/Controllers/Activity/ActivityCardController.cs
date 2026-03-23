@@ -36,9 +36,9 @@ namespace TravelWeb_API.Controllers.Activity
 
         //有條件的拉取活動資訊，且必須包含關鍵字
         [HttpGet("Keyword")]
-        public async  Task<ActionResult> SearchByActiviteTitle([FromQuery] string serachText) 
+        public async  Task<ActionResult> SearchByActiviteTitle([FromQuery] string searchText) 
         {
-            var result = await _infoService.SearchSpecificCards(serachText);
+            var result = await _infoService.SearchSpecificCards(searchText);
             if (result == null) return NotFound();
             return Ok(result);
         }

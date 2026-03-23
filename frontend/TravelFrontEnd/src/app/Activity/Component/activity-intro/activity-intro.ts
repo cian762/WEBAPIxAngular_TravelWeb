@@ -1,5 +1,5 @@
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivityInfoService } from '../../Service/activity-info-service';
 import { ActivityInfoInterface } from '../../Interface/InfoInterface';
 import { productInfoInterface } from '../../Interface/productIntroInterface';
@@ -10,17 +10,22 @@ import { RouteService } from '../../Service/route-service';
 import { NgFor, NgIf } from '@angular/common';
 import { RouteOptionDto } from '../../Interface/routeOptionDto';
 import { CardInfoModel } from '../../Interface/cardInterface';
+import { TicketPlanDrawer } from '../ticket-plan-drawer/ticket-plan-drawer';
+import { TicketInfoService } from '../../Service/ticket-info-service';
+import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
+import { forkJoin, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-activity-intro',
-  imports: [FormsModule, NgIf, NgFor, RouterLink],
+  imports: [FormsModule, NgIf, NgFor, RouterLink, TicketPlanDrawer],
   templateUrl: './activity-intro.html',
   styleUrl: './activity-intro.css',
 })
-export class ActivityIntro implements OnInit, AfterViewInit {
+export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   activityIdFromRoute: number = 0;
   isMapViewReady = false;
+  private sub?: Subscription;
 
   activityInfo: ActivityInfoInterface = {
     activityId: 0,
@@ -39,7 +44,7 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   };
 
   productInfoCollection: productInfoInterface[] = [{
-    productCode: 0,
+    productCode: '',
     productName: '',
     currentPrice: 0,
     notes: '',
@@ -60,13 +65,18 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
   map!: google.maps.Map;
 
-  constructor(
-    private infoService: ActivityInfoService,
-    private activatedRoute: ActivatedRoute,
-    private routeService: RouteService) { }
+  private infoService = inject(ActivityInfoService);
+  private activatedRoute = inject(ActivatedRoute);
+  private routeService = inject(RouteService);
+  private ticketInfoService = inject(TicketInfoService);
+
+
+  ngOnDestroy(): void {
+    // this.sub?.unsubscribe();
+  }
 
   ngOnInit(): void {
-    this.activatedRoute.params.subscribe((params) => {
+    this.sub = this.activatedRoute.params.subscribe((params) => {
       const id = Number(params['id']);
       if (!id) return;
 
@@ -81,10 +91,6 @@ export class ActivityIntro implements OnInit, AfterViewInit {
         commentCount: 0
       };
 
-      this.getActivityInfo(id);
-      this.getRelatedReviews(id);
-      this.getRelatedTickets(id);
-
       this.routeOptions = [];
       this.selectedRouteIndex = 0;
       this.routeInfo = {
@@ -95,16 +101,52 @@ export class ActivityIntro implements OnInit, AfterViewInit {
       if (this.routePolyline) {
         this.routePolyline.setMap(null);
       }
+
+      forkJoin({
+        activityInfo: this.infoService.getActivityDetails(id),
+        reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
+        productInfoCollection: this.infoService.getRelatedTickets(id)
+      }).subscribe({
+        next: ({ activityInfo, reviewsPackage, productInfoCollection }) => {
+          this.activityInfo = activityInfo;
+          this.reviewsPackage = reviewsPackage;
+          this.productInfoCollection = productInfoCollection;
+
+          this.tryInitMap();
+          this.getRelatedActivitySuggestion();
+        },
+        error: (err) => {
+          console.log('資料載入失敗', err);
+        }
+      });
     });
+
+
   }
 
   getActivityInfo(activityId: number) {
-    this.infoService.getActivityDetails(activityId)?.subscribe((data) => {
-      this.activityInfo = data;
-      console.log('這是activityinfo', this.activityInfo);
-      this.tryInitMap();
-      this.getRelatedActivitySuggestion();
-    });
+    return this.infoService.getActivityDetails(activityId);
+  }
+
+
+  getRelatedReviews(activityId: number) {
+    console.log(this.selectedSortRule);
+    return this.infoService.getRelatedReviews(activityId, this.selectedSortRule);
+  }
+
+  getRelatedTickets(activityId: number) {
+    return this.infoService.getRelatedTickets(activityId);
+  }
+
+  FindBookMark(bookmark: string) {
+    const element = document.getElementById(bookmark);
+    const offset = 100;
+
+    if (element) {
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - offset;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
   }
 
   ngAfterViewInit(): void {
@@ -144,30 +186,7 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   }
 
 
-  getRelatedReviews(activityId: number) {
-    this.infoService.getRelatedReviews(activityId)?.subscribe((data) => {
-      this.reviewsPackage = data;
-      console.log('這是reviewPackage', this.reviewsPackage);
-    });
-  }
 
-  getRelatedTickets(activityId: number) {
-    this.infoService.getRelatedTickets(activityId)?.subscribe((data) => {
-      this.productInfoCollection = data;
-      console.log('這是proinfocol', this.productInfoCollection);
-    });
-  }
-
-  FindBookMark(bookmark: string) {
-    const element = document.getElementById(bookmark);
-    const offset = 100;
-
-    if (element) {
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - offset;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-    }
-  }
 
   //取得使用者定位
   userMarker?: google.maps.Marker;
@@ -301,6 +320,55 @@ export class ActivityIntro implements OnInit, AfterViewInit {
         console.log('建議的活動資訊', this.suggestionCollection);
       });
     }
+  }
+
+
+  //用商品對應的 productCode 去打 API 拿詳細的商品資訊
+  isPlanDrawerOpen: boolean = false;
+  selectedPlan: ticketInfoInterface | null = null;
+  productInfo: ticketInfoInterface | null = null;
+
+  getTicketInfo(productCode: string) {
+    this.ticketInfoService.getTicketInfoService(productCode).subscribe((data) => {
+      if (data) {
+        this.productInfo = data;
+        this.productInfo.tag = ['即買即用', '電子票', '可取消'];
+        this.openPlanDrawer(this.productInfo);
+      }
+      console.log("ACT-XXXX資料", this.productInfo);
+
+    });
+  }
+
+  openPlanDrawer(plan: ticketInfoInterface) {
+    this.selectedPlan = plan;
+    this.isPlanDrawerOpen = true;
+  }
+
+  closePlanDrawer() {
+    this.isPlanDrawerOpen = false;
+  }
+
+
+  //評論篩選規則
+  sortRuleCollection = [
+    { label: 'highest', value: '最高評分' },
+    { label: 'lowest', value: '最低評分' },
+    { label: 'newest', value: '最新評論' },
+    { label: 'picFirst', value: '圖片優先' }
+
+  ];
+
+  selectedSortRule: string = 'highest';
+  changeSortRule(sortRule: string) {
+    this.selectedSortRule = sortRule;
+    this.activatedRoute.params.subscribe((params) => {
+      const id = Number(params['id']);
+      this.infoService.getRelatedReviews(id, this.selectedSortRule)
+        .subscribe((data) => {
+          this.reviewsPackage = data;
+        });
+    });
   }
 }
 

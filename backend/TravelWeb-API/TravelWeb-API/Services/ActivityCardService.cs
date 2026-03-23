@@ -62,7 +62,7 @@ namespace TravelWeb_API.Services
                 query = query.OrderBy(a => Math.Abs(EF.Functions.DateDiffDay(today, a.StartTime)!.Value));
             }
 
-            var totalRecords = query.Count();
+            
 
             var ans = await query
                 .Where(a => a.EndTime >= today)
@@ -90,6 +90,8 @@ namespace TravelWeb_API.Services
                 })
                 .ToListAsync();
 
+            var totalRecords = ans.Count();
+
             return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, totalRecords, q.PageSize);
 
         }
@@ -100,10 +102,10 @@ namespace TravelWeb_API.Services
 
             var ans = await _dbContext.Activities
                 .Where(a => a.SoftDelete == false)
+                .Where(a => a.EndTime >= DateOnly.FromDateTime(DateTime.Today))
                 .Where(a => a.Title!.StartsWith(searchText))
                 .OrderBy(a => a.Title!.Length)
                 .Select(a => a.Title)
-                .Take(5)
                 .ToListAsync();
 
             //如果 ans 數量小於 5 個，就再抓取其他 Title 首字不為 searchText，但 Title Body 中包含關鍵字的活動

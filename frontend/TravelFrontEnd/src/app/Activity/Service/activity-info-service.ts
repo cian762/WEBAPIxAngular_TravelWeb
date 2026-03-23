@@ -15,17 +15,19 @@ export class ActivityInfoService {
 
   getActivityDetails(activityId: number) {
 
-    if (!activityId) return;
+
     return this.http.get<ActivityInfoInterface>("https://localhost:7276/api/ActivityInfo/" + activityId);
   }
 
-  getRelatedReviews(activityId: number) {
-    if (!activityId) return;
-    return this.http.get<reviewsPackage>(`https://localhost:7276/api/ActivityInfo/${activityId}/Reviews`);
+  getRelatedReviews(activityId: number, orderRule: string = "highest") {
+
+    let params = new HttpParams();
+    params = params.set('orderRule', orderRule);
+    return this.http.get<reviewsPackage>(`https://localhost:7276/api/ActivityInfo/${activityId}/Reviews`, { params });
   }
 
   getRelatedTickets(activityId: number) {
-    if (!activityId) return;
+
     return this.http.get<productInfoInterface[]>(`https://localhost:7276/api/ActivityInfo/${activityId}/Tickets`);
   }
 

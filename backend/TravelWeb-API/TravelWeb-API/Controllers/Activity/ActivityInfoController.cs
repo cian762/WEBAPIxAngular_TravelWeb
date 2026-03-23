@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Services;
 
@@ -29,9 +32,11 @@ namespace TravelWeb_API.Controllers.Activity
 
 
         [HttpGet("{activitiyId}/Reviews")]
-        public async Task<ActionResult> GetRelatedReviews([FromRoute] int activitiyId)
+        public async Task<ActionResult> GetRelatedReviews([FromRoute] int activitiyId, [FromQuery] string orderRule)
         {
-            var result = await _activityInfoService.GetRelatedReviews(activitiyId);
+            var memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            var result = await _activityInfoService.GetRelatedReviews(activitiyId,memberId,orderRule);
             if (result == null) return NotFound();
             return Ok(result);
         }

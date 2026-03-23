@@ -136,6 +136,8 @@ builder.Services.AddScoped<ActivityCardService>();
 builder.Services.AddScoped<ActivityInfoService>();
 builder.Services.AddScoped<ActivityTicketService>();
 builder.Services.AddHttpClient<GoogleRouteForActivityService>();
+builder.Services.AddScoped<ActivityReviewService>();
+builder.Services.AddScoped<CloudinaryPhotoService>();
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>

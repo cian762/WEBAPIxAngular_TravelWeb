@@ -85,12 +85,16 @@
     </div>
 
     <div class="product-list-wrap">
+
+      @if(productInfoCollection.length == 0){
+      <div class="text-center">尚無商品</div>
+      }@else {
       @for (product of productInfoCollection; track $index) {
       <div class="ticket-card mb-3">
         <div class="row g-3 align-items-center">
           <div class="col-md-3">
             <div class="ticket-image">
-              <img src="" alt="門票簡圖">
+              <img [src]="product.coverImageUrl" alt="門票簡圖">
             </div>
           </div>
 
@@ -98,8 +102,7 @@
             <div class="ticket-content">
               <h3 class="ticket-title">{{product.productName}}</h3>
               <p class="ticket-desc">
-                {{product.notes}}
-                這邊還有notes
+                {{product.notes || '尚無notes'}}
               </p>
               <div class="ticket-tags">
                 <span>即買即用</span>
@@ -112,13 +115,20 @@
           <div class="col-md-3">
             <div class="ticket-action">
               <div class="ticket-price">NT$ {{product.currentPrice}}</div>
-              <button class="btn btn-outline-primary w-100">選擇方案</button>
+              <button class="btn btn-outline-primary w-100" (click)="getTicketInfo(product.productCode)">選擇方案</button>
             </div>
           </div>
         </div>
       </div>
       }
+      }
+
+
     </div>
+
+    <app-ticket-plan-drawer [isOpen]="isPlanDrawerOpen" [plan]="selectedPlan" (closeDrawer)="closePlanDrawer()">
+    </app-ticket-plan-drawer>
+
   </section>
 
   <div class="row g-4">
@@ -217,19 +227,26 @@
         </div>
 
         <div class="review-score">
-          <span class="score-number"> <i class="bi bi-star-fill me-1"></i>{{reviewsPackage.averageRating}}</span>
+          <span class="score-number"> <i class="bi bi-star-fill me-1"></i>{{reviewsPackage.averageRating}}<span
+              class="h4 text-warning fw-bold"> / 5</span></span>
           <span class="score-text">整體評價</span>
         </div>
         <div class="review-filter mt-3 mb-4">
-          <button class="btn btn-light btn-sm">最高評分</button>
-          <button class="btn btn-light btn-sm">最低評分</button>
-          <button class="btn btn-light btn-sm">最新</button>
-          <button class="btn btn-light btn-sm">圖片優先</button>
+          @for (rule of sortRuleCollection; track $index) {
+          <button class="btn btn-light btn-sm" [class.isActive]="selectedSortRule===rule.label"
+            (click)="changeSortRule(rule.label)">{{rule.value}}</button>
+          }
         </div>
 
-        <div class="review-item">
 
+
+        <div class="review-item">
+          <div>
+            <p>個人評論</p>
+            <div style="height:80px; border-color: black; border-style:solid;"></div>
+          </div>
           @if(reviewsPackage.commentCount!=0){
+          <p>他人評論 ({{reviewsPackage.commentCount}})</p>
           @for (review of reviewsPackage.reviews; track $index) {
           <div class="row g-3 mb-2">
             <div class="col-md-3">
@@ -275,9 +292,9 @@
         </div>
 
         <form class="report-form">
-          <label class="form-label">個人 Email:</label>
+          <label class="form-label">個人 Email <span class="text-danger">*</span></label>
           <input type="text" class="form-control mb-3" placeholder="請填入個人電子郵件">
-          <label class="form-label">請描述您遇到的問題</label>
+          <label class="form-label">請描述您遇到的問題 <span class="text-danger">*</span></label>
           <textarea class="form-control mb-3" rows="5" placeholder="例如：活動資訊錯誤、地圖位置有誤、票券內容與實際不符..."></textarea>
           <button class="btn btn-danger">送出回報</button>
         </form>

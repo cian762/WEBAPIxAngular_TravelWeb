@@ -28,7 +28,7 @@ export class CardInfoService {
 
   keywordSuggestion(keyword: string) {
     let params = new HttpParams();
-    params = params.set('serachtext', keyword);
+    params = params.set('searchtext', keyword);
     return this.http.get<string[]>('https://localhost:7276/api/ActivityCard/Keyword', { params });
   }
 }

@@ -1,0 +1,79 @@
+@if (isOpen) {
+<div class="drawer-backdrop" (click)="close()"></div>
+}
+
+<div class="drawer-panel" [class.drawer-panel--open]="isOpen">
+  @if (plan) {
+  <div class="drawer-shell">
+    <div class="drawer-header">
+      <div>
+        <p class="drawer-subtitle">Plan Details</p>
+        <h3 class="drawer-title">方案詳情</h3>
+      </div>
+      <button class="drawer-close-btn" type="button" (click)="close()" aria-label="關閉視窗">×</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="plan-card">
+        <div class="plan-image-wrap">
+          <img [src]="plan.coverImageUrl" [alt]="plan.productName" class="plan-image">
+        </div>
+
+        <div class="plan-info">
+          <h4 class="plan-name">{{ plan.productName }}</h4>
+
+          <div class="plan-period">
+            <span class="info-label">使用期限</span>
+            <span class="info-value">{{ plan.startDate }} ~ {{ plan.expiryDate }}</span>
+          </div>
+
+          <div class="tag-wrap">
+            @for (tag of plan.tag; track $index) {
+            <span class="tag">{{ tag }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <h5>商品說明</h5>
+        <p>{{ plan.description || '尚無商品說明' }}</p>
+      </div>
+
+      <div class="drawer-section">
+        <h5>服務條款</h5>
+        <p>{{ plan.termsOfService || '尚無服務條款' }}</p>
+      </div>
+
+      <div class="drawer-section">
+        <h5>注意事項</h5>
+        <p>{{ plan.notes || '尚無注意事項' }}</p>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <div class="footer-top">
+        <div class="price-block">
+          <span class="price-label">售價</span>
+          <div class="price">NT$ {{ plan.currentPrice }}</div>
+          <div class="stock">剩餘庫存：{{ plan.ticketStock }}</div>
+        </div>
+
+        <div class="qty-block">
+          <span class="qty-label">數量</span>
+          <div class="qty-stepper">
+            <button type="button" class="qty-btn" (click)="decreaseQty()">−</button>
+            <span class="qty-value">{{ quantity }}</span>
+            <button type="button" class="qty-btn" (click)="increaseQty()">＋</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-block">
+        <button type="button" class="btn-cart">加入購物車</button>
+        <button type="button" class="btn-book">立即預訂</button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
+using TravelWeb_API.Models.TripProduct.TripDTO;
 
 namespace TravelWeb_API.Services
 {
@@ -19,6 +20,7 @@ namespace TravelWeb_API.Services
             if (!check) return null;
 
             var result = await _activityDbContext.Activities
+                .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .Select(a => new ActivityInfoResponseDTO
                 {
@@ -50,7 +52,7 @@ namespace TravelWeb_API.Services
         }
 
 
-        public async Task<ReviewPackageResponseDTO?> GetRelatedReviews(int activityId)
+        public async Task<ReviewPackageResponseDTO?> GetRelatedReviews(int activityId, string? memberId,string orderRule="highest")
         {
 
             var check = await _activityDbContext.Activities.AnyAsync(a => a.ActivityId == activityId);
@@ -62,9 +64,38 @@ namespace TravelWeb_API.Services
                 AverageRating = 0,
             };
 
-            var reviews = await _activityDbContext.Activities
+            var reviews = _activityDbContext.Activities
+                .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
+                .Where(r => memberId == null || r.MemberId != memberId);
+
+            if (orderRule == "highest")
+            {
+                reviews = reviews
+                     .OrderByDescending(r => r.Rating)
+                     .ThenByDescending(r => r.CreateDate);
+
+            }
+            else if (orderRule == "lowest")
+            {
+                reviews = reviews
+                    .OrderBy(r => r.Rating)
+                    .ThenByDescending(r => r.CreateDate);
+            }
+            else if (orderRule == "newest")
+            {
+                reviews = reviews
+                    .OrderByDescending(r => r.CreateDate);
+            }
+            else if (orderRule == "picFirst")
+            {
+                reviews = reviews
+                    .OrderByDescending(r => r.ReviewImages.Count())
+                    .ThenByDescending(r => r.CreateDate);
+            }
+
+            var result = await reviews
                 .Select(r => new ReviewResponseDTO
                 {
                     ReviewId = r.ReviewId,
@@ -79,11 +110,13 @@ namespace TravelWeb_API.Services
 
 
             var averageRating = _activityDbContext.Activities
+                .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
                 .Average(r => (decimal?)r.Rating) ?? 0;
 
             var commentCount = _activityDbContext.Activities
+                .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
                 .Select(r => r.ReviewId)
@@ -93,7 +126,7 @@ namespace TravelWeb_API.Services
             return new ReviewPackageResponseDTO()
             {
                 ActivityId = activityId,
-                Reviews = reviews,
+                Reviews = result,
                 AverageRating = Math.Round(averageRating, 1),
                 CommentCount = commentCount
             };
@@ -106,6 +139,7 @@ namespace TravelWeb_API.Services
             if (!check) return new List<ActivityTicketIntroResponseDTO>();
 
             var products = await _activityDbContext.Activities
+                .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.ActivityTicketDetails)
                 .Where(atd => atd.ProductCodeNavigation.Status != "已下架")

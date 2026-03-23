@@ -20,6 +20,7 @@ namespace TravelWeb_API.Services
             if (!ticket) return null;
 
             var result = await _dbContext.AcitivityTickets
+                .AsNoTracking()
                 .Where(t => t.ProductCode == productCode)
                 .Select(t => new ActivityTicketInfoResponseDTO
                 {
@@ -28,11 +29,13 @@ namespace TravelWeb_API.Services
                     Description = t.ActivityTicketDetail!.ProdcutDescription,
                     TermsOfService = t.ActivityTicketDetail.TermsOfService,
                     CoverImageUrl = t.CoverImageUrl,
+                    Notes = t.ActivityTicketDetail.Note,
+                    TicketCategoryId = t.TicketCategory!.TicketCategoryId,
                     StartDate = t.StartDate,
                     ExpiryDate = t.ExpiryDate,
                     CurrentPrice = t.CurrentPrice,
+                    //TODO
                     TicketStock = 0, //待連結庫存欄位
-                    Notes = null,//待新增對應欄位
                 })
                 .FirstOrDefaultAsync();
 
