@@ -155,6 +155,7 @@ builder.Services.AddDbContext<BoardDbContext>(options =>
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<ITagsService, TagsService>();
 //===================================================
 
 //行程商品表連線用DI

@@ -32,6 +32,10 @@ export class BoardServe {
     return this.http.get<CommentsDTO[]>(`https://localhost:7276/api/Board/Comments/${para}`);
   }
 
+  getTagsByArticleAPI(para: number) {
+    return this.http.get(`https://localhost:7276/api/Board/Tags?articleId=${para}`)
+  }
+
   postPostAPI(UserID: string) {
     return this.http.post<number>(`https://localhost:7276/api/Board/Articles?Type=0&UserId=${UserID}`, null).pipe(
       switchMap(result => this.http.post<number>(`https://localhost:7276/api/Post?id=${result}`, null)));

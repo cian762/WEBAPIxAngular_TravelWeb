@@ -137,9 +137,8 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<ArticleTag>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ArticleTags", "Board");
+            entity.HasKey(e => new { e.ArticleId, e.TagId });
+            entity.ToTable("ArticleTags", "Board");
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.TagId).HasColumnName("TagID");

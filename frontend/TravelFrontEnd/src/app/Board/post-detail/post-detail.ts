@@ -5,6 +5,12 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Sidebar } from "../Components/sidebar/sidebar";
 import { CommentsArea } from "../Components/comments-area/comments-area";
 
+interface ArticleTag {
+  tagID: number;
+  tagName: string;
+  icon: string;
+}
+
 @Component({
   selector: 'app-post-detail',
   imports: [RouterModule, Sidebar, CommentsArea],
@@ -18,6 +24,7 @@ export class PostDetail implements OnInit {
   id = 0;
   selectedIndex = 0;
   allPhotoList: string[] = [];
+  TagsList: ArticleTag[] = [];
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -33,6 +40,9 @@ export class PostDetail implements OnInit {
         }
 
       });
+      this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
+        this.TagsList = d;
+      })
     });
   }
 
