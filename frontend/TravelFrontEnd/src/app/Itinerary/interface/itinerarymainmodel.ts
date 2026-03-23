@@ -5,3 +5,19 @@ export interface ItineraryCreateDto {
   endTime: string;
   itemsToPush: any[];
 }
+export interface ItineraryItem {
+  itemId: number;
+  sortOrder: number;
+  contentDescription: string;
+  attractionName: string;
+  address: string;
+  latitude?: number;
+  longitude?: number;
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface DayPlan {
+  day: number;
+  items: ItineraryItem[];
+}

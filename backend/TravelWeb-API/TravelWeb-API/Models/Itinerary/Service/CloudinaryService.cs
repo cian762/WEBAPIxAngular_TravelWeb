@@ -6,10 +6,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
     public class CloudinaryService : ICloudinaryService
     {
         private readonly Cloudinary _cloudinary;
-        public Task<string> UploadImageAsync(IFormFile file)
-        {
-            throw new NotImplementedException();
-        }
+
         public CloudinaryService(IConfiguration config)
         {
             // 從 appsettings.json 讀取設定

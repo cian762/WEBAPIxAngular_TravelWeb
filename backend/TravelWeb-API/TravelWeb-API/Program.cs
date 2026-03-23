@@ -1,7 +1,10 @@
 ﻿using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
@@ -14,10 +17,6 @@ using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 
 
 
@@ -29,9 +28,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.AllowAnyOrigin() 
-                  .AllowAnyHeader()  
-                  .AllowAnyMethod();  
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
         });
 });
 
@@ -109,7 +108,7 @@ builder.Services.AddSwaggerGen(
         });
         x.SwaggerDoc("Board", new OpenApiInfo
         {
-            Title = "Board"           
+            Title = "Board"
         });
 
         x.DocInclusionPredicate((docName, apiDesc) =>
@@ -147,6 +146,17 @@ var config = TypeAdapterConfig.GlobalSettings;
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddScoped<IItineraryservice, ItineraryService>();
+builder.Services.AddScoped<IAIService, AIService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
+//builder.Services.AddControllers()
+//    .AddJsonOptions(options =>
+//    {
+//        // 自動將屬性名稱轉為小寫開頭 (camelCase)，符合 Angular 習慣
+//        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+//        // 忽略掉循環引用
+//        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+//    });
 #endregion
 
 builder.Services.AddDbContext<BoardDbContext>(options =>
@@ -156,8 +166,8 @@ builder.Services.AddScoped<ICommentsService, CommentsService>();
 //===================================================
 
 //行程商品表連線用DI
-builder.Services.AddScoped<ITripproductTable,TripproductTable >();
-builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
+builder.Services.AddScoped<ITripproductTable, TripproductTable>();
+builder.Services.AddScoped<IShoppingCart, SShoppingCart>();
 //行程商品表連線用DI
 builder.Services.AddScoped<ITripproductTable, TripproductTable>();
 //購物車連線DI
@@ -202,7 +212,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(myAllowSpecificOrigins);
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 
 app.UseAuthorization();
 
