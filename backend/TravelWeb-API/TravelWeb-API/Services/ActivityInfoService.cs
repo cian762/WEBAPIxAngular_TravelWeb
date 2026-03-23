@@ -68,7 +68,8 @@ namespace TravelWeb_API.Services
                 .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
-                .Where(r => memberId == null || r.MemberId != memberId);
+                .Where(r => memberId == null || r.MemberId != memberId)
+                .Where(r => r.IsSoftDeleted == false);
 
             if (orderRule == "highest")
             {

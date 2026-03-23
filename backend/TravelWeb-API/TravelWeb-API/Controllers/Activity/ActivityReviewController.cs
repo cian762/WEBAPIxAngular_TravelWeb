@@ -71,10 +71,10 @@ namespace TravelWeb_API.Controllers.Activity
 
 
         [HttpDelete]
-        public async Task<ActionResult> DeletePersonalReview(int requestId) 
+        public async Task<ActionResult> DeletePersonalReview(int reviewId) 
         {
-
-            return Ok();
+            var result = await _activityReviewService.DeletePersonalReview(reviewId);
+            return Ok(result);
         }
     }
 }

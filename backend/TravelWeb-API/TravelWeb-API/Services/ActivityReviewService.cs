@@ -21,7 +21,7 @@ namespace TravelWeb_API.Services
             var result = await _activityDbContext.Activities
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
-                .Where(r => r.MemberId == memberId)
+                .Where(r => r.MemberId == memberId && r.IsSoftDeleted == false)
                 .Select(r => new ReviewResponseDTO
                 {
                     ReviewId = r.ReviewId,
@@ -122,9 +122,15 @@ namespace TravelWeb_API.Services
         }
 
 
+        public async Task<string> DeletePersonalReview(int reviewId) 
+        {
+            var check = await _activityDbContext.ProductReviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId);
+            if (check == null) return "無法刪除評論，找不到對應評論ID";
 
-
-
+            check.IsSoftDeleted = true;
+            await _activityDbContext.SaveChangesAsync();
+            return $"已刪除此評論, 發生時間 {DateTime.Now}";
+        }
 
 
         public List<string> FindPublicId(List<string> deletedImageUrls) 
