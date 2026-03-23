@@ -4,9 +4,11 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductDetailPage } from '../../services/product-detail-page';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CreateShoppingCart } from '../../services/create-shopping-cart';
 
 @Component({
   selector: 'app-trip-product-detail',
+  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, DecimalPipe],
   templateUrl: './trip-product-detail.html',
   styleUrl: './trip-product-detail.css',
@@ -20,7 +22,7 @@ export class TripProductDetail implements OnInit {
   basicInfo?: ProductBasic;
   schedules: ProductSchedule[] = [];
   itineraries: ProductItinerary[] = [];
-  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage) { }
+  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart) { }
   ngOnInit(): void {
     // 1. 從路由取得 ID (假設路由定義為 product/:id)
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -103,35 +105,61 @@ export class TripProductDetail implements OnInit {
   addToCart(): void {
     const data = this.getBookingData();
 
-    if (data) {
-      // 這裡 data 已經包含你剛改好的 items: [{ticketType:2, qty:...}, {ticketType:3, qty:...}]
-      console.log('加入購物車參數 (含票種代號):', data);
-
-      // 修正 Alert 顯示：直接用 this.adultCount 和 this.childCount 最快
-      const total = this.adultCount + this.childCount;
-      alert(`成功加入購物車！\n日期：${data.startDate}\n成人：${this.adultCount}位、兒童：${this.childCount}位`);
-
-      // 未來實作： this.cartService.add(data).subscribe(...);
+    if (!data || !this.selectedSchedule) {
+      alert('請選擇出發日期');
+      return;
     }
+
+    // 1. 檢查是否有會員 ID (代表已登入)
+    const memberId = localStorage.getItem('memberId');
+
+    // 2. 過濾掉數量為 0 的項目 (不論大人小孩，有買才送)
+    const itemsToProcess = data.items.filter(item => item.qty > 0);
+
+    if (itemsToProcess.length === 0) {
+      alert('請選擇購買人數');
+      return;
+    }
+
+    // 3. 根據登入狀態執行不同邏輯
+    itemsToProcess.forEach(item => {
+      const cartItem = {
+        memberId: memberId || '', // 沒登入就給空，之後同步再補
+        productCode: data.scheduleId,
+        productName: data.productName, // LocalStorage 需要名稱來顯示
+        price: item.price,
+        quantity: item.qty,
+        ticketCategoryId: item.ticketType
+      };
+
+      if (memberId) {
+        // --- 已登入：打 API 存入資料庫 ---
+        this.cartService.addToCart(cartItem).subscribe({
+          next: () => console.log(`票種 ${item.ticketType} API 存入成功`),
+          error: (err) => console.error('API 存入失敗', err)
+        });
+      } else {
+        // --- 未登入：存入 LocalStorage ---
+        this.cartService.addToLocalCart(cartItem);
+        console.log(`票種 ${item.ticketType} 已暫存至 LocalStorage`);
+      }
+    });
+
+    alert(`成功加入購物車！\n日期：${data.startDate}\n成人：${this.adultCount}位、兒童：${this.childCount}位`);
   }
-
-  // 立即購買
+  // 立即購買按鈕
   buyNow(): void {
-    const data = this.getBookingData();
+    const memberId = localStorage.getItem('memberId');
 
-    if (data) {
-      console.log('立即購買參數 (含票種代號):', data);
-
-      // 這是 Angular 最推薦的跳轉傳參方式：使用 state
-      // 這樣在「結帳頁面」就能透過 history.state 拿到這整包 data
-      // this.route.navigate(['/checkout'], {
-      //   state: {
-      //     booking: data
-      //   }
-      // });
-
-      // 如果你還沒建 checkout 頁面，先用 alert 測試
-      // alert('正在前往結帳頁面...');
+    if (!memberId) {
+      // 沒登入的話，先存 LocalStorage 再跳轉登入
+      this.addToCart();
+      alert('請先登入會員以完成訂單');
+      // this.router.navigate(['/login'], { queryParams: { returnUrl: '/shopping-cart' } });
+    } else {
+      // 已登入的話，存 API 後直接跳轉
+      this.addToCart();
+      // this.router.navigate(['/shopping-cart']);
     }
   }
 }
