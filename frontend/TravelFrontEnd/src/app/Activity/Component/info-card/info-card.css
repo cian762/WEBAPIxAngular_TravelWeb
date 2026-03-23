@@ -1,24 +1,370 @@
-.card {
+.isActive {
+  background-color: #3b82f6;
+}
+
+
+/* Panel */
+.search-panel,
+.result-panel {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  border: 1px solid #e9ecef;
+}
+
+.search-panel__title,
+.result-panel__title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 6px;
+}
+
+.search-panel__subtitle {
+  color: #6b7280;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+/* Filter */
+.filter-group__label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.custom-input {
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  box-shadow: none;
+}
+
+.custom-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, 0.15);
+}
+
+.filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.filter-chip.isActive {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+/* Calendar */
+.calendar-box {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 20px;
   height: 100%;
 }
 
-.activity-card-img {
-  width: 100%;
-  height: 220px;
-  object-fit: contain;
-  display: block;
+.calendar-box__header h5 {
+  font-weight: 700;
+  color: #1f2937;
 }
 
-.card-body {
+.calendar-box__header p {
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.action-btn {
+  height: 46px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Result Meta */
+.result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.result-badge {
+  background: #f1f5f9;
+  color: #334155;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* Sort */
+.sort-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-box__label {
+  color: #6b7280;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.sort-btn {
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 600;
+  color: black;
+}
+
+.sort-btn:hover {
+
+  border-color: #94a3b8;
+}
+
+/* Card */
+.activity-card {
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.activity-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+.activity-card__image-wrap {
+  overflow: hidden;
+}
+
+.activity-card__image {
+  height: 220px;
+  object-fit: fill;
+}
+
+.activity-card__body {
+  cursor: pointer;
+  padding: 20px;
+}
+
+.activity-card__title {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+  text-decoration: none;
+  line-height: 1.5;
+  min-height: 52px;
+}
+
+
+.activity-card__date {
+  margin-top: 10px;
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.activity-card__stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.92rem;
+}
+
+.rating-block {
   display: flex;
   flex-direction: column;
 }
 
-.card-title {
-  min-height: 30px;
-  line-height: 1.4;
+.rating-block__score {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f59e0b;
 }
 
-.isActive {
-  background-color: paleturquoise;
+.rating-block__text,
+.booking-text {
+  color: #6b7280;
+}
+
+.activity-card__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+}
+
+.price-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-block__label {
+  font-size: 0.82rem;
+  color: #9ca3af;
+}
+
+.price-block__value {
+  font-size: 1.3rem;
+  color: #111827;
+}
+
+.view-block {
+  color: #6b7280;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.activity-card__footer {
+  background: #fff;
+  border-top: 1px solid #f1f5f9;
+  padding: 14px 20px 18px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-item {
+  font-size: 0.8rem;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* Pagination */
+.pagination-wrap {
+  padding-top: 8px;
+}
+
+.custom-pagination .page-link {
+  border: none;
+  color: #374151;
+  border-radius: 10px;
+  margin: 0 4px;
+  padding: 10px 14px;
+}
+
+.custom-pagination .page-item.active .page-link {
+  background: #2563eb;
+  color: #fff;
+}
+
+.custom-pagination .page-link:hover {
+  background: #e5e7eb;
+}
+
+.search-autocomplete {
+  position: relative;
+  z-index: 20;
+}
+
+.custom-input {
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid #d9e2ec;
+  padding: 0 14px;
+  font-size: 15px;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.custom-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
+}
+
+/* 自動補全下拉選單 */
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.12),
+    0 2px 8px rgba(15, 23, 42, 0.06);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* 清單 */
+.autocomplete-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+/* 每一列 */
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #334155;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.autocomplete-item:hover {
+  background-color: #f8fbff;
+  color: #2563eb;
+}
+
+.autocomplete-item+.autocomplete-item {
+  border-top: 1px solid #f1f5f9;
+}
+
+.autocomplete-icon {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* 滾動條 */
+.autocomplete-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.autocomplete-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.autocomplete-list::-webkit-scrollbar-track {
+  background: transparent;
 }

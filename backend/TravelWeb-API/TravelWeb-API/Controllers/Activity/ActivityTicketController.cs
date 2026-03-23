@@ -27,9 +27,9 @@ namespace TravelWeb_API.Controllers.Activity
         }
 
         [HttpGet("Suggest")]
-        public async Task<ActionResult<ActivityCardReponseDTO>> GetProductSuggestion([FromQuery] string ActivityType)
+        public async Task<ActionResult<ActivityCardReponseDTO>> GetProductSuggestion([FromQuery] int activityId,[FromQuery] List<string> ActivityType)
         {
-            var result = await _TicketService.GetProductSuggestion(ActivityType);
+            var result = await _TicketService.GetProductSuggestion(activityId,ActivityType);
             if (result == null) return NotFound();
             return Ok(result);
         }

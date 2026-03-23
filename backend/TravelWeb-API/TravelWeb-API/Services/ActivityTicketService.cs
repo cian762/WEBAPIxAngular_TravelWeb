@@ -20,6 +20,7 @@ namespace TravelWeb_API.Services
             if (!ticket) return null;
 
             var result = await _dbContext.AcitivityTickets
+                .AsNoTracking()
                 .Where(t => t.ProductCode == productCode)
                 .Select(t => new ActivityTicketInfoResponseDTO
                 {
@@ -28,26 +29,28 @@ namespace TravelWeb_API.Services
                     Description = t.ActivityTicketDetail!.ProdcutDescription,
                     TermsOfService = t.ActivityTicketDetail.TermsOfService,
                     CoverImageUrl = t.CoverImageUrl,
+                    Notes = t.ActivityTicketDetail.Note,
+                    TicketCategoryId = t.TicketCategory!.TicketCategoryId,
                     StartDate = t.StartDate,
                     ExpiryDate = t.ExpiryDate,
                     CurrentPrice = t.CurrentPrice,
+                    //TODO
                     TicketStock = 0, //待連結庫存欄位
-                    Notes = null,//待新增對應欄位
                 })
                 .FirstOrDefaultAsync();
 
             return result;
         }
 
-        public async Task<List<ActivityCardReponseDTO>?> GetProductSuggestion(string activityType)
+        public async Task<List<ActivityCardReponseDTO>?> GetProductSuggestion(int activityId,List<string> activityType)
         {
-            var typeCheck = await _dbContext.TagsActivityTypes.AnyAsync(t => t.ActivityType == activityType);
+            var typeCheck = await _dbContext.TagsActivityTypes.AnyAsync(t => activityType.Contains(t.ActivityType!));
 
             if (!typeCheck) return null;
 
             var result = await _dbContext.Activities
-                .Where(a => a.SoftDelete == false && a.Types.Any(t => t.ActivityType == activityType))
-                .OrderByDescending(a => a.StartTime) //這邊往後要改成以閱覽數當排序基準
+                .Where(a => a.SoftDelete == false && a.Types.Any(t => activityType.Contains(t.ActivityType!)) && a.ActivityId != activityId)
+                .Where(a=>a.EndTime >= DateOnly.FromDateTime(DateTime.Today))
                 .Select(a => new ActivityCardReponseDTO {
                     ActivityId = a.ActivityId,
                     Title = a.Title,
@@ -56,7 +59,16 @@ namespace TravelWeb_API.Services
                     Start = a.StartTime,
                     End = a.EndTime,
                     CoverImageUrl = a.ActivityImages.FirstOrDefault(i => i.IsCoverImage==true)!.ImageUrl,
+                    ViewCount = a.ViewCount,
+                    CommentCount = a.Reviews.Count(),
+                    ReferencePrice = a.ActivityTicketDetails
+                    .Where(d => d.ProductCodeNavigation.TicketCategoryId == 2)
+                    .Select(d => d.ProductCodeNavigation.CurrentPrice)
+                    .FirstOrDefault() ?? 0,
+                    AverageRating = (float)Math.Round((a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0), 1),
                 })
+                .OrderByDescending(a => a.AverageRating)
+                .ThenByDescending(a=>a.ViewCount)
                 .ToListAsync();
 
             return result;

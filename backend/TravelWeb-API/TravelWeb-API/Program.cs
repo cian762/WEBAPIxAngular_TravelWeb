@@ -128,14 +128,20 @@ builder.Services.AddDbContext<AttractionsContext>(options =>
 builder.Services.AddDbContext<MemberSystemContext>(options =>
  options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
+#region ActivityDI
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<ActivityCardService>();
 builder.Services.AddScoped<ActivityInfoService>();
 builder.Services.AddScoped<ActivityTicketService>();
+builder.Services.AddHttpClient<GoogleRouteForActivityService>();
+builder.Services.AddScoped<ActivityReviewService>();
+builder.Services.AddScoped<CloudinaryPhotoService>();
+#endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+
 
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
