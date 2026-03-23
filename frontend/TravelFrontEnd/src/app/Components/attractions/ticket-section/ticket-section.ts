@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AttractionService, AttractionProduct } from '../attraction.service';
+import { AttractionService, AttractionProduct, ProductDetailInfo } from '../attraction.service';
 
 @Component({
   selector: 'app-ticket-section',
@@ -22,6 +22,14 @@ export class TicketSectionComponent implements OnInit {
   // productId → 購買數量
   qtyMap: Record<number, number> = {};
 
+  // Accordion：目前展開的 productId（null = 全部收起）
+  expandedId: number | null = null;
+
+  // 方案詳情側邊面板
+  drawerOpen = false;
+  drawerLoading = false;
+  drawerDetail: ProductDetailInfo | null = null;
+
   constructor(private svc: AttractionService) { }
 
   ngOnInit(): void {
@@ -30,10 +38,7 @@ export class TicketSectionComponent implements OnInit {
       this.loading = false;
 
       list.forEach(p => {
-        // 預設每個票種數量為 1
         this.qtyMap[p.productId] = 1;
-
-        // 取庫存（以 StockInRecords.remaining_stock 加總）
         this.svc.getStock(p.productCode).subscribe(s => {
           this.stockMap[p.productCode] = s.remainingStock;
           this.stockLoaded[p.productCode] = true;
@@ -42,7 +47,35 @@ export class TicketSectionComponent implements OnInit {
     });
   }
 
-  /** 增加數量，不超過 maxPurchaseQuantity 及剩餘庫存 */
+  // ── Accordion ────────────────────────────────────────
+
+  toggleExpand(productId: number): void {
+    this.expandedId = this.expandedId === productId ? null : productId;
+  }
+
+  isExpanded(productId: number): boolean {
+    return this.expandedId === productId;
+  }
+
+  // ── 方案詳情側邊面板 ──────────────────────────────────
+
+  openDrawer(productId: number): void {
+    this.drawerOpen = true;
+    this.drawerLoading = true;
+    this.drawerDetail = null;
+    this.svc.getProductDetail(productId).subscribe(d => {
+      this.drawerDetail = d;
+      this.drawerLoading = false;
+    });
+  }
+
+  closeDrawer(): void {
+    this.drawerOpen = false;
+    this.drawerDetail = null;
+  }
+
+  // ── 數量控制 ──────────────────────────────────────────
+
   incQty(p: AttractionProduct): void {
     const cur = this.qtyMap[p.productId] ?? 1;
     const stock = this.stockMap[p.productCode] ?? 0;
@@ -51,19 +84,36 @@ export class TicketSectionComponent implements OnInit {
     this.qtyMap[p.productId] = cur + 1;
   }
 
-  /** 減少數量，最少 1 */
   decQty(productId: number): void {
     this.qtyMap[productId] = Math.max(1, (this.qtyMap[productId] ?? 1) - 1);
   }
 
-  /** 庫存是否不足（低於 10 張顯示警示） */
+  // ── 庫存狀態 ──────────────────────────────────────────
+
   isLowStock(productCode: string): boolean {
-    return (this.stockMap[productCode] ?? 0) < 10;
+    return this.stockLoaded[productCode] && (this.stockMap[productCode] ?? 0) < 10 && (this.stockMap[productCode] ?? 0) > 0;
   }
 
-  /** 是否售完 */
   isSoldOut(productCode: string): boolean {
     return this.stockLoaded[productCode] && (this.stockMap[productCode] ?? 0) <= 0;
+  }
+
+  // ── 工具方法 ──────────────────────────────────────────
+
+  /** 將換行分隔的字串轉成陣列（用於 includes/excludes/eligibility） */
+  toLines(text: string | null | undefined): string[] {
+  if (!text) return [];
+  // 同時處理真實換行 \n 和字面上的 \n 字串
+  return text
+    .replace(/\\n/g, '\n')
+    .split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+}
+
+  /** 計算小計 */
+  getSubtotal(p: AttractionProduct): number {
+    return (p.price ?? 0) * (this.qtyMap[p.productId] ?? 1);
   }
 
   addToCart(p: AttractionProduct): void {

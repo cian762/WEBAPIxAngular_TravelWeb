@@ -9,10 +9,40 @@ export interface AttractionProduct {
   productCode: string;
   title: string;
   price: number | null;
+  originalPrice: number | null;
+  validityDays: number | null;
   maxPurchaseQuantity: number | null;
   status: string;
   ticketTypeCode: number | null;
   ticketTypeName: string | null;
+  tags: string[];
+}
+
+export interface ProductDetailInfo {
+  productId: number;
+  productCode: string;
+  title: string;
+  price: number | null;
+  originalPrice: number | null;
+  validityDays: number | null;
+  maxPurchaseQuantity: number | null;
+  ticketTypeName: string | null;
+  attractionName: string | null;
+  tags: string[];
+  detail: {
+    contentDetails: string | null;
+    notes: string | null;
+    usageInstructions: string | null;
+    includes: string | null;
+    excludes: string | null;
+    eligibility: string | null;
+    cancelPolicy: string | null;
+  } | null;
+  images: {
+    imageId: number;
+    imagePath: string;
+    caption: string | null;
+  }[];
 }
 
 export interface StockResult {
@@ -26,7 +56,6 @@ export class AttractionService {
 
   constructor(private http: HttpClient) { }
 
-  // 取得所有景點
   getAttractions(params?: {
     regionId?: number;
     typeId?: number;
@@ -35,47 +64,47 @@ export class AttractionService {
   }): Observable<Attraction[]> {
     let p = new HttpParams();
     if (params?.regionId) p = p.set('regionId', params.regionId);
-    if (params?.typeId) p = p.set('typeId', params.typeId);
-    if (params?.keyword) p = p.set('keyword', params.keyword);
+    if (params?.typeId)   p = p.set('typeId', params.typeId);
+    if (params?.keyword)  p = p.set('keyword', params.keyword);
     return this.http.get<Attraction[]>(`${this.apiUrl}/Attraction`, { params: p })
       .pipe(catchError(() => of([])));
   }
 
-  // 取得單一景點
   getAttractionById(id: number): Observable<Attraction | null> {
     return this.http.get<Attraction>(`${this.apiUrl}/Attraction/${id}`)
       .pipe(catchError(() => of(null)));
   }
 
-  // 取得景點分類
   getAttractionTypes(): Observable<AttractionType[]> {
     return this.http.get<AttractionType[]>(`${this.apiUrl}/AttractionType`)
       .pipe(catchError(() => of([])));
   }
 
-  // 按讚
   toggleLike(attractionId: number): Observable<{ likeCount: number; isLiked: boolean }> {
     return this.http.post<{ likeCount: number; isLiked: boolean }>(
       `${this.apiUrl}/Attraction/${attractionId}/like`, {}
     ).pipe(catchError(() => of({ likeCount: 0, isLiked: false })));
   }
 
-  // 依類型取得景點
   getAttractionsByType(typeId: number): Observable<Attraction[]> {
     return this.http.get<Attraction[]>(`${this.apiUrl}/Attraction/bytype/${typeId}`)
       .pipe(catchError(() => of([])));
   }
 
-  // ── 票務相關 ──────────────────────────────────────────
+  // ── 票務相關 ─────────────────────────────────────────
 
-  // 取得某景點所有上架票種
   getProductsByAttraction(attractionId: number): Observable<AttractionProduct[]> {
     return this.http.get<AttractionProduct[]>(
       `${this.apiUrl}/AttractionProduct/byattraction/${attractionId}`
     ).pipe(catchError(() => of([])));
   }
 
-  // 取得單一票種庫存（以 StockInRecords.remaining_stock 加總）
+  getProductDetail(productId: number): Observable<ProductDetailInfo | null> {
+    return this.http.get<ProductDetailInfo>(
+      `${this.apiUrl}/AttractionProduct/${productId}`
+    ).pipe(catchError(() => of(null)));
+  }
+
   getStock(productCode: string): Observable<StockResult> {
     return this.http.get<StockResult>(
       `${this.apiUrl}/AttractionProduct/stock/${productCode}`

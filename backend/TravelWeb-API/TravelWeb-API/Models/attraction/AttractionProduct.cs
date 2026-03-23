@@ -21,6 +21,10 @@ public partial class AttractionProduct
 
     public decimal? Price { get; set; }
 
+    public decimal? OriginalPrice { get; set; }       // 原價（劃線用）
+
+    public int? ValidityDays { get; set; }             // 有效天數（如 365）
+
     public int? MaxPurchaseQuantity { get; set; }
 
     public int? IsActive { get; set; }
@@ -32,6 +36,8 @@ public partial class AttractionProduct
     public virtual Attraction Attraction { get; set; } = null!;
 
     public virtual ICollection<AttractionProductFavorite> AttractionProductFavorites { get; set; } = new List<AttractionProductFavorite>();
+
+    public virtual ICollection<AttractionProductImage> AttractionProductImages { get; set; } = new List<AttractionProductImage>();
 
     public virtual ICollection<StockInRecord> StockInRecords { get; set; } = new List<StockInRecord>();
 
