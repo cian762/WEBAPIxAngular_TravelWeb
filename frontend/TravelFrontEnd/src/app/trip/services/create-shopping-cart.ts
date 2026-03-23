@@ -7,7 +7,7 @@ import { CartItem } from '../models/creatshopping.model';
   providedIn: 'root',
 })
 export class CreateShoppingCart {
-  private readonly apiUrl = 'https://localhost:7276/api/ShoppingCart/';
+  private readonly apiUrl = 'https://localhost:7276/api/ShoppingCart';
   constructor(private http: HttpClient) { }
   // 1. 取得購物車清單
   getCart(memberId: string): Observable<CartItem[]> {
