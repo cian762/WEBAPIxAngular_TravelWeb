@@ -19,27 +19,33 @@ namespace TravelWeb_API.Models.Board.Service
         {
             if (article(id) == null) return null;
 
-            var CList = _context.Comments.Where(c => c.ArticleId == id)
-                .Select(c => new CommentsDTO
-                {
-                    AuthorName = member(c.UserId).Name,
-                    AvatarUrl = member(c.UserId).AvatarUrl,
-                    Contents = c.Contents,
-                    CreatedAt = c.CreatedAt,
-                    LikeCount = LikeCount(c),
-                    isLiked = false,
-                });
-            return CList.ToList();
+            var commentList = _context.Comments
+                .Where(c => c.ArticleId == id)
+                .Include(c => c.MemberInformation)
+                .Include(c => c.InverseParent).ToList();
+
+            var result = commentList.Where(c => c.ParentId == null).Select(c => new CommentsDTO
+            {
+                CommentId = c.CommentId,
+                AuthorName = c.MemberInformation.Name,
+                AvatarUrl = c.MemberInformation.AvatarUrl,
+                Contents = c.Contents,
+                CreatedAt = c.CreatedAt,
+                LikeCount = LikeCount(c),
+                ReplyComments = GetReplyComments(c),
+                isLiked = false,
+            }).ToList();
+            return result;
         }
 
 
-        public Comment AddComment(int articleID, string UserId, string contents)
+        public Comment AddComment(PostCommentDto dto)
         {
             Comment comment = new Comment();
-            comment.UserId = UserId;
-            comment.ParentId = null;
-            comment.ArticleId = articleID;
-            comment.Contents = contents;
+            comment.UserId = dto.UserId;
+            comment.ParentId = dto.parentID;
+            comment.ArticleId = dto.articleID;
+            comment.Contents = dto.contents;
             //comment.CreatedAt = DateTime.Now;
 
             _context.Comments.Add(comment);
@@ -47,19 +53,7 @@ namespace TravelWeb_API.Models.Board.Service
             return comment;
         }
 
-        public Comment AddCommentWithParent(int articleID, string UserId, string contents, int parentID)
-        {
-            Comment comment = new Comment();
-            comment.UserId = UserId;
-            comment.ParentId = parentID;
-            comment.ArticleId = articleID;
-            comment.Contents = contents;
-            //comment.CreatedAt = DateTime.Now;
-
-            _context.Comments.Add(comment);
-            _context.SaveChanges();
-            return comment;
-        }
+        
 
 
         public bool CommentLike(int commentID, string UserId)
@@ -113,6 +107,21 @@ namespace TravelWeb_API.Models.Board.Service
             return member;
         }
 
+        List<CommentsDTO>? GetReplyComments(Comment comment)
+        {
+            var result = comment.InverseParent.Select(c => new CommentsDTO
+            {
+                AuthorName = c.MemberInformation.Name,
+                AvatarUrl = c.MemberInformation.AvatarUrl,
+                Contents = c.Contents,
+                CreatedAt = c.CreatedAt,
+                LikeCount = LikeCount(c),
+                isLiked = false,
+            }).ToList();
+
+            return result;
+        }
+       
         
     }
 }

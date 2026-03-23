@@ -20,14 +20,14 @@ namespace TravelWeb_API.Controllers.Board
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        private readonly IArticlesService _ArticlesService;
+        private readonly IPostService _PostService;
 
         public PostController(BoardDbContext context,
-            IArticlesService noteService,
+            IPostService noteService,
             MemberSystemContext memberDb)
         {
             _context = context;
-            _ArticlesService = noteService;
+            _PostService = noteService;
             _memberDb = memberDb;
         }
 
@@ -38,18 +38,19 @@ namespace TravelWeb_API.Controllers.Board
             Article? article = _context.Articles.Include(a => a.Post).FirstOrDefault(x => x.ArticleId == id);
             if (article == null) return NotFound();
             PostDetailDto postDetail =
-                _ArticlesService.GetPostDetailed(article);
+                _PostService.GetPostDetailed(article);
             if (postDetail == null) return NotFound();
             return postDetail;
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostPost(Article article)
+        public async Task<ActionResult<int>> PostPost(int id)
         {
+            var article=_context.Articles.FirstOrDefault(a => a.ArticleId == id);
             if (article.Type == 0)
             {
-                _ArticlesService.AddPost(article);
-                return NoContent();
+                _PostService.AddPost(article);
+                return article.ArticleId;
             }
             else if (article.Type == 1)
             {
@@ -63,24 +64,30 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         // PUT: api/Articles/5 修改文章
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutArticle(
-            int id, string? Title, string? PhotoUrl, byte Status,
-            string? content, int? regionId,
-            List<string>? photoUrlList)
+        [HttpPut("{id}")] 
+        public async Task<ActionResult<bool>> PutArticle(int id, [FromBody] PostUpdateDto updateDto)
         {
+
             //修改快速串文
-            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == id).Type;
+            byte type = _context.Articles.FirstOrDefault(a => a.ArticleId == updateDto.id).Type;
             bool isUpdateSuccess =
-                await _ArticlesService.UpdateArtic(id, Title, PhotoUrl, Status);
-            if (isUpdateSuccess)
+                await _PostService.UpdateArtic(
+                    updateDto.id,
+                    updateDto.Title, 
+                    updateDto.PhotoUrl, 
+                    updateDto.Status);
+            if (!isUpdateSuccess)
                 return NotFound();
             else
             {
                 if (type == 0)
                 {
-                    bool isUpdatePostSuccess = await _ArticlesService.UpdatePost(id, content, regionId, photoUrlList);
-                    if (isUpdatePostSuccess) return NoContent();
+                    bool isUpdatePostSuccess = await _PostService.UpdatePost(
+                        updateDto.id,
+                        updateDto.content, 
+                        updateDto.regionId,
+                        updateDto.photoUrlList);//, photoUrlList
+                    if (isUpdatePostSuccess) return true;
                     return NotFound();
                 }
                 else if (type == 1)

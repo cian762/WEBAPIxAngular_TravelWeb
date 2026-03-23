@@ -165,10 +165,13 @@ builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
 //    });
 #endregion
 
+//========留言功能=======================================
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-builder.Services.AddScoped<IArticlesService, ArticleService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<ITagsService, TagsService>();
 //===================================================
 
 //行程商品表連線用DI

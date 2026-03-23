@@ -27,7 +27,11 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/remixicon/fonts/remixicon.css",
               "src/styles.css"
+            ],
+            "scripts": [
+              "node_modules/slick-carousel/slick/slick.min.js"
             ],
             "polyfills": [
               "zone.js"
