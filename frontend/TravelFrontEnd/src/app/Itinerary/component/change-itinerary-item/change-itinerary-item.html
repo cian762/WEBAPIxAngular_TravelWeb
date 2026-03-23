@@ -1,1 +1,36 @@
-<p>change-itinerary-item works!</p>
+<div class="header" [style.background-image]="'url(' + imageUrl + ')'">
+  <input type="file" class="upload" />
+
+  <div class="header-card">
+    <h2>{{title}}</h2>
+    <p>{{date}}</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="days-wrapper" style="display: flex; gap: 20px;">
+    @for (day of days; track day.day; let dayIdx = $index) {
+    <div class="day-column">
+      <h3>Day {{ day.day }}</h3>
+
+      <div class="items-list" cdkDropList [cdkDropListData]="day.items" (cdkDropListDropped)="onDrop($event)">
+
+        @for (item of day.items; track item.itemId) {
+        <div class="card" draggable="true" (dragstart)="onDragStart(item,dayIdx )">
+          <div class="card-content">
+            <strong>{{ item.attractionName }}</strong>
+            <p>{{ item.address }}</p>
+            <small>{{ item.startTime | date:'HH:mm' }}</small>
+          </div>
+          <div class="actions">
+            <button (click)="deleteItem(day, $index)">❌</button>
+          </div>
+        </div>
+        }
+      </div>
+      <button (click)="addItem(day)" class="btn-add">+ 新增地點</button>
+    </div>
+    }
+  </div>
+  <button (click)="changeItem($event)">修改完成</button>
+</div>

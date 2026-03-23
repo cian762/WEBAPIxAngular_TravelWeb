@@ -1,5 +1,6 @@
 import { InfoCard } from './Activity/Component/info-card/info-card';
 import { Routes } from '@angular/router';
+import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 
 export const routes: Routes = [
   {
@@ -44,13 +45,20 @@ export const routes: Routes = [
     ],
   },
   // 景點介紹結束
+  { path: 'trip-detail/:id', component: TripProductDetail },
+  {
+    path: 'tripProduct',
+    loadComponent: () => import('./trip/component/product/product').then(
+      m => m.Product
+    )
+  //*行程建立路由*/
   {
     path: 'itinerary',
-    loadComponent: () => import('./Itinerary/component/index-itinerary/index-itinerary').then(m => m.IndexItinerary),
-    children: [{
-      path: 'change',
-      loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ChangeItineraryItem)
-    }]
+    loadComponent: () => import('./Itinerary/component/index-itinerary/index-itinerary').then(m => m.IndexItinerary)
+  },
+  {
+    path: 'change',
+    loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ChangeItineraryItem)
   },
   {
     path: '',
