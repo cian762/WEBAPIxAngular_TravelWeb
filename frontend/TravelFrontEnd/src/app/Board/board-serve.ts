@@ -1,7 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ArticleData } from './interface/ArticleData';
 import { PostDetailDto } from './interface/PostDetailDto';
+import { switchMap } from 'rxjs/operators';
+import { CommentsDTO } from './interface/CommentsDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -10,12 +12,50 @@ export class BoardServe {
   constructor(private http: HttpClient) {
 
   }
-  getArticleAPI() {
-    return this.http.get<ArticleData[]>('https://localhost:7276/api/Board/Articles/test');
+  getArticleAPI(para: number) {
+    return this.http.get(`https://localhost:7276/api/Board/Articles/Bypage/${para}`);
+  }
+
+  getArticleByKeyword(page: number, keyword: string) {
+    return this.http.get(`https://localhost:7276/api/Board/Articles/search?page=${page}&keyword=${keyword}`);
+  }
+
+  getArticleByDate(page: number, startTime: Date, endTime: Date) {
+    return this.http.get(`https://localhost:7276/api/Board/Articles/searchByDate?page=${page}&startTime=${startTime}&endTime=${endTime}`);
   }
 
   getArticleDetailAPI(para: number) {
-    return this.http.get<PostDetailDto>('https://localhost:7276/api/Post/10000003');
+    return this.http.get<PostDetailDto>(`https://localhost:7276/api/Post/${para}`);
   }
 
+  getComments(para: number) {
+    return this.http.get<CommentsDTO[]>(`https://localhost:7276/api/Board/Comments/${para}`);
+  }
+
+  getTagsByArticleAPI(para: number) {
+    return this.http.get(`https://localhost:7276/api/Board/Tags?articleId=${para}`)
+  }
+
+  postPostAPI(UserID: string) {
+    return this.http.post<number>(`https://localhost:7276/api/Board/Articles?Type=0&UserId=${UserID}`, null).pipe(
+      switchMap(result => this.http.post<number>(`https://localhost:7276/api/Post?id=${result}`, null)));
+  }
+
+  postCommentAPI(para: any) {
+    return this.http.post
+      (`https://localhost:7276/api/Board/Comments/PostComment`, para)
+  }
+
+  putPostAPI(id: number, para: any) {
+
+    return this.http.put(
+      `https://localhost:7276/api/Post/${id}`, para);
+
+  }
 }
+
+
+
+// getArticleCreatAPI(UserID: string) {
+//   return this.http.get(`https://localhost:7276/api/Board/Articles?Type=0&UserId=${UserID}`);
+// }

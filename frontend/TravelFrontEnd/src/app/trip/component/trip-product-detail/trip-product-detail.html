@@ -1,0 +1,154 @@
+<div class="container mt-5" *ngIf="basicInfo">
+  <div class="row g-4 mb-5">
+    <div class="col-md-7">
+      <div class="rounded-3 overflow-hidden shadow-sm mb-4">
+        <img [src]="basicInfo?.coverImage" class="img-fluid w-100" [alt]="basicInfo?.productName"
+          style="max-height: 400px; object-fit: cover;">
+      </div>
+      <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+        <h5 class="fw-bold mb-3">商品說明</h5>
+        <div class="text-muted" style="white-space: pre-wrap;">{{basicInfo?.description}}</div>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#" class="text-decoration-none">首頁</a></li>
+          <li class="breadcrumb-item active">{{basicInfo?.regionName}}</li>
+        </ol>
+      </nav>
+
+      <h1 class="h2 fw-bold mb-3">{{basicInfo?.productName}}</h1>
+
+      <div class="mb-4">
+        <span *ngFor="let tag of basicInfo.tags" class="badge bg-light text-dark border me-2 p-2">
+          # {{tag}}
+        </span>
+      </div>
+
+      <div class="card border-0 bg-light p-4 rounded-4 shadow-sm">
+        <p class="text-muted mb-1">最低價格</p>
+        <h2 class="text-danger fw-bold mb-4">
+          TWD {{ (schedules && schedules.length > 0) ? (schedules[0].price | number) : '---' }}
+          <small class="text-muted h6">起</small>
+        </h2>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">選擇出發日期</label>
+          <select class="form-select form-select-lg" [(ngModel)]="selectedSchedule">
+            <option *ngIf="schedules.length === 0" [ngValue]="null">目前無任何檔期</option>
+
+            <option *ngIf="schedules.length > 0 && filteredSchedules.length === 0" [ngValue]="null">
+              近期 3 個月內無可選日期
+            </option>
+
+            <option *ngFor="let s of filteredSchedules" [ngValue]="s" [disabled]="s.availableStock <= 0">
+              {{ s.startDate | date:'yyyy/MM/dd' }} - 價格: {{ s.price | number }}
+              ({{ s.availableStock > 0 ? '剩餘: ' + s.availableStock : '已額滿' }})
+            </option>
+          </select>
+        </div>
+
+        <div class="card p-3 bg-light border-0 mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <span class="fw-bold d-block">成人</span>
+              <small class="text-muted">12歲以上</small>
+            </div>
+            <div class="input-group" style="width: 120px;">
+              <button class="btn btn-sm btn-outline-secondary" (click)="adultCount = adultCount - 1"
+                [disabled]="adultCount <= 1">-</button>
+              <input type="text" class="form-control form-control-sm text-center" [(ngModel)]="adultCount" readonly>
+              <button class="btn btn-sm btn-outline-secondary" (click)="adultCount = adultCount + 1">+</button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="fw-bold d-block">兒童</span>
+              <small class="text-muted">2-11歲</small>
+            </div>
+            <div class="input-group" style="width: 120px;">
+              <button class="btn btn-sm btn-outline-secondary" (click)="childCount = childCount - 1"
+                [disabled]="childCount <= 0">-</button>
+              <input type="text" class="form-control form-control-sm text-center" [(ngModel)]="childCount" readonly>
+              <button class="btn btn-sm btn-outline-secondary" (click)="childCount = childCount + 1">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-6">
+            <button class="btn btn-outline-primary w-100 py-3 fw-bold" [disabled]="!selectedSchedule"
+              (click)="addToCart()">
+              加入購物車
+            </button>
+          </div>
+          <div class="col-6">
+            <button class="btn btn-primary w-100 py-3 fw-bold" [disabled]="!selectedSchedule" (click)="buyNow()">
+              立即預定
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-5">
+
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <h3 class="fw-bold mb-5 border-start border-4 border-primary ps-3">每日行程</h3>
+
+      <div *ngFor="let day of itineraries" class="mb-5 position-relative ps-5 border-start">
+
+        <div
+          class="position-absolute top-0 start-0 translate-middle-x bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+          style="width: 45px; height: 45px; margin-left: -1px; z-index: 2;">
+          D{{day.dayNumber}}
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+          <div class="card-body p-0">
+            <div class="row g-0">
+
+              <div class="col-md-5">
+                <div class="h-100 bg-light">
+                  <img *ngIf="day.resourceUrls && day.resourceUrls.length > 0; else noImg" [src]="day.resourceUrls[0]"
+                    class="img-fluid object-fit-cover w-100 h-100" style="min-height: 250px;" [alt]="day.resourceName">
+                  <ng-template #noImg>
+                    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                      <i class="bi bi-image me-2"></i> 暫無圖片
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+
+              <div class="col-md-7 p-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h5 class="fw-bold text-primary mb-0">{{day.resourceName || '行程內容'}}</h5>
+                  <small class="text-muted">Day {{day.dayNumber}}</small>
+                </div>
+
+                <p class="text-secondary small mb-3">{{day.defaultDescription}}</p>
+
+                <div class="text-dark leading-relaxed mb-3" style="white-space: pre-wrap;">
+                  {{day.customText}}
+                </div>
+
+                <div *ngIf="day.resourceUrls && day.resourceUrls.length > 1" class="row g-2 mt-auto">
+                  <div *ngFor="let img of day.resourceUrls.slice(1, 4)" class="col-3">
+                    <img [src]="img" class="img-fluid rounded-2 object-fit-cover" style="height: 60px; width: 100%;">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ====================================================== -->

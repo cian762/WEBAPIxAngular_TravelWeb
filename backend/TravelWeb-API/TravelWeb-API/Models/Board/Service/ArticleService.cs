@@ -7,164 +7,67 @@ using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Models.Board.Service
 {
-    public class ArticleService : IArticlesService
+    public class ArticleService : IArticleService
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
         public ArticleService(BoardDbContext context, MemberSystemContext memberDb)
         {
             _context = context;
-            _memberDb=memberDb;
+            _memberDb = memberDb;
         }
 
-        public Article AddArtic(byte Type,string UserId)
+        public List<Article> GetArticles(int page)
         {
-            Article article = new Article();
-            article.Type = Type;
-            article.CreatedAt = DateTime.Now;
-            article.Status = 0;                        
-            article.IsViolation = false;
-            article.UserId = UserId;
-            _context.Articles.Add(article);
-            SaveChange();
-            return article;
-        }
-
-
-        public async Task<bool> UpdateArtic(int id,string? Title,string? PhotoUrl,byte Status)
-        {
-            Article? article = 
-            _context.Articles.FirstOrDefault(a => a.ArticleId == id);
-            if (article == null) return false;
-            else
-            {
-                article.Title = Title;
-                article.PhotoUrl = PhotoUrl;
-                article.Status = Status;                
-                article.UpdatedAt = DateTime.Now;
-                await _context.SaveChangesAsync();
-                return true;
-            }
-
+            int pageSize = 10;
+            // 1. 計算要跳過幾筆
+            int skip = (page - 1) * pageSize;
             
-        }
-        //article.IsViolation
-
-        public void AddPost(Article article)
-        {
-            var post = new Post
-            {
-                // 不要設定 ArticleId = article.ArticleId; 
-                Article = article // 直接把物件塞給導覽屬性
-            };
-            _context.Posts.Add(post);
-            SaveChange();
-        }
-        public void SaveChange()
-        {
-           _context.SaveChanges();
-        }
-
-        public Article? GetArticle(int id)
-        {          
-            Article? article = _context.Articles
-                //.Include(a => a.MemberCode)
-                .FirstOrDefault(a => a.ArticleId == id);
-
-            // 判斷邏輯集中在這裡|| article.MemberCode == null
-            if (article == null) return null;
-
-            return article;
-        }
-        
-        
-
-        public PostDetailDto? GetPostDetailed(Article article)
-        {           
-            if(article.Type == 0 && article.Post != null)
-                {
-                Post post = article.Post;
-                MemberInformation? author = 
-                    _memberDb.MemberInformations.FirstOrDefault(x=>x.MemberId==article.UserId);
-                PostDetailDto postDetail = new PostDetailDto();
-                postDetail.Type = article.Type;
-                postDetail.Title = article.Title;
-                postDetail.CreatedAt = article.CreatedAt;
-                postDetail.UpdatedAt = article.UpdatedAt;
-                postDetail.Cover = article.PhotoUrl;
-                postDetail.Contents = post.Contents;
-                postDetail.RegionId = post.RegionId;
-                postDetail.PostPhoto = _context.PostPhotos
-                    .Where(p => p.ArticleId == article.ArticleId)
-                    .Select(p => p.Photo).ToList();
-                postDetail.AuthorName = author.Name;
-                postDetail.AvatarUrl = author.AvatarUrl;
-
-                return postDetail;
-            }
-
-            else if (article.Type == 1 && article.Journal != null)
-            {
-                return null;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public Journal GetJournalDetailed(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public async Task<bool> UpdatePost(int id, string? content, int? regionId
-            ,List<string>? photos)
-        {
+            var data = _context.Articles
+                .OrderByDescending(a => a.CreatedAt) // 2. 排序：CreatedAt 越新越前 (Descending)
+                .Skip((page - 1) * pageSize) // 3. 分頁邏輯
+                .Take(pageSize)                
+                .ToList();
             
-            Post? post =
-                _context.Posts.FirstOrDefault(a => a.ArticleId == id);
-            if (GetArticleByID(id) == null || post == null) return false;
-            else
-            {
-                post.Contents = content;
-                post.RegionId = regionId;
-
-
-                var postPhotos = _context.PostPhotos.Where(p => p.ArticleId == id);
-                foreach (var p in postPhotos)
-                {
-                    _context.PostPhotos.Remove(p);
-                }
-                foreach (var p in photos)
-                {
-                    _context.PostPhotos.Add(new PostPhoto { ArticleId = id, Photo = p });
-                }
-                await _context.SaveChangesAsync();
-                return true;
-            }
+            return data;
         }
-        Article? GetArticleByID(int id)
+
+        public (List<Article>, int TotalCount) ArticlesByKeyword(int page,string keyword)
         {
-            return _context.Articles.FirstOrDefault(a => a.ArticleId == id);
+            int pageSize = 10;
+            // 1. 計算要跳過幾筆
+            int skip = (page - 1) * pageSize;
+            var data = _context.Articles
+                .Where(
+                a => (a.Title != null && a.Title.Contains(keyword)) ||
+                a.UserId.Contains(keyword)
+                ).ToList();
+
+            var result = data.OrderByDescending(a => a.CreatedAt) 
+                .Skip((page - 1) * pageSize) 
+                .Take(pageSize)
+                .ToList();
+
+            return (result,data.Count);
         }
 
-        Post? GetPostByID(int id)
+        public (List<Article>, int TotalCount) ArticlesByDate(int page, DateTime startTime,DateTime endTime)
         {
-            return _context.Posts.FirstOrDefault(e => e.ArticleId == id);
+            int pageSize = 10;            
+            int skip = (page - 1) * pageSize;
+           // startTime = Convert.ToDateTime("2010/05/07");
+            endTime = endTime.AddDays(1);
+
+            var data = _context.Articles
+                .Where(a => a.CreatedAt >= startTime && 
+                      a.CreatedAt <= endTime).ToList();
+
+            var result = data.OrderByDescending(a => a.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (result,data.Count);
         }
-
-        MemberInformation Author(string CommentAuthorID)
-        {
-            MemberInformation? member = 
-            _memberDb.MemberInformations.FirstOrDefault(a => a.MemberId == CommentAuthorID);
-            return member;
-        }
-              
-
-        
-
-       
     }
 }

@@ -40,7 +40,6 @@
 
     <Folder Include="Models\MemberSystem\" />
     <Folder Include="Models\ActivityModel\" />
-    <Folder Include="Models\TripProduct\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
 

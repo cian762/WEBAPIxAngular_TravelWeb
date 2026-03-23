@@ -1,20 +1,28 @@
 import { InfoCard } from './Activity/Component/info-card/info-card';
 import { Routes } from '@angular/router';
+import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 
 export const routes: Routes = [
   {
     path: 'ActivityInfo',
-    loadComponent: () => import('./Activity/Component/info-card/info-card').then(m => m.InfoCard)
-  },
-  {
-    path: '',
-    loadComponent: () =>
-      import('./Components/test-use/test-use').then(m => m.TestUse),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./Activity/Component/info-card/info-card')
+          .then(m => m.InfoCard)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./Activity/Component/activity-intro/activity-intro')
+          .then(m => m.ActivityIntro)
+      }
+
+    ]
   },
 
   // 景點介紹開始
   {
-    path: 'contact',
+    path: 'attractions',  // ← 改這裡
     children: [
       {
         path: '',
@@ -34,9 +42,21 @@ export const routes: Routes = [
           import('./Components/attractions/attraction-detail/attraction-detail')
             .then(m => m.AttractionDetailComponent),
       },
+      {
+        path: 'tags',
+        loadComponent: () =>
+          import('./Components/attractions/attraction-tags/attraction-tags')
+            .then(m => m.AttractionTagsComponent),
+      }
     ],
   },
   // 景點介紹結束
+  { path: 'trip-detail/:id', component: TripProductDetail },
+  {
+    path: 'tripProduct',
+    loadComponent: () => import('./trip/component/product/product').then(
+      m => m.Product
+    )
   //*行程建立路由*/
   {
     path: 'itinerary',
@@ -45,6 +65,11 @@ export const routes: Routes = [
   {
     path: 'change',
     loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ChangeItineraryItem)
+  },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./Components/test-use/test-use').then(m => m.TestUse),
   },
   // 所有不認識的路徑會導向首頁
   { path: '**', redirectTo: '' },

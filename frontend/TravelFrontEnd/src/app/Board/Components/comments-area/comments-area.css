@@ -1,0 +1,8 @@
+.avatar {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  /* 關鍵：等比例縮放並裁切，不變形 */
+  object-position: center;
+  /* 從圖片中心點裁切 */
+}

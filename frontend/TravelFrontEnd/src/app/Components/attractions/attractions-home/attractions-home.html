@@ -40,34 +40,10 @@
           </div>
         </div>
 
-        <!-- 台灣地圖 SVG -->
+        <!-- 台灣地圖（圖片切換版） -->
         <div class="tw-map-wrap">
-          <svg viewBox="0 0 220 340" class="tw-map">
-            <ellipse cx="128" cy="55" rx="44" ry="36"
-              class="map-area" [class.active]="activeRegion===0"
-              (click)="selectRegion(0)" />
-            <text x="128" y="58" class="map-label" (click)="selectRegion(0)">北部</text>
-
-            <ellipse cx="116" cy="125" rx="42" ry="36"
-              class="map-area" [class.active]="activeRegion===1"
-              (click)="selectRegion(1)" />
-            <text x="116" y="128" class="map-label" (click)="selectRegion(1)">中部</text>
-
-            <ellipse cx="103" cy="193" rx="38" ry="36"
-              class="map-area" [class.active]="activeRegion===2"
-              (click)="selectRegion(2)" />
-            <text x="103" y="196" class="map-label" (click)="selectRegion(2)">南部</text>
-
-            <rect x="152" y="78" width="34" height="122" rx="10"
-              class="map-area" [class.active]="activeRegion===3"
-              (click)="selectRegion(3)" />
-            <text x="169" y="142" class="map-label" (click)="selectRegion(3)">東部</text>
-
-            <circle cx="48" cy="265" r="20"
-              class="map-area" [class.active]="activeRegion===4"
-              (click)="selectRegion(4)" />
-            <text x="48" y="268" class="map-label" (click)="selectRegion(4)">離島</text>
-          </svg>
+          <img class="tw-map-img" [src]="'assets/img/attractionCity/' + currentRegion.mapImage"
+            [alt]="currentRegion.label">
         </div>
       </div>
 
@@ -75,10 +51,7 @@
       <div class="col-lg-8">
         <!-- 地區按鈕 -->
         <div class="region-tabs">
-          <button
-            *ngFor="let r of regions; let i = index"
-            class="region-btn"
-            [class.active]="activeRegion === i"
+          <button *ngFor="let r of regions; let i = index" class="region-btn" [class.active]="activeRegion === i"
             (click)="selectRegion(i)">
             {{ r.label }}
           </button>
@@ -89,11 +62,10 @@
 
         <!-- 城市卡片 -->
         <div class="city-grid">
-          <div class="city-card" *ngFor="let city of currentRegion.cities"
-            (click)="goToCity(city)">
+          <div class="city-card" *ngFor="let city of currentRegion.cities" (click)="goToCity(city)">
             <div class="city-card__img">
               <img [src]="city.imageUrl" [alt]="city.name"
-                onerror="this.src='assets/img/package/package2.jpg'">
+                onerror="this.src='https://placehold.co/400x260?text=No+Image'">
             </div>
             <div class="city-card__overlay">
               <span class="city-card__name">{{ city.name }}</span>

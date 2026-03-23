@@ -128,14 +128,20 @@ builder.Services.AddDbContext<AttractionsContext>(options =>
 builder.Services.AddDbContext<MemberSystemContext>(options =>
  options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
+#region ActivityDI
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<ActivityCardService>();
 builder.Services.AddScoped<ActivityInfoService>();
 builder.Services.AddScoped<ActivityTicketService>();
+builder.Services.AddHttpClient<GoogleRouteForActivityService>();
+builder.Services.AddScoped<ActivityReviewService>();
+builder.Services.AddScoped<CloudinaryPhotoService>();
+#endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+
 
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
@@ -159,10 +165,13 @@ builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
 //    });
 #endregion
 
+//========留言功能=======================================
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-builder.Services.AddScoped<IArticlesService, ArticleService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<ITagsService, TagsService>();
 //===================================================
 
 //行程商品表連線用DI
@@ -178,7 +187,7 @@ builder.Services.AddScoped<IOrder, SOrder>();
 builder.Services.AddScoped<IECPay, SECPay>();
 
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-//綠界
+//////綠界
 builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
 // 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
 builder.Services.AddHttpClient();
@@ -206,6 +215,8 @@ if (app.Environment.IsDevelopment())
     }
     );
 }
+
+
 
 
 app.UseHttpsRedirection();

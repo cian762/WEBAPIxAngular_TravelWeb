@@ -40,23 +40,18 @@ namespace TravelWeb_API.Controllers.Board
             return comments;
         }
 
-        // POST:新增留言(沒媽)
-        [HttpPost]
-        public async Task<ActionResult<Comment>> PostComment(int articleID, string UserId, string contents)
+        // POST:新增留言
+        [HttpPost("PostComment")]
+        public async Task<ActionResult<Comment>> PostComment([FromBody] PostCommentDto dto)
         {
-            Comment comment = _commentsService.AddComment(articleID, UserId, contents);
+            Comment comment = _commentsService.AddComment(dto);
 
             return NoContent();
         }
 
-        // POST:新增留言(有媽)
-        [HttpPost("reply")]
-        public async Task<ActionResult<Comment>> PostCommentWithParent(int articleID, string UserId, string contents, int parentID)
-        {
-            Comment comment = _commentsService.AddCommentWithParent(articleID, UserId, contents, parentID);
+        
 
-            return NoContent();
-        }
+
 
         // Put:點讚機制
         [HttpPut("{id}")]

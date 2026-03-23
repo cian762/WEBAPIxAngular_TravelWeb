@@ -7,8 +7,7 @@ namespace TravelWeb_API.Models.Board.IService
     {
         
         public List<CommentsDTO> GetComments(int id);
-        public Comment AddComment(int articleID, string UserId, string contents);
-        public Comment AddCommentWithParent(int articleID, string UserId, string contents, int parentID);
+        public Comment AddComment(PostCommentDto dto);        
         public bool CommentLike(int commentID, string UserId);
 
     }

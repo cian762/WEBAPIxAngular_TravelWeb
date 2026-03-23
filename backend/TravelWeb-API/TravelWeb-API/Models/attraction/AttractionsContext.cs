@@ -23,6 +23,8 @@ public partial class AttractionsContext : DbContext
 
     public virtual DbSet<AttractionProductFavorite> AttractionProductFavorites { get; set; }
 
+    public virtual DbSet<AttractionProductImage> AttractionProductImages { get; set; }  // ← 新增
+
     public virtual DbSet<AttractionTypeCategory> AttractionTypeCategories { get; set; }
 
     public virtual DbSet<AttractionTypeMapping> AttractionTypeMappings { get; set; }
@@ -120,6 +122,11 @@ public partial class AttractionsContext : DbContext
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
+            entity.Property(e => e.OriginalPrice)          // ← 新增
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("original_price");
+            entity.Property(e => e.ValidityDays)           // ← 新增
+                .HasColumnName("validity_days");
             entity.Property(e => e.ProductCode)
                 .HasMaxLength(50)
                 .HasColumnName("product_code");
@@ -165,14 +172,20 @@ public partial class AttractionsContext : DbContext
                 .HasNoKey()
                 .ToTable("AttractionProductDetails", "Attractions");
 
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ContentDetails).HasColumnName("content_details");
+            entity.Property(e => e.Notes).HasColumnName("notes");
+            entity.Property(e => e.UsageInstructions).HasColumnName("usage_instructions");
+            entity.Property(e => e.Includes).HasColumnName("includes");           // ← 新增
+            entity.Property(e => e.Excludes).HasColumnName("excludes");           // ← 新增
+            entity.Property(e => e.Eligibility).HasColumnName("eligibility");     // ← 新增
+            entity.Property(e => e.CancelPolicy)                                  // ← 新增
+                .HasMaxLength(500)
+                .HasColumnName("cancel_policy");
             entity.Property(e => e.LastUpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("last_updated_at");
-            entity.Property(e => e.Notes).HasColumnName("notes");
-            entity.Property(e => e.ProductId).HasColumnName("product_id");
-            entity.Property(e => e.UsageInstructions).HasColumnName("usage_instructions");
 
             entity.HasOne(d => d.Product).WithMany()
                 .HasForeignKey(d => d.ProductId)
@@ -200,6 +213,30 @@ public partial class AttractionsContext : DbContext
             entity.HasOne(d => d.Product).WithMany(p => p.AttractionProductFavorites)
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_AttractionProductFavorites_AttractionProducts");
+        });
+
+        // ← 新增 AttractionProductImage mapping
+        modelBuilder.Entity<AttractionProductImage>(entity =>
+        {
+            entity.HasKey(e => e.ImageId);
+
+            entity.ToTable("AttractionProductImages", "Attractions");
+
+            entity.Property(e => e.ImageId).HasColumnName("image_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ImagePath)
+                .HasMaxLength(500)
+                .HasColumnName("image_path");
+            entity.Property(e => e.Caption)
+                .HasMaxLength(200)
+                .HasColumnName("caption");
+            entity.Property(e => e.SortOrder)
+                .HasDefaultValue(0)
+                .HasColumnName("sort_order");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.AttractionProductImages)
+                .HasForeignKey(d => d.ProductId)
+                .HasConstraintName("FK_AttractionProductImages_AttractionProducts");
         });
 
         modelBuilder.Entity<AttractionTypeCategory>(entity =>
@@ -362,8 +399,6 @@ public partial class AttractionsContext : DbContext
                 .HasColumnName("ticket_type_name");
         });
 
-
-        // ── 第二處：在 OnModelCreating 最後、OnModelCreatingPartial 前面加入 ──
         modelBuilder.Entity<AttractionLike>(entity =>
         {
             entity.HasKey(e => e.LikeId);
@@ -386,12 +421,6 @@ public partial class AttractionsContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_AttractionLikes_Attractions");
         });
-
-
-
-
-
-
 
         OnModelCreatingPartial(modelBuilder);
     }

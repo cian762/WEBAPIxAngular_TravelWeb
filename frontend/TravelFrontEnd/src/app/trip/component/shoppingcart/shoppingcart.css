@@ -1,0 +1,28 @@
+/* 1. 確保全域 Navbar 在這個頁面永遠處於最上層 */
+:host ::ng-deep #header {
+  background-color: rgba(34, 34, 34, 0.9) !important;
+  /* 給它深色背景，才不會變透明 */
+  z-index: 1100 !important;
+}
+
+/* 2. 在購物車組件最上方「墊」出空間 */
+:host {
+  display: block;
+  /* 這個高度要大於 Navbar 的高度，通常 130px - 150px 比較舒服 */
+  padding-top: 130px !important;
+  background-color: #f8f9fa;
+  /* 淺灰色底色能區分白色卡片，讓畫面更立體 */
+
+}
+
+/* 3. 修正右側 Sticky 卡片的停靠位置，避開 Navbar */
+.sticky-top {
+  /* 確保滑動時，卡片頂部會停在 Navbar 的下緣 */
+  top: 110px !important;
+  z-index: 1000 !important;
+}
+
+/* 4. 移除多餘的間距 */
+.container {
+  padding-top: 0 !important;
+}
