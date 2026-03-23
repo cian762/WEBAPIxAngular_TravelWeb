@@ -1,0 +1,10 @@
+<div class="tags-page">
+  <div class="container py-4">
+    <h2 class="tags-title"># 景點標籤</h2>
+    <div class="tags-cloud">
+      <button *ngFor="let t of types" class="tag-item" (click)="goToTag(t)">
+        #{{ t.attractionTypeName }}
+      </button>
+    </div>
+  </div>
+</div>
