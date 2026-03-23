@@ -1,3 +1,4 @@
+import { TagListDTO } from './../../trip/models/tripproduct.model';
 import { PostDetailDto } from './../interface/PostDetailDto';
 import { Component, Input, OnInit } from '@angular/core';
 import { BoardServe } from '../board-serve';
@@ -28,6 +29,9 @@ export class CreatPost implements OnInit {
   id = 0;
   post?: PostDetailDto;
 
+  tagList: any[] = [];
+  removeTagList: any[] = [];
+
   coverUrl?: string;
   photoUrlList: string[] = [];
 
@@ -55,6 +59,10 @@ export class CreatPost implements OnInit {
         //   $('#status-select').niceSelect('update');
         // }, 0);
       });
+      this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
+        this.tagList = d;
+      })
+
     });
   }
 
@@ -145,6 +153,16 @@ export class CreatPost implements OnInit {
       console.log('更新失敗');
     }
   }
+
+  removeTag(id: number) {
+    var tag = this.tagList.find(tag => tag.tagId === id)
+    this.tagList = this.tagList.filter(tag => tag.tagId !== id);
+    this.removeTagList.push(tag);
+  }
+
+  // addTag() {
+  //   this.tagList = this.tagList.filter(tag => tag.tagId !== id);
+  // }
 
 
   onFileSelected(event: any) {

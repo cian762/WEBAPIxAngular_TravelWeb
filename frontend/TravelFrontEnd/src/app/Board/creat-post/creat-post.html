@@ -73,14 +73,40 @@
         </div>
 
       </form>
+      <div class="mb-3">
+        <label for="exampleFormControlTextarea1" class="form-label">標籤</label>
+        <div class="row">
+          <div class="col-6 border-end border-2">
+            <p>已加入:</p>
+            @for(tag of tagList ; track tag.tagId){
+            <a (click)="removeTag(tag.tagId)" class="genric-btn success small circle mx-1">{{tag.tagName}} x</a>
+            }
+          </div>
+          <div class="col-6">
+            <div class="widget-wrap">
+              <div class="single-sidebar-widget search-widget">
+                <form class="search-form">
+                  <input placeholder="Search Posts" name="search" type="text" onfocus="this.placeholder = ''"
+                    onblur="this.placeholder = 'Search Posts'">
+                  <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+              </div>
+            </div>
 
-
-
-      <a href="#" class="genric-btn danger-border radius">刪除文章</a>
-      <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
-
-      <a class="genric-btn success circle">測試用</a>
-
+            <p>最近加入:</p>
+            @for(tag of removeTagList ; track tag.tagId){
+            <a class="genric-btn success-border small circle mx-1">{{tag.tagName}} +</a>
+            }
+          </div>
+        </div>
+      </div>
     </div>
+
+
+    <a href="#" class="genric-btn danger-border radius">刪除文章</a>
+    <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
+
+
+
   </div>
 </div>

@@ -60,6 +60,25 @@ export const routes: Routes = [
     path: 'change',
     loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ChangeItineraryItem)
   },
+
+  {
+    path: 'Board',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./Board/blog-home/blog-home').then(m => m.BlogHome),
+      },
+      {
+        path: 'creat/:id',
+        loadComponent: () => import('./Board/creat-post/creat-post').then(m => m.CreatPost),
+      },
+      {
+        path: 'detail/:id',
+        loadComponent: () => import('./Board/post-detail/post-detail').then(m => m.PostDetail),
+      },
+    ],
+  },
+
   {
     path: '',
     loadComponent: () =>
