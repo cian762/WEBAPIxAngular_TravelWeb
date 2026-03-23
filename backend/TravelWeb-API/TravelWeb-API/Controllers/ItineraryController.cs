@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using TravelWeb_API.Models.Itinerary.DTO;
 using TravelWeb_API.Models.Itinerary.Service;
 
@@ -6,14 +8,17 @@ using TravelWeb_API.Models.Itinerary.Service;
 
 namespace TravelWeb_API.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ItineraryController : ControllerBase
     {
         private readonly IItineraryservice _itineraryService;
+        private readonly string _memberId;
         public ItineraryController(IItineraryservice itineraryService)
         {
             _itineraryService = itineraryService;
+            //_memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
