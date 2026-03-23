@@ -60,7 +60,7 @@ namespace TravelWeb_API.Controllers
 
             try
             {
-                // 3. 呼叫 Service 邏輯
+                // 3. 呼叫 Service
                 int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto);
 
                 // 4. 回傳 201 Created，並在 Header 附上查詢該行程的 URL
