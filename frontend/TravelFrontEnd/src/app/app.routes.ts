@@ -57,6 +57,7 @@ export const routes: Routes = [
     loadComponent: () => import('./trip/component/product/product').then(
       m => m.Product
     )
+  },
   //*行程建立路由*/
   {
     path: 'itinerary',
@@ -64,7 +65,7 @@ export const routes: Routes = [
   },
   {
     path: 'change',
-    loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ChangeItineraryItem)
+    loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ItineraryDetailComponent)
   },
   {
     path: '',

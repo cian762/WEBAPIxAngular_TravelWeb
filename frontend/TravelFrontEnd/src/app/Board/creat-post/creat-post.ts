@@ -3,7 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { BoardServe } from '../board-serve';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Cloudinary, CloudinaryImage } from '@cloudinary/url-gen';
+// import { Cloudinary, CloudinaryImage } from '@cloudinary/url-gen';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 declare var cloudinary: any;
