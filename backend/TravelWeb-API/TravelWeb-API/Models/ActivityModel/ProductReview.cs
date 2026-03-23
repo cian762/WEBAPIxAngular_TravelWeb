@@ -17,6 +17,8 @@ public partial class ProductReview
 
     public DateOnly CreateDate { get; set; }
 
+    public bool IsSoftDeleted { get; set; }
+
     public virtual ICollection<ReviewImage> ReviewImages { get; set; } = new List<ReviewImage>();
 
     public virtual ICollection<Activity> Activities { get; set; } = new List<Activity>();

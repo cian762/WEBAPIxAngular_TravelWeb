@@ -1,0 +1,235 @@
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.custom-slider-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+
+/* ===========以下為圖片輪播之樣式=========== */
+/* 主圖樣式 */
+.main-display {
+  width: 100%;
+  height: 400px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.main-display img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 切換時的淡入動畫 */
+.fade-in {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* 縮圖列樣式 */
+.thumb-nav {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.thumb-item {
+  flex: 0 0 100px;
+  /* 縮圖寬度 100px */
+  height: 70px;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 0.5;
+  transition: 0.3s;
+  border: 2px solid transparent;
+}
+
+.thumb-UpdatePhoto-item {
+  width: 96px;
+  height: 66px;
+  cursor: pointer;
+}
+
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 被選中時的高亮樣式 */
+.thumb-item.active {
+  opacity: 1;
+  border-color: #007bff;
+
+}
+
+.thumb-item:hover {
+  opacity: 0.8;
+}
+
+/* ===========以上為圖片輪播之樣式=========== */
+
+/* ===========以下為設定封面按鈕之樣式=========== */
+/* 1. 設定外層容器為基準點 */
+::ng-deep .cover-upload-container {
+  position: relative;
+  /* 關鍵：建立定位基準 */
+  width: 100%;
+  /* 填滿父容器 */
+  overflow: hidden;
+  /* 如果按鈕稍微超出，會被切掉（選配） */
+  padding: 0;
+  /* 移除 padding，讓圖片貼齊邊框 */
+}
+
+/* 2. 圖片樣式（包含 object-fit: cover） */
+::ng-deep .cover-photo {
+  width: 100%;
+  height: 300px;
+  /* 設定一個固定高度（依需求修改） */
+  object-fit: cover;
+  /* 關鍵：保持比例並填滿，寧可裁切也不拉伸 */
+  display: block;
+  /* 移除下方的小空隙 */
+}
+
+/* 3. 設定按鈕浮在圖片上方 */
+::ng-deep .set-cover-btn {
+  position: absolute;
+  /* 關鍵：脫離排版流 */
+
+  /* 定位位置（選配，這裡是設定在右下角） */
+  bottom: 10px;
+  /* 距離底部 10px */
+  right: 10px;
+  /* 距離右側 10px */
+
+  /* 增加層級，確保它在圖片上面 */
+  z-index: 10;
+
+  /* 微調（選配）：調整文字大小與內邊距 */
+  font-size: 12px !important;
+  line-height: 30px !important;
+  padding: 0 15px !important;
+}
+
+/* ===========以上為設定封面按鈕之樣式=========== */
+
+
+/* ===========以下為上傳圖片按鈕樣式=========== */
+/* 1. 定義上傳區域的基礎與懸停樣式 */
+.upload-label {
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  /* 讓變化過程變平滑 */
+  background-color: transparent;
+}
+
+/* 3. 針對內部的 Icon 做額外動畫（選配） */
+.upload-label:hover i {
+  animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes bounce {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.2);
+  }
+}
+
+/* 2. 當滑鼠移上去時的變化 */
+.upload-label:hover {
+  background-color: #f8f9fa;
+  /* 淺灰色背景，增加點擊感 */
+  border-color: #38a4ff !important;
+  /* 邊框變為 Bootstrap 主色（藍色） */
+  color: #38a4ff;
+  /* 文字與 Icon 一併變色 */
+  transform: translateY(-2px);
+  /* 微幅上浮，增加互動感 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* 淡淡的陰影 */
+}
+
+/* ===========以上為上傳圖片按鈕樣式=========== */
+
+
+
+/* ===========以下為權限下拉式選單之樣式=========== */
+/* 1. 先幫所有選項留出左側圖標的空間 */
+::ng-deep .nice-select .current {
+  padding-left: 25px !important;
+  position: relative;
+}
+
+/* 2. 定義「私人」選中時的圖標 (假設 value="0") */
+::ng-deep .nice-select:has(li.option[data-value="0"].selected) .current::before {
+  content: "\F47A";
+  /* Bootstrap Icon: lock-fill */
+  font-family: "bootstrap-icons";
+  position: absolute;
+  left: 0;
+}
+
+/* 3. 定義「公開」選中時的圖標 (假設 value="1") */
+::ng-deep .nice-select:has(li.option[data-value="1"].selected) .current::before {
+  content: "\F883";
+  /* Bootstrap Icon: globe */
+  font-family: "bootstrap-icons";
+  position: absolute;
+  left: 0;
+}
+
+/* 4. 定義「粉絲」選中時的圖標 (假設 value="2") */
+::ng-deep .nice-select:has(li.option[data-value="2"].selected) .current::before {
+  content: "\F59D";
+  /* Bootstrap Icon: people-fill */
+  font-family: "bootstrap-icons";
+  position: absolute;
+  left: 0;
+}
+
+/* 針對「私人」選項加上鎖頭 */
+::ng-deep .nice-select .option[data-value="0"]::before {
+  content: "\F47A";
+  /* Bootstrap Icon 的 unicode */
+  font-family: "bootstrap-icons";
+  margin-right: 8px;
+}
+
+/* 針對「公開」選項加上地球 */
+::ng-deep .nice-select .option[data-value="1"]::before {
+  content: "\F883";
+  font-family: "bootstrap-icons";
+  margin-right: 8px;
+}
+
+/* 針對「粉絲」選項加上愛心 */
+::ng-deep .nice-select .option[data-value="2"]::before {
+  content: "\F59D";
+  /* Bootstrap Icon 的 unicode */
+  font-family: "bootstrap-icons";
+  margin-right: 8px;
+}
+
+/* ===========以上為權限下拉式選單之樣式=========== */

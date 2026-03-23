@@ -1,0 +1,68 @@
+<!-- 留言區在這 -->
+<div class="comments-area">
+  <h4>{{commentList.length}}條留言</h4>
+  @for (comment of commentList; track $index) {
+  <div class="comment-list">
+    <div class="single-comment justify-content-between d-flex">
+      <div class="user justify-content-between d-flex">
+        <div class="thumb">
+          <img [src]="comment.avatarUrl" class="avatar">
+        </div>
+        <div class="desc">
+          <h5><a href="#">{{comment.authorName}}</a></h5>
+          <p class="date">{{comment.createdAt}}</p>
+          <p class="comment">
+            {{comment.contents}}
+          </p>
+        </div>
+      </div>
+      <div class="reply-btn">
+        <a (click)="setParent(comment.commentId,comment.authorName,comment.contents)"
+          class="btn-reply text-uppercase">回覆</a>
+      </div>
+    </div>
+  </div>
+  @for (reply of comment.replyComments; track $index) {
+  <div class="comment-list left-padding">
+    <div class="single-comment justify-content-between d-flex">
+      <div class="user justify-content-between d-flex">
+        <div class="thumb">
+          <img [src]="reply.avatarUrl" class="avatar">
+        </div>
+        <div class="desc">
+          <h5><a href="#">{{reply.authorName}}</a></h5>
+          <p class="date">{{reply.createdAt}}</p>
+          <p class="comment">
+            {{reply.contents}}
+          </p>
+        </div>
+      </div>
+      <div class="reply-btn">
+        <!-- <a href="" class="btn-reply text-uppercase">reply</a> -->
+      </div>
+    </div>
+  </div>
+  }
+  }
+
+
+  <div class="comment-form">
+    <h4>請留言</h4>
+    <div class="d-flex justify-content-start">
+      <p>{{parentComment}}</p>
+    </div>
+    <form>
+      <div class="form-group form-inline">
+        <div class="form-group col-lg-6 col-md-12 name">
+          <input type="text" class="form-control" id="name" placeholder="Enter Name" onfocus="this.placeholder = ''"
+            onblur="this.placeholder = 'Enter Name'" name="UserId" [(ngModel)]="UserId">
+        </div>
+        <div class="form-group">
+          <textarea class="form-control mb-10" rows="5" name="message" placeholder="Messege"
+            onfocus="this.placeholder = ''" onblur="this.placeholder = 'Messege'" required=""
+            [(ngModel)]="contents">{{ contents }}</textarea>
+        </div>
+        <a (click)="postComment(UserId,contents)" class="primary-btn text-uppercase">送出</a>
+      </div>
+    </form>
+  </div>

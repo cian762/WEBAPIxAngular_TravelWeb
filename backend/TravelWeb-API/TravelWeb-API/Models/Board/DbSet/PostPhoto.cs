@@ -5,6 +5,7 @@ namespace TravelWeb_API.Models.Board.DbSet;
 
 public partial class PostPhoto
 {
+    public int ID { get; set; }
     public int ArticleId { get; set; }
 
     public string Photo { get; set; } = null!;

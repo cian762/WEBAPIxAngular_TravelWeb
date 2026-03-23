@@ -8,4 +8,6 @@ public partial class TagsList
     public int TagId { get; set; }
 
     public string TagName { get; set; } = null!;
+
+    public string? icon { get; set; }
 }

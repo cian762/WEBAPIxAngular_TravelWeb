@@ -1,0 +1,85 @@
+.cover {
+  width: 730px !important;
+  height: auto;
+  object-fit: cover;
+  /* 關鍵：等比例縮放並裁切，不變形 */
+  object-position: center;
+  /* 從圖片中心點裁切 */
+}
+
+/* ===========以下為圖片輪播之樣式=========== */
+/* 主圖樣式 */
+.main-display {
+  width: 100%;
+  height: 400px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.main-display img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 切換時的淡入動畫 */
+.fade-in {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* 縮圖列樣式 */
+.thumb-nav {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.thumb-item {
+  flex: 0 0 100px;
+  /* 縮圖寬度 100px */
+  height: 70px;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  opacity: 0.5;
+  transition: 0.3s;
+  border: 2px solid transparent;
+}
+
+.thumb-UpdatePhoto-item {
+  width: 96px;
+  height: 66px;
+  cursor: pointer;
+}
+
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 被選中時的高亮樣式 */
+.thumb-item.active {
+  opacity: 1;
+  border-color: #007bff;
+
+}
+
+.thumb-item:hover {
+  opacity: 0.8;
+}
+
+/* ===========以上為圖片輪播之樣式=========== */

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -22,14 +23,7 @@ namespace TravelWeb_API.Controllers.Activity
         }
 
 
-        //首次載入時，拿取所有活動資訊
-        [HttpGet]
-        public async Task<ActionResult> GetActivities([FromQuery] PagedQueryParameters query)
-        {
-            return Ok(await _infoService.GetCards(query));
-        }
 
-        
         //有條件的拉取活動資訊
         //填入的日期格式要是 YYYY-MM-DD
         [HttpGet("Query")]
@@ -42,9 +36,9 @@ namespace TravelWeb_API.Controllers.Activity
 
         //有條件的拉取活動資訊，且必須包含關鍵字
         [HttpGet("Keyword")]
-        public async  Task<ActionResult> SearchByActiviteTitle([FromQuery] string serachText) 
+        public async  Task<ActionResult> SearchByActiviteTitle([FromQuery] string searchText) 
         {
-            var result = await _infoService.SearchSpecificCards(serachText);
+            var result = await _infoService.SearchSpecificCards(searchText);
             if (result == null) return NotFound();
             return Ok(result);
         }
