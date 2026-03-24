@@ -1,125 +1,214 @@
-<div class="container mt-4">
-  <div class="row border border-3 p-3">
-    <h2>活動搜尋</h2>
-    <div class="col-6">
-      <div id="keyword" class="mt-3">
-        <p>關鍵字</p>
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-      </div>
-      <div id="region" class="mt-3">
-        <p>區域</p>
-        <div>
-          @for (item of region; track $index) {
-          <button [ngClass]="selectRegions.includes(item)?'isActive':''" (click)="toggleRegion(item)"
-            class="btn me-2 mt-1 border border-primary rounded-pill">{{item}}</button>
-          }
-        </div>
-      </div>
-      <div id="Type" class="mt-3">
-        <p>活動類型</p>
-        <div>
-          @for (item of type; track $index) {
-          <button [ngClass]="selectTypes.includes(item)?'isActive':''" (click)="toggleType(item)"
-            class="btn me-2 mt-2 border border-primary rounded-pill">{{item}}</button>
-          }
-        </div>
-      </div>
+<div class="activity-page container py-4">
 
-    </div>
-
-    <div class="col-6 mb-3">
-      <div>日曆</div>
-      <div #calendarHost></div>
-      <div id="search" class="row mt-3">
-        <div class="col-6">
-          <button class="btn btn-warning btn-lg w-100 text-white" (click)="clear()">清除選取</button>
-        </div>
-        <div class="col-6">
-          <button class="btn btn-success btn-lg w-100" (click)="submit()">搜尋</button>
-        </div>
+  <!-- Search Panel -->
+  <section class="search-panel shadow-sm mb-4">
+    <div class="search-panel__header mb-4">
+      <div>
+        <h2 class="search-panel__title">活動搜尋</h2>
+        <p class="search-panel__subtitle">依照地區、類型與日期快速找到適合的旅遊活動</p>
       </div>
     </div>
 
-  </div>
+    <div class="row g-4">
+      <!-- Left Filters -->
+      <div class="col-lg-5">
+        <div class="filter-group mt-4 search-autocomplete">
+          <label class="filter-group__label">關鍵字</label>
 
-  <div class="row border border-3">
-    <h2>精選內容</h2>
-    <div class="row d-flex justify-content-between">
-      <div class="col-6 mt-2">
-        <span>標籤:</span>
-        <br>
-        <span>總筆數: {{pageData.totalRecords}} 筆結果</span>
-        <br>
-        <span>目前頁次: {{ pageData.pageNumber }} / {{ pageData.totalPages}}</span>
-      </div>
-      <div class="col-6 d-flex justify-content-end">
-        <p>排序條件</p>
-        <button class="m-2">熱門討論</button>
-        <button class="m-2">最近時間</button>
-        <button class="m-2">較舊時間</button>
-      </div>
-    </div>
-    <div>
-      <div class="row d-flex justify-content-center">
-        <div class="row row-cols-1 row-cols-md-4 g-4">
-          @for (card of cardData; track $index) {
-          <div class="col">
-            <div class="card h-100">
-              <img [src]="card.coverImageUrl" class="card-img-top activity-card-img" alt="...">
-              <div class="card-body">
-                <a class="card-title h4">{{ card.title }}</a>
-                <h6 class="text-warning">{{ card.start | date:'yyyy/MM/dd'}} ~ {{ card.end | date:'yyyy/MM/dd' }}</h6>
-                <div class="mt-2">
-                  <span class="me-3 h4"><i class="bi bi-star-fill"></i> {{card.averageRating}}</span>
-                  <span>{{card.commentCount}} 則評論 {{card.referencePrice?('/ ' + card.sellCount + ' 個已訂購'):''}}</span>
-                </div>
-                <div class="mt-2 d-flex justify-content-between align-items-end">
-                  <span>
-                    <strong class="h3">{{card.referencePrice ? ('NT$ '+card.referencePrice) :
-                      '免費參觀'}}
-                    </strong>
-                  </span>
-                  <span><i class="bi bi-eye-fill"></i> {{card.viewCount}}</span>
-                </div>
-              </div>
-              <div class="card-footer h5">
-                <small class="text-muted">
-                  @for (r of card.region; track $index) {
-                  <span class="me-1">#{{ r }}</span>
-                  }
-                  @for (t of card.type; track $index) {
-                  <span class="me-1">#{{ t }}</span>
-                  }
-                </small>
-              </div>
-            </div>
+          <input class="form-control custom-input" type="search" placeholder="輸入活動名稱、主題..." aria-label="Search"
+            [(ngModel)]="keyword" (ngModelChange)="OnKeyWordChange($event)" (mousedown)="onMouseDown()"
+            (blur)="onMouseLeave()" />
+
+          @if (searchResult.length > 0 && isFocus) {
+          <div class="autocomplete-dropdown">
+            <ul class="autocomplete-list">
+              @for (res of searchResult; track $index) {
+              <li class="autocomplete-item" (mousedown)="onClickKeyword(res)">
+                <i class="bi bi-search autocomplete-icon"></i>
+                <span>{{ res }}</span>
+              </li>
+              }
+            </ul>
           </div>
           }
         </div>
+
+        <div class="filter-group mt-4">
+          <label class="filter-group__label">區域</label>
+          <div class="filter-tags">
+            <button type="button" [ngClass]="toggleDefaultChoiceA() ? '' : 'isActive'" class="btn filter-chip">
+              全部
+            </button>
+
+            @for (item of region; track $index) {
+            <button type="button" [ngClass]="selectRegions.includes(item) ? 'isActive' : ''"
+              (click)="toggleRegion(item)" class="btn filter-chip">
+              {{ item }}
+            </button>
+            }
+          </div>
+        </div>
+
+        <div class="filter-group mt-4">
+          <label class="filter-group__label">活動類型</label>
+          <div class="filter-tags">
+            <button type="button" [ngClass]="toggleDefaultChoiceB() ? '' : 'isActive'" class="btn filter-chip">
+              全部
+            </button>
+
+            @for (item of type; track $index) {
+            <button type="button" [ngClass]="selectTypes.includes(item) ? 'isActive' : ''" (click)="toggleType(item)"
+              class="btn filter-chip">
+              {{ item }}
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Calendar -->
+      <div class="col-lg-7">
+        <div class="calendar-box">
+          <div class="calendar-box__header">
+            <h5 class="mb-1">日期篩選</h5>
+            <p class="mb-0">選擇活動期間，快速縮小搜尋範圍</p>
+          </div>
+
+          <div class="calendar-box__body mt-3 justify-content-center d-flex">
+            <div #calendarHost></div>
+          </div>
+
+          <div class="row g-3 mt-3">
+            <div class="col-6">
+              <button class="btn btn-outline-secondary w-100 action-btn" (click)="clear()">
+                清除選取
+              </button>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-primary w-100 action-btn" (click)="submit()">
+                搜尋活動
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Result Panel -->
+  <section class="result-panel shadow-sm">
+    <div class="result-panel__top row g-3 align-items-center">
+      <div class="col-lg-6">
+        <h2 class="result-panel__title">精選內容</h2>
+        <div class="result-meta">
+          <span class="result-badge">總筆數 {{ pageData.totalRecords }} 筆</span>
+          <span class="result-badge">第 {{ pageData.pageNumber }} / {{ pageData.totalPages }} 頁</span>
+        </div>
+      </div>
+
+      <div class="col-lg-6 d-flex justify-content-lg-end">
+        <div class="sort-box">
+          <span class="sort-box__label">排序條件</span>
+
+          @for(rule of sortCollection; track $index){
+          <button (click)="toggleSortRule(rule.label)" [class.isActive]="currentSortParam === rule.label"
+            class="btn filter-chip">{{
+            rule.value }}</button>
+          }
+
+
+        </div>
       </div>
     </div>
 
-    <div class="row mt-5 mb-3">
-      <div class="d-flex justify-content-center">
-        <nav aria-label="Page navigation example">
-          <ul class="pagination">
-            <li class="page-item">
-              <a class="page-link" href="#" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item">
-              <a class="page-link" href="#" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-          </ul>
-        </nav>
+    <!-- Cards -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mt-1">
+      @for (card of cardData; track $index) {
+      <div class="col">
+        <div class="activity-card card h-100 border-0 shadow-sm">
+          <div class="activity-card__image-wrap">
+            <img [src]="card.coverImageUrl" class="card-img-top activity-card__image" alt="activity image">
+          </div>
+
+          <div class="card-body activity-card__body" [routerLink]="'/ActivityInfo/'+ card.activityId">
+            <a class="activity-card__title">{{ card.title }}</a>
+
+            <div class="activity-card__date">
+              <i class="bi bi-calendar-event me-2"></i>
+              {{ card.start | date:'yyyy/MM/dd' }} ~ {{ card.end | date:'yyyy/MM/dd' }}
+            </div>
+
+            <div class="activity-card__stats mt-3">
+              <div class="rating-block">
+                <span class="rating-block__score">
+                  <i class="bi bi-star-fill me-1"></i>{{ card.averageRating }}
+                </span>
+                <span class="rating-block__text">{{ card.commentCount }} 則評論</span>
+              </div>
+
+              <div class="booking-text">
+                {{ card.referencePrice ? (card.sellCount + ' 個已訂購') : '免費活動' }}
+              </div>
+            </div>
+
+            <div class="activity-card__bottom mt-3">
+              <div class="price-block">
+                <span class="price-block__label">參考價格</span>
+                <strong class="price-block__value">
+                  {{ card.referencePrice ? ('NT$ ' + card.referencePrice) : '免費參觀' }}
+                </strong>
+              </div>
+
+              <div class="view-block">
+                <i class="bi bi-eye-fill me-1"></i>{{ card.viewCount }}
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer activity-card__footer">
+            <div class="tag-list">
+              @for (r of card.region; track $index) {
+              <span class="tag-item">#{{ r }}</span>
+              }
+              @for (t of card.type; track $index) {
+              <span class="tag-item">#{{ t }}</span>
+              }
+            </div>
+          </div>
+        </div>
       </div>
+      }
     </div>
-  </div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrap mt-5">
+      <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center custom-pagination mb-0">
+
+          <!-- 上一頁 -->
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" type="button" (click)="prevPage()">
+              <span aria-hidden="true">&laquo;</span>
+            </button>
+          </li>
+
+          <!-- 動態頁碼 -->
+          @for(page of pageNumbers; track page){
+          <li class="page-item" [class.active]="page===currentPage">
+            <button class="page-link" type="button" (click)="goToPage(page)">{{page}}</button>
+          </li>
+          }
+
+          <!-- 下一頁 -->
+          <li class="page-item" [class.disabled]="currentPage === pageData.totalPages || pageData.totalPages ===0">
+            <a class="page-link" type="button" (click)="nextPage()">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+    </div>
+  </section>
 
 </div>

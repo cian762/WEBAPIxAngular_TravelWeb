@@ -1,0 +1,218 @@
+<!-- 售票區 -->
+
+<!-- ── 載入中 ── -->
+<div class="ts-loading" *ngIf="loading">
+  <div class="spinner-border text-warning"></div>
+  <span>票種資訊載入中...</span>
+</div>
+
+<!-- ── 無票種 ── -->
+<div class="ts-empty" *ngIf="!loading && products.length === 0">
+  🎫 目前無可購買票種
+</div>
+
+<!-- ── 方案選擇 ── -->
+<div class="ts-section" *ngIf="!loading && products.length > 0">
+
+  <div class="ts-section-header">
+    <span class="ts-section-bar"></span>
+    <h3 class="ts-section-title">方案選擇</h3>
+  </div>
+
+  <div class="ts-list">
+    <div class="ts-card"
+         *ngFor="let p of products"
+         [class.ts-card--expanded]="isExpanded(p.productId)"
+         [class.ts-card--sold-out]="isSoldOut(p.productCode)">
+
+      <!-- ── 收起狀態列 ── -->
+      <div class="ts-card__row" (click)="toggleExpand(p.productId)">
+
+        <!-- 左：票種名稱 + 標籤 + 詳情連結 -->
+        <div class="ts-card__info">
+          <div class="ts-card__title">{{ p.title }}</div>
+
+          <!-- Tag 標籤（免費取消、立即確認...） -->
+          <div class="ts-card__tags" *ngIf="p.tags && p.tags.length > 0">
+            <span class="ts-tag" *ngFor="let tag of p.tags">{{ tag }}</span>
+          </div>
+
+          <!-- 方案詳情連結 -->
+          <button class="ts-detail-link"
+                  (click)="$event.stopPropagation(); openDrawer(p.productId)">
+            方案詳情 ›
+          </button>
+        </div>
+
+        <!-- 右：票種 badge + 價格 + 展開按鈕 -->
+        <div class="ts-card__right">
+          <span class="ts-type-badge">{{ p.ticketTypeName || '一般票' }}</span>
+          <div class="ts-card__price-wrap">
+            <span class="ts-price">NT$ {{ p.price | number }}</span>
+            <span class="ts-original-price" *ngIf="p.originalPrice && p.originalPrice > (p.price ?? 0)">
+              NT$ {{ p.originalPrice | number }}
+            </span>
+          </div>
+          <button class="ts-expand-btn" [class.ts-expand-btn--open]="isExpanded(p.productId)">
+            {{ isExpanded(p.productId) ? '∧' : '∨' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ── 展開狀態內容 ── -->
+      <div class="ts-card__body" *ngIf="isExpanded(p.productId)">
+        <hr class="ts-divider">
+
+        <!-- 兌換期說明（來自 notes，如需顯示） -->
+        <!-- <div class="ts-validity" *ngIf="p.validityDays">
+          <div class="ts-sub-title">兌換期</div>
+          <p>憑證使用期為訂單確認日起 {{ p.validityDays }} 天內</p>
+        </div> -->
+
+        <!-- 庫存狀態 -->
+        <div class="ts-stock"
+             [class.ts-stock--low]="isLowStock(p.productCode)"
+             [class.ts-stock--out]="isSoldOut(p.productCode)">
+          <ng-container *ngIf="!stockLoaded[p.productCode]">
+            庫存載入中...
+          </ng-container>
+          <ng-container *ngIf="stockLoaded[p.productCode] && !isSoldOut(p.productCode)">
+            <span *ngIf="isLowStock(p.productCode)">⚠️ 剩餘庫存：{{ stockMap[p.productCode] }} 張</span>
+            <span *ngIf="!isLowStock(p.productCode)">剩餘庫存：{{ stockMap[p.productCode] }} 張</span>
+          </ng-container>
+          <ng-container *ngIf="isSoldOut(p.productCode)">
+            已售完
+          </ng-container>
+        </div>
+
+        <!-- 數量選擇 -->
+        <div class="ts-qty-section" *ngIf="!isSoldOut(p.productCode)">
+          <div class="ts-sub-title">選擇數量</div>
+          <div class="ts-qty-row">
+            <span class="ts-qty-label">每人</span>
+            <div class="ts-price-qty">
+              <div class="ts-price-wrap">
+                <span class="ts-price">NT$ {{ p.price | number }}</span>
+                <span class="ts-original-price" *ngIf="p.originalPrice && p.originalPrice > (p.price ?? 0)">
+                  NT$ {{ p.originalPrice | number }}
+                </span>
+              </div>
+              <div class="ts-qty-ctrl">
+                <button class="ts-qty-btn" (click)="decQty(p.productId)">−</button>
+                <span class="ts-qty-val">{{ qtyMap[p.productId] }}</span>
+                <button class="ts-qty-btn" (click)="incQty(p)">＋</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 小計 + 按鈕 -->
+        <div class="ts-card__footer" *ngIf="!isSoldOut(p.productCode)">
+          <span class="ts-subtotal">NT$ {{ getSubtotal(p) | number }}</span>
+          <div class="ts-action-btns">
+            <button class="ts-btn ts-btn--cart" (click)="addToCart(p)">加入購物車</button>
+            <button class="ts-btn ts-btn--buy" (click)="addToCart(p)">立即預訂</button>
+          </div>
+        </div>
+
+        <div class="ts-sold-out-msg" *ngIf="isSoldOut(p.productCode)">
+          此票種已售完
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- 方案詳情側邊面板 Drawer -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<!-- 遮罩 -->
+<div class="ts-overlay" *ngIf="drawerOpen" (click)="closeDrawer()"></div>
+
+<!-- Drawer 本體 -->
+<div class="ts-drawer" [class.ts-drawer--open]="drawerOpen">
+
+  <!-- 標題列 -->
+  <div class="ts-drawer__header">
+    <span class="ts-drawer__title">詳情</span>
+    <button class="ts-drawer__close" (click)="closeDrawer()">✕</button>
+  </div>
+
+  <!-- 載入中 -->
+  <div class="ts-drawer__loading" *ngIf="drawerLoading">
+    <div class="spinner-border text-warning"></div>
+  </div>
+
+  <!-- 內容 -->
+  <div class="ts-drawer__body" *ngIf="!drawerLoading && drawerDetail">
+
+    <!-- 票種名稱 -->
+    <h4 class="ts-drawer__product-title">{{ drawerDetail.title }}</h4>
+
+    <!-- Tags -->
+    <div class="ts-drawer__tags" *ngIf="drawerDetail.tags && drawerDetail.tags.length > 0">
+      <div class="ts-drawer__tag-item" *ngFor="let tag of drawerDetail.tags">
+        <span class="ts-drawer__tag-icon">⚡</span> {{ tag }}
+      </div>
+    </div>
+
+    <!-- 有效期 -->
+    <div class="ts-drawer__tag-item" *ngIf="drawerDetail.validityDays">
+      <span class="ts-drawer__tag-icon">⏱</span>
+      有效期：{{ drawerDetail.validityDays }} 天
+      <div class="ts-drawer__tag-sub" *ngIf="drawerDetail.detail?.notes">
+        {{ drawerDetail.detail?.notes }}
+      </div>
+    </div>
+
+    <!-- 取消政策 -->
+    <div class="ts-drawer__tag-item" *ngIf="drawerDetail.detail?.cancelPolicy">
+      <span class="ts-drawer__tag-icon">ℹ</span>
+      {{ drawerDetail.detail?.cancelPolicy }}
+    </div>
+
+    <hr class="ts-divider" *ngIf="drawerDetail.detail?.includes || drawerDetail.detail?.excludes || drawerDetail.detail?.eligibility">
+
+    <!-- 方案詳情 -->
+    <div class="ts-drawer__section"
+         *ngIf="drawerDetail.detail?.includes || drawerDetail.detail?.excludes || drawerDetail.detail?.eligibility">
+      <h5 class="ts-drawer__section-title">方案詳情</h5>
+
+      <!-- 費用包含 -->
+      <div class="ts-detail-block" *ngIf="toLines(drawerDetail.detail?.includes).length > 0">
+        <div class="ts-detail-block__title">費用包含</div>
+        <div class="ts-detail-item ts-detail-item--include"
+             *ngFor="let line of toLines(drawerDetail.detail?.includes)">
+          <span class="ts-check">✓</span> {{ line }}
+        </div>
+      </div>
+
+      <!-- 費用不包含 -->
+      <div class="ts-detail-block" *ngIf="toLines(drawerDetail.detail?.excludes).length > 0">
+        <div class="ts-detail-block__title">費用不包含</div>
+        <div class="ts-detail-item ts-detail-item--exclude"
+             *ngFor="let line of toLines(drawerDetail.detail?.excludes)">
+          <span class="ts-cross">✕</span> {{ line }}
+        </div>
+      </div>
+
+      <!-- 預訂資格 -->
+      <div class="ts-detail-block" *ngIf="toLines(drawerDetail.detail?.eligibility).length > 0">
+        <div class="ts-detail-block__title">預訂資格</div>
+        <div class="ts-detail-item"
+             *ngFor="let line of toLines(drawerDetail.detail?.eligibility)">
+          • {{ line }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 注意事項 -->
+    <div class="ts-drawer__section" *ngIf="drawerDetail.detail?.usageInstructions">
+      <h5 class="ts-drawer__section-title">注意事項</h5>
+      <p class="ts-drawer__text">{{ drawerDetail.detail?.usageInstructions }}</p>
+    </div>
+
+  </div>
+</div>

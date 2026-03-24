@@ -1,7 +1,10 @@
 ﻿using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
@@ -14,10 +17,6 @@ using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 
 
 
@@ -29,9 +28,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.AllowAnyOrigin() 
-                  .AllowAnyHeader()  
-                  .AllowAnyMethod();  
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
         });
 });
 
@@ -122,7 +121,7 @@ builder.Services.AddSwaggerGen(
         });
         x.SwaggerDoc("Board", new OpenApiInfo
         {
-            Title = "Board"           
+            Title = "Board"
         });
 
         x.DocInclusionPredicate((docName, apiDesc) =>
@@ -142,14 +141,20 @@ builder.Services.AddDbContext<AttractionsContext>(options =>
 builder.Services.AddDbContext<MemberSystemContext>(options =>
  options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
+#region ActivityDI
 builder.Services.AddDbContext<ActivityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 builder.Services.AddScoped<ActivityCardService>();
 builder.Services.AddScoped<ActivityInfoService>();
 builder.Services.AddScoped<ActivityTicketService>();
+builder.Services.AddHttpClient<GoogleRouteForActivityService>();
+builder.Services.AddScoped<ActivityReviewService>();
+builder.Services.AddScoped<CloudinaryPhotoService>();
+#endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
+
 
 #region ItineraryDI
 builder.Services.AddDbContext<TravelWeb_API.Models.Itinerary.DBContext.TravelContext>(options =>
@@ -160,17 +165,31 @@ var config = TypeAdapterConfig.GlobalSettings;
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 builder.Services.AddScoped<IItineraryservice, ItineraryService>();
+builder.Services.AddScoped<IAIService, AIService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
+//builder.Services.AddControllers()
+//    .AddJsonOptions(options =>
+//    {
+//        // 自動將屬性名稱轉為小寫開頭 (camelCase)，符合 Angular 習慣
+//        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+//        // 忽略掉循環引用
+//        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+//    });
 #endregion
 
+//========留言功能=======================================
 builder.Services.AddDbContext<BoardDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
-builder.Services.AddScoped<IArticlesService, ArticleService>();
+builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
+builder.Services.AddScoped<IArticleService, ArticleService>();
+builder.Services.AddScoped<ITagsService, TagsService>();
 //===================================================
 
 //行程商品表連線用DI
-builder.Services.AddScoped<ITripproductTable,TripproductTable >();
-builder.Services.AddScoped<IShoppingCart,SShoppingCart>();
+builder.Services.AddScoped<ITripproductTable, TripproductTable>();
+builder.Services.AddScoped<IShoppingCart, SShoppingCart>();
 //行程商品表連線用DI
 builder.Services.AddScoped<ITripproductTable, TripproductTable>();
 //購物車連線DI
@@ -181,7 +200,7 @@ builder.Services.AddScoped<IOrder, SOrder>();
 builder.Services.AddScoped<IECPay, SECPay>();
 
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-//綠界
+//////綠界
 builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
 // 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
 builder.Services.AddHttpClient();
@@ -211,11 +230,13 @@ if (app.Environment.IsDevelopment())
 }
 
 
+
+
 app.UseHttpsRedirection();
 
 app.UseCors(myAllowSpecificOrigins);
 
-app.UseAuthentication(); 
+app.UseAuthentication();
 
 app.UseAuthorization();
 

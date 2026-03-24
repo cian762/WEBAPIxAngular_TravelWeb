@@ -8,27 +8,14 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
     public class TripproductTable : ITripproductTable
     {
         private readonly TripDbContext _trip;
-        private readonly  string _mvcBaseUrl;
-        public TripproductTable(TripDbContext trip ,IConfiguration config)
+        private readonly string _mvcBaseUrl;
+        public TripproductTable(TripDbContext trip, IConfiguration config)
         {
             _trip = trip;
-            _mvcBaseUrl = config["ExternalServices:MvcBackendUrl"]?.TrimEnd('/') ?? "";
+            _mvcBaseUrl = config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
 
         }
-        //抓商品表的那張表給自己的DTO
-        public async Task<IEnumerable<TripProductDTO>> GetAllAsync()
-        {
-            var products = await _trip.TripProducts.Select(p => new TripProductDTO
-            {
-                TripProductId = p.TripProductId,
-                ProductName = p.ProductName,
-                CoverImage = string.IsNullOrEmpty(p.CoverImage)
-                         ? ""
-                         : _mvcBaseUrl + p.CoverImage.Replace("~", ""),
-                DisplayPrice = p.DisplayPrice
-            }).ToListAsync();
-            return products;
-        }
+
         //抓所有地區表
         public async Task<IEnumerable<RegionListDTO>> GetRegionsAllAsync()
         {
@@ -40,11 +27,6 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             return rogin;
         }
 
-
-        public Task<IEnumerable<ProductQueryDTO>> GetTagAll()
-        {
-            throw new NotImplementedException();
-        }
         // 取得所有標籤，給前端畫按鈕用
         public async Task<IEnumerable<TagListDTO>> GetTagsAllAsync()
         {
@@ -65,6 +47,9 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             // 1. 篩選地區
             if (queryDto.RegionId.HasValue)
                 query = query.Where(p => p.RegionId == queryDto.RegionId);
+            //價錢篩選
+            if (queryDto.MaxPrice.HasValue)
+                query = query.Where(p => p.DisplayPrice <= queryDto.MaxPrice);
 
             // 2. 篩選標籤 (多對多直接寫法)
             if (queryDto.TagIds != null && queryDto.TagIds.Any())
@@ -105,7 +90,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     TripProductId = x.p.TripProductId,
                     ProductName = x.p.ProductName,
-                    CoverImage = x.p.CoverImage,
+                    CoverImage = _mvcBaseUrl + "/PImages/" + x.p.CoverImage,
                     DisplayPrice = x.p.DisplayPrice,
                     RegionName = x.r.RegionName, // 這裡從 Join 的 r 拿名稱
                     DurationDays = x.p.DurationDays
@@ -114,5 +99,76 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             return new PagedResult<TripProductDTO> { TotalCount = totalCount, Data = pagedData };
 
         }
+        //=====================================================================================
+        //這裡是商品詳細頁
+        //細項標頭
+        public async Task<ProductBasicDto?> GetBasicInfoAsync(int id)
+        {
+            var product = await _trip.TripProducts.Where(x => x.TripProductId == id).Select(s => new ProductBasicDto
+            {
+                TripProductId = s.TripProductId,
+                ProductName = s.ProductName!,
+                CoverImage = _mvcBaseUrl + "/PImages/" + s.CoverImage,
+                Description = s.Description,
+                RegionName = s.Region != null ? s.Region.RegionName : "未分類",
+                Tags = s.TravelTags!
+                      .Select(t => t.TravelTagName!).ToList()
+            }).FirstOrDefaultAsync();
+            var viewCount = await _trip.TripProducts.FirstOrDefaultAsync(x => x.TripProductId == id);
+            if (viewCount != null) { viewCount.ClickTimes += 1;await _trip.SaveChangesAsync(); }
+            
+            return product;
+        }
+        //細項行程
+        public async Task<IEnumerable<ProductItineraryDto>> GetItineraryAsync(int id)
+        {
+            return await _trip.TripItineraryItems
+         .Where(i => i.TripProductId == id)
+         // 先按天數排序，再按當天順序排序
+         .OrderBy(i => i.DayNumber)
+         .ThenBy(i => i.SortOrder)
+         .Select(i => new ProductItineraryDto
+         {
+             DayNumber = (int)i.DayNumber!,
+             SortOrder =(int)i.SortOrder!,
+             CustomText = i.CustomText,
+             DefaultDescription=i.Resource!.DefaultDescription,
+             // 從 Resource 表抓名字 (例如：台北 101)
+             ResourceName = i.Resource != null ? i.Resource.ResourceName : null,
+
+             // 核心邏輯：去 ResourcesImage 表抓出所有屬於該 ResourceId 的圖片
+             ResourceUrls = i.Resource != null
+                ? i.Resource.ResourcesImages
+                    .Select(img => _mvcBaseUrl+ img.MainImage)
+                    .ToList()
+                : new List<string>()
+         })
+         .ToListAsync();
+        }
+        //細項檔期
+        public async Task<IEnumerable<ProductScheduleDto>> GetSchedulesAsync(int id)
+        {
+            // 1. 將今天的日期設定為 DateOnly 型別，以便與資料庫欄位對比
+            // 使用 DateOnly.FromDateTime 從 DateTime 轉換過來
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var result = await _trip.TripSchedules
+                .Where(s => s.TripProductId == id && s.StartDate >= today) // 現在兩邊都是 DateOnly 了
+                .OrderBy(s => s.StartDate)
+                .ToListAsync();
+
+            // 2. 在記憶體中進行轉型
+            return result.Select(s => new ProductScheduleDto
+            {
+                ProductCode = s.ProductCode,
+                // 如果 s.StartDate 已經是 DateOnly，直接賦值即可
+                // 若為可空型別且 Dto 需要非空，需處理預設值，例如：s.StartDate ?? DateOnly.MinValue
+                StartDate = s.StartDate ?? DateOnly.MinValue,
+                Price = (decimal)s.Price!,
+                AvailableStock = (s.MaxCapacity ?? 0) - (s.SoldQuantity ?? 0)
+            });
+
+        }
     }
 }
+

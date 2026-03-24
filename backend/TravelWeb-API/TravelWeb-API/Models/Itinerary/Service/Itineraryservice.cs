@@ -8,12 +8,14 @@ namespace TravelWeb_API.Models.Itinerary.Service
     {
         private readonly TravelContext _context;
         private readonly ICloudinaryService _imageUploadService;
+
         public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService)
         {
             _imageUploadService = cloudinaryService;
             _context = context;
-        }
 
+        }
+        /*建立主表包含物件*/
         public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto)
         {
             // 啟動資料庫交易
@@ -115,7 +117,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 throw;
             }
         }
-
+        //抓行程細節
         public async Task<ItineraryDetailDto> GetItineraryDetailAsync(int itineraryId)
         {
             var result = await _context.Itineraries
@@ -124,6 +126,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 {
                     ItineraryId = i.ItineraryId,
                     ItineraryName = i.ItineraryName,
+                    ItineraryImage = i.ItineraryImage ?? "https://res.cloudinary.com/dcyrbbv4w/image/upload/v1773284561/cld-sample-2.jpg",
                     // 抓取「當前使用中」的版本
                     CurrentVersion = i.ItineraryVersions
                         .Where(v => v.CurrentUsageStatus == "Y")

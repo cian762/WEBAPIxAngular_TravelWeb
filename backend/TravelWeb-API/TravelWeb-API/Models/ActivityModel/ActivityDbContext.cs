@@ -47,7 +47,6 @@ public partial class ActivityDbContext : DbContext
 
     public virtual DbSet<UserFavorite> UserFavorites { get; set; }
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AcitivityTicket>(entity =>

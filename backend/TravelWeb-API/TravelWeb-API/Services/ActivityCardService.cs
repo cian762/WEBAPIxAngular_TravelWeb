@@ -18,12 +18,54 @@ namespace TravelWeb_API.Services
             _dbContext = dbContext;
         }
 
-        public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetCards(PagedQueryParameters q) 
-        {
-            var totalRecords = _dbContext.Activities.Count(a => a.SoftDelete == false);
-
-            var ans = await _dbContext.Activities
+        public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetSpecificCards(ActivityInfoParameters q) 
+       {
+            var query = _dbContext.Activities
+                .Include(a=>a.Reviews)
                 .Where(a => a.SoftDelete == false)
+                .AsNoTracking();
+
+            if (q.Keyword != null)
+            {
+                query = query.Where(a => a.Title == q.Keyword);
+            }
+
+            if (q.Type != null && q.Type.Length > 0)
+            {
+                query = query.Where(a => a.Types.Any(t => q.Type!.Contains(t.ActivityType)));
+            }
+
+            if (q.Region != null && q.Region.Length > 0)
+            {
+                query = query.Where(a => a.Regions.Any(r => q.Region!.Contains(r.RegionName)));
+                   
+            }
+
+            if (q.Start != null && q.End != null)
+            {
+                query = query.Where(a =>a.StartTime <= q.End && a.EndTime >= q.Start);
+            }
+
+
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+            if (q.OrderByParam == "hot")
+            {
+                query = query.OrderByDescending(a => a.Reviews.Any()? a.Reviews.Select(r=>r.ReviewId).Count() : 0);
+            }
+            else if (q.OrderByParam == "rating")
+            {
+                query = query.OrderByDescending(a => a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0);
+            }
+            else if (q.OrderByParam == "latest")
+            {
+                query = query.OrderBy(a => Math.Abs(EF.Functions.DateDiffDay(today, a.StartTime)!.Value));
+            }
+
+            
+
+            var ans = await query
+                .Where(a => a.EndTime >= today)
                 .Skip((q.PageNumber - 1) * q.PageSize)
                 .Take(q.PageSize)
                 .Select(a => new ActivityCardReponseDTO
@@ -40,71 +82,15 @@ namespace TravelWeb_API.Services
                                     .FirstOrDefault(),
                     ViewCount = a.ViewCount,
                     CommentCount = a.Reviews.Count(),
-                    AverageRating = (float) (a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),
+                    AverageRating = (float)Math.Round((a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),1),
                     ReferencePrice = a.ActivityTicketDetails
-                    .Where(d=>d.ProductCodeNavigation.TicketCategoryId == 2)
+                    .Where(d => d.ProductCodeNavigation.TicketCategoryId == 2)
                     .Select(d => d.ProductCodeNavigation.CurrentPrice)
                     .FirstOrDefault() ?? 0,
-
                 })
                 .ToListAsync();
 
-            return new PagedResponseDTO<ActivityCardReponseDTO>(ans,q.PageNumber,totalRecords, q.PageSize);
-        }
-
-        public async Task<PagedResponseDTO<ActivityCardReponseDTO>> GetSpecificCards(ActivityInfoParameters q) 
-        {
-            var query = _dbContext.Activities
-                .Where(a => a.SoftDelete == false);
-
-            var totalRecords = query.Count();
-
-            if (!q.Type.IsNullOrEmpty())
-            {
-                query = query.Where(a => a.Types.Any(t => t.ActivityType == q.Type));
-            }
-
-            if (!q.Region.IsNullOrEmpty())
-            {
-                query = query.Where(a => a.Regions.Any(r => r.RegionName == q.Region));
-            }
-
-            if (q.Start != null && q.End != null)
-            {
-                query = query.Where(a => a.StartTime >= q.Start && a.EndTime <= q.End);
-            }
-
-            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-            
-            //if(OrderByPopularity) result = result.OrderByDescending(a => a.Popularity);
-
-            if (q.IsLatest)
-            {
-                query = query.OrderBy(a => EF.Functions.DateDiffDay(today, a.StartTime));
-            }
-            else if (q.IsObsolete)
-            {
-                query = query.OrderBy(a => a.StartTime);
-            }
-            else
-            {
-                query = query.OrderBy(a => a.ActivityId);
-            }
-
-
-            var ans = await query
-                .Skip((q.PageNumber - 1) * q.PageSize)
-                .Take(q.PageSize)
-                .Select(a => new ActivityCardReponseDTO
-                {
-                    ActivityId = a.ActivityId,
-                    Title = a.Title,
-                    Type = a.Types.Select(t => t.ActivityType),
-                    Region = a.Regions.Select(r => r.RegionName),
-                    Start = a.StartTime,
-                    End = a.EndTime,
-                })
-                .ToListAsync();
+            var totalRecords = ans.Count();
 
             return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, totalRecords, q.PageSize);
 
@@ -116,6 +102,7 @@ namespace TravelWeb_API.Services
 
             var ans = await _dbContext.Activities
                 .Where(a => a.SoftDelete == false)
+                .Where(a => a.EndTime >= DateOnly.FromDateTime(DateTime.Today))
                 .Where(a => a.Title!.StartsWith(searchText))
                 .OrderBy(a => a.Title!.Length)
                 .Select(a => a.Title)

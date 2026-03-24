@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TravelWeb_API.Models.MemberSystem;
 
@@ -18,6 +19,6 @@ public partial class ComplaintRecord
     public virtual Administrator Admin { get; set; } = null!;
 
     public virtual MemberList MemberCodeNavigation { get; set; } = null!;
-
+   
     public virtual MemberComplaint? MemberComplaint { get; set; }
 }
