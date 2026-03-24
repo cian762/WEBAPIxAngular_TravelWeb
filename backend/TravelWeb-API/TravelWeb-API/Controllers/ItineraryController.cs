@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
+﻿using Microsoft.AspNetCore.Mvc;
 using TravelWeb_API.Models.Itinerary.DTO;
 using TravelWeb_API.Models.Itinerary.Service;
 
@@ -8,7 +6,7 @@ using TravelWeb_API.Models.Itinerary.Service;
 
 namespace TravelWeb_API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ItineraryController : ControllerBase
@@ -18,7 +16,7 @@ namespace TravelWeb_API.Controllers
         public ItineraryController(IItineraryservice itineraryService)
         {
             _itineraryService = itineraryService;
-            _memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
+            //_memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
@@ -109,10 +107,10 @@ namespace TravelWeb_API.Controllers
             }
         }
         //POST修改圖片
-        [HttpPost("{Id}/Savephoto")]
-        public async Task<IActionResult> SavePhoto([FromForm] IFormFile image, int Id)
+        [HttpPost("Savephoto/{Id}")]
+        public async Task<IActionResult> SavePhoto([FromForm] ItineraryImageDto dto, int Id)
         {
-            var imageUrl = _itineraryService.SaveImagebyid(image, Id);
+            var imageUrl = await _itineraryService.SaveImagebyid(dto.Image, Id);
             if (imageUrl == null)
             {
                 return BadRequest("圖片上傳失敗");

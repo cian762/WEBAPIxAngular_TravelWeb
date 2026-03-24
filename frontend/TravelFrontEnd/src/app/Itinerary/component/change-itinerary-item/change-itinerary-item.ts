@@ -68,7 +68,7 @@ export class ItineraryDetailComponent implements OnInit {
     formData.append('image', file);
 
     // 呼叫剛剛寫的控制器端點
-    this.http.post<any>(`api/itinerary/${this.itineraryId}/upload-cover`, formData)
+    this.http.post<any>(`https://localhost:7276/api/Itinerary/Savephoto/${this.itineraryId}`, formData)
       .subscribe({
         next: (res) => {
           // 成功後，前端變數 imageUrl 更新，HTML 會自動重新渲染背景圖
