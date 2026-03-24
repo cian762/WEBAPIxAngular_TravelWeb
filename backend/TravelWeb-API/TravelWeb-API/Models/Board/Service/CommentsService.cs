@@ -39,10 +39,10 @@ namespace TravelWeb_API.Models.Board.Service
         }
 
 
-        public Comment AddComment(PostCommentDto dto)
+        public Comment AddComment(PostCommentDto dto,string UserId)
         {
             Comment comment = new Comment();
-            comment.UserId = dto.UserId;
+            comment.UserId = UserId;
             comment.ParentId = dto.parentID;
             comment.ArticleId = dto.articleID;
             comment.Contents = dto.contents;

@@ -20,15 +20,13 @@ export class CommentsArea implements OnInit {
 
   @Input() id = 0;
   commentList: CommentsDTO[] = [];
-  UserId = "";
   contents = "";
   parent?: number;
   parentComment? = "";
 
-  postComment(UserId: string, contents: string) {
+  postComment(contents: string) {
     var CommentDto = {
       articleID: this.id,
-      userId: UserId,
       contents: contents,
       parentID: this.parent !== undefined ? this.parent : null,
     }

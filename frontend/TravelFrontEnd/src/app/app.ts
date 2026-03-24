@@ -6,20 +6,21 @@ import { Header } from "./header/header";
 import { Footer } from "./footer/footer";
 import { Banner } from "./banner/banner";
 import { PostDetail } from "./Board/post-detail/post-detail";
-import { Shoppingcart } from './trip/component/shoppingcart/shoppingcart';
+// import { Shoppingcart } from './trip/component/shoppingcart/shoppingcart';
 import { Order } from "./trip/component/order/order";
 import { Product } from "./trip/component/product/product";
 import { TripProductDetail } from "./trip/component/trip-product-detail/trip-product-detail";
+import { LoginComponent } from "./Member/login/login.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TestUse, RouterLink, Shoppingcart, BlogHome, Header, Footer, Banner, PostDetail, Order, Product, TripProductDetail],
+  imports: [RouterOutlet, TestUse, RouterLink, BlogHome, Header, Footer, Banner, PostDetail, Order, Product, TripProductDetail, LoginComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit {
   ngOnInit(): void {
-    this.initializeGuestId();
+    // this.initializeGuestId();
   }
   protected readonly title = signal('TravelFrontEnd');
   initializeGuestId() {
