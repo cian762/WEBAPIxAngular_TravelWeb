@@ -100,7 +100,6 @@ export class TripProductDetail implements OnInit {
       totalPrice: this.selectedSchedule.price * (this.adultCount + this.childCount)
     };
   }
-
   // 加入購物車
   addToCart(): void {
     const data = this.getBookingData();
@@ -110,10 +109,7 @@ export class TripProductDetail implements OnInit {
       return;
     }
 
-    // 1. 檢查是否有會員 ID (代表已登入)
-    const memberId = localStorage.getItem('memberId');
-
-    // 2. 過濾掉數量為 0 的項目 (不論大人小孩，有買才送)
+    // 過濾掉數量為 0 的項目
     const itemsToProcess = data.items.filter(item => item.qty > 0);
 
     if (itemsToProcess.length === 0) {
@@ -121,47 +117,38 @@ export class TripProductDetail implements OnInit {
       return;
     }
 
-    // 3. 根據登入狀態執行不同邏輯
+    // 🏆 簡化後的邏輯：直接交給 Service 處理
     itemsToProcess.forEach(item => {
       const cartItem = {
-        memberId: memberId || '', // 沒登入就給空，之後同步再補
+        // 不需要傳 memberId 了，Service 會自己抓 Token 或判斷遊客
         productCode: data.scheduleId,
-        productName: data.productName, // LocalStorage 需要名稱來顯示
+        productName: data.productName,
         price: item.price,
         quantity: item.qty,
-        ticketCategoryId: item.ticketType
+        ticketCategoryId: item.ticketType,
+        mainImage: this.basicInfo?.coverImage // 建議傳圖片，購物車顯示才好看
       };
 
-      if (memberId) {
-        // --- 已登入：打 API 存入資料庫 ---
-        this.cartService.addToCart(cartItem).subscribe({
-          next: () => console.log(`票種 ${item.ticketType} API 存入成功`),
-          error: (err) => console.error('API 存入失敗', err)
-        });
-      } else {
-        // --- 未登入：存入 LocalStorage ---
-        this.cartService.addToLocalCart(cartItem);
-        console.log(`票種 ${item.ticketType} 已暫存至 LocalStorage`);
-      }
+      // 🚀 直接呼叫 Service，它會自己判斷要打 API 還是存 LocalStorage
+      this.cartService.addToCart(cartItem).subscribe({
+        next: () => console.log(`項目 ${item.ticketType} 處理完成`),
+        error: (err) => console.error('處理失敗', err)
+      });
     });
 
     alert(`成功加入購物車！\n日期：${data.startDate}\n成人：${this.adultCount}位、兒童：${this.childCount}位`);
   }
+
   // 立即購買按鈕
   buyNow(): void {
-    const memberId = localStorage.getItem('memberId');
+    // 呼叫上面的 addToCart
 
-    if (!memberId) {
-      // 沒登入的話，先存 LocalStorage 再跳轉登入
-      this.addToCart();
-      alert('請先登入會員以完成訂單');
-      // this.router.navigate(['/login'], { queryParams: { returnUrl: '/shopping-cart' } });
-    } else {
-      // 已登入的話，存 API 後直接跳轉
-      this.addToCart();
-      // this.router.navigate(['/shopping-cart']);
-    }
+
+    // 不管有沒有登入，都導向購物車頁面
+    // 如果 Service 寫得好，導向後購物車頁面會自動顯示剛加進去的東西（不論是從 API 還是 LocalStorage 來的）
+    // this.router.navigate(['/cart']);
   }
+
 }
 
 

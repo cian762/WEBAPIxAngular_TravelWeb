@@ -51,14 +51,16 @@ export const routes: Routes = [
   },
   // 景點介紹結束
   //行程商品相關
-
-
-
   { path: 'trip-detail/:id', component: TripProductDetail },
   {
     path: 'tripProduct',
     loadComponent: () => import('./trip/component/product/product').then(
       m => m.Product
+    )
+  }, {
+    path: 'Shoppingcart',
+    loadComponent: () => import('./trip/component/shoppingcart/shoppingcart').then(
+      m => m.Shoppingcart
     )
   },
   //*行程建立路由*/

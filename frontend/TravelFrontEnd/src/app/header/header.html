@@ -60,7 +60,11 @@
               <li><a href="blog-single.html">Blog Single</a></li>
             </ul>
           </li>
-          <li><a href="hotels.html">購物車圖案放這</a></li>
+          <li><a routerLink="Shoppingcart"><i class="bi bi-cart3 fs-4"></i> <span
+                *ngIf="(cartService.cartCount$ | async) as count"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ count > 99 ? '99+' : count }}
+              </span></a></li>
           <!-- ... 其他選單略 ... -->
         </ul>
       </nav>
