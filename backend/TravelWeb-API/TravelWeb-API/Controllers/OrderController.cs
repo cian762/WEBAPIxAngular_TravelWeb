@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
@@ -12,26 +13,23 @@ namespace TravelWeb_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrder _order;
         private readonly IECPay _ecpay;
-        public OrderController(IOrder order, IECPay ecpay) {
+        private readonly string _memberId;
+        public OrderController(IOrder order, IECPay ecpay, string memderId) {
             _order = order;
             _ecpay = ecpay;
+            _memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
         }
-
-        [HttpPut("cancel/{orderId}/{memberId}")]
-        public async Task<IActionResult> CancelOrder(int orderId, string memberId)
+        // 取得當前登入者 ID 的輔助方法
+        [HttpPut("cancel/{orderId}")]
+        public async Task<IActionResult> CancelOrder(int orderId)
         {
-            // 1. 從 Token 的 Claims 中提取 MemberId (對應你在產生 Token 時設定的 ClaimType)
-            // 通常是 ClaimTypes.NameIdentifier 或 "sub"
-            //var memberId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            //if (string.IsNullOrEmpty(memberId))
-            //{
-            //    return Unauthorized("無法取得用戶資訊");
-            //}
+            var memberId = _memberId; // 👈 從 Token 抓 ID
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
 
             // 2. 呼叫 Service 執行取消邏輯 (包含狀態機檢查)
             var result = await _order.CancelOrderAsync(orderId, memberId);
@@ -45,8 +43,10 @@ namespace TravelWeb_API.Controllers
             return Ok(new { Message = "訂單已成功取消" });
         }
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto, [FromQuery] string memberId)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
+            var memberId = _memberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             try
             {
                 if (string.IsNullOrEmpty(memberId))
@@ -75,8 +75,10 @@ namespace TravelWeb_API.Controllers
             }
         }
         [HttpGet("my-orders")]
-        public async Task<IActionResult> GetMyOrders([FromQuery] string memberId)
+        public async Task<IActionResult> GetMyOrders()
         {
+            var memberId = _memberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             try
             {
                 // 1. 檢查 MemberId 是否有傳入
@@ -104,8 +106,10 @@ namespace TravelWeb_API.Controllers
             }
         }
         [HttpGet("{orderId}")]
-        public async Task<IActionResult> GetOrderDetail(int orderId, [FromQuery] string memberId)
+        public async Task<IActionResult> GetOrderDetail(int orderId)
         {
+            var memberId = _memberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             // 呼叫你剛寫好的服務層
             var detail = await _order.GetOrderDetailAsync(orderId, memberId);
 
@@ -117,8 +121,10 @@ namespace TravelWeb_API.Controllers
             return Ok(detail);
         }
         [HttpPost("preview")]
-        public async Task<IActionResult> GetPreview([FromBody] CreateOrderDto dto, [FromQuery] string memberId)
+        public async Task<IActionResult> GetPreview([FromBody] CreateOrderDto dto)
         {
+            var memberId = _memberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             try
             {
                 // 1. 驗證基本輸入
