@@ -62,7 +62,7 @@ namespace TravelWeb_API.Controllers
             {
                 HttpOnly = true, // 防止 XSS 攻擊 (前端 JS 讀不到)
                 Secure = true,   // 限制只能在 HTTPS 環境下傳輸
-                SameSite = SameSiteMode.Strict, // 防止 CSRF 跨站攻擊
+                SameSite = SameSiteMode.None, // 防止 CSRF 跨站攻擊
                 Expires = DateTime.UtcNow.AddHours(9) // 與 Token 過期時間一致
             };
             Response.Cookies.Append("AuthToken", token, cookieOptions);
