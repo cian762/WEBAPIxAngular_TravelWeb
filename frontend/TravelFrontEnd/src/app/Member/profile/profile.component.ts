@@ -16,8 +16,12 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // 準備一個空物件來接 API 資料
+  // ⚠️ 請確保這是您後端 API 的主機網址，用來串接大頭貼的相對路徑
+  private backendHost = 'https://localhost:7276';
+
   userProfile: any = {
+    avatarUrl: 'assets/default-avatar.png', // 👈 預設給這張，就不會閃白底
+    coverUrl: '',
     accountInfo: {},
     memberInfo: {},
     followingList: [],
@@ -26,34 +30,39 @@ export class ProfileComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    // 載入頁面時，打 API 抓取個人資料
     this.authService.getMyProfile().subscribe({
       next: (data) => {
-        // 將後端回傳的資料塞入我們的變數中
         this.userProfile.memberCode = data.memberCode;
         this.userProfile.memberId = data.memberId;
         this.userProfile.name = data.name;
-        this.userProfile.avatarUrl = data.avatarUrl || 'assets/default-avatar.png';
-        this.userProfile.coverUrl = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'; // 封面暫時用假圖
 
-        this.userProfile.accountInfo.email = data.email;
-        this.userProfile.accountInfo.phone = data.phone;
+        if (data.avatarUrl && data.avatarUrl.trim() !== '') {
+
+          // 如果您的後端已經把完整的 Cloudinary 網址存進資料庫，直接拿來用！
+          // 例如：data.avatarUrl 會是 "https://res.cloudinary.com/..."
+          this.userProfile.avatarUrl = data.avatarUrl;
+
+        } else {
+          // 如果資料庫沒圖片，維持預設圖 (您那張很讚的黑人問號圖)
+          this.userProfile.avatarUrl = 'assets/default-avatar.png';
+        }
+        // 🔥 將封面設為空值，不要預設圖片
+        this.userProfile.coverUrl = '';
+
+        // 🔥 確保有把後端的資料存入 accountInfo 和 memberInfo 裡面
+        this.userProfile.accountInfo.email = data.email || '未提供信箱';
+        this.userProfile.accountInfo.phone = data.phone || '未提供電話';
 
         this.userProfile.memberInfo.gender = data.gender;
-        this.userProfile.memberInfo.birthDate = data.birthDate;
+        this.userProfile.memberInfo.birthDate = data.birthDate || '未提供生日';
         this.userProfile.memberInfo.status = data.status;
-
-        // 追隨者與黑名單等，等後端補上對應欄位後即可直接 mapping
       },
-       error: (err) => {
-    alert('無法取得會員資料，請重新登入');
-
-    // 🔥 加上這兩行，強制清除前端的幽靈登入狀態！
-    localStorage.removeItem('isLoggedIn');
-    this.authService.authState$.next(false); // 廣播給 Header 叫它變回登入按鈕
-
-    this.router.navigate(['/login']);
-  }
+      error: (err) => {
+        alert('無法取得會員資料，請重新登入');
+        localStorage.removeItem('isLoggedIn');
+        this.authService.authState$.next(false);
+        this.router.navigate(['/login']);
+      }
     });
   }
 
@@ -65,17 +74,14 @@ export class ProfileComponent implements OnInit {
     alert(`準備上傳 ${type}`);
   }
 
-  // 🔥 新增：執行登出
   onLogout(): void {
     if(confirm('確定要登出嗎？')) {
       this.authService.logout().subscribe({
         next: () => {
-          alert('已成功登出');
-          this.router.navigate(['/login']); // 跳回登入頁
+          this.router.navigate(['/login']);
         },
         error: (err) => {
-          console.error('登出發生錯誤', err);
-          this.router.navigate(['/login']); // 就算出錯也強制導回登入頁
+          this.router.navigate(['/login']);
         }
       });
     }

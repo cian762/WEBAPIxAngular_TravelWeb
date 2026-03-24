@@ -31,8 +31,8 @@ export class AuthService {
   }
 
   getMyProfile(): Observable<any> {
-    // 🔥 必須加上 { withCredentials: true }，才會把 Cookie 帶給後端！
-    return this.http.get(`${this.apiUrl}/MemberInfo/MyProfile`, { withCredentials: true });
+    // 🔥 關鍵修復：這裡的路徑必須對應後端新的 MemberProfileController
+    return this.http.get(`${this.apiUrl}/MemberProfile/me`, { withCredentials: true });
   }
 
   logout(): Observable<any> {
