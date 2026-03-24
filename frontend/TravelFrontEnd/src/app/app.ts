@@ -14,7 +14,7 @@ import { LoginComponent } from "./Member/login/login.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TestUse, RouterLink, BlogHome, Header, Footer, Banner, PostDetail, Order, Product, TripProductDetail, LoginComponent],
+  imports: [RouterOutlet, TestUse, RouterLink, BlogHome, Header, Footer, Banner, PostDetail, Order, Product, TripProductDetail],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

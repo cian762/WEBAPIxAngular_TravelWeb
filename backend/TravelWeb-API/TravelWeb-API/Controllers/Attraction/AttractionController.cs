@@ -8,6 +8,7 @@ namespace TravelWeb_API.Controllers.Attraction
     
     [Route("api/[controller]")]
     [ApiController]
+    //[ApiExplorerSettings(GroupName = "Attraction")] // ← 加這行
     public class AttractionController : ControllerBase
     {
         private readonly AttractionsContext _dbContext;
