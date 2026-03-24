@@ -30,7 +30,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 3. 防呆：若 AI 格式錯誤，回傳當天零點
             return targetDate;
         }
-        public async Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days)
+        public async Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days, string memberid)
         {
             // 【前因 1】：AI 需要知道景點的座標與營業時間才能排動線，所以要先從 DB 撈詳細資料
             var pois = await _context.Attractions
@@ -75,7 +75,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 // 1. 建立行程主表
                 var newItinerary = new DBModel.Itinerary
                 {
-                    MemberId = dto.MemberId,
+                    MemberId = memberid,
                     ItineraryName = dto.ItineraryName,
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,

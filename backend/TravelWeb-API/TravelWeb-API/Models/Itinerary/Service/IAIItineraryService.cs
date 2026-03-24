@@ -4,7 +4,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
 {
     public interface IAIItineraryService
     {
-        public Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days);
+        public Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days, string memberid);
 
     }
 }
