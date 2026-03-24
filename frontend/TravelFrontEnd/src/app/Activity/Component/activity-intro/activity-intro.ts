@@ -7,7 +7,6 @@ import { productInfoInterface } from '../../Interface/productIntroInterface';
 import { reviewsPackage } from '../../Interface/reviewsPackage';
 import { FormsModule } from '@angular/forms';
 import { RouteService } from '../../Service/route-service';
-
 import { NgFor, NgIf } from '@angular/common';
 import { RouteOptionDto } from '../../Interface/routeOptionDto';
 import { CardInfoModel } from '../../Interface/cardInterface';
@@ -115,8 +114,7 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
         activityInfo: this.infoService.getActivityDetails(id),
         reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
         productInfoCollection: this.infoService.getRelatedTickets(id),
-        //TODO 這邊到時要把 memberId = 2 拿掉
-        personalComments: this.personalCommentService.getPersonalComments(id, "2")
+        personalComments: this.personalCommentService.getPersonalComments(id)
       }).subscribe({
         next: ({ activityInfo, reviewsPackage, productInfoCollection, personalComments }) => {
           this.activityInfo = activityInfo;
@@ -150,9 +148,8 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  getPersonalComments(activityId: number, memberId: string) {
-    //TODO 這邊到時要把 memberId 拿掉
-    return this.personalCommentService.getPersonalComments(activityId, memberId);
+  getPersonalComments(activityId: number) {
+    return this.personalCommentService.getPersonalComments(activityId);
   }
 
   FindBookMark(bookmark: string) {
@@ -379,13 +376,14 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
   selectedSortRule: string = 'highest';
   changeSortRule(sortRule: string) {
     this.selectedSortRule = sortRule;
-    this.activatedRoute.params.subscribe((params) => {
-      const id = Number(params['id']);
-      this.infoService.getRelatedReviews(id, this.selectedSortRule)
-        .subscribe((data) => {
-          this.reviewsPackage = data;
-        });
-    });
+
+    // this.activatedRoute.params.subscribe((params) => {
+    //   const id = Number(params['id']);
+
+    this.infoService.getRelatedReviews(this.activityIdFromRoute, this.selectedSortRule)
+      .subscribe((data) => {
+        this.reviewsPackage = data;
+      });
   }
 
   isModalOpen = false;
@@ -405,7 +403,7 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   refreshPersonalComment(): void {
     console.log('父元件 refreshPersonalComment()被觸發');
-    this.personalCommentService.getPersonalComments(this.activityIdFromRoute, "2").pipe(
+    this.personalCommentService.getPersonalComments(this.activityIdFromRoute).pipe(
       switchMap((data) => {
         console.log("個人評論更新載入成功");
         this.personalCommentCollection = data;

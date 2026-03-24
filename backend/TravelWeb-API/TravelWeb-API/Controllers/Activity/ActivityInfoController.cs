@@ -34,9 +34,8 @@ namespace TravelWeb_API.Controllers.Activity
         [HttpGet("{activitiyId}/Reviews")]
         public async Task<ActionResult> GetRelatedReviews([FromRoute] int activitiyId, [FromQuery] string orderRule)
         {
-            var memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-
-            var result = await _activityInfoService.GetRelatedReviews(activitiyId,memberId,orderRule);
+            var memberCode = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            var result = await _activityInfoService.GetRelatedReviews(activitiyId,memberCode,orderRule);
             if (result == null) return NotFound();
             return Ok(result);
         }

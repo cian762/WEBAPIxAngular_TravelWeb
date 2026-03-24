@@ -14,13 +14,11 @@ export class PersonalCommentService {
   http = inject(HttpClient);
   baseUrl: string = "https://localhost:7276/api/PersonalReview";
 
-  //TODO 到時要把 memberId 拿掉
-  getPersonalComments(activityId: number, memberId: string): Observable<reviewResponseDTO[]> {
-    const params = new HttpParams().set('memberId2', memberId);
-    return this.http.get<reviewResponseDTO[]>(`https://localhost:7276/api/PersonalReview/${activityId}`, { params })
+  getPersonalComments(activityId: number): Observable<reviewResponseDTO[]> {
+    return this.http.get<reviewResponseDTO[]>(`https://localhost:7276/api/PersonalReview/${activityId}`)
   }
 
-  postPersonComment(requset: postPersonalReviewRequest, memberId: string) {
+  postPersonComment(requset: postPersonalReviewRequest) {
     //將 request 包成 FormData 送進 API
     const formData = new FormData();
     formData.append('activityId', requset.activityId.toString());
@@ -31,9 +29,7 @@ export class PersonalCommentService {
     //多張圖片用同一個 key (即 reviewImages 這個key) 重複 append
     requset.reviewImages.forEach(file => { formData.append('reviewImages', file) });
 
-    //TODO 到時要把 memberId 拿掉
-    const params = new HttpParams().set('memberId2', memberId);
-    return this.http.post(this.baseUrl, formData, { params });
+    return this.http.post(this.baseUrl, formData);
   }
 
   patchPersonalComment(request: editPersonalReviewRequest) {
