@@ -59,6 +59,28 @@ export class ItineraryDetailComponent implements OnInit {
       items: dayItems
     }));
   }
+  /**上傳圖片 */
+  uploadImage(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // 呼叫剛剛寫的控制器端點
+    this.http.post<any>(`api/itinerary/${this.itineraryId}/upload-cover`, formData)
+      .subscribe({
+        next: (res) => {
+          // 成功後，前端變數 imageUrl 更新，HTML 會自動重新渲染背景圖
+          this.imageUrl = res.url;
+          alert('封面更新成功！');
+        },
+        error: (err) => {
+          console.error('上傳失敗', err);
+          alert('上傳失敗，請檢查網絡');
+        }
+      });
+  }
   /**載入API的數據 */
   loadData() {
     this.http.get<any>(`api/itinerary/${this.itineraryId}`).subscribe(res => {

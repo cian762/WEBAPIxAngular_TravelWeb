@@ -1,5 +1,5 @@
 <div class="header" [style.background-image]="'url(' + imageUrl + ')'">
-  <input type="file" class="upload" />
+  <input (click)="uploadImage($event)" type="file" class="upload">
 
   <div class="header-card">
     <h2>{{title}}</h2>
