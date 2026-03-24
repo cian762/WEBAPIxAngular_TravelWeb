@@ -2,79 +2,95 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using TravelWeb_API.DTO.MemberSystemDto;
 using TravelWeb_API.Models.MemberSystem;
-using TravelWebApi.DTOs;
+using TravelWebApi.DTOs; // 替換為您的 Models 命名空間
 
-namespace TravelWebApi.Controllers
+namespace TravelWeb_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
-    public class ComplaintsController : ControllerBase
+    [Authorize] // 🛡️ 必須登入才能投訴！
+    public class ComplaintController : ControllerBase
     {
         private readonly MemberSystemContext _context;
 
-        public ComplaintsController(MemberSystemContext context)
+        public ComplaintController(MemberSystemContext context)
         {
             _context = context;
         }
 
-
-        [HttpPost]
-        public async Task<IActionResult> CreateComplaint([FromBody] ComplaintCreateDto dto)
+        [HttpPost("submit")]
+        public async Task<IActionResult> SubmitComplaint([FromBody] ComplaintCreateDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var memberIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                                          ?? User.FindFirst("MemberId")?.Value;
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            if (string.IsNullOrEmpty(memberIdString))
-            {
-                return Unauthorized(new { message = "無法取得登入者身分，請重新登入" });
-            }
-            string memberId = memberIdString;
+            // 1. 從 Token 中抓出登入者的 MemberCode
+            string myMemberCode = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            DateTime now = DateTime.Now;
-            string datePrefix = now.ToString("yyyyMMdd");
+            // 透過 MemberCode 找出他的 MemberId (寫入 Member_Complaint 需要用到)
+            var myInfo = await _context.MemberInformations.FirstOrDefaultAsync(m => m.MemberCode == myMemberCode);
+            if (myInfo == null) return Unauthorized(new { message = "找不到會員資料" });
 
-            var lastComplaint = await _context.MemberComplaints
-                .Where(c => c.ComplaintId.StartsWith(datePrefix))
+            // 2. 自動產生 ComplaintId (格式：yyyyMMdd + 3碼流水號，如 20231027001)
+            string todayPrefix = DateTime.Now.ToString("yyyyMMdd");
+            var lastRecord = await _context.ComplaintRecords
+                .Where(c => c.ComplaintId.StartsWith(todayPrefix))
                 .OrderByDescending(c => c.ComplaintId)
                 .FirstOrDefaultAsync();
 
-            int nextSequence = 1;
-
-            if (lastComplaint != null)
+            int sequence = 1;
+            if (lastRecord != null && lastRecord.ComplaintId.Length >= 11)
             {
-                string lastSequenceStr = lastComplaint.ComplaintId.Substring(8);
-                if (int.TryParse(lastSequenceStr, out int lastSeq))
+                if (int.TryParse(lastRecord.ComplaintId.Substring(8, 3), out int lastSeq))
                 {
-                    nextSequence = lastSeq + 1;
+                    sequence = lastSeq + 1;
                 }
             }
+            string newComplaintId = $"{todayPrefix}{sequence:D3}";
 
-            string newComplaintId = $"{datePrefix}{nextSequence:D3}";
-
-            var newComplaint = new MemberComplaint
+            // 3. 準備資料
+            // 主表：Complaint_Record
+            var complaintRecord = new ComplaintRecord
             {
                 ComplaintId = newComplaintId,
-                MemberId = memberId,
-                Description = dto.Description,
-                ReplyEmail = dto.ReplyEmail,
-                CreatedAt = now
+                MemberCode = myMemberCode,
+                Status = "已檢視" // 預設狀態
             };
 
-            _context.MemberComplaints.Add(newComplaint);
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+            // 副表：Member_Complaint (明細)
+            var memberComplaint = new MemberComplaint
             {
-                success = true,
-                message = "投訴信已成功送出！",
-                complaintId = newComplaintId
-            });
+                ComplaintId = newComplaintId,
+                MemberId = myInfo.MemberId,
+                Description = request.Description,
+                ReplyEmail = request.ReplyEmail,
+                CreatedAt = DateTime.Now
+            };
+
+            // 4. 使用 Transaction 一口氣寫入兩張表
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.ComplaintRecords.Add(complaintRecord);
+                await _context.SaveChangesAsync();
+
+                _context.MemberComplaints.Add(memberComplaint);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return Ok(new
+                {
+                    message = "投訴信已成功送出",
+                    complaintId = newComplaintId
+                });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { message = "系統發生錯誤，投訴失敗", error = ex.Message });
+            }
         }
     }
 }
