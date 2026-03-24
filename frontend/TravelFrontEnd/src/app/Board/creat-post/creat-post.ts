@@ -31,6 +31,8 @@ export class CreatPost implements OnInit {
 
   tagList: any[] = [];
   removeTagList: any[] = [];
+  allTags: any[] = [];
+  filteredTags: any[] = [];
 
   coverUrl?: string;
   photoUrlList: string[] = [];
@@ -53,15 +55,13 @@ export class CreatPost implements OnInit {
         this.post = d;
         this.FormReset(d);
         console.log(this.post);
-        // 2. 通知 jQuery 插件：值變了，請更新 UI 顯示
-        // 必須放在 setTimeout 確保 Angular 已經把 value 填入原生 <select>
-        // setTimeout(() => {
-        //   $('#status-select').niceSelect('update');
-        // }, 0);
       });
       this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
         this.tagList = d;
-      })
+      });
+      this.Serve.getAllTags().subscribe((d: any) => {
+        this.allTags = d;
+      });
 
     });
   }
@@ -147,6 +147,7 @@ export class CreatPost implements OnInit {
 
     console.log(postUpdateDto);
     const isSuccess = await this.isUploadSuccess(this.id, postUpdateDto);
+
     if (isSuccess) {
       alert('成功');
     } else {
@@ -155,14 +156,18 @@ export class CreatPost implements OnInit {
   }
 
   removeTag(id: number) {
-    var tag = this.tagList.find(tag => tag.tagId === id)
+    var tag = this.tagList.find(tag => tag.tagId === id);
     this.tagList = this.tagList.filter(tag => tag.tagId !== id);
     this.removeTagList.push(tag);
   }
 
-  // addTag() {
-  //   this.tagList = this.tagList.filter(tag => tag.tagId !== id);
-  // }
+  addTag(id: number) {
+    console.log(id);
+    var tag = this.allTags.find(tag => tag.tagId === id);
+    this.removeTagList = this.removeTagList.filter(tag => tag.tagId !== id);
+    this.tagList.push(tag);
+    this.filteredTags = [];
+  }
 
 
   onFileSelected(event: any) {
@@ -181,12 +186,12 @@ export class CreatPost implements OnInit {
     try {
       // 轉換為 Promise 並等待 API 執行結果
       // 使用 map 將結果轉為 true，若成功執行到這一步代表成功
-      const result = await firstValueFrom(
-        this.Serve.putPostAPI(this.id, para).pipe()
-      );
-      return result;
-
-    } catch (error) {
+      await firstValueFrom(this.Serve.putPostAPI(this.id, para));
+      const TagIDList: number[] = this.tagList.map(t => t.tagId);
+      await firstValueFrom(this.Serve.postTagsByArticleAPI(this.id, TagIDList));
+      return true;
+    }
+    catch (error) {
       return false;
     }
   }
@@ -259,6 +264,28 @@ export class CreatPost implements OnInit {
 
   selectCover() {
     this.coverIndex = this.selectedIndex;
+  }
+  onFocus(event: any) {
+    event.target.closest('.search-box').classList.add('focused');
+    if (event.target.value) {
+      this.onSeach(event);
+    }
+  }
+
+  onSeach(event: any) {
+    const keyword = event.target.value;
+    this.filteredTags = this.allTags.filter(tag =>
+      tag.tagName.includes(keyword)
+    );
+  }
+
+
+
+  onBlur(event: any) {
+    setTimeout(() => {
+      event.target.closest('.search-box').classList.remove('focused');
+      this.filteredTags = [];
+    }, 200);
   }
 
 

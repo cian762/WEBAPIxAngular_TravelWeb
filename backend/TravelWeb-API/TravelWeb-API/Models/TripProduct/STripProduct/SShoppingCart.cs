@@ -211,6 +211,43 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 await _context.SaveChangesAsync();
             }
         }
+        //處理「登入後將遊客本地（LocalStorage）的大量資料同步到資料庫」處理遊客搬遷到會員
+        public async Task SyncCartAsync(List<AddToCartDTO> dtos, string memberId)
+        {
+            // 1. 一次抓出該會員目前資料庫裡所有的購物車項目
+            var existingCart = await _context.ShoppingCarts
+                .Where(c => c.MemberId == memberId)
+                .ToListAsync();
+
+            foreach (var dto in dtos)
+            {
+                // 2. 在記憶體中比對是否已存在
+                var existingItem = existingCart
+                    .FirstOrDefault(c => c.ProductCode == dto.ProductCode && c.TicketCategoryId == dto.TicketCategoryId);
+
+                if (existingItem != null)
+                {
+                    // 如果已存在，累加數量（或是你可以改成覆蓋）
+                    existingItem.Quantity += dto.Quantity;
+                }
+                else
+                {
+                    // 如果不存在，新增一筆
+                    _context.ShoppingCarts.Add(new ShoppingCart
+                    {
+                        MemberId = memberId,
+                        ProductCode = dto.ProductCode,
+                        Quantity = dto.Quantity,
+                        TicketCategoryId = dto.TicketCategoryId,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+            }
+
+            // 3. 最終只呼叫一次資料庫存檔，效率極高！
+            await _context.SaveChangesAsync();
+        }
+
         //修改購物車內容
         public async Task UpdateQuantityAsync(UpdateCartQtyDTO dto,string memberId)
         {

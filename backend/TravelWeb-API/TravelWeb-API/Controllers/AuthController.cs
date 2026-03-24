@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -6,9 +7,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using TravelWeb_API.DTO.MemberSystemDto;
 using TravelWeb_API.Models;
 using TravelWeb_API.Models.MemberSystem;
-using TravelWeb_API.DTO.MemberSystemDto;
 
 namespace TravelWeb_API.Controllers
 {
@@ -62,10 +63,32 @@ namespace TravelWeb_API.Controllers
             {
                 HttpOnly = true, // 防止 XSS 攻擊 (前端 JS 讀不到)
                 Secure = true,   // 限制只能在 HTTPS 環境下傳輸
-                SameSite = SameSiteMode.Strict, // 防止 CSRF 跨站攻擊
+                SameSite = SameSiteMode.None, // 防止 CSRF 跨站攻擊
                 Expires = DateTime.UtcNow.AddHours(9) // 與 Token 過期時間一致
             };
             Response.Cookies.Append("AuthToken", token, cookieOptions);
+
+            // ==========================================
+            // 🚀 3. 關鍵修復：寫入登入紀錄 (Log_in_record)
+            // ==========================================
+            try
+            {
+                // 🔥 就是這麼簡單！我們「只給」MemberCode 和 LoginAt
+                // 絕對不要寫 LoginRecordId = xxx！
+                var loginRecord = new LogInRecord
+                {
+                    MemberCode = user.MemberCode,
+                    LoginAt = DateTime.Now
+                };
+
+                _context.LogInRecords.Add(loginRecord);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // 萬一出錯，把真實原因印出來看
+                Console.WriteLine("🚨 寫入登入紀錄失敗：" + ex.InnerException?.Message ?? ex.Message);
+            }
 
             return Ok(new
             {

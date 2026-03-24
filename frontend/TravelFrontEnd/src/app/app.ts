@@ -10,10 +10,11 @@ import { PostDetail } from "./Board/post-detail/post-detail";
 import { Order } from "./trip/component/order/order";
 import { Product } from "./trip/component/product/product";
 import { TripProductDetail } from "./trip/component/trip-product-detail/trip-product-detail";
+import { LoginComponent } from "./Member/login/login.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TestUse, RouterLink, BlogHome, Header, Footer, Banner, PostDetail, Order, Product, TripProductDetail],
+  imports: [RouterOutlet, TestUse, RouterLink, BlogHome, Header, Footer, Banner, PostDetail, Order, Product, TripProductDetail, LoginComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -8,6 +8,93 @@
   margin: 0 auto;
 }
 
+.widget-wrap {
+  border: 0px;
+  padding: 0px 0px;
+}
+
+.my-title {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+/* ===========以下為標籤搜尋框之樣式=========== */
+.my-dropdown-menu {
+  background-color: #fff;
+  width: 70%;
+  margin: 5px auto;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: #4cd3e3;
+  border-radius: 999px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  /* transition: all 0.2s ease; */
+  margin: 5px auto;
+  width: 80%;
+}
+
+.search-box.focused {
+  background-color: #fff;
+  border: 1px solid #4cd3e3;
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent !important;
+  font-size: 14px;
+  color: #fff;
+}
+
+.search-box input::placeholder {
+  color: #fff;
+}
+
+.search-box.focused input {
+  color: #4cd3e3;
+}
+
+.search-box.focused input::placeholder {
+  color: #4cd3e3;
+}
+
+.search-box button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.search-box.focused button {
+  color: #4cd3e3;
+}
+
+.search-box input:-webkit-autofill,
+.search-box input:-webkit-autofill:hover,
+.search-box input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+  -webkit-text-fill-color: #4cd3e3 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.search-box:not(.focused) input:-webkit-autofill,
+.search-box:not(.focused) input:-webkit-autofill:hover,
+.search-box:not(.focused) input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #4cd3e3 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ===========以上為標籤搜尋框之樣式=========== */
+
 
 /* ===========以下為圖片輪播之樣式=========== */
 /* 主圖樣式 */
