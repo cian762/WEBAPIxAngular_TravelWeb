@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using TravelWeb_API.Models.Itinerary.DTO;
 using TravelWeb_API.Models.Itinerary.Service;
 
@@ -6,14 +8,17 @@ using TravelWeb_API.Models.Itinerary.Service;
 
 namespace TravelWeb_API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ItineraryController : ControllerBase
     {
         private readonly IItineraryservice _itineraryService;
+        private readonly string _memberId;
         public ItineraryController(IItineraryservice itineraryService)
         {
             _itineraryService = itineraryService;
+            _memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
@@ -55,8 +60,8 @@ namespace TravelWeb_API.Controllers
 
             try
             {
-                // 3. 呼叫 Service 邏輯
-                int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto);
+                // 3. 呼叫 Service
+                int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto, _memberId);
 
                 // 4. 回傳 201 Created，並在 Header 附上查詢該行程的 URL
 
@@ -103,7 +108,12 @@ namespace TravelWeb_API.Controllers
                 return StatusCode(500, $"儲存快照時發生伺服器錯誤: {ex.Message}");
             }
         }
+        [HttpPost("{Id}/Savephoto")]
+        public async Task<IActionResult> SavePhoto([FromForm] IFormFile file, int Id)
+        {
 
+            return Ok();
+        }
 
         // GET 基於版本找該版本的所有ITEM
         [HttpGet("{VerId}/item")]

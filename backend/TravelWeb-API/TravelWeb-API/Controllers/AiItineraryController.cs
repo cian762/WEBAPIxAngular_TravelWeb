@@ -51,19 +51,6 @@ namespace TravelWeb_API.Controllers
 
             return newAttr.AttractionId;
         }
-        // GET: api/<AiItineraryController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<AiItineraryController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
         // POST api/<AiItineraryController>
         [HttpPost("generate-ai")]
@@ -112,16 +99,6 @@ namespace TravelWeb_API.Controllers
             }
         }
 
-        // PUT api/<AiItineraryController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
 
-        // DELETE api/<AiItineraryController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

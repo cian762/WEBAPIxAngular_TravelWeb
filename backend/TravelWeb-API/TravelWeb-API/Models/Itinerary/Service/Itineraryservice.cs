@@ -16,7 +16,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
 
         }
         /*建立主表包含物件*/
-        public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto)
+        public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto, string memberid)
         {
             // 啟動資料庫交易
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -25,7 +25,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 // 1. 建立行程主表
                 var newItinerary = new DBModel.Itinerary
                 {
-                    MemberId = dto.MemberId,
+                    MemberId = memberid,
                     ItineraryName = dto.ItineraryName,
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,
@@ -257,6 +257,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 })
                 .ToListAsync();
         }
+
         public async Task<VersionDto> GetItemByVersionAsync(int versionId)
         {
 #pragma warning disable CS8603 // 可能有 Null 參考傳回。
@@ -285,6 +286,15 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 }).ToList()
         }).FirstOrDefaultAsync();
 #pragma warning restore CS8603 // 可能有 Null 參考傳回。
+        }
+        public async Task<string> SaveImagebyid(IFormFile image, int Id)
+        {
+            string? imageUrl = null;
+            if (image != null)
+            {
+                imageUrl = await _imageUploadService.UploadImageAsync(image, "itinerary_covers");
+            }
+            return imageUrl;
         }
     }
 }
