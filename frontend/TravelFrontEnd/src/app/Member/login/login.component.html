@@ -1,0 +1,60 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+      <div class="card shadow-lg border-0 rounded-4 mt-5">
+        <div class="card-header bg-primary text-white text-center py-4 border-0 rounded-top-4">
+          <h3 class="mb-0 fw-bold"><i class="bi bi-box-arrow-in-right"></i> 會員登入</h3>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <!-- 錯誤訊息提示區塊 -->
+          <div *ngIf="errorMessage" class="alert alert-danger rounded-3 fw-bold">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+          </div>
+
+          <!-- 使用 ngSubmit 綁定表單送出 -->
+          <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+
+            <!-- 帳號輸入框 -->
+            <div class="mb-4">
+              <label class="form-label fw-bold text-secondary">帳號 (Email 或 代碼)</label>
+              <input type="text" class="form-control form-control-lg shadow-sm" name="account"
+                [(ngModel)]="loginData.account" placeholder="請輸入帳號" required />
+            </div>
+
+            <!-- 密碼輸入框 -->
+            <div class="mb-5">
+              <label class="form-label fw-bold text-secondary">密碼</label>
+              <input type="password" class="form-control form-control-lg shadow-sm" name="password"
+                [(ngModel)]="loginData.password" placeholder="請輸入密碼" required />
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 🔥 這裡加入分隔線與註冊按鈕 -->
+            <!-- ========================================== -->
+            <div class="text-center mt-4 pt-3 border-top">
+              <span class="text-muted d-block mb-3">還沒有 Travelista 帳號嗎？</span>
+
+              <!-- 點擊這個按鈕會透過路由跳轉到 /register -->
+              <a routerLink="/register" class="btn btn-outline-secondary w-100 rounded-pill fw-bold"
+                style="color: #5b73e8; border-color: #5b73e8;">
+                <i class="bi bi-person-plus-fill me-1"></i> 註冊新會員
+              </a>
+            </div>
+
+            <!-- 登入按鈕 (加入 Loading 狀態防連點) -->
+            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm fw-bold"
+              [disabled]="isLoading || loginForm.invalid">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isLoading ? '登入中...' : '立即登入' }}
+            </button>
+
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

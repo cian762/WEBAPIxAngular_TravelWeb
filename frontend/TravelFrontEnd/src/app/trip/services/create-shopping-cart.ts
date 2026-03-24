@@ -52,37 +52,17 @@ export class CreateShoppingCart {
     return this.http.delete(`${this.apiUrl}/clear/${memberId}`);
   }
   // 把遊客的東西搬到會員下的方法
+  // 🏆 關鍵：同步本地購物車到資料庫
+  syncLocalCartToDb() {
+    const localData = localStorage.getItem('GuestCart');
+    if (!localData) return;
 
-  async syncLocalCartToDB(memberId: string): Promise<void> {
-    const localCart = localStorage.getItem('cart');
-    if (!localCart) return;
+    const items = JSON.parse(localData);
+    if (items.length === 0) return;
 
-    try {
-      const items: any[] = JSON.parse(localCart);
-      if (items.length === 0) return;
-
-      console.log(`正在同步 ${items.length} 項商品至會員 ${memberId}...`);
-
-      // 使用 for...of 確保一筆一筆同步完成
-      for (const item of items) {
-        const dto = {
-          memberId: memberId,
-          productCode: item.productCode,
-          quantity: item.quantity,
-          ticketCategoryId: item.ticketCategoryId
-        };
-
-        // 使用 lastValueFrom 代替 toPromise
-        await lastValueFrom(this.addToCart(dto));
-      }
-
-      // 全部成功後才刪除本地暫存
-      localStorage.removeItem('cart');
-      console.log('同步成功，已清空 LocalStorage');
-    } catch (error) {
-      console.error('同步購物車時發生錯誤:', error);
-      // 注意：這裡可以選擇不刪除 localStorage，讓使用者下次登入再試一次
-    }
+    // 這裡呼叫後端新增的 [HttpPost("sync")]
+    // 記得一定要加 { withCredentials: true }，後端才能從 Cookie 認出你是誰
+    return this.http.post(`${this.apiUrl}/sync`, items, { withCredentials: true });
   }
   // * /將商品存入 LocalStorage(未登入時使用)
 

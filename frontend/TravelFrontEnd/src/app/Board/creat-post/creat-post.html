@@ -54,15 +54,50 @@
 
 
         <div class="mb-3">
-          <label for="exampleFormControlInput1" class="form-label">文章標題</label>
+          <label for="exampleFormControlInput1" class="form-label my-title">文章標題</label>
           <input type="email" class="form-control" formControlName="title" placeholder="請輸入標題">
         </div>
         <div class="mb-3">
-          <label for="exampleFormControlTextarea1" class="form-label">文章內文</label>
+          <label for="exampleFormControlTextarea1" class="form-label my-title">文章內文</label>
           <textarea class="form-control" formControlName="content" placeholder="請輸入內文" rows="3"></textarea>
         </div>
+        <div class="mb-3">
+          <label for="exampleFormControlTextarea1" class="form-label my-title">標籤</label>
+          <div class="row">
+            <div class="col-6 border-end border-2">
+              <label for="exampleFormControlTextarea1" class="form-label">已加入:</label>
+              @for(tag of tagList ; track tag.tagId){
+              <a (click)="removeTag(tag.tagId)" class="genric-btn success small circle m-1 "><i
+                  [class]="tag.icon"></i>{{tag.tagName}} <i class="ri-close-large-line"></i></a>
+              }
+            </div>
+            <div class="col-6">
+              <div class="search-form" (submit)="$event.preventDefault()">
+                <div class="search-box">
+                  <input placeholder="搜尋標籤" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event);"
+                    (input)="onSeach($event)">
+                  <button type="button"><i class="fa fa-search"></i></button>
+                </div>
+                <ul class="my-dropdown-menu">
+                  @for(tag of filteredTags; track tag.tagId) {
+                  <li class="dropdown-item" (click)="addTag(tag.tagId); $event.stopPropagation()">{{ tag.tagName }} <i
+                      class="ri-add-large-line"></i>
+                  </li>
+                  }
+                </ul>
+              </div>
+
+              <p>最近加入:</p>
+              @for(tag of removeTagList ; track tag.tagId){
+              <a (click)="addTag(tag.tagId)" class="genric-btn success-border small circle mx-1">{{tag.tagName}} <i
+                  class="ri-add-large-line"></i></a>
+              }
+            </div>
+          </div>
+        </div>
+
         <div class="single-element-widget">
-          <label for="exampleFormControlTextarea1" class="form-label">文章權限:</label>
+          <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
           <div class="default-select">
             <select formControlName="status" id="status-select">
               <option [value]="0"><i class="bi bi-lock-fill"></i>私人</option>
@@ -73,33 +108,7 @@
         </div>
 
       </form>
-      <div class="mb-3">
-        <label for="exampleFormControlTextarea1" class="form-label">標籤</label>
-        <div class="row">
-          <div class="col-6 border-end border-2">
-            <p>已加入:</p>
-            @for(tag of tagList ; track tag.tagId){
-            <a (click)="removeTag(tag.tagId)" class="genric-btn success small circle mx-1">{{tag.tagName}} x</a>
-            }
-          </div>
-          <div class="col-6">
-            <div class="widget-wrap">
-              <div class="single-sidebar-widget search-widget">
-                <form class="search-form">
-                  <input placeholder="Search Posts" name="search" type="text" onfocus="this.placeholder = ''"
-                    onblur="this.placeholder = 'Search Posts'">
-                  <button type="submit"><i class="fa fa-search"></i></button>
-                </form>
-              </div>
-            </div>
 
-            <p>最近加入:</p>
-            @for(tag of removeTagList ; track tag.tagId){
-            <a class="genric-btn success-border small circle mx-1">{{tag.tagName}} +</a>
-            }
-          </div>
-        </div>
-      </div>
     </div>
 
 

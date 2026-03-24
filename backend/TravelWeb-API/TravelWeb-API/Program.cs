@@ -21,6 +21,11 @@ using TravelWeb_API.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ==========================================
+// 🚀 關鍵修復：替換為正確的 CORS 設定
+// ==========================================
+// 將原本的 myAllowSpecificOrigins 設定刪除，改用這個：
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -28,12 +33,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
+    
 });
-
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -59,7 +65,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
 
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey!)),
 
             ClockSkew = TimeSpan.Zero
         };
@@ -122,10 +128,7 @@ builder.Services.AddSwaggerGen(
         x.SwaggerDoc("Board", new OpenApiInfo
         {
             Title = "Board"
-        });
-        //x.SwaggerDoc("Attraction", new OpenApiInfo 
-        //{ Title = "Attraction"
-        //}); // ← 加這行
+        });        
 
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
@@ -225,7 +228,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(
         x =>
     {
-        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
+        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");       
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
 
     }
@@ -236,6 +239,9 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+// 🔥 關鍵順序：必須是 Routing -> Cors -> Auth -> MapControllers
+app.UseRouting();
 
 app.UseCors(myAllowSpecificOrigins);
 

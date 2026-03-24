@@ -25,6 +25,26 @@ body {
   width: 80%;
 }
 
+.days-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.side-actions {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+.itinerary-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
 .container {
   margin-top: 80px;
   padding: 20px;

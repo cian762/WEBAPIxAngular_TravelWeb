@@ -11,5 +11,6 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public Task<bool> SoftDeleteItineraryAsync(int itineraryId);
         public Task<List<ItineraryVersionHistoryDto>> GetVersionHistoryAsync(int itineraryId);
         public Task<VersionDto> GetItemByVersionAsync(int versionId);
+        public Task<string> SaveImagebyid(IFormFile image, int Id);
     }
 }
