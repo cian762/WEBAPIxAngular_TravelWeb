@@ -12,28 +12,28 @@ namespace TravelWeb_API.Controllers.Activity
     //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class ActivityReviewController : ControllerBase
+    public class PersonalReviewController : ControllerBase
     {
         //private readonly string _memberId;
         private readonly ActivityReviewService _activityReviewService;
         private readonly CloudinaryPhotoService _cloudinaryPhotoService;
 
-        public ActivityReviewController(ActivityReviewService activityReviewService, CloudinaryPhotoService cloudinaryPhotoService)
+        public PersonalReviewController(ActivityReviewService activityReviewService, CloudinaryPhotoService cloudinaryPhotoService)
         {
             //_memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
             _activityReviewService = activityReviewService;
             _cloudinaryPhotoService = cloudinaryPhotoService;
         }
 
-        [HttpGet]
-        public async  Task<ActionResult> GetPersonalReviews(int activityId,string memberId2)
+        [HttpGet("{activityId}")]
+        public async  Task<ActionResult> GetPersonalReviews([FromRoute]int activityId,[FromQuery]string memberId2)
         {
             var result = await _activityReviewService.GetPersonalReviews(activityId,memberId2);
             return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult> PostPersonalReview(ReviewRequestDTO request, string memberId2)
+        public async Task<ActionResult> PostPersonalReview([FromForm] ReviewRequestDTO request, string memberId2)
         {
             var imageDetails = new List<ImageUploadResult>();
 
@@ -44,11 +44,11 @@ namespace TravelWeb_API.Controllers.Activity
             
             var result = await _activityReviewService.PostPersonalReview(request,memberId2,imageDetails);
             
-            return Ok(result);
+            return Ok(new { message = "新增成功", data = result});
         }
 
         [HttpPatch]
-        public async Task<ActionResult> PatchPersonalReview(ReviewEditRequestDTO request)
+        public async Task<ActionResult> PatchPersonalReview([FromForm]ReviewEditRequestDTO request)
         {
             var imageDetails = new List<ImageUploadResult>();
 
@@ -66,15 +66,15 @@ namespace TravelWeb_API.Controllers.Activity
             }
 
             var result = await _activityReviewService.PatchPersonalReview(request,imageDetails);
-            return Ok(result);
+            return Ok(new { message = "修改成功", data = result });
         }
 
 
         [HttpDelete]
-        public async Task<ActionResult> DeletePersonalReview(int reviewId) 
+        public async Task<ActionResult> DeletePersonalReview([FromQuery]int reviewId) 
         {
             var result = await _activityReviewService.DeletePersonalReview(reviewId);
-            return Ok(result);
+            return Ok(new { message = "刪除成功", data = result });
         }
     }
 }

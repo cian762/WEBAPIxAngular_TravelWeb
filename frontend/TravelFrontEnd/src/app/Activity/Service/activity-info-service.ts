@@ -15,7 +15,6 @@ export class ActivityInfoService {
 
   getActivityDetails(activityId: number) {
 
-
     return this.http.get<ActivityInfoInterface>("https://localhost:7276/api/ActivityInfo/" + activityId);
   }
 

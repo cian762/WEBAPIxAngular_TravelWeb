@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
+import { CreateShoppingCart } from '../../../trip/services/create-shopping-cart';
 
 @Component({
   selector: 'app-ticket-plan-drawer',
@@ -12,6 +13,9 @@ export class TicketPlanDrawer {
   @Input() plan: ticketInfoInterface | null = null;
 
   @Output() closeDrawer = new EventEmitter<void>();
+
+  cartService = inject(CreateShoppingCart);
+
 
   quantity: number = 1;
 
@@ -29,4 +33,20 @@ export class TicketPlanDrawer {
       this.quantity--;
     }
   }
+
+  addToCart() {
+    const purchase = {
+      memberId: "1",
+      productCode: this.plan?.productCode,
+      quantity: this.quantity,
+      ticketCategoryId: this.plan?.ticketCategoryId,
+    };
+    console.log(purchase);
+    this.cartService.addToCart(purchase).subscribe((data) => {
+      console.log(data);
+    });
+    this.close();
+  }
+
+
 }

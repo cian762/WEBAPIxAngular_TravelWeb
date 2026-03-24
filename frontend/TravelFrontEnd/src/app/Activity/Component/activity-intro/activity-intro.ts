@@ -1,3 +1,4 @@
+import { reviewResponseDTO } from './../../Interface/reviewResonseDTO';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivityInfoService } from '../../Service/activity-info-service';
@@ -14,10 +15,13 @@ import { TicketPlanDrawer } from '../ticket-plan-drawer/ticket-plan-drawer';
 import { TicketInfoService } from '../../Service/ticket-info-service';
 import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
 import { forkJoin, Subscription } from 'rxjs';
+import { UserCommentForm } from "../user-comment-form/user-comment-form";
+import { PersonalCommentService } from '../../Service/personal-comment-service';
+import { EditCommentForm } from "../edit-comment-form/edit-comment-form";
 
 @Component({
   selector: 'app-activity-intro',
-  imports: [FormsModule, NgIf, NgFor, RouterLink, TicketPlanDrawer],
+  imports: [FormsModule, NgIf, NgFor, RouterLink, TicketPlanDrawer, UserCommentForm, EditCommentForm],
   templateUrl: './activity-intro.html',
   styleUrl: './activity-intro.css',
 })
@@ -25,6 +29,7 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   activityIdFromRoute: number = 0;
   isMapViewReady = false;
+
   private sub?: Subscription;
 
   activityInfo: ActivityInfoInterface = {
@@ -62,6 +67,8 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   suggestionCollection: CardInfoModel[] = [];
 
+  personalCommentCollection: reviewResponseDTO[] = [];
+
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
   map!: google.maps.Map;
 
@@ -69,6 +76,7 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
   private routeService = inject(RouteService);
   private ticketInfoService = inject(TicketInfoService);
+  private personalCommentService = inject(PersonalCommentService);
 
 
   ngOnDestroy(): void {
@@ -102,16 +110,19 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
         this.routePolyline.setMap(null);
       }
 
+
       forkJoin({
         activityInfo: this.infoService.getActivityDetails(id),
         reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
-        productInfoCollection: this.infoService.getRelatedTickets(id)
+        productInfoCollection: this.infoService.getRelatedTickets(id),
+        //TODO 這邊到時要把 memberId = 2 拿掉
+        personalComments: this.personalCommentService.getPersonalComments(id, "2")
       }).subscribe({
-        next: ({ activityInfo, reviewsPackage, productInfoCollection }) => {
+        next: ({ activityInfo, reviewsPackage, productInfoCollection, personalComments }) => {
           this.activityInfo = activityInfo;
           this.reviewsPackage = reviewsPackage;
           this.productInfoCollection = productInfoCollection;
-
+          this.personalCommentCollection = personalComments;
           this.tryInitMap();
           this.getRelatedActivitySuggestion();
         },
@@ -136,6 +147,12 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   getRelatedTickets(activityId: number) {
     return this.infoService.getRelatedTickets(activityId);
+  }
+
+
+  getPersonalComments(activityId: number, memberId: string) {
+    //TODO 這邊到時要把 memberId 拿掉
+    return this.personalCommentService.getPersonalComments(activityId, memberId);
   }
 
   FindBookMark(bookmark: string) {
@@ -370,6 +387,67 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
         });
     });
   }
+
+  isModalOpen = false;
+  toggleCommentForm() {
+    this.isModalOpen = !this.isModalOpen;
+    console.log('按下後', this.isModalOpen);
+  }
+
+  openCommentForm(): void {
+    this.isModalOpen = true;
+  }
+
+  closeCommentForm(): void {
+    console.log('父元件 closeCommentForm()被觸發');
+    this.isModalOpen = false;
+  }
+
+  refreshPersonalComment(): void {
+    console.log('父元件 refreshPersonalComment()被觸發');
+    this.personalCommentService.getPersonalComments(this.activityIdFromRoute, "2")
+      .subscribe((data) => {
+        console.log('評論重新載入成功');
+        this.personalCommentCollection = data;
+      });
+  }
+
+  deletePersonalComment(activityId: number): void {
+    this.personalCommentService.deletePresonalComment(activityId)
+      .subscribe({
+        next: (res) => {
+          console.log('刪除成功', res);
+          this.refreshPersonalComment();
+        },
+        error: (err) => {
+          console.log('刪除失敗', err);
+        }
+      });
+  }
+
+  openEditForm = false;
+
+  isEditFormOpen() {
+    console.log('壓下 isEditFormOpen');
+    this.openEditForm = !this.openEditForm;
+    this.refreshPersonalComment();
+  }
+
+  selectedPersonalReview: reviewResponseDTO = {
+    title: "",
+    reviewId: 0,
+    memberId: '',
+    comment: '',
+    rating: 0,
+    createDate: new Date(),
+    reviewImages: []
+  };
+
+  sendTargetToEditForm(target: reviewResponseDTO) {
+    this.isEditFormOpen();
+    this.selectedPersonalReview = target;
+  }
+
 }
 
 export class SuggestionInfo {
