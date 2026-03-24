@@ -123,6 +123,9 @@ builder.Services.AddSwaggerGen(
         {
             Title = "Board"
         });
+        //x.SwaggerDoc("Attraction", new OpenApiInfo 
+        //{ Title = "Attraction"
+        //}); // ← 加這行
 
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
