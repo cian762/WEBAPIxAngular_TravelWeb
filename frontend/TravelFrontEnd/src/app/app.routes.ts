@@ -1,4 +1,3 @@
-import { InfoCard } from './Activity/Component/info-card/info-card';
 import { Routes } from '@angular/router';
 import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 

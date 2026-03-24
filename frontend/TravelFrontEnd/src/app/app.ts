@@ -14,7 +14,7 @@ import { LoginComponent } from "./Member/login/login.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TestUse, RouterLink, BlogHome, Header, Footer, Banner, PostDetail, Order, Product, TripProductDetail],
+  imports: [RouterOutlet, Header, Footer, Banner],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -22,6 +22,7 @@ export class App implements OnInit {
   ngOnInit(): void {
     // this.initializeGuestId();
   }
+
   protected readonly title = signal('TravelFrontEnd');
   initializeGuestId() {
     // 1. 檢查是否已經有登入的會員 (假設你存為 memberId)

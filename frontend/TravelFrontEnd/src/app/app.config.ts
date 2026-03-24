@@ -18,12 +18,12 @@ export const appConfig: ApplicationConfig = {
       scrollPositionRestoration: 'top',
       anchorScrolling: 'disabled'
     })),
-     provideHttpClient(
+    provideHttpClient(
       withFetch(),
       withInterceptors([authInterceptor])
-    ) ,
+    ),
     provideZoneChangeDetection(),
     provideHttpClient()
-    // provideHttpClient(withFetch()),
+
   ]
 };
