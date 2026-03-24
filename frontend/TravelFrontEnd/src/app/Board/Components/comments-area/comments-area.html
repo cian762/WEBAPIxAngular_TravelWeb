@@ -47,22 +47,18 @@
 
 
   <div class="comment-form">
-    <h4>請留言</h4>
+    <h4 style="margin-bottom: 10px;">請留言</h4>
     <div class="d-flex justify-content-start">
       <p>{{parentComment}}</p>
     </div>
     <form>
       <div class="form-group form-inline">
-        <div class="form-group col-lg-6 col-md-12 name">
-          <input type="text" class="form-control" id="name" placeholder="Enter Name" onfocus="this.placeholder = ''"
-            onblur="this.placeholder = 'Enter Name'" name="UserId" [(ngModel)]="UserId">
-        </div>
         <div class="form-group">
           <textarea class="form-control mb-10" rows="5" name="message" placeholder="Messege"
             onfocus="this.placeholder = ''" onblur="this.placeholder = 'Messege'" required=""
             [(ngModel)]="contents">{{ contents }}</textarea>
         </div>
-        <a (click)="postComment(UserId,contents)" class="primary-btn text-uppercase">送出</a>
+        <a (click)="postComment(contents)" class="primary-btn text-uppercase">送出</a>
       </div>
     </form>
   </div>

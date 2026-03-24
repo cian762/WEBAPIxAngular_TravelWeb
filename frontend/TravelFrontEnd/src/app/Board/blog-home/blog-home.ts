@@ -67,7 +67,7 @@ export class BlogHome implements OnInit {
   }
 
   goToCreate(): void {
-    this.Serve.postPostAPI("Turtle_05").subscribe(p => {
+    this.Serve.postPostAPI().subscribe(p => {
       this.router.navigate(['Board', 'creat', p]);
     });
   }

@@ -81,8 +81,8 @@ namespace TravelWeb_API.Services
                                     .Select(i => i.ImageUrl)
                                     .FirstOrDefault(),
                     ViewCount = a.ViewCount,
-                    CommentCount = a.Reviews.Count(),
-                    AverageRating = (float)Math.Round((a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0),1),
+                    CommentCount = a.Reviews.Where(r=>r.IsSoftDeleted==false).Count(),
+                    AverageRating = (float)Math.Round((a.Reviews.Any() ? a.Reviews.Where(r=>r.IsSoftDeleted==false).Average(r => r.Rating) : 0),1),
                     ReferencePrice = a.ActivityTicketDetails
                     .Where(d => d.ProductCodeNavigation.TicketCategoryId == 2)
                     .Select(d => d.ProductCodeNavigation.CurrentPrice)
