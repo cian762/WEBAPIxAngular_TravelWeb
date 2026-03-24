@@ -1,0 +1,143 @@
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+      <div class="card shadow-lg border-0 rounded-4 mt-4">
+        <div class="card-header bg-success text-white text-center py-4 border-0 rounded-top-4">
+          <h3 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill"></i> 會員註冊</h3>
+          <p class="mb-0 mt-1 opacity-75 small">加入我們，開啟您的專屬旅程！</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+          <!-- 系統錯誤訊息 -->
+          <div *ngIf="errorMessage" class="alert alert-danger rounded-3 fw-bold">
+            <i class="bi bi-exclamation-octagon-fill me-2"></i>{{ errorMessage }}
+          </div>
+
+          <!-- 註冊表單 (綁定 registerForm) -->
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+            <h5 class="text-secondary fw-bold border-bottom pb-2 mb-4">帳號資訊</h5>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label fw-bold text-secondary">Email 信箱 <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" formControlName="email" placeholder="example@email.com"
+                       [ngClass]="{ 'is-invalid': f['email'].touched && f['email'].invalid }">
+              </div>
+              <div *ngIf="f['email'].touched && f['email'].errors?.['required']" class="text-danger small mt-1">請輸入 Email</div>
+              <div *ngIf="f['email'].touched && f['email'].errors?.['email']" class="text-danger small mt-1">請輸入有效的 Email 格式</div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <!-- 密碼 -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary">設定密碼 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                  <input type="password" class="form-control" formControlName="password" placeholder="英數混合，至少8碼"
+                         [ngClass]="{ 'is-invalid': f['password'].touched && f['password'].invalid }">
+                </div>
+                <div *ngIf="f['password'].touched && f['password'].errors?.['required']" class="text-danger small mt-1">密碼為必填</div>
+                <div *ngIf="f['password'].touched && f['password'].errors?.['minlength']" class="text-danger small mt-1">密碼至少需 8 碼</div>
+                <div *ngIf="f['password'].touched && f['password'].errors?.['pattern']" class="text-danger small mt-1">密碼必須為英數混合</div>
+              </div>
+
+              <!-- 確認密碼 -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary">確認密碼 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-lock-fill"></i></span>
+                  <input type="password" class="form-control" formControlName="confirmPassword" placeholder="再次輸入密碼"
+                         [ngClass]="{ 'is-invalid': f['confirmPassword'].touched && f['confirmPassword'].invalid }">
+                </div>
+                <div *ngIf="f['confirmPassword'].touched && f['confirmPassword'].errors?.['passwordMismatch']" class="text-danger small mt-1">兩次密碼不一致！</div>
+              </div>
+            </div>
+
+            <h5 class="text-secondary fw-bold border-bottom pb-2 mb-4 mt-5">個人基本資料</h5>
+
+            <div class="row g-3 mb-3">
+              <!-- 姓名 -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary">真實姓名 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                  <input type="text" class="form-control" formControlName="name" placeholder="請輸入姓名"
+                         [ngClass]="{ 'is-invalid': f['name'].touched && f['name'].invalid }">
+                </div>
+                <div *ngIf="f['name'].touched && f['name'].errors?.['required']" class="text-danger small mt-1">姓名為必填</div>
+              </div>
+
+              <!-- 電話 -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary">聯絡電話 <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                  <input type="text" class="form-control" formControlName="phone" placeholder="09xx-xxxxxx"
+                         [ngClass]="{ 'is-invalid': f['phone'].touched && f['phone'].invalid }">
+                </div>
+                <div *ngIf="f['phone'].touched && f['phone'].errors?.['required']" class="text-danger small mt-1">電話為必填</div>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <!-- 性別 -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary">性別</label>
+                <select class="form-select" formControlName="gender">
+                  <option value="">-- 未設定 --</option>
+                  <option value="1">男</option>
+                  <option value="2">女</option>
+                </select>
+              </div>
+
+              <!-- 生日 -->
+              <div class="col-md-6">
+                <label class="form-label fw-bold text-secondary">出生年月日</label>
+                <input type="date" class="form-control" formControlName="birthDate">
+              </div>
+            </div>
+
+            <!-- 檔案上傳與預覽區塊 -->
+            <div class="mb-5 p-3 bg-light rounded-3 border">
+              <label class="form-label fw-bold text-secondary">上傳個人頭像 (非必填)</label>
+              <div class="d-flex align-items-center gap-4">
+
+                <!-- 預覽圖 -->
+                <img [src]="imagePreviewUrl || 'assets/default-avatar.png'"
+                     class="rounded-circle shadow-sm bg-white"
+                     style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #dee2e6;" alt="Avatar Preview" />
+
+                <!-- 選擇檔案按鈕 -->
+                <div class="flex-grow-1">
+                  <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)">
+                  <small class="text-muted mt-1 d-block">建議上傳正方形圖片，支援 JPG, PNG。</small>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- 按鈕區 -->
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-success btn-lg shadow-sm fw-bold rounded-pill" [disabled]="isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isLoading ? '資料送出中...' : '確認註冊' }}
+              </button>
+            </div>
+
+            <div class="text-center mt-4">
+              <span class="text-muted">已經有帳號了嗎？</span>
+              <a routerLink="/login" class="text-decoration-none fw-bold ms-1">立即登入</a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
