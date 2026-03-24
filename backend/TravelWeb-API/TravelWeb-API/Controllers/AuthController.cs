@@ -67,6 +67,28 @@ namespace TravelWeb_API.Controllers
             };
             Response.Cookies.Append("AuthToken", token, cookieOptions);
 
+            // ==========================================
+            // 🚀 3. 關鍵修復：寫入登入紀錄 (Log_in_record)
+            // ==========================================
+            try
+            {
+                // 🔥 就是這麼簡單！我們「只給」MemberCode 和 LoginAt
+                // 絕對不要寫 LoginRecordId = xxx！
+                var loginRecord = new LogInRecord
+                {
+                    MemberCode = user.MemberCode,
+                    LoginAt = DateTime.Now
+                };
+
+                _context.LogInRecords.Add(loginRecord);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // 萬一出錯，把真實原因印出來看
+                Console.WriteLine("🚨 寫入登入紀錄失敗：" + ex.InnerException?.Message ?? ex.Message);
+            }
+
             return Ok(new
             {
                 message = "登入成功",
