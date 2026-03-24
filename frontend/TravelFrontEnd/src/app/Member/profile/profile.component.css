@@ -1,0 +1,70 @@
+/* 封面照片高度與填滿設定 */
+.cover-container {
+  height: 350px;
+  background-color: #e9ecef;
+}
+.cover-img {
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 大頭貼往上推 (負邊距魔法) */
+.avatar-wrapper {
+  margin-top: -80px; /* 讓大頭貼往上吃進封面照片裡 */
+  z-index: 2; /* 確保大頭貼在最上層 */
+}
+.avatar-img {
+  width: 168px;
+  height: 168px;
+  background-color: white; /* 避免圖片透明時露出背景 */
+}
+
+/* 大頭貼旁邊的小相機編輯按鈕 */
+.avatar-edit-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  right: 10px;
+  bottom: 10px;
+  background-color: #e4e6eb;
+  color: #050505;
+  border: none;
+}
+.avatar-edit-btn:hover {
+  background-color: #d8dadf;
+}
+
+/* 左側自訂清單群組樣式 (模仿 FB 藍色高亮) */
+.custom-list-group .list-group-item {
+  color: #050505;
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+}
+.custom-list-group .list-group-item:hover {
+  background-color: #f0f2f5;
+}
+.custom-list-group .list-group-item.active {
+  background-color: #e7f3ff; /* FB 藍色背景 */
+  color: #1877f2; /* FB 藍色文字 */
+  font-weight: bold;
+}
+
+/* 響應式微調 (手機版大頭貼置中) */
+@media (max-width: 768px) {
+  .avatar-wrapper {
+    margin-top: -60px;
+    display: flex;
+    justify-content: center;
+  }
+  .avatar-img {
+    width: 140px;
+    height: 140px;
+  }
+  .avatar-edit-btn {
+    right: auto;
+    left: 55%;
+  }
+}
