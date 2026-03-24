@@ -11,16 +11,18 @@ import {
   CdkDrag
 } from '@angular/cdk/drag-drop';
 import { DayPlan, ItineraryItem } from '../../interface/itinerarymainmodel';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-itinerary-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, CdkDropListGroup, CdkDropList, CdkDrag],
+  imports: [CommonModule, FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, RouterModule],
   templateUrl: './change-itinerary-item.html',
   styleUrl: './change-itinerary-item.css',
 })
 export class ItineraryDetailComponent implements OnInit {
   private http = inject(HttpClient);
+
   /**輸入ID */
   @Input() itineraryId!: number;
 
@@ -28,8 +30,9 @@ export class ItineraryDetailComponent implements OnInit {
   date = '';
   imageUrl = '';
   days: DayPlan[] = [];
-
+  constructor(private activateroute: ActivatedRoute) { }
   ngOnInit() {
+    this.itineraryId = this.activateroute.snapshot.params['id']
     if (this.itineraryId) {
       this.loadData();
     }
@@ -64,11 +67,11 @@ export class ItineraryDetailComponent implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('image', file);
+    const formDataimg = new FormData();
+    formDataimg.append('image', file);
 
     // 呼叫剛剛寫的控制器端點
-    this.http.post<any>(`https://localhost:7276/api/Itinerary/Savephoto/${this.itineraryId}`, formData)
+    this.http.post<any>(`https://localhost:7276/api/Itinerary/Savephoto/${this.itineraryId}`, formDataimg)
       .subscribe({
         next: (res) => {
           // 成功後，前端變數 imageUrl 更新，HTML 會自動重新渲染背景圖
