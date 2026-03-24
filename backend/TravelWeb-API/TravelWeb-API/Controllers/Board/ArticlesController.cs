@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.Board.DbSet;
@@ -24,7 +25,7 @@ namespace TravelWeb_API.Controllers.Board
         private readonly MemberSystemContext _memberDb;
         private readonly IPostService _PostService;
         private readonly IArticleService _ArticleService;
-        
+
         public ArticlesController(BoardDbContext context,
             IPostService noteService,
             IArticleService articleService,
@@ -42,7 +43,7 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByDate(int page)
         {
             var totalCount = _context.Articles.Count();
-            var result=_ArticleService.GetArticles(page);
+            var result = _ArticleService.GetArticles(page);
             return Ok(new
             {
                 totalCount = totalCount,
@@ -53,15 +54,15 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("{id}")]
         public IActionResult GetArticlesByID(int id)
         {
-            return Ok(_context.Articles.FirstOrDefault(x=>x.ArticleId == id));
+            return Ok(_context.Articles.FirstOrDefault(x => x.ArticleId == id));
         }
 
 
 
         // GET:用標題KeyWord搜尋
         [HttpGet("search")]
-        public IActionResult GetArticlesByTitle([FromQuery]int page, [FromQuery] string keyword)
-        {            
+        public IActionResult GetArticlesByTitle([FromQuery] int page, [FromQuery] string keyword)
+        {
             var result = _ArticleService.ArticlesByKeyword(page, keyword);
             return Ok(new
             {
@@ -74,7 +75,7 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("searchByDate")]
         public IActionResult GetArticlesByDate(int page, DateTime startTime, DateTime endTime)
         {
-            
+
             var result = _ArticleService.ArticlesByDate(page, startTime, endTime);
             return Ok(new
             {
@@ -93,34 +94,36 @@ namespace TravelWeb_API.Controllers.Board
 
         // POST: api/Articles 新增標頭
         [HttpPost]
-        public async Task<ActionResult<Article>> PostArticle(byte Type, string UserId)
+        public async Task<IActionResult>PostArticle(byte Type)
         {
-            Article article = _PostService.AddArtic(Type, UserId);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("無效的 Token");
+            Article article = _PostService.AddArtic(Type, userId);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(
-                   "GetArticle",                       // 1. Action 名稱：指向「查詢單一資料」的那個方法
-                   new { id = article.ArticleId },    // 2. 路由參數：用來填補 GetArticle 所需的 id
-                   article                            // 3. 回傳內容：要把整份物件秀給前端看
-                     );
+            return Ok(article.ArticleId);
         }
 
 
-       
+
         // DELETE: api/Articles/5 刪除
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {
-                return NotFound();
+            return NotFound();
         }
 
         [HttpGet("test")]
-        public IActionResult TaskArtcle()        
+        public IActionResult TaskArtcle()
         {
             var list = _context.Articles.ToList();
-            var result = 
-                list.Select(l => new Test { Title = l.Title,PhotoUrl=l.PhotoUrl,UserName =l.UserId}).ToList();
+            var result =
+                list.Select(l => new Test { Title = l.Title, PhotoUrl = l.PhotoUrl, UserName = l.UserId }).ToList();
             return Ok(result);
         }
-        
+
+
     }
 }

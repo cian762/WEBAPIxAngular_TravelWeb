@@ -12,46 +12,56 @@ export class BoardServe {
   constructor(private http: HttpClient) {
 
   }
+  private apiUrl = 'https://localhost:7276/api';
   getArticleAPI(para: number) {
-    return this.http.get(`https://localhost:7276/api/Board/Articles/Bypage/${para}`);
+    return this.http.get(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
   }
 
   getArticleByKeyword(page: number, keyword: string) {
-    return this.http.get(`https://localhost:7276/api/Board/Articles/search?page=${page}&keyword=${keyword}`);
+    return this.http.get(`${this.apiUrl}/Board/Articles/search?page=${page}&keyword=${keyword}`);
   }
 
   getArticleByDate(page: number, startTime: Date, endTime: Date) {
-    return this.http.get(`https://localhost:7276/api/Board/Articles/searchByDate?page=${page}&startTime=${startTime}&endTime=${endTime}`);
+    return this.http.get(`${this.apiUrl}/Board/Articles/searchByDate?page=${page}&startTime=${startTime}&endTime=${endTime}`);
   }
 
   getArticleDetailAPI(para: number) {
-    return this.http.get<PostDetailDto>(`https://localhost:7276/api/Post/${para}`);
+    return this.http.get<PostDetailDto>(`${this.apiUrl}/Post/${para}`);
   }
 
   getComments(para: number) {
-    return this.http.get<CommentsDTO[]>(`https://localhost:7276/api/Board/Comments/${para}`);
+    return this.http.get<CommentsDTO[]>(`${this.apiUrl}/Board/Comments/${para}`);
   }
-
+  getAllTags() {
+    return this.http.get
+      (`${this.apiUrl}/Board/Tags/all`)
+  }
   getTagsByArticleAPI(para: number) {
-    return this.http.get(`https://localhost:7276/api/Board/Tags?articleId=${para}`)
+    return this.http.get(`${this.apiUrl}/articleId/${para}`)
   }
 
-  postPostAPI(UserID: string) {
-    return this.http.post<number>(`https://localhost:7276/api/Board/Articles?Type=0&UserId=${UserID}`, null).pipe(
-      switchMap(result => this.http.post<number>(`https://localhost:7276/api/Post?id=${result}`, null)));
+  postPostAPI() {
+    return this.http.post<number>(`${this.apiUrl}/Board/Articles?Type=0`, null, { withCredentials: true }).pipe(
+      switchMap(result => this.http.post<number>(`${this.apiUrl}/Post?id=${result}`, null)));
   }
 
   postCommentAPI(para: any) {
     return this.http.post
-      (`https://localhost:7276/api/Board/Comments/PostComment`, para)
+      (`${this.apiUrl}/Board/Comments/PostComment`, para, { withCredentials: true })
   }
+  postTagsByArticleAPI(articleId: number, para: number[]) {
+    return this.http.post(`${this.apiUrl}/Board/Tags?articleId=${articleId}`, para)
+  }
+
 
   putPostAPI(id: number, para: any) {
 
     return this.http.put(
-      `https://localhost:7276/api/Post/${id}`, para);
+      `${this.apiUrl}/Post/${id}`, para);
 
   }
+
+
 }
 
 

@@ -33,11 +33,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
+            policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
+    
 });
 
 builder.Services.AddControllers();
@@ -127,7 +128,7 @@ builder.Services.AddSwaggerGen(
         x.SwaggerDoc("Board", new OpenApiInfo
         {
             Title = "Board"
-        });
+        });        
 
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
@@ -227,7 +228,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(
         x =>
     {
-        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
+        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");       
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
 
     }
