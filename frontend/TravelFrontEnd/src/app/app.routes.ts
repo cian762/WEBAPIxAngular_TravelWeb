@@ -51,6 +51,9 @@ export const routes: Routes = [
     ],
   },
   // 景點介紹結束
+
+
+
   { path: 'trip-detail/:id', component: TripProductDetail },
   {
     path: 'tripProduct',
@@ -89,7 +92,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./Components/test-use/test-use').then(m => m.TestUse),
+      import('./Member/login/login.component').then(m => m.LoginComponent),
   },
 
   {
