@@ -1,0 +1,86 @@
+@if (isOpen) {
+<div class="comment-modal-backdrop" (click)="closeModal()"></div>
+
+<div class="comment-modal">
+  <div class="comment-modal__header">
+    <div>
+      <h3 class="comment-modal__title">編輯評論</h3>
+      <p class="comment-modal__subtitle">可修改文字、刪除舊圖片、上傳新圖片</p>
+    </div>
+    <button type="button" class="comment-modal__close" (click)="closeModal()">×</button>
+  </div>
+
+  <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="comment-form">
+    <div class="comment-form__group">
+      <label for="title">標題</label>
+      <input id="title" type="text" formControlName="title" class="comment-form__control">
+    </div>
+
+    <div class="comment-form__group">
+      <label>評分</label>
+      <div class="rating-picker">
+        @for (star of [1,2,3,4,5]; track star) {
+        <button type="button" class="rating-star" [class.active]="isStarActive(star)" (click)="setRating(star)">
+          ★
+        </button>
+        }
+        <span class="rating-text">{{ editForm.controls.rating.value }} / 5</span>
+      </div>
+    </div>
+
+    <div class="comment-form__group">
+      <label for="comment">評論內容</label>
+      <textarea id="comment" rows="5" formControlName="comment" class="comment-form__control"></textarea>
+    </div>
+
+    <div class="comment-form__group">
+      <label>目前圖片</label>
+      @if (existingImages.length) {
+      <div class="preview-grid">
+        @for (imgUrl of existingImages; track imgUrl) {
+        <div class="preview-card">
+          <img [src]="imgUrl" alt="既有圖片" class="preview-card__img">
+          <button type="button" class="preview-card__remove" (click)="removeExistingImage($index)">
+            ×
+          </button>
+        </div>
+        }
+      </div>
+      } @else {
+      <p>目前沒有圖片</p>
+      }
+    </div>
+
+    <div class="comment-form__group">
+      <label for="newImages">新增圖片</label>
+      <label class="upload-box">
+        <input id="newImages" type="file" multiple accept="image/*" (change)="onNewImagesChange($event)" hidden>
+        <div class="upload-box__icon">＋</div>
+        <div class="upload-box__text">點擊新增圖片</div>
+        <div class="upload-box__hint">新圖片會送到 API 的 NewImages</div>
+      </label>
+    </div>
+
+    @if (newImagePreviews.length) {
+    <div class="comment-form__group">
+      <label>新圖片預覽</label>
+      <div class="preview-grid">
+        @for (preview of newImagePreviews; track $index) {
+        <div class="preview-card">
+          <img [src]="preview" alt="新圖片預覽" class="preview-card__img">
+          <button type="button" class="preview-card__remove" (click)="removeNewImage($index)">
+            ×
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <div class="comment-form__actions">
+      <button type="button" class="btn-cancel" (click)="closeModal()">取消</button>
+      <button type="submit" class="btn-submit">儲存修改</button>
+    </div>
+  </form>
+</div>
+}
