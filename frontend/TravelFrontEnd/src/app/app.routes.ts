@@ -51,6 +51,7 @@ export const routes: Routes = [
     ],
   },
   // 景點介紹結束
+  //行程商品相關
   { path: 'trip-detail/:id', component: TripProductDetail },
   {
     path: 'tripProduct',
