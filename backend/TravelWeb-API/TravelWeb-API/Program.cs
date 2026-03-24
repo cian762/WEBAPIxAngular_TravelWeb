@@ -21,6 +21,11 @@ using TravelWeb_API.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ==========================================
+// 🚀 關鍵修復：替換為正確的 CORS 設定
+// ==========================================
+// 將原本的 myAllowSpecificOrigins 設定刪除，改用這個：
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -28,12 +33,15 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.AllowAnyOrigin()
+            // 🚨 錯誤示範：policy.AllowAnyOrigin() <-- 這是造成錯誤的主因！
+
+            // ✅ 正確寫法：必須精確指定前端的網址，且「不能」加上最後的斜線
+            policy.WithOrigins("http://localhost:4200")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // 👈 必須加上這個，前端的 Cookie 才能送過來
         });
 });
-
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -233,6 +241,9 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+// 🔥 關鍵順序：必須是 Routing -> Cors -> Auth -> MapControllers
+app.UseRouting();
 
 app.UseCors(myAllowSpecificOrigins);
 
