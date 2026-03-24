@@ -14,7 +14,7 @@ import { CardInfoModel } from '../../Interface/cardInterface';
 import { TicketPlanDrawer } from '../ticket-plan-drawer/ticket-plan-drawer';
 import { TicketInfoService } from '../../Service/ticket-info-service';
 import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
-import { forkJoin, Subscription } from 'rxjs';
+import { forkJoin, Subscription, switchMap } from 'rxjs';
 import { UserCommentForm } from "../user-comment-form/user-comment-form";
 import { PersonalCommentService } from '../../Service/personal-comment-service';
 import { EditCommentForm } from "../edit-comment-form/edit-comment-form";
@@ -405,11 +405,22 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   refreshPersonalComment(): void {
     console.log('父元件 refreshPersonalComment()被觸發');
-    this.personalCommentService.getPersonalComments(this.activityIdFromRoute, "2")
-      .subscribe((data) => {
-        console.log('評論重新載入成功');
+    this.personalCommentService.getPersonalComments(this.activityIdFromRoute, "2").pipe(
+      switchMap((data) => {
+        console.log("個人評論更新載入成功");
         this.personalCommentCollection = data;
-      });
+
+        return this.infoService.getRelatedReviews(this.activityIdFromRoute, this.selectedSortRule);
+      })
+    ).subscribe({
+      next: (res) => {
+        console.log('評論重新載入成功');
+        this.reviewsPackage = res;
+      },
+      error: (err) => {
+        console.log('refreshPersonalComment 發生錯誤', err);
+      }
+    })
   }
 
   deletePersonalComment(activityId: number): void {

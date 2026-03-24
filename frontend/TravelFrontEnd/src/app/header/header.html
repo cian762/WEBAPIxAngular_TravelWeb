@@ -2,23 +2,46 @@
   <div class="header-top">
     <div class="container">
       <div class="row align-items-center">
+
+        <!-- 左上角 (Visit Us 等) 保持不變 -->
         <div class="col-lg-6 col-sm-6 col-6 header-top-left">
           <ul>
             <li><a href="#">Visit Us</a></li>
             <li><a href="#">Buy Tickets</a></li>
           </ul>
         </div>
-        <div class="col-lg-6 col-sm-6 col-6 header-top-right">
-          <div class="header-social">
-            <a href="#"><i class="fa fa-facebook"></i></a>
-            <a href="#"><i class="fa fa-twitter"></i></a>
-            <a href="#"><i class="fa fa-dribbble"></i></a>
-            <a href="#"><i class="fa fa-behance"></i></a>
-          </div>
+
+        <!-- ========================================== -->
+        <!-- 🔥 右上角：動態切換「登入/註冊」與「歡迎你! Name / 登出」 -->
+        <!-- ========================================== -->
+        <div class="col-lg-6 col-sm-6 col-6 header-top-right text-end">
+
+          <!-- 🔴 未登入顯示：登入 | 註冊 -->
+          <ng-container *ngIf="!isLoggedIn">
+            <a routerLink="/login" class="text-white text-decoration-none fw-bold ms-3" style="font-size: 14px;">
+              <i class="fa fa-sign-in me-1"></i> 登入
+            </a>
+            <span class="text-white mx-2 opacity-50">|</span>
+            <a routerLink="/register" class="text-white text-decoration-none fw-bold" style="font-size: 14px;">
+              <i class="fa fa-user-plus me-1"></i> 註冊會員
+            </a>
+          </ng-container>
+
+          <!-- 🟢 已登入顯示：歡迎你! Name | 登出 -->
+          <ng-container *ngIf="isLoggedIn">
+            <!-- 點擊名字跳轉到個人檔案 profile -->
+            <a routerLink="/profile" class="text-warning text-decoration-none fw-bold ms-3" style="font-size: 14px;">
+              <i class="fa fa-user-circle me-1"></i> 歡迎你! {{ userName }}
+            </a>
+          </ng-container>
+
         </div>
+
       </div>
     </div>
   </div>
+
+  <!-- 下半部 main-menu (Logo 與所有導覽列) 完全保留不變 -->
   <div class="container main-menu">
     <div class="row align-items-center justify-content-between d-flex">
       <div id="logo" class="col-6">
@@ -48,10 +71,10 @@
               </li>
             </ul>
           </li>
+          <!-- ... 其他選單略 ... -->
           <li><a routerLink="/attractions">觀光景點</a></li>
-
         </ul>
-      </nav><!-- #nav-menu-container -->
+      </nav>
     </div>
   </div>
-</header><!-- #header -->
+</header>
