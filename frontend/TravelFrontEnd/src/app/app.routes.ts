@@ -94,10 +94,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./Member/login/login.component').then(m => m.LoginComponent),
   },
+
+  {
+    path: 'login',
+    loadComponent: () => import('./Member/login/login.component').then(m => m.LoginComponent)
+  },
   {
     path: 'register',
-    loadComponent: () =>
-      import('./Member/register/register.component').then(m => m.RegisterComponent),
+    loadComponent: () => import('./Member/register/register.component').then(m => m.RegisterComponent)
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./Member/profile/profile.component').then(m => m.ProfileComponent)
   },
 
   // 所有不認識的路徑會導向首頁

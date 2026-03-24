@@ -21,6 +21,11 @@ using TravelWeb_API.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ==========================================
+// 🚀 關鍵修復：替換為正確的 CORS 設定
+// ==========================================
+// 將原本的 myAllowSpecificOrigins 設定刪除，改用這個：
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -34,7 +39,6 @@ builder.Services.AddCors(options =>
                   .AllowCredentials();
         });
 });
-
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -234,6 +238,9 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+// 🔥 關鍵順序：必須是 Routing -> Cors -> Auth -> MapControllers
+app.UseRouting();
 
 app.UseCors(myAllowSpecificOrigins);
 

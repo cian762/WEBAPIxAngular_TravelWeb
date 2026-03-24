@@ -45,10 +45,15 @@ export class ProfileComponent implements OnInit {
 
         // 追隨者與黑名單等，等後端補上對應欄位後即可直接 mapping
       },
-      error: (err) => {
-        alert('無法取得會員資料，請重新登入');
-        this.router.navigate(['/login']);
-      }
+       error: (err) => {
+    alert('無法取得會員資料，請重新登入');
+
+    // 🔥 加上這兩行，強制清除前端的幽靈登入狀態！
+    localStorage.removeItem('isLoggedIn');
+    this.authService.authState$.next(false); // 廣播給 Header 叫它變回登入按鈕
+
+    this.router.navigate(['/login']);
+  }
     });
   }
 
