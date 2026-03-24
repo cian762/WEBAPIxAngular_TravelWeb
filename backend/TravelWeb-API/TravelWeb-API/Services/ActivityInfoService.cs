@@ -121,6 +121,7 @@ namespace TravelWeb_API.Services
                 .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
+                .Where(r => r.IsSoftDeleted == false)
                 .Select(r => r.ReviewId)
                 .Count();
                 
