@@ -155,6 +155,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
 
             return result;
         }
+        //存取快照
         public async Task<int> SaveItinerarySnapshotAsync(ItinerarySnapshotDto dto)
         {
             string? imageUrl = null;
@@ -289,11 +290,28 @@ namespace TravelWeb_API.Models.Itinerary.Service
         }
         public async Task<string> SaveImagebyid(IFormFile image, int Id)
         {
-            string? imageUrl = null;
-            if (image != null)
+            // 1. 檢查檔案與行程是否存在
+            if (image == null || image.Length == 0) return null;
+
+            var itinerary = await _context.Itineraries.FindAsync(Id);
+            if (itinerary == null) return null;
+
+            // 2. 呼叫你的 Service 上傳到 Cloudinary
+            // 這裡調用你提供的 UploadImageAsync
+            string? imageUrl = await _imageUploadService.UploadImageAsync(image, "itinerary_covers");
+
+            if (string.IsNullOrEmpty(imageUrl))
             {
-                imageUrl = await _imageUploadService.UploadImageAsync(image, "itinerary_covers");
+                return null;
             }
+
+            // 3. 同步更新資料庫中的圖片網址 (即時存入 DB)
+            itinerary.ItineraryImage = imageUrl; // 假設欄位名為 ItineraryImage
+
+
+            await _context.SaveChangesAsync();
+
+            // 4. 回傳網址給前端，讓前端可以 [style.background-image] 顯示
             return imageUrl;
         }
     }

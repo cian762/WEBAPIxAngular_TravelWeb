@@ -108,11 +108,16 @@ namespace TravelWeb_API.Controllers
                 return StatusCode(500, $"儲存快照時發生伺服器錯誤: {ex.Message}");
             }
         }
+        //POST修改圖片
         [HttpPost("{Id}/Savephoto")]
-        public async Task<IActionResult> SavePhoto([FromForm] IFormFile file, int Id)
+        public async Task<IActionResult> SavePhoto([FromForm] IFormFile image, int Id)
         {
-
-            return Ok();
+            var imageUrl = _itineraryService.SaveImagebyid(image, Id);
+            if (imageUrl == null)
+            {
+                return BadRequest("圖片上傳失敗");
+            }
+            return Ok(new { url = imageUrl });
         }
 
         // GET 基於版本找該版本的所有ITEM
