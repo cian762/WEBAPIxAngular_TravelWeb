@@ -155,13 +155,14 @@ namespace TravelWeb_API.Models.Itinerary.Service
 
             return result;
         }
+        //存取快照
         public async Task<int> SaveItinerarySnapshotAsync(ItinerarySnapshotDto dto)
         {
-            string? imageUrl = null;
-            if (dto.ImageFile != null)
-            {
-                imageUrl = await _imageUploadService.UploadImageAsync(dto.ImageFile, "itinerary_covers");
-            }
+            //string? imageUrl = null;
+            //if (dto.ImageFile != null)
+            //{
+            //    imageUrl = await _imageUploadService.UploadImageAsync(dto.ImageFile, "itinerary_covers");
+            //}
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
@@ -172,7 +173,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 //上傳圖片
                 var itinerary = await _context.Itineraries.FindAsync(dto.ItineraryId);
                 if (itinerary == null) throw new Exception("找不到對應的行程主表"); // 拋出異常觸及 Catch 進行 Rollback
-                if (imageUrl != null) itinerary.ItineraryImage = imageUrl;
+                //if (imageUrl != null) itinerary.ItineraryImage = imageUrl;
 
                 int nextVersionNumber = 1;
                 if (oldVersions.Any())
@@ -202,10 +203,41 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     int currentSortOrder = 100;
                     foreach (var item in dayGroup)
                     {
+                        int finalAttractionId = item.AttractionId;
+
+                        // 如果前端傳過來的是新地點 (AttractionId == 0 或帶有 PlaceId)
+                        if (finalAttractionId == 0 && !string.IsNullOrEmpty(item.PlaceId))
+                        {
+                            // 1. 檢查 DB 是否已有此 Google PlaceId 的景點
+                            var existingAttraction = await _context.Attractions
+                                .FirstOrDefaultAsync(a => a.GooglePlaceId == item.PlaceId);
+
+                            if (existingAttraction != null)
+                            {
+                                finalAttractionId = existingAttraction.AttractionId;
+                            }
+                            else
+                            {
+                                // 2. 若不存在，則先新增到 Attractions 表
+                                var newAttraction = new Attraction
+                                {
+                                    Name = item.Name,
+                                    Address = item.Address,
+                                    RegionId = 1000,
+                                    GooglePlaceId = item.PlaceId,
+                                    Latitude = item.Latitude,
+                                    Longitude = item.Longitude,
+                                    CreatedAt = DateTime.UtcNow
+                                };
+                                _context.Attractions.Add(newAttraction);
+                                await _context.SaveChangesAsync(); // 取得新 AttractionId
+                                finalAttractionId = newAttraction.AttractionId;
+                            }
+                        }
                         var newItem = new ItineraryItem
                         {
                             VersionId = newVersion.VersionId,
-                            AttractionId = item.AttractionId,
+                            AttractionId = finalAttractionId,
                             DayNumber = dayGroup.Key,
                             SortOrder = currentSortOrder,
                             ContentDescription = item.ContentDescription,
@@ -288,13 +320,32 @@ namespace TravelWeb_API.Models.Itinerary.Service
 #pragma warning restore CS8603 // 可能有 Null 參考傳回。
         }
         public async Task<string> SaveImagebyid(IFormFile image, int Id)
+
         {
-            string? imageUrl = null;
-            if (image != null)
+            // 1. 檢查檔案與行程是否存在
+            if (image == null || image.Length == 0) return null;
+
+            var itinerary = await _context.Itineraries.FindAsync(Id);
+            if (itinerary == null) return null;
+
+            // 2. 呼叫你的 Service 上傳到 Cloudinary
+            // 這裡調用你提供的 UploadImageAsync
+            string? imageUrl = await _imageUploadService.UploadImageAsync(image, "itinerary_covers");
+
+            if (string.IsNullOrEmpty(imageUrl))
             {
-                imageUrl = await _imageUploadService.UploadImageAsync(image, "itinerary_covers");
+                return null;
             }
+
+            // 3. 同步更新資料庫中的圖片網址 (即時存入 DB)
+            itinerary.ItineraryImage = imageUrl; // 假設欄位名為 ItineraryImage
+
+
+            await _context.SaveChangesAsync();
+
+            // 4. 回傳網址給前端，讓前端可以 [style.background-image] 顯示
             return imageUrl;
         }
+        public async Task<>
     }
 }

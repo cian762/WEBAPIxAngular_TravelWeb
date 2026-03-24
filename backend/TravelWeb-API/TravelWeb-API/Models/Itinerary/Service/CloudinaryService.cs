@@ -36,7 +36,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             {
                 return uploadResult.SecureUrl.ToString(); // 回傳 https 連結
             }
-
+            Console.WriteLine(uploadResult.Error?.Message);
             return null;
         }
         public async Task<DeletionResult> DeletePhotoAsync(string publicId)

@@ -68,7 +68,7 @@ export const routes: Routes = [
     loadComponent: () => import('./Itinerary/component/index-itinerary/index-itinerary').then(m => m.IndexItinerary)
   },
   {
-    path: 'change',
+    path: 'change/:Id',
     loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ItineraryDetailComponent)
   },
 
