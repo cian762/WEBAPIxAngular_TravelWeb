@@ -35,9 +35,16 @@ export class AuthService {
   }
 
   getMyProfile(): Observable<any> {
-    // 🔥 必須加上 { withCredentials: true }，才會把 Cookie 帶給後端！
-    return this.http.get(`${this.apiUrl}/MemberInfo/MyProfile`, { withCredentials: true });
+    // 🔥 關鍵修復：這裡的路徑必須對應後端新的 MemberProfileController
+    return this.http.get(`${this.apiUrl}/MemberProfile/me`, { withCredentials: true });
   }
+
+  // 在你的 AuthService 裡面加入這個方法
+updateProfile(formData: FormData) {
+  // 記得換成你真正的後端網址
+  const apiUrl = 'https://localhost:7276/api/MemberProfile/me';
+  return this.http.put(apiUrl, formData, { withCredentials: true });
+}
 
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/Auth/logout`, {}, { withCredentials: true }).pipe(

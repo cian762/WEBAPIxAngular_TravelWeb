@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'; // 🔥 新增 ViewChild, ElementRef
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -16,44 +16,54 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // 準備一個空物件來接 API 資料
+  // 🔥 取得 HTML 中隱藏的 input 元素
+  @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('coverInput') coverInput!: ElementRef<HTMLInputElement>;
+
   userProfile: any = {
+    avatarUrl: 'assets/default-avatar.png',
+    coverUrl: '',
     accountInfo: {},
     memberInfo: {},
     followingList: [],
-    blackList: [],
-    complaints: []
+    blackList:[],
+    complaints:[]
   };
 
   ngOnInit(): void {
-    // 載入頁面時，打 API 抓取個人資料
     this.authService.getMyProfile().subscribe({
       next: (data) => {
-        // 將後端回傳的資料塞入我們的變數中
         this.userProfile.memberCode = data.memberCode;
         this.userProfile.memberId = data.memberId;
         this.userProfile.name = data.name;
-        this.userProfile.avatarUrl = data.avatarUrl || 'assets/default-avatar.png';
-        this.userProfile.coverUrl = 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80'; // 封面暫時用假圖
 
-        this.userProfile.accountInfo.email = data.email;
-        this.userProfile.accountInfo.phone = data.phone;
+        // 處理大頭貼
+        if (data.avatarUrl && data.avatarUrl.trim() !== '') {
+          this.userProfile.avatarUrl = data.avatarUrl;
+        } else {
+          this.userProfile.avatarUrl = 'assets/default-avatar.png';
+        }
+
+        // 🔥 處理封面圖片：讀取後端的 backgroundUrl
+        if (data.backgroundUrl && data.backgroundUrl.trim() !== '') {
+          this.userProfile.coverUrl = data.backgroundUrl;
+        } else {
+          this.userProfile.coverUrl = '';
+        }
+
+        this.userProfile.accountInfo.email = data.email || '未提供信箱';
+        this.userProfile.accountInfo.phone = data.phone || '未提供電話';
 
         this.userProfile.memberInfo.gender = data.gender;
-        this.userProfile.memberInfo.birthDate = data.birthDate;
+        this.userProfile.memberInfo.birthDate = data.birthDate || '未提供生日';
         this.userProfile.memberInfo.status = data.status;
-
-        // 追隨者與黑名單等，等後端補上對應欄位後即可直接 mapping
       },
-       error: (err) => {
-    alert('無法取得會員資料，請重新登入');
-
-    // 🔥 加上這兩行，強制清除前端的幽靈登入狀態！
-    localStorage.removeItem('isLoggedIn');
-    this.authService.authState$.next(false); // 廣播給 Header 叫它變回登入按鈕
-
-    this.router.navigate(['/login']);
-  }
+      error: (err) => {
+        alert('無法取得會員資料，請重新登入');
+        localStorage.removeItem('isLoggedIn');
+        this.authService.authState$.next(false);
+        this.router.navigate(['/login']);
+      }
     });
   }
 
@@ -61,21 +71,59 @@ export class ProfileComponent implements OnInit {
     this.activeTab = tabName;
   }
 
+  // 🔥 1. 觸發隱藏的 input 點擊事件，打開檔案總管
   triggerUpload(type: 'avatar' | 'cover'): void {
-    alert(`準備上傳 ${type}`);
+    if (type === 'avatar') {
+      this.avatarInput.nativeElement.click();
+    } else if (type === 'cover') {
+      this.coverInput.nativeElement.click();
+    }
   }
 
-  // 🔥 新增：執行登出
+  // 🔥 2. 當使用者選好圖片後觸發此函式，發送給後端
+  onFileSelected(event: Event, type: 'avatar' | 'cover'): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const formData = new FormData();
+
+      // ⚠️ 屬性名稱必須跟後端 C# 的 MemberProfileUpdateDto 一模一樣
+      if (type === 'avatar') {
+        formData.append('AvatarFile', file);
+      } else {
+        formData.append('BackgroundFile', file);
+      }
+
+      // 呼叫 API 更新資料
+      this.authService.updateProfile(formData).subscribe({
+        next: (res: any) => {
+          // 上傳成功，將後端回傳的 Cloudinary 網址更新到畫面上
+          if (type === 'avatar' && res.avatarUrl) {
+            this.userProfile.avatarUrl = res.avatarUrl;
+          } else if (type === 'cover' && res.backgroundUrl) {
+            this.userProfile.coverUrl = res.backgroundUrl;
+          }
+          alert('圖片更新成功！');
+        },
+        error: (err) => {
+          console.error(err);
+          alert('圖片更新失敗，請稍後再試。');
+        }
+      });
+
+      // 清空 input，確保下次選同一張圖也能觸發 change 事件
+      input.value = '';
+    }
+  }
+
   onLogout(): void {
     if(confirm('確定要登出嗎？')) {
       this.authService.logout().subscribe({
         next: () => {
-          alert('已成功登出');
-          this.router.navigate(['/login']); // 跳回登入頁
+          this.router.navigate(['/login']);
         },
         error: (err) => {
-          console.error('登出發生錯誤', err);
-          this.router.navigate(['/login']); // 就算出錯也強制導回登入頁
+          this.router.navigate(['/login']);
         }
       });
     }

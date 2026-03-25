@@ -11,6 +11,8 @@ using System.Security.Cryptography;
 using System.Text;
 using TravelWeb_API.DTO.MemberSystemDto;
 using TravelWeb_API.Models.MemberSystem;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace TravelWeb_API.Controllers
 {
@@ -80,29 +82,44 @@ namespace TravelWeb_API.Controllers
             };
 
             // ==========================================
-            // 處理大頭貼上傳
+            // 處理大頭貼上傳 (Cloudinary)
             // ==========================================
             if (request.AvatarFile != null && request.AvatarFile.Length > 0)
             {
-                string uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads");
+                // 1. 讀取 appsettings.json 中的 Cloudinary 設定
+                var cloudName = _configuration["CloudinarySettings:CloudName"];
+                var apiKey = _configuration["CloudinarySettings:ApiKey"];
+                var apiSecret = _configuration["CloudinarySettings:ApiSecret"];
 
-                if (!Directory.Exists(uploadsFolder))
+                // 2. 初始化 Cloudinary 帳號
+                Account account = new Account(cloudName, apiKey, apiSecret);
+                Cloudinary cloudinary = new Cloudinary(account);
+
+                // 3. 讀取圖片串流並設定上傳參數
+                using var stream = request.AvatarFile.OpenReadStream();
+                var uploadParams = new ImageUploadParams()
                 {
-                    Directory.CreateDirectory(uploadsFolder);
+                    File = new FileDescription(request.AvatarFile.FileName, stream),
+                    Folder = "TravelWeb/Avatars", // 建議在 Cloudinary 建立一個資料夾來集中管理
+                                                  // 🔥 Cloudinary 強大功能：上傳時自動裁切並壓縮成 500x500 正方形的大頭貼
+                    Transformation = new Transformation().Width(500).Height(500).Crop("fill").Gravity("face")
+                };
+
+                // 4. 執行上傳
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                // 5. 檢查上傳是否成功
+                if (uploadResult.Error != null)
+                {
+                    return StatusCode(500, new { message = "圖片上傳失敗", error = uploadResult.Error.Message });
                 }
 
-                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(request.AvatarFile.FileName);
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await request.AvatarFile.CopyToAsync(stream);
-                }
-
-                newMemberInfo.AvatarUrl = "/uploads/" + uniqueFileName;
+                // 6. 將 Cloudinary 產生的安全網址 (https) 存入資料庫
+                newMemberInfo.AvatarUrl = uploadResult.SecureUrl.ToString();
             }
             else
             {
+                // 如果沒有上傳，可以使用你的預設圖片，或者你也可以把預設圖片傳到 Cloudinary 並填入該網址
                 newMemberInfo.AvatarUrl = "/images/default-avatar.png";
             }
 
