@@ -41,13 +41,12 @@ namespace TravelWeb_API.Controllers.Board
         // GET: api/Articles 瀏覽(全部文章之瀑布流)async Task<ActionResult<IEnumerable<Article>>>
         [HttpGet("Bypage/{page}")]
         public IActionResult GetArticlesByDate(int page)
-        {
-            var totalCount = _context.Articles.Count();
+        {            
             var result = _ArticleService.GetArticles(page);
             return Ok(new
             {
-                totalCount = totalCount,
-                articleList = result
+                totalCount = result.TotalCount,
+                articleList = result.Item1
             });
         }
 
@@ -64,6 +63,18 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByTitle([FromQuery] int page, [FromQuery] string keyword)
         {
             var result = _ArticleService.ArticlesByKeyword(page, keyword);
+            return Ok(new
+            {
+                totalCount = result.Item2,
+                articleList = result.Item1
+            });
+        }
+
+        [HttpGet("searchByAll")]
+        public IActionResult Search([FromQuery] int page, [FromQuery] ArticleSearchDTO dto)
+        {
+            var result = _ArticleService.Search(page,dto);
+
             return Ok(new
             {
                 totalCount = result.Item2,
@@ -97,7 +108,20 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
-       
+        // GET:用作者搜尋
+        [HttpGet("searchByAuthor")]
+        public IActionResult GetArticlesByAuthor([FromQuery] int page, [FromQuery]string authorID)
+        {
+            var result = _ArticleService.ArticlesByAuthorID(page, authorID);
+
+            return Ok(new
+            {
+                totalCount = result.Item2,
+                articleList = result.Item1
+            });
+        }
+
+
 
 
         // POST: api/Articles 新增標頭

@@ -211,10 +211,10 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
 // 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
 builder.Services.AddHttpClient();
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add(new AuthorizeFilter());
-});
+//builder.Services.AddControllers(options =>
+//{
+//    options.Filters.Add(new AuthorizeFilter());
+//});
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

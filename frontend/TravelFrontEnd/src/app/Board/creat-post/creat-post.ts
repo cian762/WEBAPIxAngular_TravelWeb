@@ -1,7 +1,7 @@
 import { TagListDTO } from './../../trip/models/tripproduct.model';
 import { PostDetailDto } from './../interface/PostDetailDto';
 import { Component, Input, OnInit } from '@angular/core';
-import { BoardServe } from '../board-serve';
+import { BoardServe } from '../Service/board-serve';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { Cloudinary, CloudinaryImage } from '@cloudinary/url-gen';

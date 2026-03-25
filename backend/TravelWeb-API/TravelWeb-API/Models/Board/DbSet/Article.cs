@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Models.Board.DbSet;
 
@@ -7,7 +8,7 @@ public partial class Article
 {
     public int ArticleId { get; set; }
 
-    public string? UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
     public string? Title { get; set; }
 
@@ -32,6 +33,9 @@ public partial class Article
     public virtual ICollection<JournalPage> JournalPages { get; set; } = new List<JournalPage>();
 
     public virtual Post? Post { get; set; }
+
+    // 導覽屬性
+    public virtual MemberInformation MemberInformation { get; set; } = null!;
 
 
 }
