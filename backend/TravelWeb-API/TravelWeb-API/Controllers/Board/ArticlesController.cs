@@ -84,12 +84,20 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
-        //// GET:綜合搜尋
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Article>>> GetArticlesByAuthor(string AuthorID)
-        //{
-        //    return await _context.Articles.ToListAsync();
-        //}
+        // GET:Tag搜尋
+        [HttpGet("searchByTags")]
+        public IActionResult GetArticlesByTags([FromQuery]int page, [FromQuery] SearchByTagsDTO searchByTags)
+        {
+            var result = _ArticleService.ArticlesByTags(page, searchByTags);
+            
+            return Ok(new
+            {
+                totalCount = result.Item2,
+                articleList = result.Item1
+            });
+        }
+
+       
 
 
         // POST: api/Articles 新增標頭

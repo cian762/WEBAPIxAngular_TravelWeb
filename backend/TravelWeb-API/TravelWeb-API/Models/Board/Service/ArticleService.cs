@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.MemberSystem;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TravelWeb_API.Models.Board.Service
 {
@@ -68,6 +70,38 @@ namespace TravelWeb_API.Models.Board.Service
                 .ToList();
 
             return (result,data.Count);
+        }
+
+        public (List<Article>, int TotalCount) ArticlesByTags(int page, SearchByTagsDTO searchByTags)
+        {
+            int pageSize = 10;
+            List<Article> data = new List<Article>();
+            var tagIds = searchByTags.TagsId;
+            
+            if (searchByTags.isprecise)
+            {
+                data = _context.ArticleTags
+                      .Where(at => tagIds.Contains(at.TagId))
+                      .GroupBy(at => at.ArticleId)
+                      .Where(g => g.Select(x => x.TagId).Distinct().Count() == tagIds.Count)
+                      .Select(g => g.First().Article)
+                      .ToList();
+            }
+            else
+            {
+                data = _context.ArticleTags
+                              .Where(t => tagIds.Contains(t.TagId))
+                              .Select(t => t.Article)
+                              .Distinct() //移除重複資料
+                              .ToList();
+            }
+
+            var result = data.OrderByDescending(a => a.CreatedAt)
+              .Skip((page - 1) * pageSize)
+              .Take(pageSize)
+              .ToList();
+            return (result, data.Count);
+
         }
     }
 }
