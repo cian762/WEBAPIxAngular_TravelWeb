@@ -35,6 +35,7 @@ export class ItineraryDetailComponent implements OnInit {
   constructor(private activateroute: ActivatedRoute) { }
   ngOnInit() {
     this.itineraryId = Number(this.activateroute.snapshot.params['id'])
+    console.log(this.itineraryId);
     if (this.itineraryId) {
       this.loadData();
     }
@@ -82,7 +83,7 @@ export class ItineraryDetailComponent implements OnInit {
   }
   /**載入API的數據 */
   loadData() {
-    this.http.get<any>(`api/itinerary/${this.itineraryId}`).subscribe(res => {
+    this.http.get<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}`).subscribe(res => {
       this.title = res.itineraryName;
       this.imageUrl = res.ItineraryImage;
       this.date = res.startTime;

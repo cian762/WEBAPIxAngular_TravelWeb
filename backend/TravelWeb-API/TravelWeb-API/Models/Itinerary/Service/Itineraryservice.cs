@@ -145,10 +145,10 @@ namespace TravelWeb_API.Models.Itinerary.Service
                                     DayNumber = item.DayNumber ?? 1,
                                     ContentDescription = item.ContentDescription,
                                     // 關鍵：從關聯的 Attraction 表抓取地點資訊
-                                    AttractionName = item.Attraction.Name != null ? item.Attraction.Name : "未知景點",
-                                    Address = item.Attraction.Address,
-                                    Latitude = item.Attraction.Latitude,
-                                    Longitude = item.Attraction.Longitude,
+                                    AttractionName = item.Attraction.Name != null ? item.Attraction.Name : item.ContentDescription,
+                                    Address = item.Attraction.Address != null ? item.Attraction.Address : "建議於附近區域安排",
+                                    Latitude = item.Attraction.Latitude != null ? item.Attraction.Latitude : null,
+                                    Longitude = item.Attraction.Longitude != null ? item.Attraction.Longitude : null,
                                     StartTime = item.StartTime,
                                     EndTime = item.EndTime
                                 }).ToList()

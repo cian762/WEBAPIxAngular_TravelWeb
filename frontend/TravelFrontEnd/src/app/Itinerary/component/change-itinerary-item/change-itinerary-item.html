@@ -23,8 +23,22 @@
               <input type="time" [(ngModel)]="item.startTime">
             </div>
             <div class="info-box">
-              <div class="attraction-name">{{ item.attractionName }}</div>
-              <div class="address">{{ item.address }}</div>
+              <div class="attraction-name">
+                @if (!item.attractionId) {
+                <span class="badge bg-info-subtle text-info me-1" style="font-size: 0.7rem;">AI 建議</span>
+                {{ item.contentDescription }}
+                } @else {
+                {{ item.attractionName }}
+                }
+              </div>
+
+              <div class="address">
+                @if (item.attractionId) {
+                {{ item.address }}
+                } @else {
+                <span class="text-muted small">依當下位置彈性安排</span>
+                }
+              </div>
             </div>
             <div class="sort-handle" cdkDragHandle>☰</div>
           </div>
