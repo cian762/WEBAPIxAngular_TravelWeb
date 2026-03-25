@@ -1,40 +1,42 @@
 ﻿using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.FlowAnalysis;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Services;
 
 namespace TravelWeb_API.Controllers.Activity
 {
-    //[Authorize]
+
     [Route("api/[controller]")]
     [ApiController]
     public class PersonalReviewController : ControllerBase
     {
-        //private readonly string _memberId;
         private readonly ActivityReviewService _activityReviewService;
         private readonly CloudinaryPhotoService _cloudinaryPhotoService;
 
         public PersonalReviewController(ActivityReviewService activityReviewService, CloudinaryPhotoService cloudinaryPhotoService)
         {
-            //memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
             _activityReviewService = activityReviewService;
             _cloudinaryPhotoService = cloudinaryPhotoService;
         }
 
         [HttpGet("{activityId}")]
-        public async  Task<ActionResult> GetPersonalReviews([FromRoute]int activityId,[FromQuery]string memberId2)
+        public async  Task<ActionResult> GetPersonalReviews([FromRoute]int activityId)
         {
-            var result = await _activityReviewService.GetPersonalReviews(activityId,memberId2);
+            var memberCode = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+
+            var result = await _activityReviewService.GetPersonalReviews(activityId,memberCode);
             return Ok(result);
         }
 
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult> PostPersonalReview([FromForm] ReviewRequestDTO request, string memberId2)
+        public async Task<ActionResult> PostPersonalReview([FromForm] ReviewRequestDTO request)
         {
+            var memberCode = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+
             var imageDetails = new List<ImageUploadResult>();
 
             if (request.ReviewImages !=null &&request.ReviewImages.Any()) 
@@ -42,11 +44,13 @@ namespace TravelWeb_API.Controllers.Activity
                 imageDetails = await _cloudinaryPhotoService.AddPhotoAsync(request.ReviewImages);
             }
             
-            var result = await _activityReviewService.PostPersonalReview(request,memberId2,imageDetails);
+
+            var result = await _activityReviewService.PostPersonalReview(request, memberCode, imageDetails);
             
             return Ok(new { message = "新增成功", data = result});
         }
 
+        [Authorize]
         [HttpPatch]
         public async Task<ActionResult> PatchPersonalReview([FromForm]ReviewEditRequestDTO request)
         {
@@ -69,7 +73,7 @@ namespace TravelWeb_API.Controllers.Activity
             return Ok(new { message = "修改成功", data = result });
         }
 
-
+        [Authorize]
         [HttpDelete]
         public async Task<ActionResult> DeletePersonalReview([FromQuery]int reviewId) 
         {

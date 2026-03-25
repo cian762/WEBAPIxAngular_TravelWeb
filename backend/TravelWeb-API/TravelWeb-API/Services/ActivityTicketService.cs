@@ -60,12 +60,12 @@ namespace TravelWeb_API.Services
                     End = a.EndTime,
                     CoverImageUrl = a.ActivityImages.FirstOrDefault(i => i.IsCoverImage==true)!.ImageUrl,
                     ViewCount = a.ViewCount,
-                    CommentCount = a.Reviews.Count(),
+                    CommentCount = a.Reviews.Where(r=>r.IsSoftDeleted==false).Count(),
                     ReferencePrice = a.ActivityTicketDetails
                     .Where(d => d.ProductCodeNavigation.TicketCategoryId == 2)
                     .Select(d => d.ProductCodeNavigation.CurrentPrice)
                     .FirstOrDefault() ?? 0,
-                    AverageRating = (float)Math.Round((a.Reviews.Any() ? a.Reviews.Average(r => r.Rating) : 0), 1),
+                    AverageRating = (float)Math.Round((a.Reviews.Any() ? a.Reviews.Where(r=>r.IsSoftDeleted==false).Average(r => r.Rating) : 0), 1),
                 })
                 .OrderByDescending(a => a.AverageRating)
                 .ThenByDescending(a=>a.ViewCount)

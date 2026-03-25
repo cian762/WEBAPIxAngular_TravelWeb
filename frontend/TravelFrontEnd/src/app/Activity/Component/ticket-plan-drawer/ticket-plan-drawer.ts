@@ -36,7 +36,6 @@ export class TicketPlanDrawer {
 
   addToCart() {
     const purchase = {
-      memberId: "1",
       productCode: this.plan?.productCode,
       quantity: this.quantity,
       ticketCategoryId: this.plan?.ticketCategoryId,

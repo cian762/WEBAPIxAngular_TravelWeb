@@ -94,8 +94,9 @@ namespace TravelWeb_API.Controllers
             {
                 message = "登入成功",
                 userCode = user.MemberCode,
-                role = role
-                // token = token // (可選) 既然存 Cookie 了，這裡可以不用回傳明文 Token，看前端需求
+                role = role,
+                 token = token
+                // (可選) 既然存 Cookie 了，這裡可以不用回傳明文 Token，看前端需求
             });
         }
 
