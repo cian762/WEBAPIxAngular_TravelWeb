@@ -99,14 +99,39 @@ export class IndexItinerary implements AfterViewInit {
       });
   }
   createByAI() {
-    const data = {
-      name: this.ItineraryName,
-      dateTime: this.tripDateTime,
-      location: this.location
+    if (this.startDateTime > this.endDateTime) {
+      alert('時間錯誤');
+      return;
+    }
+    const requestBody = {
+      memberId: this.memberId,
+      itineraryName: this.ItineraryName,
+      startTime: new Date(this.startDateTime).toISOString(),
+      endTime: new Date(this.endDateTime).toISOString(),
+      introduction: '初版行程~',
+      itemsToPush: [
+        {
+          externalLocation: {
+            name: this.location,
+            address: this.location,
+            googlePlaceId: this.placeId,   // 👉 要從 autocomplete 拿
+            latitude: this.lat,
+            longitude: this.lng
+          }
+        }
+      ]
     };
+    this.mainService.createAIItinerary(requestBody)
+      .subscribe({
+        next: (res) => {
+          console.log('成功:', res);
+          alert('建立成功');
+        },
+        error: (err) => {
+          console.error('錯誤:', err);
+          alert('建立失敗');
+        }
+      });
 
-    console.log('AI 建立:', data);
-
-    // TODO: 呼叫 AI API
   }
 }

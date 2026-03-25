@@ -35,8 +35,7 @@
         </div>
         }
       </div>
-
-      <button (click)="addItem(day)" class="btn-add-item">＋ 新增單筆行程</button>
+      <button (click)="openSearchModal(day)">+ 新增單筆行程</button>
     </div>
     }
   </div>
@@ -47,3 +46,13 @@
     <button class="btn-secondary">查看過去版本</button>
   </div>
 </div>
+
+@if(showSearchModal){
+<div class="my-modal">
+  <div class="modal-body">
+    <h3>搜尋地點</h3>
+    <input #searchInput type="text" class="form-control" placeholder="請輸入景點...">
+    <button (click)="showSearchModal = false">取消</button>
+  </div>
+</div>
+}

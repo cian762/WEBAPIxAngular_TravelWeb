@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using TravelWeb_API.Models.Itinerary.DBContext;
 using TravelWeb_API.Models.Itinerary.DTO;
 using TravelWeb_API.Models.Itinerary.Service;
@@ -22,7 +22,7 @@ namespace TravelWeb_API.Controllers
         {
             _aiItineraryService = aiItineraryService;
             _context = travelContext;
-            _memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
+            _memberId = User.FindFirst(ClaimTypes.)?.Value!;
         }
         private async Task<int> EnsureAttractionExists(ExternalLocationDto external)
         {
