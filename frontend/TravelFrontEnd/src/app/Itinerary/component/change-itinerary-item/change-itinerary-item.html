@@ -1,5 +1,6 @@
 <div class="header" [style.background-image]="'url(' + imageUrl + ')'">
-  <input type="file" class="upload" />
+  <input (change)="uploadImage($event)" type="file" class="upload-input" id="coverUpload">
+  <label for="coverUpload" class="upload-btn">上傳檔案</label>
 
   <div class="header-card">
     <h2>{{title}}</h2>
@@ -7,30 +8,42 @@
   </div>
 </div>
 
-<div class="container">
-  <div class="days-wrapper" style="display: flex; gap: 20px;">
+<div class="main-content" cdkDropListGroup>
+  <div class="days-container">
     @for (day of days; track day.day; let dayIdx = $index) {
     <div class="day-column">
-      <h3>Day {{ day.day }}</h3>
+      <div class="day-header">天數(第{{ day.day }}天)</div>
 
       <div class="items-list" cdkDropList [cdkDropListData]="day.items" (cdkDropListDropped)="onDrop($event)">
 
-        @for (item of day.items; track item.itemId) {
-        <div class="card" draggable="true" (dragstart)="onDragStart(item,dayIdx )">
-          <div class="card-content">
-            <strong>{{ item.attractionName }}</strong>
-            <p>{{ item.address }}</p>
-            <small>{{ item.startTime | date:'HH:mm' }}</small>
+        @for (item of day.items; track $index) {
+        <div class="itinerary-card" cdkDrag>
+          <div class="card-row">
+            <div class="time-box">
+              <input type="time" [(ngModel)]="item.startTime">
+            </div>
+            <div class="info-box">
+              <div class="attraction-name">{{ item.attractionName }}</div>
+              <div class="address">{{ item.address }}</div>
+            </div>
+            <div class="sort-handle" cdkDragHandle>☰</div>
           </div>
-          <div class="actions">
-            <button (click)="deleteItem(day, $index)">❌</button>
+          <div class="card-footer">
+            <span class="detail-link">詳細資訊</span>
+            <button class="btn-delete" (click)="deleteItem(day, $index)">刪除</button>
           </div>
         </div>
         }
       </div>
-      <button (click)="addItem(day)" class="btn-add">+ 新增地點</button>
+
+      <button (click)="addItem(day)" class="btn-add-item">＋ 新增單筆行程</button>
     </div>
     }
   </div>
-  <button (click)="changeItem($event)">修改完成</button>
+
+  <div class="side-actions">
+    <!-- (click)="saveSnapshot()" -->
+    <button class="btn-primary">儲存快照</button>
+    <button class="btn-secondary">查看過去版本</button>
+  </div>
 </div>

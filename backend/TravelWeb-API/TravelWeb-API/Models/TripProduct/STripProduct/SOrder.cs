@@ -192,9 +192,9 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             var preview = new OrderDetailDto
             {
                 OrderId = 0,
-                ContactName = dto.ContactName,
-                ContactPhone = dto.ContactPhone,
-                ContactEmail = dto.ContactEmail,
+                ContactName = dto.ContactName!,
+                ContactPhone = dto.ContactPhone!,
+                ContactEmail = dto.ContactEmail!,
                 CustomerNote = dto.CustomerNote,
                 TotalAmount = totalAmount,
                 CreatedAt = DateTime.Now,

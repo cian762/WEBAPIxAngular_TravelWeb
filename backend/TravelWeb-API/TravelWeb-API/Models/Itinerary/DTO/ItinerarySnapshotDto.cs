@@ -12,10 +12,14 @@
     public class SnapshotItemDto
     {
         public int AttractionId { get; set; }
+        public string? Name { get; set; }
+        public string? Address { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
         public int DayNumber { get; set; } // 使用者當前分配的天數
         public string? ContentDescription { get; set; }
         public DateTime? StartTime { get; set; }
-
+        public string? PlaceId { get; set; }
         public DateTime? EndTime { get; set; }
     }
 }

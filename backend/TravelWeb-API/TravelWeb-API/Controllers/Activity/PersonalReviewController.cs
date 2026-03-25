@@ -20,7 +20,7 @@ namespace TravelWeb_API.Controllers.Activity
 
         public PersonalReviewController(ActivityReviewService activityReviewService, CloudinaryPhotoService cloudinaryPhotoService)
         {
-            //_memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
+            //memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
             _activityReviewService = activityReviewService;
             _cloudinaryPhotoService = cloudinaryPhotoService;
         }

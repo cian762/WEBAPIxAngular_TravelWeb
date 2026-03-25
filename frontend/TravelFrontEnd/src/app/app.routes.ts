@@ -1,4 +1,3 @@
-import { InfoCard } from './Activity/Component/info-card/info-card';
 import { Routes } from '@angular/router';
 import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 
@@ -51,6 +50,10 @@ export const routes: Routes = [
     ],
   },
   // 景點介紹結束
+  //行程商品相關
+
+
+
   { path: 'trip-detail/:id', component: TripProductDetail },
   {
     path: 'tripProduct',
@@ -64,7 +67,7 @@ export const routes: Routes = [
     loadComponent: () => import('./Itinerary/component/index-itinerary/index-itinerary').then(m => m.IndexItinerary)
   },
   {
-    path: 'change',
+    path: 'change/:Id',
     loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ItineraryDetailComponent)
   },
 
@@ -89,7 +92,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./Components/test-use/test-use').then(m => m.TestUse),
+      import('./Member/login/login.component').then(m => m.LoginComponent),
   },
 
   {

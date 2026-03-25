@@ -6,6 +6,7 @@ namespace TravelWeb_API.Controllers.Attraction
 {
     [ApiController]
     [Route("api/[controller]")]
+    //[ApiExplorerSettings(GroupName = "Attraction")] // ← 加這行
     public class AttractionProductController : ControllerBase
     {
         private readonly AttractionsContext _dbContext;

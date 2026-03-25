@@ -33,14 +33,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            // 🚨 錯誤示範：policy.AllowAnyOrigin() <-- 這是造成錯誤的主因！
-
-            // ✅ 正確寫法：必須精確指定前端的網址，且「不能」加上最後的斜線
-            policy.WithOrigins("http://localhost:4200")
+            policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials(); // 👈 必須加上這個，前端的 Cookie 才能送過來
+                  .AllowCredentials();
         });
+    
 });
 
 builder.Services.AddControllers();
@@ -67,7 +65,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
 
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey!)),
 
             ClockSkew = TimeSpan.Zero
         };
@@ -130,7 +128,7 @@ builder.Services.AddSwaggerGen(
         x.SwaggerDoc("Board", new OpenApiInfo
         {
             Title = "Board"
-        });
+        });        
 
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
@@ -230,7 +228,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(
         x =>
     {
-        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
+        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");       
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
 
     }
