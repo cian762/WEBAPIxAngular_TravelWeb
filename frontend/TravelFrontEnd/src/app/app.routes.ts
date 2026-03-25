@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
+import { aGuard } from './a-guard';
 
 export const routes: Routes = [
   {
@@ -62,6 +63,13 @@ export const routes: Routes = [
     loadComponent: () => import('./trip/component/shoppingcart/shoppingcart').then(
       m => m.Shoppingcart
     )
+  },
+  {
+    path: 'order',
+    loadComponent: () => import('./trip/component/order/order').then(
+      m => m.Order
+    )
+    , canActivate: [aGuard]
   },
   //*行程建立路由*/
   {

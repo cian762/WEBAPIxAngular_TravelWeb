@@ -21,9 +21,9 @@ namespace TravelWeb_API.Controllers
          _cart = cart;
         }
         private string? CurrentMemberId =>
-       User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-       User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
-       User.Identity?.Name;
+         User.FindFirst("MemberId")?.Value ?? // 👈 優先抓你自定義的這個標籤
+         User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+         User.Identity?.Name;
         // 🏆 核心邏輯：判斷目前身分
 
         //下單完成後一次性刪除該使用者（MemberId）在購物車裡的所有商品

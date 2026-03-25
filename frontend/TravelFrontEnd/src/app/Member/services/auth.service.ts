@@ -1,7 +1,7 @@
 import { Injectable, Injector, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { CreateShoppingCart } from '../../trip/services/create-shopping-cart';
 
 @Injectable({
@@ -55,5 +55,11 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return localStorage.getItem('isLoggedIn') === 'true';
+  }
+  //20260325李皇毅路由守門員用的方法
+  checkAuthStatus(): Observable<boolean> {
+    return this.http.get<boolean>(`${this.apiUrl}/Auth/check-status`).pipe(
+      catchError(() => of(false)) // 如果報錯或沒登入，就回傳 false
+    );
   }
 }

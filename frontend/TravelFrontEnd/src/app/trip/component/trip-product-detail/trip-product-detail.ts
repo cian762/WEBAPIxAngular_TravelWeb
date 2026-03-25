@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductBasic, ProductItinerary, ProductSchedule } from '../../models/tripproduct.model';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductDetailPage } from '../../services/product-detail-page';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -22,7 +22,7 @@ export class TripProductDetail implements OnInit {
   basicInfo?: ProductBasic;
   schedules: ProductSchedule[] = [];
   itineraries: ProductItinerary[] = [];
-  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart) { }
+  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart, private router: Router) { }
   ngOnInit(): void {
     // 1. 從路由取得 ID (假設路由定義為 product/:id)
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -129,7 +129,7 @@ export class TripProductDetail implements OnInit {
         mainImage: this.basicInfo?.coverImage // 建議傳圖片，購物車顯示才好看
       };
 
-      // 🚀 直接呼叫 Service，它會自己判斷要打 API 還是存 LocalStorage
+      //直接呼叫 Service，它會自己判斷要打 API 還是存 LocalStorage
       this.cartService.addToCart(cartItem).subscribe({
         next: () => console.log(`項目 ${item.ticketType} 處理完成`),
         error: (err) => console.error('處理失敗', err)
@@ -138,15 +138,36 @@ export class TripProductDetail implements OnInit {
 
     alert(`成功加入購物車！\n日期：${data.startDate}\n成人：${this.adultCount}位、兒童：${this.childCount}位`);
   }
+  nowBuy(): void {
+    const data = this.getBookingData();
 
-  // 立即購買按鈕
-  buyNow(): void {
-    // 呼叫上面的 addToCart
+    if (!data || !this.selectedSchedule) {
+      alert('請選擇出發日期');
+      return;
+    }
+
+    // 1. 準備要傳給結帳頁面的「直接購買」物件
+    // 注意：這裡的欄位名稱要跟你的後端 CreateOrderDto 一致
+    const checkoutPayload = {
+      directBuyItems: data.items
+        .filter(item => item.qty > 0)
+        .map(item => ({
+          productCode: data.scheduleId,
+          quantity: item.qty,
+          ticketCategoryId: item.ticketType
+        }))
+    };
 
 
-    // 不管有沒有登入，都導向購物車頁面
-    // 如果 Service 寫得好，導向後購物車頁面會自動顯示剛加進去的東西（不論是從 API 還是 LocalStorage 來的）
-    // this.router.navigate(['/cart']);
+    if (checkoutPayload.directBuyItems.length === 0) {
+      alert('請選擇購買人數');
+      return;
+    }
+
+    // 2. 導向結帳頁面
+    // 專業做法：透過導航狀態 (state) 傳遞資料，這樣網址不會變醜，且資料安全
+    this.router.navigate(['/order'], { state: { data: checkoutPayload } });
+
   }
 
 }

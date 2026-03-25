@@ -33,6 +33,12 @@ namespace TravelWeb_API.Controllers
             // 返回 Content 並指定為 text/html，瀏覽器收到會立刻自動 Submit 跳轉到綠界
             return Content(htmlForm, "text/html", System.Text.Encoding.UTF8);
         }
+        [HttpPost("PaymentCallback")]
+        public IActionResult PaymentCallback()
+        {
+            // 這裡不做邏輯處理，單純把使用者轉回前端
+            return Redirect("http://localhost:4200/");
+        }
         //綠界回傳
         [HttpPost("EcpayReturn")]
         [Consumes("application/x-www-form-urlencoded")]

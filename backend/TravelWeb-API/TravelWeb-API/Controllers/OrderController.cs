@@ -24,9 +24,9 @@ namespace TravelWeb_API.Controllers
           
         }
         private string? CurrentMemberId =>
-        User.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-        User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
-        User.Identity?.Name;
+          User.FindFirst("MemberId")?.Value ?? // 👈 優先抓你自定義的這個標籤
+          User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+          User.Identity?.Name;
 
         // 取得當前登入者 ID 的輔助方法
         [HttpPut("cancel/{orderId}")]
@@ -50,6 +50,7 @@ namespace TravelWeb_API.Controllers
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
             var memberId = CurrentMemberId;
+            Console.WriteLine($"目前登入的會員 ID 是: {memberId}");
             if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             try
             {
