@@ -28,7 +28,7 @@
             <ul class="tags">
               @for (tag of TagsList; track $index)
               {
-              <li><a href="#"><i [class]="tag.icon"></i>{{tag.tagName}}, </a></li>
+              <li><a (click)="seachTag(tag)"><i [class]="tag.icon"></i>{{tag.tagName}}, </a></li>
               }
             </ul>
             <div class="user-details row">

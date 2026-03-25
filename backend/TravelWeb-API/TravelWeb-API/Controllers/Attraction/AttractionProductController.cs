@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.attraction;
-
+//沒有更新
 namespace TravelWeb_API.Controllers.Attraction
 {
     [ApiController]

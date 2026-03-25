@@ -40,6 +40,7 @@ export class LoginComponent {
         // 登入成功
         this.isLoading = false;
 
+
         // ==========================================
         // 🔥 關鍵修正 1：寫入假旗標與基本資訊
         // 雖然真正的 Token 已經安全地存在 Cookie 裡了，
@@ -52,11 +53,13 @@ export class LoginComponent {
 
         alert('登入成功！歡迎回來');
 
+
         // 跳轉至會員中心頁面
         this.router.navigate(['/profile']);
       },
       error: (err) => {
         // 登入失敗... (維持原本的寫法)
+        console.log(err);
         this.isLoading = false;
         this.errorMessage = err.error?.message || '登入失敗，請檢查網路或伺服器狀態';
       }
