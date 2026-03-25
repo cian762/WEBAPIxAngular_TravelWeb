@@ -13,6 +13,7 @@ import {
 import { DayPlan, ItineraryItem } from '../../interface/itinerarymainmodel';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 declare const google: any;
+
 @Component({
   selector: 'app-itinerary-detail',
   standalone: true,
@@ -23,156 +24,137 @@ declare const google: any;
 export class ItineraryDetailComponent implements OnInit {
   private http = inject(HttpClient);
 
-  /**輸入ID */
   @Input() itineraryId!: number;
   @ViewChild('searchInput') searchInput!: ElementRef;
+
   showSearchModal = false;
   title = '';
   date = '';
   imageUrl = '';
   days: DayPlan[] = [];
+
+  /** 目前顯示的天數（預設第1天） */
+  activeDayIndex = 1;
+
+  /** 所有行程總數（地圖圖例用） */
+  get totalItems(): number {
+    return this.days.reduce((sum, d) => sum + d.items.length, 0);
+  }
+
   private currentAddingDay?: DayPlan;
+
   constructor(private activateroute: ActivatedRoute) { }
+
   ngOnInit() {
-    this.itineraryId = Number(this.activateroute.snapshot.params['id'])
-    console.log(this.itineraryId);
+    this.itineraryId = Number(this.activateroute.snapshot.params['id']);
     if (this.itineraryId) {
       this.loadData();
     }
   }
-  /**把數據排序並做資料格式轉譯 */
+
   private mapApiToDays(items: ItineraryItem[]): DayPlan[] {
     if (!items || items.length === 0) return [];
     const groups = new Map<number, ItineraryItem[]>();
-
     items.forEach(item => {
-      // 確保這裡的欄位名稱 (dayNumber) 與後端 JSON 回傳的大小寫一致
       const d = item.dayNumber || 1;
       if (!groups.has(d)) groups.set(d, []);
       groups.get(d)?.push(item);
     });
-
     return Array.from(groups.entries())
-      .sort(([a], [b]) => a - b) // 按天數由小到大排序
+      .sort(([a], [b]) => a - b)
       .map(([dayNumber, dayItems]) => ({
         day: dayNumber,
         items: dayItems.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
       }));
   }
-  /**上傳圖片 */
+
   uploadImage(event: any) {
     const file = event.target.files[0];
     if (!file) return;
-
     const formDataimg = new FormData();
     formDataimg.append('image', file);
-
-    // 呼叫剛剛寫的控制器端點
     this.http.post<any>(`https://localhost:7276/api/Itinerary/Savephoto/${this.itineraryId}`, formDataimg)
       .subscribe({
-        next: (res) => {
-          // 成功後，前端變數 imageUrl 更新，HTML 會自動重新渲染背景圖
-          this.imageUrl = res.url;
-          alert('封面更新成功！');
-        },
-        error: (err) => {
-          console.error('上傳失敗', err);
-          alert('上傳失敗，請檢查網絡');
-        }
+        next: (res) => { this.imageUrl = res.url; alert('封面更新成功！'); },
+        error: (err) => { console.error('上傳失敗', err); alert('上傳失敗，請檢查網絡'); }
       });
   }
-  /**載入API的數據 */
+
   loadData() {
     this.http.get<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}`).subscribe(res => {
       this.title = res.itineraryName;
       this.imageUrl = res.ItineraryImage;
       this.date = res.startTime;
-      // 假設後端資料結構轉前端
       this.days = this.mapApiToDays(res.currentVersion?.items || []);
+      if (this.days.length > 0) {
+        this.activeDayIndex = this.days[0].day;
+      }
     });
   }
-  /**新增行程 */
+
   openSearchModal(day: DayPlan) {
     this.showSearchModal = true;
     this.currentAddingDay = day;
-
     setTimeout(() => {
       if (this.searchInput) {
         const autocomplete = new google.maps.places.Autocomplete(this.searchInput.nativeElement);
-
         autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace();
           if (place.geometry) {
-            // 選定地點後的邏輯
             this.handlePlaceSelection(place);
-            this.showSearchModal = false; // 關閉彈窗
+            this.showSearchModal = false;
           }
         });
       }
     }, 100);
   }
+
   handlePlaceSelection(place: any) {
-    if (!place || !this.currentAddingDay) {
-      return;
-    }
-    if (place) {
-      const newItem: ItineraryItem = {
-        itemId: 0,
-        attractionId: 0,
-        dayNumber: this.currentAddingDay.day,
-        // 新地點為 0，由後端判斷
-        attractionName: place.name,
-        address: place.formatted_address,
-        placeId: place.place_id,
-        latitude: place.geometry.location.lat(),
-        longitude: place.geometry.location.lng(),
-        startTime: '10:00', // 預設時間
-        sortOrder: (this.currentAddingDay.items.length + 1) * 100,
-        contentDescription: `新增行程`
-      };
-      this.currentAddingDay.items.push(newItem);
-      this.updateSortOrders();
-    }
-    console.log('選中的地點：', place.name);
+    if (!place || !this.currentAddingDay) return;
+    const newItem: ItineraryItem = {
+      itemId: 0,
+      attractionId: 0,
+      dayNumber: this.currentAddingDay.day,
+      attractionName: place.name,
+      address: place.formatted_address,
+      placeId: place.place_id,
+      latitude: place.geometry.location.lat(),
+      longitude: place.geometry.location.lng(),
+      startTime: '10:00',
+      sortOrder: (this.currentAddingDay.items.length + 1) * 100,
+      contentDescription: `新增行程`
+    };
+    this.currentAddingDay.items.push(newItem);
+    this.updateSortOrders();
   }
-  /**刪除行程 */
-  deleteItem(day: DayPlan, index: any) {
+
+  deleteItem(day: DayPlan, index: number) {
     if (confirm('確定要刪除嗎？')) {
       day.items.splice(index, 1);
       this.updateSortOrders();
     }
   }
 
-  /**修改行程 */
   changeItem(event: any) {
-    // 將 days 拍平成後端要的 List<Item>
     const flattenedItems: any[] = [];
     this.days.forEach(day => {
       day.items.forEach(item => {
-        flattenedItems.push({
-          ...item,
-          dayNumber: day.day // 確保帶上正確的天數
-        });
+        flattenedItems.push({ ...item, dayNumber: day.day });
       });
     });
-
     const payload = {
       itineraryId: this.itineraryId,
       items: flattenedItems,
-      versionNote: "手動修改行程"
+      versionNote: '手動修改行程'
     };
-
     this.http.post(`https://localhost:7276/api/Itinerary/SaveSnapshot`, payload)
-      .subscribe(res => alert('修改成功'));
+      .subscribe(() => alert('修改成功'));
   }
 
-  /**處理拖拉後的 SortOrder 更新*/
   onDrop(event: CdkDragDrop<ItineraryItem[]>) {
     if (event.previousContainer === event.container) {
-      // 同一天內移動
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      // 跨天移動
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -182,11 +164,10 @@ export class ItineraryDetailComponent implements OnInit {
     }
     this.updateSortOrders();
   }
-  /**更新排序 */
+
   private updateSortOrders() {
     this.days.forEach(day => {
       day.items.forEach((item, index) => {
-        // 邏輯：第一筆 100, 第二筆 200, 依此類推
         item.sortOrder = (index + 1) * 100;
       });
     });
