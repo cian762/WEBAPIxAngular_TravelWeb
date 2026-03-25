@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'; // 🔥 新增 ViewChild, ElementRef
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
@@ -16,17 +16,18 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // ⚠️ 請確保這是您後端 API 的主機網址，用來串接大頭貼的相對路徑
-  private backendHost = 'https://localhost:7276';
+  // 🔥 取得 HTML 中隱藏的 input 元素
+  @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('coverInput') coverInput!: ElementRef<HTMLInputElement>;
 
   userProfile: any = {
-    avatarUrl: 'assets/default-avatar.png', // 👈 預設給這張，就不會閃白底
+    avatarUrl: 'assets/default-avatar.png',
     coverUrl: '',
     accountInfo: {},
     memberInfo: {},
     followingList: [],
-    blackList: [],
-    complaints: []
+    blackList:[],
+    complaints:[]
   };
 
   ngOnInit(): void {
@@ -36,20 +37,20 @@ export class ProfileComponent implements OnInit {
         this.userProfile.memberId = data.memberId;
         this.userProfile.name = data.name;
 
+        // 處理大頭貼
         if (data.avatarUrl && data.avatarUrl.trim() !== '') {
-
-          // 如果您的後端已經把完整的 Cloudinary 網址存進資料庫，直接拿來用！
-          // 例如：data.avatarUrl 會是 "https://res.cloudinary.com/..."
           this.userProfile.avatarUrl = data.avatarUrl;
-
         } else {
-          // 如果資料庫沒圖片，維持預設圖 (您那張很讚的黑人問號圖)
           this.userProfile.avatarUrl = 'assets/default-avatar.png';
         }
-        // 🔥 將封面設為空值，不要預設圖片
-        this.userProfile.coverUrl = '';
 
-        // 🔥 確保有把後端的資料存入 accountInfo 和 memberInfo 裡面
+        // 🔥 處理封面圖片：讀取後端的 backgroundUrl
+        if (data.backgroundUrl && data.backgroundUrl.trim() !== '') {
+          this.userProfile.coverUrl = data.backgroundUrl;
+        } else {
+          this.userProfile.coverUrl = '';
+        }
+
         this.userProfile.accountInfo.email = data.email || '未提供信箱';
         this.userProfile.accountInfo.phone = data.phone || '未提供電話';
 
@@ -70,8 +71,49 @@ export class ProfileComponent implements OnInit {
     this.activeTab = tabName;
   }
 
+  // 🔥 1. 觸發隱藏的 input 點擊事件，打開檔案總管
   triggerUpload(type: 'avatar' | 'cover'): void {
-    alert(`準備上傳 ${type}`);
+    if (type === 'avatar') {
+      this.avatarInput.nativeElement.click();
+    } else if (type === 'cover') {
+      this.coverInput.nativeElement.click();
+    }
+  }
+
+  // 🔥 2. 當使用者選好圖片後觸發此函式，發送給後端
+  onFileSelected(event: Event, type: 'avatar' | 'cover'): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const formData = new FormData();
+
+      // ⚠️ 屬性名稱必須跟後端 C# 的 MemberProfileUpdateDto 一模一樣
+      if (type === 'avatar') {
+        formData.append('AvatarFile', file);
+      } else {
+        formData.append('BackgroundFile', file);
+      }
+
+      // 呼叫 API 更新資料
+      this.authService.updateProfile(formData).subscribe({
+        next: (res: any) => {
+          // 上傳成功，將後端回傳的 Cloudinary 網址更新到畫面上
+          if (type === 'avatar' && res.avatarUrl) {
+            this.userProfile.avatarUrl = res.avatarUrl;
+          } else if (type === 'cover' && res.backgroundUrl) {
+            this.userProfile.coverUrl = res.backgroundUrl;
+          }
+          alert('圖片更新成功！');
+        },
+        error: (err) => {
+          console.error(err);
+          alert('圖片更新失敗，請稍後再試。');
+        }
+      });
+
+      // 清空 input，確保下次選同一張圖也能觸發 change 事件
+      input.value = '';
+    }
   }
 
   onLogout(): void {

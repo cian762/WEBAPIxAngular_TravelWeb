@@ -1,5 +1,8 @@
 <div class="bg-light pb-5 min-vh-100">
 
+  <input type="file" #avatarInput hidden accept="image/*" (change)="onFileSelected($event, 'avatar')">
+  <input type="file" #coverInput hidden accept="image/*" (change)="onFileSelected($event, 'cover')">
+
   <!-- ========================================== -->
   <!-- 🔥 關鍵修復：幫白色導覽列文字做一塊深色墊背 -->
   <!-- 由於 Header 是 absolute 或 fixed 定位，這塊深色墊背會把它襯托出來 -->

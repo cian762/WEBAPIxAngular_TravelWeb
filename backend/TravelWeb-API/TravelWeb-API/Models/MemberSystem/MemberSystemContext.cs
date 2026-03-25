@@ -108,7 +108,10 @@ public partial class MemberSystemContext : DbContext
         {
             entity.ToTable("Log_in_record", "Member");
 
-            entity.Property(e => e.LoginRecordId).ValueGeneratedOnAdd();
+            // 🔥 終極殺手鐧：強制告訴 EF Core 這個欄位由資料庫控制，不准塞值！
+            entity.Property(e => e.LoginRecordId)
+                  .UseIdentityColumn() // 明確宣告它是 IDENTITY 欄位 (如果是 SQL Server)
+                  .ValueGeneratedOnAdd();
             entity.Property(e => e.LoginAt).HasColumnType("datetime");
             entity.Property(e => e.MemberCode).HasMaxLength(50);
 

@@ -49,6 +49,7 @@ namespace TravelWebApi.Controllers
                                          MemberId = info.MemberId,
                                          Name = info.Name,
                                          AvatarUrl = info.AvatarUrl,
+                                         BackgroundUrl = info.BackgroundUrl,
                                          Gender = info.Gender,
                                          BirthDate = info.BirthDate,
                                          Email = list.Email,
@@ -92,18 +93,20 @@ namespace TravelWebApi.Controllers
             }
 
             // ==========================================
-            // 處理 Cloudinary 圖片上傳
+            // 🔥 關鍵修正：把初始化 Cloudinary 放在這裡 (兩個 if 的外面)
             // ==========================================
-            // 🔥 確認這裡呼叫的是 dto.AvatarFile (與下方修正的 DTO 對應)
+            var cloudName = _configuration["CloudinarySettings:CloudName"];
+            var apiKey = _configuration["CloudinarySettings:ApiKey"];
+            var apiSecret = _configuration["CloudinarySettings:ApiSecret"];
+
+            Account account = new Account(cloudName, apiKey, apiSecret);
+            Cloudinary cloudinary = new Cloudinary(account); // 宣告在這裡，下面兩個 if 都能用！
+
+            // ==========================================
+            // 處理大頭貼上傳
+            // ==========================================
             if (dto.AvatarFile != null && dto.AvatarFile.Length > 0)
             {
-                var cloudName = _configuration["CloudinarySettings:CloudName"];
-                var apiKey = _configuration["CloudinarySettings:ApiKey"];
-                var apiSecret = _configuration["CloudinarySettings:ApiSecret"];
-
-                Account account = new Account(cloudName, apiKey, apiSecret);
-                Cloudinary cloudinary = new Cloudinary(account);
-
                 using var stream = dto.AvatarFile.OpenReadStream();
                 var uploadParams = new ImageUploadParams()
                 {
@@ -112,20 +115,45 @@ namespace TravelWebApi.Controllers
                     Transformation = new Transformation().Width(500).Height(500).Crop("fill").Gravity("face")
                 };
 
-                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                var uploadResult = await cloudinary.UploadAsync(uploadParams); // 這裡可以用
 
-                if (uploadResult.Error != null)
-                {
-                    return StatusCode(500, new { message = "大頭貼上傳失敗", error = uploadResult.Error.Message });
-                }
+                if (uploadResult.Error != null) return StatusCode(500, new { message = "大頭貼上傳失敗" });
 
                 memberInfo.AvatarUrl = uploadResult.SecureUrl.ToString();
             }
 
+            // ==========================================
+            // 處理背景圖上傳
+            // ==========================================
+            if (dto.BackgroundFile != null && dto.BackgroundFile.Length > 0)
+            {
+                using var stream = dto.BackgroundFile.OpenReadStream();
+                var uploadParams = new ImageUploadParams() // ⚠️注意：這裡不要寫成 var uploadParams = ... 如果上面宣告過會衝突，建議大頭貼的叫 avatarParams，背景的叫 bgParams，或者直接用 { } 區塊隔開 (如現在的寫法)
+                {
+                    File = new FileDescription(dto.BackgroundFile.FileName, stream),
+                    Folder = "TravelWeb/Backgrounds",
+                    Transformation = new Transformation().Width(1200).Height(400).Crop("fill")
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams); // 這裡也可以用了！
+
+                if (uploadResult.Error != null) return StatusCode(500, new { message = "背景圖上傳失敗" });
+
+                memberInfo.BackgroundUrl = uploadResult.SecureUrl.ToString();
+            }
+
+            // ==========================================
+            // 寫入資料庫並回傳
+            // ==========================================
             try
             {
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "個人資料已成功更新！", avatarUrl = memberInfo.AvatarUrl });
+                return Ok(new
+                {
+                    message = "個人資料已成功更新！",
+                    avatarUrl = memberInfo.AvatarUrl,
+                    backgroundUrl = memberInfo.BackgroundUrl
+                });
             }
             catch (Exception ex)
             {

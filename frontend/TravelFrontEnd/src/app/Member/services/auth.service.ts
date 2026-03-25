@@ -35,6 +35,13 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/MemberProfile/me`, { withCredentials: true });
   }
 
+  // 在你的 AuthService 裡面加入這個方法
+updateProfile(formData: FormData) {
+  // 記得換成你真正的後端網址
+  const apiUrl = 'https://localhost:7276/api/MemberProfile/me';
+  return this.http.put(apiUrl, formData, { withCredentials: true });
+}
+
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/Auth/logout`, {}, { withCredentials: true }).pipe(
       // 🔥 必須解開註解！讓 Angular 知道已登出！
