@@ -5,11 +5,13 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PopularPost } from "../Components/popular-post/popular-post";
 import { TagClouds } from "../Components/tag-clouds/tag-clouds";
+import localeZhTw from '@angular/common/locales/zh-Hant';
+import { DatePipe, registerLocaleData } from '@angular/common';
 
-
+registerLocaleData(localeZhTw);
 @Component({
   selector: 'app-blog-home',
-  imports: [RouterModule, FormsModule, PopularPost, TagClouds],
+  imports: [RouterModule, FormsModule, PopularPost, TagClouds, DatePipe],
   templateUrl: './blog-home.html',
   styleUrl: './blog-home.css',
 })

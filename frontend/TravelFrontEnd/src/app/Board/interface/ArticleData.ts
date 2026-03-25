@@ -7,7 +7,7 @@ export interface ArticleResponse {
 export interface ArticleData {
   articleId: number;
   title?: string;
-  createdAt: Data;
+  createdAt: Date;
   photoUrl?: string;
   userID: string;
   userName?: string;
