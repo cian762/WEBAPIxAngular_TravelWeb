@@ -50,7 +50,7 @@ namespace TravelWeb_API.Controllers.Attraction
                     TicketTypeName = p.TicketTypeCodeNavigation != null
                         ? p.TicketTypeCodeNavigation.TicketTypeName
                         : null,
-                    Tags = p.Tags.Select(t => t.TagName).ToList()
+                    Tags = p.Tags.Select(t => new { t.TagName, t.Description }).ToList()
                 })
                 .ToListAsync();
 
@@ -75,7 +75,9 @@ namespace TravelWeb_API.Controllers.Attraction
             if (product == null)
                 return NotFound(new { message = "找不到此商品" });
 
+
             // 詳細說明
+            // detail 的 Select 補上 ValidityNote
             var detail = await _dbContext.AttractionProductDetails
                 .Where(d => d.ProductId == productId)
                 .OrderByDescending(d => d.LastUpdatedAt)
@@ -87,7 +89,8 @@ namespace TravelWeb_API.Controllers.Attraction
                     d.Includes,
                     d.Excludes,
                     d.Eligibility,
-                    d.CancelPolicy
+                    d.CancelPolicy,
+                    d.ValidityNote    // ← 補上這行
                 })
                 .FirstOrDefaultAsync();
 
@@ -114,7 +117,8 @@ namespace TravelWeb_API.Controllers.Attraction
                 product.MaxPurchaseQuantity,
                 TicketTypeName = product.TicketTypeCodeNavigation?.TicketTypeName,
                 AttractionName = product.Attraction?.Name,
-                Tags = product.Tags.Select(t => t.TagName).ToList(),
+                // Tags 改成物件
+                Tags = product.Tags.Select(t => new { t.TagName, t.Description }).ToList(),
                 Detail = detail,
                 Images = images
             };

@@ -15,7 +15,7 @@ export interface AttractionProduct {
   status: string;
   ticketTypeCode: number | null;
   ticketTypeName: string | null;
-  tags: string[];
+  tags: { tagName: string; description: string | null }[];
 }
 
 export interface ProductDetailInfo {
@@ -28,7 +28,7 @@ export interface ProductDetailInfo {
   maxPurchaseQuantity: number | null;
   ticketTypeName: string | null;
   attractionName: string | null;
-  tags: string[];
+  tags: { tagName: string; description: string | null }[];
   detail: {
     contentDetails: string | null;
     notes: string | null;
@@ -37,6 +37,7 @@ export interface ProductDetailInfo {
     excludes: string | null;
     eligibility: string | null;
     cancelPolicy: string | null;
+    validityNote: string | null;   // ← 補上這行
   } | null;
   images: {
     imageId: number;
@@ -64,8 +65,8 @@ export class AttractionService {
   }): Observable<Attraction[]> {
     let p = new HttpParams();
     if (params?.regionId) p = p.set('regionId', params.regionId);
-    if (params?.typeId)   p = p.set('typeId', params.typeId);
-    if (params?.keyword)  p = p.set('keyword', params.keyword);
+    if (params?.typeId) p = p.set('typeId', params.typeId);
+    if (params?.keyword) p = p.set('keyword', params.keyword);
     return this.http.get<Attraction[]>(`${this.apiUrl}/Attraction`, { params: p })
       .pipe(catchError(() => of([])));
   }
