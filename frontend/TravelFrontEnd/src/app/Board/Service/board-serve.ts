@@ -1,9 +1,9 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ArticleData } from './interface/ArticleData';
-import { PostDetailDto } from './interface/PostDetailDto';
+import { ArticleData, ArticleResponse } from '../interface/ArticleData';
+import { PostDetailDto } from '../interface/PostDetailDto';
 import { switchMap } from 'rxjs/operators';
-import { CommentsDTO } from './interface/CommentsDTO';
+import { CommentsDTO } from '../interface/CommentsDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -14,21 +14,36 @@ export class BoardServe {
   }
   private apiUrl = 'https://localhost:7276/api';
   getArticleAPI(para: number) {
-    return this.http.get(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
   }
 
   getArticleByKeyword(page: number, keyword: string) {
-    return this.http.get(`${this.apiUrl}/Board/Articles/search?page=${page}&keyword=${keyword}`);
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/search?page=${page}&keyword=${keyword}`);
   }
 
   getArticleByDate(page: number, startTime: Date, endTime: Date) {
-    return this.http.get(`${this.apiUrl}/Board/Articles/searchByDate?page=${page}&startTime=${startTime}&endTime=${endTime}`);
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByDate?page=${page}&startTime=${startTime}&endTime=${endTime}`);
+  }
+
+  getArticleByAuthor(page: number, authorId: string) {
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByAuthor?page=${page}&authorID=${authorId}`)
+  }
+
+  getArticleByTags(page: number, isprecise: boolean, TagsId?: string[]) {
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByTags?page=${page}&${TagsId}isprecise=false`)
+  }
+
+  getArticleByAllSearch(page: number, authorId?: string) {
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByAll?page=${page}&Keyword=10000006&StartTime=2026-02-21&EndTime=2026-02-28&AuthorId=${authorId}&TagIds=6`)
   }
 
   getArticleDetailAPI(para: number) {
     return this.http.get<PostDetailDto>(`${this.apiUrl}/Post/${para}`);
   }
 
+  getTagsByArticleAPI(para: number) {
+    return this.http.get(`${this.apiUrl}/Board/Tags/articleId/${para}`)
+  }
   getComments(para: number) {
     return this.http.get<CommentsDTO[]>(`${this.apiUrl}/Board/Comments/${para}`);
   }
@@ -36,9 +51,7 @@ export class BoardServe {
     return this.http.get
       (`${this.apiUrl}/Board/Tags/all`)
   }
-  getTagsByArticleAPI(para: number) {
-    return this.http.get(`${this.apiUrl}/articleId/${para}`)
-  }
+
 
   postPostAPI() {
     return this.http.post<number>(`${this.apiUrl}/Board/Articles?Type=0`, null, { withCredentials: true }).pipe(

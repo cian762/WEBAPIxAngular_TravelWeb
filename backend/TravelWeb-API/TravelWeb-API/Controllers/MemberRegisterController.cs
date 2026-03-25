@@ -67,7 +67,7 @@ namespace TravelWeb_API.Controllers
             string randomSuffix = new string(Enumerable.Repeat(chars, 2)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
 
-            string newMemberId = "@"+emailPrefix + randomSuffix;
+            string newMemberId = "@" + emailPrefix + randomSuffix;
 
             var newMemberInfo = new MemberInformation
             {
@@ -195,5 +195,28 @@ namespace TravelWeb_API.Controllers
                 return Convert.ToBase64String(hash);
             }
         }
-    }
+
+
+
+        [HttpPost("InitPasswords")]
+        public IActionResult InitPasswords()
+        {
+            var members = _context.MemberLists.Where(m => m.PasswordHash == null).ToList();
+
+            foreach (var member in members)
+            {
+                member.PasswordHash = HashPassword(member.MemberCode);
+            }
+
+            _context.SaveChanges();
+            return Ok("完成");
+        }
+
+
+
+    } 
+
+        
+
+        
 }

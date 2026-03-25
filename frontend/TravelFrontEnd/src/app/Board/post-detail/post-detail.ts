@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BoardServe } from '../board-serve';
+import { BoardServe } from '../Service/board-serve';
 import { PostDetailDto } from '../interface/PostDetailDto';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Sidebar } from "../Components/sidebar/sidebar";
@@ -18,7 +18,7 @@ interface ArticleTag {
   styleUrl: './post-detail.css',
 })
 export class PostDetail implements OnInit {
-  constructor(private Serve: BoardServe, private route: ActivatedRoute) {
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) {
 
   }
   id = 0;
@@ -50,5 +50,17 @@ export class PostDetail implements OnInit {
 
   setIndex(index: number) {
     this.selectedIndex = index;
+  }
+
+  seachTag(tag: any) {
+    console.log(tag)
+    const para: string[] = [];
+    para.push(`TagsId=${tag.tagId}&`);
+    this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
+      this.router.navigate(['Board'], {
+        state: { articleList: d.articleList }
+      });
+    }
+    )
   }
 }
