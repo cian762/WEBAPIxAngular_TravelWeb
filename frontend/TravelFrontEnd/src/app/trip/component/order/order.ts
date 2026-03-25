@@ -27,6 +27,7 @@ export class Order implements OnInit {
 
 
   ngOnInit(): void {
+    console.log('打進oninit確認checkoutInfo', this.checkoutInfo.directBuyItems);
     this.initForm();
     if (!this.checkoutInfo && this.router.navigated) {
       console.warn('遺失結帳資訊，準備導回...');

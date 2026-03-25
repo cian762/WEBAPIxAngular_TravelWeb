@@ -168,6 +168,7 @@ export class TripProductDetail implements OnInit {
     // 專業做法：透過導航狀態 (state) 傳遞資料，這樣網址不會變醜，且資料安全
     this.router.navigate(['/order'], { state: { data: checkoutPayload } });
 
+
   }
 
 }

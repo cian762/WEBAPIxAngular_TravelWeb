@@ -49,7 +49,7 @@ namespace TravelWebApi.Controllers
                                          MemberId = info.MemberId,
                                          Name = info.Name,
                                          AvatarUrl = info.AvatarUrl,
-                                         BackgroundUrl = info.BackgroundUrl,
+                                         //BackgroundUrl = info.BackgroundUrl,
                                          Gender = info.Gender,
                                          BirthDate = info.BirthDate,
                                          Email = list.Email,
@@ -139,7 +139,7 @@ namespace TravelWebApi.Controllers
 
                 if (uploadResult.Error != null) return StatusCode(500, new { message = "背景圖上傳失敗" });
 
-                memberInfo.BackgroundUrl = uploadResult.SecureUrl.ToString();
+                //memberInfo.BackgroundUrl = uploadResult.SecureUrl.ToString();
             }
 
             // ==========================================
@@ -152,7 +152,7 @@ namespace TravelWebApi.Controllers
                 {
                     message = "個人資料已成功更新！",
                     avatarUrl = memberInfo.AvatarUrl,
-                    backgroundUrl = memberInfo.BackgroundUrl
+                    //backgroundUrl = memberInfo.BackgroundUrl
                 });
             }
             catch (Exception ex)
