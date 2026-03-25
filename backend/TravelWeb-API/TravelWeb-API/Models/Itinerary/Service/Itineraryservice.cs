@@ -136,17 +136,19 @@ namespace TravelWeb_API.Models.Itinerary.Service
                             VersionNumber = v.VersionNumber ?? 0,
                             // 抓取該版本下的所有項目，並依照 SortOrder 排序
                             Items = v.ItineraryItems
-                                .OrderBy(item => item.SortOrder)
+                            .OrderBy(item => item.DayNumber) // 先按天數排
+                                .ThenBy(item => item.SortOrder)
                                 .Select(item => new ItemDetailDto
                                 {
                                     ItemId = item.ItemId,
                                     SortOrder = item.SortOrder ?? 0,
+                                    DayNumber = item.DayNumber ?? 1,
                                     ContentDescription = item.ContentDescription,
                                     // 關鍵：從關聯的 Attraction 表抓取地點資訊
-                                    AttractionName = item.Attraction.Name != null ? item.Attraction.Name : "未知景點",
-                                    Address = item.Attraction.Address,
-                                    Latitude = item.Attraction.Latitude,
-                                    Longitude = item.Attraction.Longitude,
+                                    AttractionName = item.Attraction.Name != null ? item.Attraction.Name : item.ContentDescription,
+                                    Address = item.Attraction.Address != null ? item.Attraction.Address : "建議於附近區域安排",
+                                    Latitude = item.Attraction.Latitude != null ? item.Attraction.Latitude : null,
+                                    Longitude = item.Attraction.Longitude != null ? item.Attraction.Longitude : null,
                                     StartTime = item.StartTime,
                                     EndTime = item.EndTime
                                 }).ToList()
@@ -346,6 +348,6 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 4. 回傳網址給前端，讓前端可以 [style.background-image] 顯示
             return imageUrl;
         }
-       
+
     }
 }
