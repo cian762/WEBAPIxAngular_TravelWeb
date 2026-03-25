@@ -46,7 +46,7 @@ export class PersonalCommentService {
 
   }
 
-  deletePresonalComment(reviewId: number) {
+  deletePersonalComment(reviewId: number) {
     const params = new HttpParams().set('reviewId', reviewId);
     return this.http.delete(this.baseUrl, { params });
   }
