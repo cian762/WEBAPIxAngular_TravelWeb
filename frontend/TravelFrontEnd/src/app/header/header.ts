@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common'; // 🔥 必須引入才能在 HTML 用 *ngIf
 import { RouterModule, RouterLink } from '@angular/router';
 import { AuthService } from '../Member/services/auth.service'; // 引入服務
+import { CreateShoppingCart } from '../trip/services/create-shopping-cart';
 
 @Component({
   selector: 'app-header',
@@ -11,7 +12,7 @@ import { AuthService } from '../Member/services/auth.service'; // 引入服務
   styleUrl: './header.css',
 })
 export class Header implements OnInit {
-
+  public cartService = inject(CreateShoppingCart);
   private authService = inject(AuthService);
 
   // 綁定到畫面的變數
@@ -44,7 +45,7 @@ export class Header implements OnInit {
 
   // 登出按鈕觸發的方法
   onLogout(): void {
-    if(confirm('確定要登出嗎？')) {
+    if (confirm('確定要登出嗎？')) {
       this.authService.logout().subscribe({
         next: () => {
           // 登出成功後，廣播會自動把 isLoggedIn 變成 false，畫面會瞬間切換！

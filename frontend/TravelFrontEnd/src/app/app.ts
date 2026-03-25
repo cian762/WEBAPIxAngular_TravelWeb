@@ -20,7 +20,7 @@ import { LoginComponent } from "./Member/login/login.component";
 })
 export class App implements OnInit {
   ngOnInit(): void {
-    // this.initializeGuestId();
+    this.initializeGuestId();
   }
 
   protected readonly title = signal('TravelFrontEnd');
