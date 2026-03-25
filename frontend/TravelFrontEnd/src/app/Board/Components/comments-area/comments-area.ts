@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { BoardServe } from '../../board-serve';
+import { BoardServe } from '../../Service/board-serve';
 import { CommentsDTO } from '../../interface/CommentsDTO';
 import { FormsModule } from '@angular/forms';
 

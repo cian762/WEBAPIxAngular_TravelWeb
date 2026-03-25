@@ -94,8 +94,9 @@ namespace TravelWeb_API.Controllers
             {
                 message = "登入成功",
                 userCode = user.MemberCode,
-                role = role
-                // token = token // (可選) 既然存 Cookie 了，這裡可以不用回傳明文 Token，看前端需求
+                role = role,
+                 token = token
+                // (可選) 既然存 Cookie 了，這裡可以不用回傳明文 Token，看前端需求
             });
         }
 
@@ -148,6 +149,22 @@ namespace TravelWeb_API.Controllers
                 byte[] hash = sha.ComputeHash(bytes);
                 return Convert.ToBase64String(hash);
             }
+        }
+        //檢查登入狀態勿刪搭配路由守門員使用
+        [HttpGet("check-status")]
+        public IActionResult CheckStatus()
+        {
+            // 檢查名為 "AuthToken" 的 Cookie 是否存在
+            var token = Request.Cookies["AuthToken"];
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return Ok(false); // 沒 Cookie，代表沒登入
+            }
+
+            // 進階：你也可以在這裡驗證 JWT Token 是否過期
+            // 如果只是初步練習，檢查有無字串即可
+            return Ok(true);
         }
     }
 }

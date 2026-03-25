@@ -44,8 +44,8 @@
   <!-- 下半部 main-menu (Logo 與所有導覽列) 完全保留不變 -->
   <div class="container main-menu">
     <div class="row align-items-center justify-content-between d-flex">
-      <div id="logo" class="col-6">
-        <a href="index.html"><img src="assets/img/logo.png" alt="" title="" /></a>
+      <div id="logo" class="col-4 ms-3">
+        <a href="index.html"><img src="assets/img/網站logo.png" style="height: 60px;" title="" /></a>
       </div>
       <nav id="nav-menu-container" class="col-6">
         <ul class="nav-menu">
@@ -60,7 +60,11 @@
               <li><a href="blog-single.html">Blog Single</a></li>
             </ul>
           </li>
-          <li><a href="hotels.html">購物車圖案放這</a></li>
+          <li><a routerLink="Shoppingcart"><i class="bi bi-cart3 fs-4"></i> <span
+                *ngIf="(cartService.cartCount$ | async) as count"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ count > 99 ? '99+' : count }}
+              </span></a></li>
           <!-- ... 其他選單略 ... -->
         </ul>
       </nav>

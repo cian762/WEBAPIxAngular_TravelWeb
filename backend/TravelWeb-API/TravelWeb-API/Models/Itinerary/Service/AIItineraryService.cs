@@ -30,7 +30,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 3. 防呆：若 AI 格式錯誤，回傳當天零點
             return targetDate;
         }
-        public async Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days)
+        public async Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days, string memberid)
         {
             // 【前因 1】：AI 需要知道景點的座標與營業時間才能排動線，所以要先從 DB 撈詳細資料
             var pois = await _context.Attractions
@@ -41,19 +41,25 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     Name = a.Name,
                     Latitude = a.Latitude ?? 0,
                     Longitude = a.Longitude ?? 0,
-                    BusinessHours = a.BusinessHours,
+                    BusinessHours = string.IsNullOrEmpty(a.BusinessHours) ? "09:00-18:00" : a.BusinessHours,
                     MustVisit = true // 告訴 AI 這些都是必去
                 }).ToListAsync();
-
+            if (!pois.Any())
+            {
+                throw new Exception("景點池為空，AI 無法規劃。請檢查 selectedPoiIds 是否正確傳遞。");
+            }
             var inputContext = new AiInputContext
             {
+
                 TotalDays = days,
                 Destination = dto.ItineraryName,
                 AttractionPool = pois
             };
-
+            var debugJson = JsonSerializer.Serialize(inputContext);
             // 【前因 2】：呼叫 AI 取得規劃好的 JSON
-            var jsonResult = await _aiService.CallAiAsync(TravelPrompts.CreateItinerarySystemPrompt, inputContext);
+            var jsonResult = await _aiService.CallAiAsync(TravelPrompts.CreateItinerarySystemPrompt, debugJson);
+            Console.WriteLine($"DEBUG_RAW_AI: {jsonResult}");
+
             // 設定：忽略大小寫差異
             var options = new JsonSerializerOptions
             {
@@ -75,7 +81,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 // 1. 建立行程主表
                 var newItinerary = new DBModel.Itinerary
                 {
-                    MemberId = dto.MemberId,
+                    MemberId = memberid,
                     ItineraryName = dto.ItineraryName,
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,
@@ -124,13 +130,13 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 }
 
                 // 4. 存入 AI 分析報告
-                _context.Aianalyses.Add(new Aianalysis
-                {
-                    VersionId = aiVersion.VersionId,
-                    FeasibilityScore = result.Summary.AnalysisMetrics.OverallFeasibility,
-                    FatigueIndex = result.Summary.AnalysisMetrics.OverallFatigue,
-                    AnalysisTime = DateTime.Now
-                });
+                //_context.Aianalyses.Add(new Aianalysis
+                //{
+                //    VersionId = aiVersion.VersionId,
+                //    FeasibilityScore = result.Summary.AnalysisMetrics.OverallFeasibility,
+                //    FatigueIndex = result.Summary.AnalysisMetrics.OverallFatigue,
+                //    AnalysisTime = DateTime.Now
+                //});
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

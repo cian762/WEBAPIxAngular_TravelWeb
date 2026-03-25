@@ -170,9 +170,15 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
         // 2. 訂單預覽：在正式下單前，計算金額與確認商品清單 (不寫入資料庫)
         public async Task<OrderDetailDto> GetCheckoutPreviewAsync(CreateOrderDto dto, string memberId)
         {
-          // 1.決定來源(直接購買 或 購物車)
-                 var itemsToProcess = dto.DirectBuyItems;
-            if (itemsToProcess == null || !itemsToProcess.Any())
+            // 1.決定來源(直接購買 或 購物車)
+            List<AddToCartDTO> itemsToProcess;
+
+            if (dto.DirectBuyItems != null && dto.DirectBuyItems.Any())
+            {
+                // 優先使用直接購買的商品
+                itemsToProcess = dto.DirectBuyItems;
+            }
+            else
             {
                 itemsToProcess = await _context.ShoppingCarts
                     .Where(c => c.MemberId == memberId)

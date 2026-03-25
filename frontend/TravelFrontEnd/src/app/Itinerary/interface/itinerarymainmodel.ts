@@ -7,6 +7,9 @@ export interface ItineraryCreateDto {
 }
 export interface ItineraryItem {
   itemId: number;
+  dayNumber: number;
+  attractionId: number;
+  placeId: string;
   sortOrder: number;
   contentDescription: string;
   attractionName: string;

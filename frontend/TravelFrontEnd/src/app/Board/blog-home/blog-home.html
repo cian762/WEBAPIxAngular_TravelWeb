@@ -1,19 +1,49 @@
-<!-- Start post-content Area -->
+<button class="float-btn" (click)="goToCreate()">
+  <i class="fa fa-plus"></i>
+  <span class="btn-text">新增文章</span>
+</button>
+
 <section class="post-content-area">
   <div class="container">
-    <a (click)="goToCreate()" class="genric-btn primary radius">新增貼文</a>
-    <!-- Start post-content Area -->
+    <!-- 搜尋起點 -->
+    <div class="row my-5">
+      <div class="d-flex justify-content-center align-items-center">
+        <div class="col-5">
+          <div class="search-form" (submit)="$event.preventDefault()">
+            <div class="search-box">
+              <input placeholder="搜尋文章" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event);"
+                (input)="onSeach($event)">
+              <button type="button"><i class="fa fa-search"></i></button>
+            </div>
+            <!-- <ul class="my-dropdown-menu">
+            @for(tag of filteredTags; track tag.tagId) {
+            <li class="dropdown-item" (click)="addTag(tag.tagId); $event.stopPropagation()">{{ tag.tagName }} <i
+                class="ri-add-large-line"></i>
+            </li>
+            }
+          </ul> -->
+          </div>
+        </div>
+        <a href="#" class="genric-btn primary-border circle">進階搜尋</a>
+      </div>
+    </div>
+    <!-- 搜尋終點 -->
+
     <div class="row">
+      <!-- 文章列起點 -->
       <div class="col-lg-8 posts-list">
         @for (article of articleList; track $index) {
-        <div class="single-post row">
+        <div class="single-post row border-bottom">
           <div class="col-lg-3  col-md-3 meta-details">
-            <ul class="tags">
+            <!-- <ul class="tags">
               <li><a href="#">Food,</a></li>
               <li><a href="#">Technology,</a></li>
               <li><a href="#">Politics,</a></li>
               <li><a href="#">Lifestyle</a></li>
-            </ul>
+            </ul> -->
+            <div style="margin-bottom:10px;">
+              <img class="userAvatar" [src]="article.userAvatar">
+            </div>
             <div class="user-details row">
               <p class="user-name col-lg-12 col-md-12 col-6"><a href="#">{{article.userName}}</a> <span
                   class="lnr lnr-user"></span></p>
@@ -27,15 +57,11 @@
           </div>
           <div class="col-lg-9 col-md-9 ">
             <div class="feature-img">
-              <img class="img-fluid img-fixed-size" [src]="article.photoUrl" alt="">
+              <img class="img-fluid img-fixed-size" [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
             </div>
-            <a class="posts-title" href="blog-single.html">
+            <a class="posts-title" (click)="goToDetail(article.articleId)">
               <h3>{{article.title}}</h3>
             </a>
-            <p class="excert">
-              MCSE boot camps have its supporters and its detractors. Some people do not understand why you should
-              have to spend money on boot camp when you can get the MCSE study materials yourself at a fraction.
-            </p>
             <a (click)="goToDetail(article.articleId)" class="primary-btn">查看詳情</a>
             <a (click)="goToUpdate(article.articleId)" class="genric-btn primary">編輯貼文</a>
           </div>
@@ -75,142 +101,23 @@
           </ul>
         </nav>
       </div>
+      <!-- 文章列終點 -->
 
-
+      <!-- 側欄起點 -->
       <div class="col-lg-4 sidebar-widgets">
         <div class="widget-wrap">
-          <div class="single-sidebar-widget search-widget">
-            <form class="search-form">
-              <input placeholder="Search Posts" name="search" type="text" onfocus="this.placeholder = ''"
-                onblur="this.placeholder = 'Search Posts'" [(ngModel)]="Keyword">
-              <button type="submit" (click)="searchByKeyword()"><i class="fa fa-search"></i></button>
-            </form>
-          </div>
-          <div class="single-sidebar-widget user-info-widget">
-            <img src="img/blog/user-info.png" alt="">
-            <a href="#">
-              <h4>Charlie Barber</h4>
-            </a>
-            <p>
-              Senior blog writer
-            </p>
-            <ul class="social-links">
-              <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-              <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-              <li><a href="#"><i class="fa fa-github"></i></a></li>
-              <li><a href="#"><i class="fa fa-behance"></i></a></li>
-            </ul>
-            <p>
-              Boot camps have its supporters andit sdetractors. Some people do not understand why you should have to
-              spend money on boot camp when you can get. Boot camps have itssuppor ters andits detractors.
-            </p>
-          </div>
-          <div class="single-sidebar-widget popular-post-widget">
-            <h4 class="popular-title">Popular Posts</h4>
-            <div class="popular-post-list">
-              <div class="single-post-list d-flex flex-row align-items-center">
-                <div class="thumb">
-                  <img class="img-fluid" src="img/blog/pp1.jpg" alt="">
-                </div>
-                <div class="details">
-                  <a href="blog-single.html">
-                    <h6>Space The Final Frontier</h6>
-                  </a>
-                  <p>02 Hours ago</p>
-                </div>
-              </div>
-              <div class="single-post-list d-flex flex-row align-items-center">
-                <div class="thumb">
-                  <img class="img-fluid" src="img/blog/pp2.jpg" alt="">
-                </div>
-                <div class="details">
-                  <a href="blog-single.html">
-                    <h6>The Amazing Hubble</h6>
-                  </a>
-                  <p>02 Hours ago</p>
-                </div>
-              </div>
-              <div class="single-post-list d-flex flex-row align-items-center">
-                <div class="thumb">
-                  <img class="img-fluid" src="img/blog/pp3.jpg" alt="">
-                </div>
-                <div class="details">
-                  <a href="blog-single.html">
-                    <h6>Astronomy Or Astrology</h6>
-                  </a>
-                  <p>02 Hours ago</p>
-                </div>
-              </div>
-              <div class="single-post-list d-flex flex-row align-items-center">
-                <div class="thumb">
-                  <img class="img-fluid" src="img/blog/pp4.jpg" alt="">
-                </div>
-                <div class="details">
-                  <a href="blog-single.html">
-                    <h6>Asteroids telescope</h6>
-                  </a>
-                  <p>02 Hours ago</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <app-popular-post></app-popular-post>
+          <app-tag-clouds></app-tag-clouds>
+          <app-popular-post></app-popular-post>
           <div class="single-sidebar-widget ads-widget">
             <a href="#"><img class="img-fluid" src="img/blog/ads-banner.jpg" alt=""></a>
           </div>
-          <div class="single-sidebar-widget post-category-widget">
-            <h4 class="category-title">Post Catgories</h4>
-            <ul class="cat-list">
-              <li>
-                <a href="#" class="d-flex justify-content-between">
-                  <p>Technology</p>
-                  <p>37</p>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="d-flex justify-content-between">
-                  <p>Lifestyle</p>
-                  <p>24</p>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="d-flex justify-content-between">
-                  <p>Fashion</p>
-                  <p>59</p>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="d-flex justify-content-between">
-                  <p>Art</p>
-                  <p>29</p>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="d-flex justify-content-between">
-                  <p>Food</p>
-                  <p>15</p>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="d-flex justify-content-between">
-                  <p>Architecture</p>
-                  <p>09</p>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="d-flex justify-content-between">
-                  <p>Adventure</p>
-                  <p>44</p>
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
-
-
-    </div><!-- End post-content Area -->
+      <!-- 側欄終點 -->
+    </div>
   </div>
-</section><!-- End post-content Area -->
+</section>
 
 
 

@@ -1,29 +1,33 @@
-import { Component, OnInit } from '@angular/core';
-import { ArticleData } from '../interface/ArticleData';
-import { BoardServe } from '../board-serve';
+import { Component, Input, input, OnInit } from '@angular/core';
+import { ArticleData, ArticleResponse } from '../interface/ArticleData';
+import { BoardServe } from '../Service/board-serve';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { PopularPost } from "../Components/popular-post/popular-post";
+import { TagClouds } from "../Components/tag-clouds/tag-clouds";
+
 
 @Component({
   selector: 'app-blog-home',
-  imports: [RouterModule, FormsModule],
+  imports: [RouterModule, FormsModule, PopularPost, TagClouds],
   templateUrl: './blog-home.html',
   styleUrl: './blog-home.css',
 })
 export class BlogHome implements OnInit {
-  constructor(private Serve: BoardServe,
-    private router: Router
+  constructor(private Serve: BoardServe, private router: Router
   ) {
 
   }
-  articleList: ArticleData[] = [
-  ]
+  articleList: ArticleData[] = history.state.articleList || [];
   totalCount = 0;
   currentPage: number = 1;
   Keyword = "";
 
   ngOnInit(): void {
-    this.ReflashArticles();
+    if (this.articleList.length === 0) {
+      this.ReflashArticles();
+    }
+
   }
 
 
@@ -35,7 +39,7 @@ export class BlogHome implements OnInit {
   }
 
   ReflashArticles() {
-    this.Serve.getArticleAPI(this.currentPage).subscribe((d: any) => {
+    this.Serve.getArticleAPI(this.currentPage).subscribe((d: ArticleResponse) => {
       this.articleList = d.articleList;
       this.totalCount = d.totalCount;
     });
@@ -76,6 +80,24 @@ export class BlogHome implements OnInit {
     this.router.navigate(['Board', 'creat', id]);
   }
 
+  onFocus(event: any) {
+    event.target.closest('.search-box').classList.add('focused');
+    if (event.target.value) {
+      this.onSeach(event);
+    }
+  }
 
+  onSeach(event: any) {
+    const keyword = event.target.value;
+
+  }
+
+
+
+  onBlur(event: any) {
+    setTimeout(() => {
+      event.target.closest('.search-box').classList.remove('focused');
+    }, 200);
+  }
 
 }

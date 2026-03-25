@@ -108,16 +108,13 @@ export class UserCommentForm implements OnDestroy {
       return;
     }
 
-    // TODO: 這裡接你的 API
-    const memberId = '2';
     this.personalCommentService.postPersonComment({
       activityId: this.activityId,
       title: this.commentForm.controls.title.value,
       comment: this.commentForm.controls.comment.value,
       rating: this.commentForm.controls.rating.value,
       reviewImages: this.commentForm.controls.images.value
-
-    }, memberId).subscribe({
+    }).subscribe({
       next: (res) => {
         console.log('送出成功', res);
         this.commentEmit.emit();

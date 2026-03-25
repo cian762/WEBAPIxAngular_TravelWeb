@@ -14,32 +14,34 @@ namespace TravelWeb_API.Controllers
     public class ShoppingCartController : ControllerBase
     {
         private readonly IShoppingCart _cart;
-        private readonly string _memberId;
+      
 
-        public ShoppingCartController(IShoppingCart cart, string memderId) 
+        public ShoppingCartController(IShoppingCart cart) 
         {
          _cart = cart;
-          _memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
-
         }
+        private string? CurrentMemberId =>
+         User.FindFirst("MemberId")?.Value ?? // 👈 優先抓你自定義的這個標籤
+         User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+         User.Identity?.Name;
         // 🏆 核心邏輯：判斷目前身分
-     
+
         //下單完成後一次性刪除該使用者（MemberId）在購物車裡的所有商品
         [HttpDelete("clear")]
         public async Task<IActionResult> ClearCart([FromQuery] string? guestId)
         {
       
-            await _cart.ClearCartAsync(_memberId);
+            await _cart.ClearCartAsync(CurrentMemberId!);
             return Ok(new { message = "購物車已清空" });
         }
         //呼叫該會員購物車商品
         // 1. 取得購物車：GET api/ShoppingCart/{memberId}
         [HttpGet]
-        public async Task<IActionResult> GetCart([FromQuery] string? guestId)
+        public async Task<IActionResult> GetCart()
         {
             try
             {
-                var id = _memberId;
+                var id = CurrentMemberId;
                 if (string.IsNullOrEmpty(id)) return BadRequest("無法辨識用戶身分");
 
                 var cart = await _cart.GetCartAsync(id);
@@ -55,7 +57,7 @@ namespace TravelWeb_API.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDTO dto)
         {
-            dto.MemberId = _memberId;
+            dto.MemberId = CurrentMemberId;
             if (dto == null) return BadRequest("資料不能為空");
 
             try
@@ -70,13 +72,13 @@ namespace TravelWeb_API.Controllers
         }
         //跟新購物車數量
         [HttpPatch("update-quantity")]
-        public async Task<IActionResult> UpdateQuantity([FromQuery] string? guestId, [FromBody] UpdateCartQtyDTO dto)
+        public async Task<IActionResult> UpdateQuantity([FromBody] UpdateCartQtyDTO dto)
         {
             try
             {
                 // 這裡要把 URL 的 memberId 傳給 Service
-                var id = _memberId;
-                await _cart.UpdateQuantityAsync(dto, id);
+                var id = CurrentMemberId;
+                await _cart.UpdateQuantityAsync(dto, id!);
                 return Ok(new { success = true, message = "數量已更新" });
             }
             catch (Exception ex)
@@ -91,9 +93,7 @@ namespace TravelWeb_API.Controllers
         public async Task<IActionResult> RemoveItems([FromBody] DeleteCartItemsDTO dto, [FromQuery] string? guestId)
         {
             // 1. 決定最終要使用的 ID (優先用 Token，沒有才用傳進來的 guestId)
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                         ?? User.Identity?.Name
-                         ?? guestId;
+            var userId = CurrentMemberId;
             if (dto.CartIds == null || !dto.CartIds.Any()) return BadRequest("未提供 ID");
 
             try
@@ -111,7 +111,7 @@ namespace TravelWeb_API.Controllers
         public async Task<IActionResult> SyncCart([FromBody] List<AddToCartDTO> dtos)
         {
             // 從 Cookie 拿 ID
-            var memberId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.Identity?.Name;
+            var memberId = CurrentMemberId;
 
             if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             if (dtos == null || !dtos.Any()) return Ok(); // 沒東西要同步就直接回傳 OK
@@ -120,20 +120,20 @@ namespace TravelWeb_API.Controllers
             return Ok(new { message = "同步完成" });
         }
         //遊客轉會員購物車搬遷這支目前先不用
-        [HttpPost("migrate")]
-        public async Task<IActionResult> Migrate([FromBody] MigrateCartDto dto)
-        {
-            try
-            {
-                await _cart.MigrateCartAsync(dto.GuestId, dto.MemberId);
-                return Ok(new { success = true, message = "購物車合併成功" });
-            }
-            catch (Exception ex)
-            {
-                // 如果 Service 丟出「無效遊客」或「帳號不存在」，這裡會抓到
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-        }
+        //[HttpPost("migrate")]
+        //public async Task<IActionResult> Migrate([FromBody] MigrateCartDto dto)
+        //{
+        //    try
+        //    {
+        //        await _cart.MigrateCartAsync(dto.GuestId, dto.MemberId);
+        //        return Ok(new { success = true, message = "購物車合併成功" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // 如果 Service 丟出「無效遊客」或「帳號不存在」，這裡會抓到
+        //        return BadRequest(new { success = false, message = ex.Message });
+        //    }
+        //}
 
 
     }

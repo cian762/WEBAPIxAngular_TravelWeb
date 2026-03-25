@@ -23,8 +23,22 @@
               <input type="time" [(ngModel)]="item.startTime">
             </div>
             <div class="info-box">
-              <div class="attraction-name">{{ item.attractionName }}</div>
-              <div class="address">{{ item.address }}</div>
+              <div class="attraction-name">
+                @if (!item.attractionId) {
+                <span class="badge bg-info-subtle text-info me-1" style="font-size: 0.7rem;">AI 建議</span>
+                {{ item.contentDescription }}
+                } @else {
+                {{ item.attractionName }}
+                }
+              </div>
+
+              <div class="address">
+                @if (item.attractionId) {
+                {{ item.address }}
+                } @else {
+                <span class="text-muted small">依當下位置彈性安排</span>
+                }
+              </div>
             </div>
             <div class="sort-handle" cdkDragHandle>☰</div>
           </div>
@@ -35,8 +49,7 @@
         </div>
         }
       </div>
-
-      <button (click)="addItem(day)" class="btn-add-item">＋ 新增單筆行程</button>
+      <button (click)="openSearchModal(day)">+ 新增單筆行程</button>
     </div>
     }
   </div>
@@ -47,3 +60,13 @@
     <button class="btn-secondary">查看過去版本</button>
   </div>
 </div>
+
+@if(showSearchModal){
+<div class="my-modal">
+  <div class="modal-body">
+    <h3>搜尋地點</h3>
+    <input #searchInput type="text" class="form-control" placeholder="請輸入景點...">
+    <button (click)="showSearchModal = false">取消</button>
+  </div>
+</div>
+}

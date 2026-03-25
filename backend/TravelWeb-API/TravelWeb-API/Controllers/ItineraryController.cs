@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TravelWeb_API.Models.Itinerary.DTO;
 using TravelWeb_API.Models.Itinerary.Service;
 
@@ -6,7 +7,7 @@ using TravelWeb_API.Models.Itinerary.Service;
 
 namespace TravelWeb_API.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ItineraryController : ControllerBase
@@ -16,7 +17,7 @@ namespace TravelWeb_API.Controllers
         public ItineraryController(IItineraryservice itineraryService)
         {
             _itineraryService = itineraryService;
-            //_memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
+            //_memberId = User.FindFirst("MemberId")?.Value!;
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
@@ -44,6 +45,7 @@ namespace TravelWeb_API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateItinerary([FromBody] ItineraryCreateDto dto)
         {
+            var memberId = User.FindFirst("MemberId")?.Value ?? "tw_user_001";
             // 1. 基本驗證：確保 DTO 不是空的
             if (dto == null)
             {
@@ -59,7 +61,7 @@ namespace TravelWeb_API.Controllers
             try
             {
                 // 3. 呼叫 Service
-                int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto, _memberId);
+                int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto, memberId);
 
                 // 4. 回傳 201 Created，並在 Header 附上查詢該行程的 URL
 
