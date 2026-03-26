@@ -104,7 +104,11 @@ namespace TravelWeb_API.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            Response.Cookies.Delete("AuthToken");
+            Response.Cookies.Delete("AuthToken", new CookieOptions
+            {
+                Secure =true,
+                SameSite = SameSiteMode.None
+            });
             return Ok(new { message = "已成功登出" });
         }
 
