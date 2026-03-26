@@ -29,17 +29,29 @@
       </div>
 
       <div class="day-nav-list">
-        <div class="day-nav-item all-item">
+        <!-- 全部行程 -->
+        <div class="day-nav-item all-item" [class.active]="activeDayIndex === 0" (click)="activeDayIndex = 0">
           <span class="nav-icon">☰</span>
           <span class="nav-label">全部行程</span>
         </div>
 
-        @for (day of days; track day.day) {
-        <div class="day-nav-item" [class.active]="activeDayIndex === day.day" (click)="activeDayIndex = day.day">
-          <span class="nav-label">第{{ day.day }}天</span>
-          <span class="nav-count">({{ day.items.length }})</span>
+        <!-- 使用 dayTabs 渲染按鈕，確保 1~N 天都會出現 -->
+        @for (dayNum of dayTabs; track dayNum) {
+        <div class="day-nav-item" [class.active]="activeDayIndex === dayNum" (click)="activeDayIndex = dayNum">
+          <span class="nav-label">第{{ dayNum }}天</span>
+
+          <!-- 顯示該天數有的項目數量，若無則顯示 (0) -->
+          <span class="nav-count">
+            ({{ getCountForDay(dayNum) }})
+          </span>
         </div>
         }
+
+        <!-- 新增天數按鈕 -->
+        <div class="day-nav-item add-day" (click)="addExtraDay()">
+          <span class="nav-icon">+</span>
+          <span class="nav-label">新增天數</span>
+        </div>
       </div>
 
       <div class="sidebar-actions">
@@ -67,20 +79,22 @@
 
       <!-- Day Tabs Row -->
       <div class="day-tabs">
-        @for (day of days; track day.day) {
-        <button class="day-tab" [class.active]="activeDayIndex === day.day" (click)="activeDayIndex = day.day">
-          第{{ day.day }}天
-          <span class="tab-count">{{ day.items.length }}</span>
+        @for (dayNum of dayTabs; track dayNum) {
+        <button class="day-tab" [class.active]="activeDayIndex === dayNum" (click)="activeDayIndex = dayNum">
+          第{{ dayNum }}天
+          <span class="tab-count">{{ getCountForDay(dayNum) }}</span>
         </button>
         }
       </div>
 
       <!-- Items for Active Day -->
-      @for (day of days; track day.day) {
-      @if (activeDayIndex === day.day) {
-      <div class="items-container" cdkDropList [cdkDropListData]="day.items" (cdkDropListDropped)="onDrop($event)">
 
-        @for (item of day.items; track $index; let i = $index) {
+      @if (activeDayIndex>0) {
+      @let currentDay = getOrCreateDayPlan(activeDayIndex);
+      <div class="items-container" cdkDropList [cdkDropListData]="currentDay.items"
+        (cdkDropListDropped)="onDrop($event)">
+
+        @for (item of currentDay.items; track $index; let i = $index) {
         <div class="itinerary-card" cdkDrag>
 
           <!-- Drag handle left -->
@@ -127,19 +141,19 @@
               <span>▶</span>
             </button>
             <button class="btn-icon btn-edit" title="編輯">✏️</button>
-            <button class="btn-icon btn-delete" title="刪除" (click)="deleteItem(day, $index)">🗑</button>
+            <button class="btn-icon btn-delete" title="刪除" (click)="deleteItem(currentDay, $index)">🗑</button>
           </div>
 
         </div>
         }
 
         <!-- Add button -->
-        <button class="btn-add-item" (click)="openSearchModal(day)">
+        <button class="btn-add-item" (click)="openSearchModal(currentDay)">
           <span class="plus">＋</span> 新增單筆行程
         </button>
       </div>
       }
-      }
+
 
     </div>
   </div>

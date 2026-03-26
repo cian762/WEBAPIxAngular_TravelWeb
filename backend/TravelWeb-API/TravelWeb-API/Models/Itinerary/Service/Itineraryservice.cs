@@ -18,6 +18,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         /*建立主表包含物件*/
         public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto, string memberid)
         {
+            int totalDays = (dto.EndTime.Value.Date - dto.StartTime.Value.Date).Days + 1;
             // 啟動資料庫交易
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -47,10 +48,11 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 };
                 _context.ItineraryVersions.Add(initialVersion);
                 await _context.SaveChangesAsync(); // 取得 VersionID
-                // 2. 處理景點 (ItemsToPush)
-                int currentOrder = 100;
+                                                   // 2. 處理景點 (ItemsToPush)
+
                 if (dto.ItemsToPush == null || !dto.ItemsToPush.Any())
                     throw new Exception("至少要一個景點");
+                int currentOrder = 100;
                 foreach (var input in dto.ItemsToPush)
                 {
                     int finalAttractionId;
@@ -93,6 +95,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     else continue; // 兩者皆無則跳過
 
                     // 3. 建立 ItineraryItems 關聯
+
+
                     var newItem = new ItineraryItem
                     {
                         VersionId = initialVersion.VersionId,
@@ -101,11 +105,13 @@ namespace TravelWeb_API.Models.Itinerary.Service
                         ContentDescription = input.UserNote ?? "自訂行程項目",
                         DayNumber = 1, // 初始預設第一天
                         StartTime = dto.StartTime,
-                        EndTime = dto.EndTime
+                        EndTime = dto.StartTime?.AddHours(1)
                     };
                     _context.ItineraryItems.Add(newItem);
                     currentOrder += 100;
                 }
+
+
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync(); // 全部成功，提交交易
@@ -127,7 +133,9 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     ItineraryId = i.ItineraryId,
                     ItineraryName = i.ItineraryName,
                     ItineraryImage = i.ItineraryImage ?? "https://res.cloudinary.com/dcyrbbv4w/image/upload/v1773284561/cld-sample-2.jpg",
-
+                    StartTime = i.StartTime,
+                    EndTime = i.EndTime,
+                    Introduction = i.Introduction,
                     // 抓取「當前使用中」的版本
                     CurrentVersion = i.ItineraryVersions
                         .Where(v => v.CurrentUsageStatus == "Y")
@@ -351,6 +359,18 @@ namespace TravelWeb_API.Models.Itinerary.Service
 
             // 4. 回傳網址給前端，讓前端可以 [style.background-image] 顯示
             return imageUrl;
+        }
+        public async Task<DateTime> ExtendOneDayAsync(int itineraryId)
+        {
+            var itinerary = await _context.Itineraries.FindAsync(itineraryId);
+            if (itinerary == null) throw new Exception("找不到該行程");
+
+            // 將結束日期往後推 1 天
+            // 注意：如果是 Nullable 的 DateTime? 建議要做 null 檢查
+            itinerary.EndTime = itinerary.EndTime?.AddDays(1) ?? DateTime.Now.AddDays(1);
+
+            await _context.SaveChangesAsync();
+            return itinerary.EndTime.Value;
         }
 
     }

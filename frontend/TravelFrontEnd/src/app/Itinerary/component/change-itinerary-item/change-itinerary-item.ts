@@ -1,3 +1,4 @@
+import { DayPlan } from './../../interface/itinerarymainmodel';
 import { Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import {
   CdkDropList,
   CdkDrag
 } from '@angular/cdk/drag-drop';
-import { DayPlan, ItineraryItem } from '../../interface/itinerarymainmodel';
+import { ItineraryItem } from '../../interface/itinerarymainmodel';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 declare const google: any;
 
@@ -56,7 +57,7 @@ export class ItineraryDetailComponent implements OnInit {
     if (!items || items.length === 0) return [];
     const groups = new Map<number, ItineraryItem[]>();
     items.forEach(item => {
-      const d = item.dayNumber || 1;
+      const d = Number(item.dayNumber) || 1;
       if (!groups.has(d)) groups.set(d, []);
       groups.get(d)?.push(item);
     });
@@ -98,12 +99,57 @@ export class ItineraryDetailComponent implements OnInit {
       item.isAiSuggestion = true; // 標記為 AI 建議，可以在 UI 顯示不同顏色
     }
   }
+  getCountForDay(dayNum: number): number {
+    const dayData = this.days.find(d => d.day === dayNum);
+    return dayData ? dayData.items.length : 0;
+  }
+  startTime: string = '';
+  endDate: string = '';
+  dayTabs: number[] = [];
+  addExtraDay() {
+    this.http.patch<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}/extend-day`, {})
+      .subscribe({
+        next: (res) => {
+          // 🚩 防禦性檢查：嘗試抓取大小寫可能的欄位
+          const newTime = res.newEndTime || res.NewEndTime;
+
+          if (newTime) {
+            // 🚩 修正 1：確保賦值
+            this.endDate = newTime;
+
+            // 🚩 修正 2：直接在呼叫前印出這兩個值，確認它們真的不一樣
+            console.log('計算前:', this.startTime, this.endDate);
+
+            this.generateDayTabs(this.startTime, this.endDate);
+
+            // 🚩 修正 3：手動檢查 dayTabs 長度
+            console.log('更新後的 DayTabs:', this.dayTabs);
+
+            setTimeout(() => {
+              const lastDay = this.dayTabs[this.dayTabs.length - 1];
+              this.activeDayIndex = lastDay;
+              // 執行一次確保 days 陣列裡有這一天
+              this.getOrCreateDayPlan(lastDay);
+            }, 100);
+          }
+        }
+      });
+  }
   loadData() {
     this.http.get<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}`).subscribe(res => {
+      console.log('API 回傳的原始資料:', res);
       this.title = res.itineraryName;
       this.imageUrl = res.itineraryImage;
-      this.date = res.startTime;
+      this.startTime = res.startTime || res.StartTime;
+      this.endDate = res.endTime || res.EndTime;
+      console.log('存入元件後的 startTime:', this.startTime);
+      this.generateDayTabs(this.startTime, this.endDate);
       this.days = this.mapApiToDays(res.currentVersion?.items || []);
+      if (this.days.length > 0) {
+        this.activeDayIndex = this.days[0].day;
+      } else {
+        this.activeDayIndex = 1;
+      }
       this.days.forEach(day => {
         day.items.forEach(item => {
           // 如果 AttractionId 是 0 或 null，才需要解析字串
@@ -112,12 +158,45 @@ export class ItineraryDetailComponent implements OnInit {
           }
         });
       });
-      if (this.days.length > 0) {
-        this.activeDayIndex = this.days[0].day;
-      }
+
     });
   }
+  getOrCreateDayPlan(dayNum: number): DayPlan {
+    // 先找看看 days 陣列有沒有這一天
+    let dayPlan = this.days.find(d => d.day === dayNum);
 
+    // 如果找不到（代表是剛新增的空天數）
+    if (!dayPlan) {
+      dayPlan = {
+        day: dayNum,
+        items: []
+      };
+      // 將這個新的空天數物件加入 days 陣列，並排序
+      this.days.push(dayPlan);
+      this.days.sort((a, b) => a.day - b.day);
+    }
+
+    return dayPlan;
+  }
+  generateDayTabs(start: string, end: string) {
+    const finalStart = start || this.startTime;
+    if (!finalStart || !end) {
+      console.error('無法計算天數：開始或結束日期缺失', { finalStart, end });
+      return;
+    }
+    const s = new Date(start);
+    const e = new Date(end);
+
+    // 🚩 防呆：重設日期時間為 00:00:00，避免因為小時數導致計算不滿一天
+    s.setHours(0, 0, 0, 0);
+    e.setHours(0, 0, 0, 0);
+
+    const diffTime = e.getTime() - s.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    // 🚩 重新賦值陣列，觸發 Angular 變更偵測
+    console.log('算出的天數:', diffDays);
+    this.dayTabs = Array.from({ length: diffDays > 0 ? diffDays : 1 }, (_, i) => i + 1);
+  }
   openSearchModal(day: DayPlan) {
     this.showSearchModal = true;
     this.currentAddingDay = day;
