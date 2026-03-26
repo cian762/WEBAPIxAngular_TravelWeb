@@ -43,9 +43,9 @@ export class OrderDetails implements OnInit {
 
   getStatusBadge(status: string) {
     switch (status) {
-      case 'Pending': return 'bg-warning text-dark';
-      case 'Active': return 'bg-success';
-      case 'Cancelled': return 'bg-danger';
+      case '待處理': return 'bg-warning text-dark';
+      case '已處理': return 'bg-success';
+      case '已取消': return 'bg-danger';
       default: return 'bg-secondary';
     }
   }

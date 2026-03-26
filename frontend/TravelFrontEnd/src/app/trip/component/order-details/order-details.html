@@ -8,6 +8,7 @@
         <th>總金額</th>
         <th>訂單狀態</th>
         <th>訂單詳細</th>
+        <th>付款狀態</th>
       </tr>
     </thead>
     <tbody>
@@ -25,10 +26,14 @@
             <button class="btn btn-sm btn-outline-primary" (click)="toggleDetail(order)">
               {{ order.isExpanded ? '收合' : '詳情' }}
             </button>
-            <button *ngIf="order.orderStatus === 'Pending'" class="btn btn-sm btn-success ms-2"
+
+          </td>
+          <td>
+            <button *ngIf="order.orderStatus === '待處理'" class="btn btn-sm btn-success ms-2"
               (click)="onRepay(order.orderId)">
               前往付款
             </button>
+
           </td>
         </tr>
 

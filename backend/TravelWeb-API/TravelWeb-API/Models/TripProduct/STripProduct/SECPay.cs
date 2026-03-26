@@ -25,7 +25,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             var parameters = new Dictionary<string, string>
             {
                 { "MerchantID", ecpaySection["MerchantID"]! },
-                { "MerchantTradeNo",$"TW{order.OrderId}{DateTime.Now:MMddHH}"},
+                { "MerchantTradeNo",$"TW{order.OrderId}{DateTime.Now:yyMMddHHmmss}"},
                 { "MerchantTradeDate", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") },
                 { "CustomField1", order.OrderId.ToString() },
                 { "PaymentType", "aio" },

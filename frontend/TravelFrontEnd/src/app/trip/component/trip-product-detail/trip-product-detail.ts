@@ -151,7 +151,7 @@ export class TripProductDetail implements OnInit {
           productCode: data.scheduleId,
           quantity: item.qty,
           ticketCategoryId: item.ticketType,
-          cartId: 0
+
         }))
     };
 
