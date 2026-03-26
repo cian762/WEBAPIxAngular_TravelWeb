@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
 import { CartItem } from '../../models/creatshopping.model';
 
@@ -15,7 +15,7 @@ import { CartItem } from '../../models/creatshopping.model';
 
 export class Shoppingcart implements OnInit {
   private cartService = inject(CreateShoppingCart);
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
   cartItems: CartItem[] = []; // 使用強型別介面
   isLoading: boolean = true;
   totalAmount: number = 0;
@@ -63,6 +63,25 @@ export class Shoppingcart implements OnInit {
     this.cartService.updateQuantity(item.cartId, newQty, item.productCode).subscribe({
       next: () => this.fetchCartData()
     });
+  }
+  //購物車打包給訂單用
+  goToOrder() {
+    // 假設你的購物車資料存在 this.cartItems
+    // 這裡要把資料打包，格式要跟你的 OrderComponent 接收的一致
+    const checkoutPayload = {
+      directBuyItems: this.cartItems.map(item => ({
+        productCode: item.productCode,
+        productName: item.productName,
+        quantity: item.quantity,
+        ticketCategoryId: item.ticketCategoryId,
+        price: item.price,
+        cartId: item.cartId, // 這是為了之後刪除用的
+        coverImage: item.coverImage // 讓訂單頁能顯示圖片
+      }))
+    };
+    console.log('準備帶走的資料:', checkoutPayload);
+    // 使用 router.navigate 並透過 state 傳資料
+    this.router.navigate(['/order'], { state: { data: checkoutPayload } });
   }
 
   // 4. 計算總價

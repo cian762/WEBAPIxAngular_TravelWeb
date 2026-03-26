@@ -68,6 +68,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     CartId = item.CartId,
                     ProductCode = item.ProductCode,
                     Quantity = item.Quantity ?? 0,
+                    ticketCategoryId = item.TicketCategoryId
                 };
 
                 // --- 第一段：找「行程商品」(重點：s.Price 是檔期價格) ---

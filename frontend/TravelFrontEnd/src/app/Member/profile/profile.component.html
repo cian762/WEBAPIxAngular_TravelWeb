@@ -17,12 +17,14 @@
 
       <!-- 封面照片區塊 (無預設圖片) -->
       <div class="position-relative cover-container rounded-bottom-4 shadow-sm"
-           style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);">
+        style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);">
 
         <!-- 有上傳封面才顯示 img 標籤 -->
-        <img *ngIf="userProfile.coverUrl" [src]="userProfile.coverUrl" class="cover-img w-100 rounded-bottom-4" alt="Cover Photo">
+        <img *ngIf="userProfile.coverUrl" [src]="userProfile.coverUrl" class="cover-img w-100 rounded-bottom-4"
+          alt="Cover Photo">
 
-        <button class="btn btn-light btn-sm position-absolute bottom-0 end-0 m-3 shadow fw-bold" (click)="triggerUpload('cover')">
+        <button class="btn btn-light btn-sm position-absolute bottom-0 end-0 m-3 shadow fw-bold"
+          (click)="triggerUpload('cover')">
           <i class="bi bi-camera-fill me-1"></i> 編輯封面相片
         </button>
       </div>
@@ -32,9 +34,11 @@
 
         <!-- 大頭貼 -->
         <div class="avatar-wrapper position-relative">
-          <img [src]="userProfile.avatarUrl" class="avatar-img rounded-circle border border-4 border-white shadow" alt="Avatar"
-               onerror="this.src='assets/default-avatar.png';"> <!-- 防破圖機制 -->
-          <button class="btn btn-secondary btn-sm position-absolute bottom-0 end-0 rounded-circle avatar-edit-btn shadow" (click)="triggerUpload('avatar')">
+          <img [src]="userProfile.avatarUrl" class="avatar-img rounded-circle border border-4 border-white shadow"
+            alt="Avatar" onerror="this.src='assets/default-avatar.png';"> <!-- 防破圖機制 -->
+          <button
+            class="btn btn-secondary btn-sm position-absolute bottom-0 end-0 rounded-circle avatar-edit-btn shadow"
+            (click)="triggerUpload('avatar')">
             <i class="bi bi-camera-fill"></i>
           </button>
         </div>
@@ -47,7 +51,8 @@
         </div>
 
         <!-- 新增限時動態按鈕 (編輯按鈕移到下面了) -->
-        <div class="mt-3 mt-md-auto mb-md-2 text-center text-md-end d-flex align-items-end gap-2 justify-content-center">
+        <div
+          class="mt-3 mt-md-auto mb-md-2 text-center text-md-end d-flex align-items-end gap-2 justify-content-center">
           <button class="btn btn-primary fw-bold shadow-sm">
             <i class="bi bi-plus-lg me-1"></i> 新增限時動態
           </button>
@@ -70,13 +75,22 @@
           <div class="card-body p-2">
             <h5 class="fw-bold px-3 pt-3 pb-2 text-dark">設定與隱私</h5>
             <div class="list-group list-group-flush custom-list-group">
-              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1" [class.active]="activeTab === 'account'" (click)="switchTab('account')">帳號資料</button>
-              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1" [class.active]="activeTab === 'member'" (click)="switchTab('member')">會員資料</button>
-              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1" [class.active]="activeTab === 'following'" (click)="switchTab('following')">追隨清單</button>
-              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1" [class.active]="activeTab === 'blocked'" (click)="switchTab('blocked')">黑名單</button>
-              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1" [class.active]="activeTab === 'complaints'" (click)="switchTab('complaints')">意見申訴</button>
+              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1"
+                [class.active]="activeTab === 'account'" (click)="switchTab('account')">帳號資料</button>
+              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1"
+                [class.active]="activeTab === 'member'" (click)="switchTab('member')">會員資料</button>
+              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1"
+                [class.active]="activeTab === 'following'" (click)="switchTab('following')">追隨清單</button>
+              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1"
+                [class.active]="activeTab === 'blocked'" (click)="switchTab('blocked')">黑名單</button>
+              <button routerLink="orderdetails"
+                class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1"
+                [class.active]="activeTab === 'orderdetails'" (click)="switchTab('orderdetails')">我的訂單</button>
+              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1"
+                [class.active]="activeTab === 'complaints'" (click)="switchTab('complaints')">意見申訴</button>
               <hr class="my-2">
-              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1 text-danger" (click)="onLogout()">安全登出</button>
+              <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1 text-danger"
+                (click)="onLogout()">安全登出</button>
             </div>
           </div>
         </div>
@@ -143,6 +157,10 @@
             </div>
 
             <!-- 其他區塊略 (依照您原本的設計即可) -->
+            <div *ngIf="activeTab === 'orderdetails'">
+              <router-outlet></router-outlet>
+            </div>
+
 
           </div>
         </div>

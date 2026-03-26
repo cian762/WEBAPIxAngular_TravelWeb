@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { OrderService } from '../../services/OrderService';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CreateShoppingCart } from '../../services/create-shopping-cart';
 
 
 
@@ -18,7 +19,7 @@ export class Order implements OnInit {
   orderForm!: FormGroup;
   previewData?: OrderDetailDto;
   isLoading: boolean = false;
-  constructor(private orderService: OrderService, private fb: FormBuilder, private route: ActivatedRoute, private router: Router) {
+  constructor(private orderService: OrderService, private fb: FormBuilder, private route: ActivatedRoute, private router: Router, private cartService: CreateShoppingCart) {
     // 從 Router 的導航狀態中取出資料
     const navigation = this.router.getCurrentNavigation();
     this.checkoutInfo = navigation?.extras.state?.['data'];
@@ -27,7 +28,7 @@ export class Order implements OnInit {
 
 
   ngOnInit(): void {
-    console.log('打進oninit確認checkoutInfo', this.checkoutInfo.directBuyItems);
+
     this.initForm();
     if (!this.checkoutInfo && this.router.navigated) {
       console.warn('遺失結帳資訊，準備導回...');
@@ -77,27 +78,45 @@ export class Order implements OnInit {
 
   /** 3. 正式結帳並跳轉金流 */
   onCheckout() {
-    if (this.orderForm.invalid || this.isLoading) return; // 增加 isLoading 判斷
+    if (this.orderForm.invalid || this.isLoading) return;
 
     this.isLoading = true;
-    if (this.orderForm.invalid) {
-      this.orderForm.markAllAsTouched();
-      alert('請填寫正確的聯絡人資訊');
-      return;
-    }
 
-    // 修改點：同樣使用 checkoutInfo 裡的商品資訊
-    const directItems = this.checkoutInfo?.directBuyItems || [];
+    // 取得結帳商品資訊
+    const items = this.checkoutInfo?.directBuyItems || [];
 
     const finalDto: CreateOrderDto = {
       ...this.orderForm.value,
-      directBuyItems: directItems
+      directBuyItems: items
     };
+
     this.orderService.createOrder(finalDto).subscribe({
       next: (res) => {
-        if (res.paymentForm) {
-          this.executePaymentForm(res.paymentForm);
+        // --- 關鍵清理邏輯開始 ---
+
+        // 從商品清單中找出哪些是有 cartId 的（大於 0 代表來自購物車）
+        const cartIdsToRemove = items
+          .map((i: any) => i.cartId)
+          .filter((id: number) => id > 0);
+
+        if (cartIdsToRemove.length > 0) {
+          // 情況 A：來自購物車，先呼叫 removeItems 刪除，成功後再跳轉金流
+          this.cartService.removeItems(cartIdsToRemove, []).subscribe({
+            next: () => {
+              console.log('購物車項目已清理');
+              this.handlePaymentRedirect(res);
+            },
+            error: (err) => {
+              console.error('清理失敗，但仍繼續支付流程', err);
+              this.handlePaymentRedirect(res);
+            }
+          });
+        } else {
+          // 情況 B：立即購買 (cartId 都是 0)，直接跳轉金流
+          this.handlePaymentRedirect(res);
         }
+
+        // --- 關鍵清理邏輯結束 ---
       },
       error: (err) => {
         this.isLoading = false;
@@ -105,7 +124,6 @@ export class Order implements OnInit {
       }
     });
   }
-
   /** 4. 輔助方法：執行綠界金流 HTML 表單跳轉 */
   private executePaymentForm(formHtml: string) {
     const div = document.createElement('div');
@@ -114,6 +132,15 @@ export class Order implements OnInit {
     const form = div.querySelector('form');
     if (form) {
       form.submit(); // 自動送出表單，頁面會跳轉到綠界
+    }
+  }
+  // 抽取出來的跳轉方法，讓程式碼更乾淨
+  private handlePaymentRedirect(res: any) {
+    if (res.paymentForm) {
+      this.executePaymentForm(res.paymentForm);
+    } else {
+      // 如果沒有金流表單（例如金額為 0），可能導向成功頁面
+      this.router.navigate(['/order-success']);
     }
   }
 }
