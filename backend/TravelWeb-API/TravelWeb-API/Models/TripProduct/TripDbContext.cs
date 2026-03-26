@@ -43,6 +43,10 @@ public partial class TripDbContext : DbContext
 
     public virtual DbSet<ProductInventoryStatus> ProductInventoryStatuses { get; set; }
 
+    public virtual DbSet<QrcodeInfo> QrcodeInfos { get; set; }
+
+    public virtual DbSet<QrcodeVerification> QrcodeVerifications { get; set; }
+
     public virtual DbSet<Resource> Resources { get; set; }
 
     public virtual DbSet<ResourcesImage> ResourcesImages { get; set; }
@@ -93,7 +97,6 @@ public partial class TripDbContext : DbContext
             entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.Title).HasMaxLength(50);
             entity.Property(e => e.UpdateAt).HasColumnType("datetime");
-            entity.Property(e => e.ViewCount).HasDefaultValue(0);
         });
 
         modelBuilder.Entity<ActivityImage>(entity =>
@@ -174,6 +177,9 @@ public partial class TripDbContext : DbContext
             entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
             entity.Property(e => e.MaxPurchaseQuantity).HasColumnName("max_purchase_quantity");
+            entity.Property(e => e.OriginalPrice)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("original_price");
             entity.Property(e => e.PolicyId).HasColumnName("policy_id");
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
@@ -189,6 +195,7 @@ public partial class TripDbContext : DbContext
             entity.Property(e => e.Title)
                 .HasMaxLength(255)
                 .HasColumnName("title");
+            entity.Property(e => e.ValidityDays).HasColumnName("validity_days");
 
             entity.HasOne(d => d.Attraction).WithMany(p => p.AttractionProducts)
                 .HasForeignKey(d => d.AttractionId)
@@ -361,6 +368,45 @@ public partial class TripDbContext : DbContext
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProductInventoryStatus_AttractionProducts");
+        });
+
+        modelBuilder.Entity<QrcodeInfo>(entity =>
+        {
+            entity.HasKey(e => e.QrcodeId);
+
+            entity.ToTable("QRcodeInfo");
+
+            entity.Property(e => e.QrcodeId).HasColumnName("QRcodeId");
+            entity.Property(e => e.CreateAt).HasColumnType("datetime");
+            entity.Property(e => e.Qrtoken)
+                .HasMaxLength(500)
+                .HasColumnName("QRToken");
+            entity.Property(e => e.Status).HasMaxLength(10);
+            entity.Property(e => e.UsedAt).HasColumnType("datetime");
+            entity.Property(e => e.UsedBy).HasMaxLength(50);
+
+            entity.HasOne(d => d.Order).WithMany(p => p.QrcodeInfos)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_QRcodeInfo_OrderItems");
+        });
+
+        modelBuilder.Entity<QrcodeVerification>(entity =>
+        {
+            entity.HasKey(e => e.VerificationId);
+
+            entity.ToTable("QRcodeVerification");
+
+            entity.Property(e => e.Action).HasMaxLength(10);
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.Message).HasMaxLength(100);
+            entity.Property(e => e.OperatorId).HasMaxLength(50);
+            entity.Property(e => e.QrcodeId).HasColumnName("QRcodeId");
+
+            entity.HasOne(d => d.Qrcode).WithMany(p => p.QrcodeVerifications)
+                .HasForeignKey(d => d.QrcodeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_QRcodeVerification_QRcodeInfo");
         });
 
         modelBuilder.Entity<Resource>(entity =>

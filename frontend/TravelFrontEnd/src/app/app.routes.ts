@@ -113,7 +113,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./Member/login/login.component').then(m => m.LoginComponent),
+      import('./travelindex/travelindex').then(m => m.Travelindex),
   },
 
   {

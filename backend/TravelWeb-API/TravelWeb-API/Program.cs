@@ -157,6 +157,16 @@ builder.Services.AddScoped<ActivityTicketService>();
 builder.Services.AddHttpClient<GoogleRouteForActivityService>();
 builder.Services.AddScoped<ActivityReviewService>();
 builder.Services.AddScoped<CloudinaryPhotoService>();
+
+//QRCode 相關組態強型別引用、QRCode Service 註冊
+builder.Services.Configure<QrCodeSettings>(
+    builder.Configuration.GetSection("QrCodeSettings"));
+builder.Services.AddScoped<QRCodeService>();
+
+//SMTP 相關組態強型別引用、Email Service 註冊
+builder.Services.Configure<SmtpSettings>(
+    builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddScoped<EmailService>();
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>

@@ -27,15 +27,17 @@ export class Order implements OnInit {
 
 
   ngOnInit(): void {
+    console.log(this.checkoutInfo);
+
     this.initForm();
     if (!this.checkoutInfo && this.router.navigated) {
       console.warn('遺失結帳資訊，準備導回...');
       // 這裡可以選擇導回購物車或首頁
     }
     this.loadOrderPreview();
-
-
   }
+
+
   initForm() {
     this.orderForm = this.fb.group({
       contactName: ['', Validators.required],
@@ -60,6 +62,7 @@ export class Order implements OnInit {
       directBuyItems: directItems // 直接使用傳過來的陣列
     };
     console.log('檢查傳給後端的 DTO:', previewDto);
+
     this.orderService.getPreview(previewDto).subscribe({
       next: (data) => {
         this.previewData = data;
