@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TravelWeb_API.Models.TripProduct;
+using TravelWeb_API.Models.TripProduct.Enums;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
@@ -154,10 +155,56 @@ namespace TravelWeb_API.Controllers
                 // 捕捉 Service 丟出的錯誤（例如：名額不足、找不到商品等）
                 return BadRequest(new { Message = "預覽失敗: " + ex.Message });
             }
+          
         }
+        //這支是從我的訂單這去到綠界結帳的
+        [HttpPost("{orderId}/repay")]
+        public async Task<IActionResult> RepayOrder(int orderId)
+        {
+            // 1. 從 Token 取得目前登入的會員 ID
+            var memberId = CurrentMemberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
+
+            try
+            {
+                // 2. 呼叫 Service 取得訂單 (內含 AsNoTracking 與 MemberId 驗證)
+                var order = await _order.GetOrderByIdAsync(orderId, memberId);
+
+                if (order == null)
+                {
+                    return NotFound(new { Message = "找不到該筆訂單，或您無權限存取。" });
+                }
+
+                // 3. 安全檢查：只有「待處理」且「未付款」的訂單才能重新支付
+                // 這裡建議對照你的 OrderStatusNames 常數
+                if (order.OrderStatus != OrderStatusNames.Pending)
+                {
+                    return BadRequest(new { Message = $"訂單狀態為 {order.OrderStatus}，無法重新執行支付。" });
+                }
+
+                if (order.PaymentStatus == "已付款".Trim())
+                {
+                    return BadRequest(new { Message = "此訂單已完成付款，請勿重複支付。" });
+                }
+
+                // 4. 呼叫現有的 _ecpay 服務產生新的綠界 HTML 表單
+                // 因為是 AsNoTracking 抓出來的，這裡傳入 order 物件非常安全
+                string paymentForm = _ecpay.GetPaymentForm(order);
+
+                // 5. 回傳給前端
+                return Ok(new
+                {
+                    Message = "重新取得支付資訊成功",
+                    OrderId = order.OrderId,
+                    PaymentForm = paymentForm
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "重新支付發生錯誤: " + ex.Message });
+            }
+        }
+
     }
-
-
-
 }
 

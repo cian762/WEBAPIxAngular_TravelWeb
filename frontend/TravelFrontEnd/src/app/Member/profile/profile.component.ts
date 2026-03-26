@@ -1,12 +1,12 @@
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'; // 🔥 新增 ViewChild, ElementRef
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterLink, RouterOutlet],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -27,8 +27,8 @@ export class ProfileComponent implements OnInit {
     accountInfo: {},
     memberInfo: {},
     followingList: [],
-    blackList:[],
-    complaints:[]
+    blackList: [],
+    complaints: []
   };
 
   ngOnInit(): void {
@@ -118,7 +118,7 @@ export class ProfileComponent implements OnInit {
   }
 
   onLogout(): void {
-    if(confirm('確定要登出嗎？')) {
+    if (confirm('確定要登出嗎？')) {
       this.authService.logout().subscribe({
         next: () => {
           this.router.navigate(['/login']);

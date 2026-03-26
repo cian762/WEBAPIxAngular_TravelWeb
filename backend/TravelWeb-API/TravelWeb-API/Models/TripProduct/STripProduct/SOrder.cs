@@ -488,5 +488,10 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
             return att?.Price ?? 0;
         }
+        //針對現有訂單重新取得支付在成立訂單後如果不支付可重新再支付
+        public async Task<Order?> GetOrderByIdAsync(int orderId, string memberId)
+        {
+            return await _context.Orders.AsNoTracking().Include(o=>o.OrderItems).FirstOrDefaultAsync(s => s.OrderId == orderId && s.MemberId == memberId);
+        }
     }
 }

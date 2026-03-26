@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 import { aGuard } from './a-guard';
+import { ProfileComponent } from './Member/profile/profile.component';
 
 export const routes: Routes = [
   {
@@ -126,7 +127,14 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () => import('./Member/profile/profile.component').then(m => m.ProfileComponent)
+    component: ProfileComponent, // 這是你目前顯示頭像和 Sidebar 的元件
+    children: [
+      {
+        path: 'orderdetails', // 這裡不要加 /
+        loadComponent: () => import('./trip/component/order-details/order-details').then(
+          m => m.OrderDetails
+        )
+      }],
   },
 
   { path: 'complaint', loadComponent: () => import('./Member/complaint-form/complaint-form.component').then(m => m.ComplaintFormComponent) },
