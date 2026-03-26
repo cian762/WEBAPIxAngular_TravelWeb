@@ -15,11 +15,11 @@ namespace TravelWeb_API.Services
         }
 
         //將成功付款訂單中的商品明細，轉換成 QRCode Token 寫進資料庫
-        public async Task CreateQrCodeForOrderAsync(int orderId) 
+        public void CreateQrCodeForOrderAsync(int orderId) 
         {
-            var check = await _dbcontext.Orders
+            var check = _dbcontext.Orders
                 .Where(o => o.OrderStatus == "已付款")
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+                .FirstOrDefault(o => o.OrderId == orderId);
                 
             if (check == null) return;
 
@@ -36,7 +36,7 @@ namespace TravelWeb_API.Services
 
             _dbcontext.QrcodeInfos.AddRange(qrCodeEntities);
            
-            await _dbcontext.SaveChangesAsync();
+            _dbcontext.SaveChanges();
         }
     }
 }
