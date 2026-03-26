@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration; // 🔥 引入 IConfiguration
 using System.Security.Claims;
-using TravelWeb_API.DTO.MemberSystemDto;
 using TravelWeb_API.Models.MemberSystem;
-using TravelWebApi.DTOs; // 替換為您的 Models 命名空間
+using TravelWebApi.DTOs; // 請確保這是你 DTO 的正確命名空間
 
 namespace TravelWeb_API.Controllers
 {
@@ -14,10 +16,12 @@ namespace TravelWeb_API.Controllers
     public class ComplaintController : ControllerBase
     {
         private readonly MemberSystemContext _context;
+        private readonly IConfiguration _configuration; // 🔥 改為注入設定檔
 
-        public ComplaintController(MemberSystemContext context)
+        public ComplaintController(MemberSystemContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         [HttpPost("submit")]
@@ -68,13 +72,43 @@ namespace TravelWeb_API.Controllers
                 CreatedAt = DateTime.Now
             };
 
-            // 4. 使用 Transaction 一口氣寫入兩張表
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            // ==========================================
+            // 🖼️ 處理圖片上傳 (Cloudinary)
+            // ==========================================
+            if (request.ImageFile != null && request.ImageFile.Length > 0)
+            {
+                // 1. 讀取 Cloudinary 金鑰
+                var cloudName = _configuration["CloudinarySettings:CloudName"];
+                var apiKey = _configuration["CloudinarySettings:ApiKey"];
+                var apiSecret = _configuration["CloudinarySettings:ApiSecret"];
+
+                Account account = new Account(cloudName, apiKey, apiSecret);
+                Cloudinary cloudinary = new Cloudinary(account);
+
+                // 2. 設定上傳參數
+                using var stream = request.ImageFile.OpenReadStream();
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(request.ImageFile.FileName, stream),
+                    Folder = "TravelWeb/Complaints", // 🔥 建議建一個專屬資料夾放客訴圖片
+                    // 客訴圖片通常需要保留原圖讓管理員看清楚，所以這裡不加上 Crop 裁切
+                };
+
+                // 3. 執行上傳
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                {
+                    return StatusCode(500, new { message = "圖片上傳失敗", error = uploadResult.Error.Message });
+                }
+
+                // 4. 將 Cloudinary 回傳的網址存入資料庫模型
+                // ⚠️ 注意：C# 的 Model 屬性通常是首字母大寫，請確認你的 MemberComplaint 裡面是 ImageUrl 還是 imageUrl
+                memberComplaint.imageUrl = uploadResult.SecureUrl.ToString();
+            }
+
             try
             {
-                _context.ComplaintRecords.Add(complaintRecord);
-                await _context.SaveChangesAsync();
-
                 _context.MemberComplaints.Add(memberComplaint);
                 await _context.SaveChangesAsync();
 
