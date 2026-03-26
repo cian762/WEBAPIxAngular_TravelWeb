@@ -106,9 +106,10 @@ namespace TravelWeb_API.Controllers
         {
             Response.Cookies.Delete("AuthToken", new CookieOptions
             {
-                Secure =true,
-                SameSite = SameSiteMode.None
+                Secure = true,
+                SameSite = SameSiteMode.None,
             });
+
             return Ok(new { message = "已成功登出" });
         }
 

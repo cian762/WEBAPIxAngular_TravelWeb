@@ -97,13 +97,23 @@ export const routes: Routes = [
         path: 'detail/:id',
         loadComponent: () => import('./Board/post-detail/post-detail').then(m => m.PostDetail),
       },
+      //私人(可編輯)
+      {
+        path: 'Main',
+        loadComponent: () => import('./Board/personal-homepage/personal-homepage').then(m => m.PersonalHomepage),
+      },
+      //公開(只能看)
+      {
+        path: 'user/:id',
+        loadComponent: () => import('./Board/user-articles-page/user-articles-page').then(m => m.UserArticlesPage),
+      },
     ],
   },
 
   {
     path: '',
     loadComponent: () =>
-      import('./Member/login/login.component').then(m => m.LoginComponent),
+      import('./travelindex/travelindex').then(m => m.Travelindex),
   },
 
   {
@@ -118,6 +128,8 @@ export const routes: Routes = [
     path: 'profile',
     loadComponent: () => import('./Member/profile/profile.component').then(m => m.ProfileComponent)
   },
+
+  { path: 'complaint', loadComponent: () => import('./Member/complaint-form/complaint-form.component').then(m => m.ComplaintFormComponent) },
 
   // 所有不認識的路徑會導向首頁
   { path: '**', redirectTo: '' },

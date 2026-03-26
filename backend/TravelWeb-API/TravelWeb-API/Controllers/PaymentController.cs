@@ -79,8 +79,10 @@ namespace TravelWeb_API.Controllers
                             transaction.CompletedAt = DateTime.Now;
                         }
 
+
                         await _tripDbContext.SaveChangesAsync();
                     }
+                    //QRcode 送信放這
                 }
             }
 
