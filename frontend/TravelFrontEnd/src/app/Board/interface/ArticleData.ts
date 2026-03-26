@@ -7,15 +7,17 @@ export interface ArticleResponse {
 export interface ArticleData {
   articleId: number;
   title?: string;
-  createdAt: Data;
+  createdAt: Date;
   photoUrl?: string;
   userID: string;
   userName?: string;
   userAvatar?: string;
+  likeCount: number;
+  isLike: boolean;
   tags?: TagDTO[]
 }
 
 export interface TagDTO {
-  TagId: number;
-  TagName: string;
+  tagId: number;
+  tagName: string;
 }

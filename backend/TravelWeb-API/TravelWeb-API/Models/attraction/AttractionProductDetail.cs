@@ -22,6 +22,6 @@ public partial class AttractionProductDetail
     public string? CancelPolicy { get; set; }      // 取消政策說明
 
     public DateTime? LastUpdatedAt { get; set; }
-
+    public string? ValidityNote { get; set; }   // ← 補上
     public virtual AttractionProduct Product { get; set; } = null!;
 }

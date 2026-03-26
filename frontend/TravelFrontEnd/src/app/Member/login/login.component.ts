@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // 必須引入才能用 ngModel
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -24,6 +24,8 @@ export class LoginComponent {
   // 注入 Service 與 Router
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute); // ← 新增：用來讀 returnUrl
+
 
   // 點擊登入按鈕觸發的方法
   onSubmit(): void {
@@ -54,8 +56,9 @@ export class LoginComponent {
         alert('登入成功！歡迎回來');
 
 
-        // 跳轉至會員中心頁面
-        this.router.navigate(['/profile']);
+        // ← 修改：優先導回 returnUrl，沒有才去 /profile
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/profile';
+        this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {
         // 登入失敗... (維持原本的寫法)

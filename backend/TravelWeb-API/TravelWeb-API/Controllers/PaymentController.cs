@@ -93,8 +93,10 @@ namespace TravelWeb_API.Controllers
                             }
                         }
 
+
                         await _tripDbContext.SaveChangesAsync();
                     }
+                    //QRcode 送信放這
                 }
             }
 

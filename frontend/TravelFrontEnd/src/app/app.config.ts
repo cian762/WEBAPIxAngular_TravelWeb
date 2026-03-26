@@ -7,12 +7,12 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 // 引入我們剛剛寫的攔截器
 import { authInterceptor } from './Member/interceptors/auth-interceptor';
 
-
-
+import { CookieService } from 'ngx-cookie-service';
 
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    CookieService,
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withInMemoryScrolling({
       scrollPositionRestoration: 'top',

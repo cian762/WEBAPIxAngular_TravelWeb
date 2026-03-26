@@ -161,6 +161,102 @@
               <router-outlet></router-outlet>
             </div>
 
+             <!-- 4. 黑名單 -->
+            <div *ngIf="activeTab === 'blocked'">
+               <!-- 您原本寫好的黑名單內容 -->
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 5. 意見申訴紀錄 (可展開詳細內容) -->
+            <!-- ========================================== -->
+            <div *ngIf="activeTab === 'complaints'">
+
+              <!-- 頂部標題與新增按鈕 -->
+              <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                <h4 class="fw-bold mb-0 text-dark">
+                  <i class="bi bi-chat-square-text-fill me-2 text-primary"></i> 意見申訴紀錄
+                </h4>
+                <a routerLink="/complaint" class="btn btn-primary rounded-pill shadow-sm fw-bold px-4">
+                  <i class="bi bi-plus-lg me-1"></i> 新增申訴
+                </a>
+              </div>
+
+              <!-- 沒資料時的空狀態 (如果 userProfile.complaints 陣列是空的) -->
+              <div *ngIf="!userProfile.complaints || userProfile.complaints.length === 0" class="text-center text-muted py-5 bg-light rounded-4 border mt-4">
+                <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
+                <h6 class="fw-bold">目前沒有任何申訴紀錄</h6>
+                <p class="mb-0 small">如果您在使用過程中有任何問題或建議，歡迎點擊上方按鈕新增申訴。</p>
+              </div>
+
+              <!-- 有資料時的表格 -->
+              <div *ngIf="userProfile.complaints && userProfile.complaints.length > 0" class="table-responsive mt-3">
+                <table class="table table-hover align-middle border rounded-3 overflow-hidden shadow-sm">
+
+                  <thead class="table-light text-secondary">
+                    <tr>
+                      <th class="ps-4">案件編號</th>
+                      <th>主旨</th>
+                      <th>投訴時間</th>
+                      <th>處理狀態</th>
+                      <th class="text-end pe-4">操作</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <!-- 使用 ngFor 跑迴圈，印出每一筆紀錄 (這裡先用您原本 ts 裡的假資料展示) -->
+                    <ng-container *ngFor="let c of userProfile.complaints; let i = index">
+
+                      <!-- 1. 表格主要列 (摘要) -->
+                      <tr>
+                        <td class="ps-4 fw-bold text-primary">{{ c.id }}</td>
+                        <!-- 🔥 改成您的 subject 欄位 -->
+                        <td class="fw-semibold text-dark">{{ c.subject || '未分類投訴' }}</td>
+                        <!-- 🔥 改成您的時間欄位 -->
+                        <td class="text-muted small">{{ c.date }}</td>
+                        <td>
+                          <!-- 狀態標籤 -->
+                          <span class="badge rounded-pill px-3 py-2 shadow-sm"
+                                [ngClass]="{'bg-success': c.status === '已處理', 'bg-warning text-dark': c.status === '處理中', 'bg-secondary': c.status === '已檢視'}">
+                            {{ c.status }}
+                          </span>
+                        </td>
+                        <td class="text-end pe-4">
+                          <!-- 展開/收合詳細內容的按鈕 (透過 Angular 的變數控制) -->
+                          <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold"
+                                  (click)="c.isExpanded = !c.isExpanded">
+                            {{ c.isExpanded ? '收合' : '詳細內容' }} <i class="bi" [ngClass]="c.isExpanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                          </button>
+                        </td>
+                      </tr>
+
+                      <!-- 2. 隱藏的詳細內容列 (點擊按鈕後才會出現) -->
+                      <tr *ngIf="c.isExpanded" class="bg-light">
+                        <td colspan="5" class="p-4 border-bottom">
+                          <div class="row g-4">
+                            <!-- 投訴內容 -->
+                            <div class="col-md-12">
+                              <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-file-earmark-text me-2"></i>投訴內容詳述</h6>
+                              <div class="p-3 bg-white border rounded-3 text-dark" style="white-space: pre-wrap;">
+                                {{ c.desc }}
+                              </div>
+                            </div>
+                            <!-- 官方回覆 (如果有) -->
+                            <div class="col-md-12" *ngIf="c.compensation">
+                              <h6 class="fw-bold text-success mb-2"><i class="bi bi-reply-fill me-2"></i>官方處理結果</h6>
+                              <div class="p-3 bg-white border border-success rounded-3 text-dark" style="white-space: pre-wrap;">
+                                {{ c.compensation }}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+
+                    </ng-container>
+                  </tbody>
+
+                </table>
+              </div>
+            </div>
 
           </div>
         </div>

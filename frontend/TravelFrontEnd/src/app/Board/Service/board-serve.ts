@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ArticleData, ArticleResponse } from '../interface/ArticleData';
+import { ArticleData, ArticleResponse, TagDTO } from '../interface/ArticleData';
 import { PostDetailDto } from '../interface/PostDetailDto';
 import { switchMap } from 'rxjs/operators';
 import { CommentsDTO } from '../interface/CommentsDTO';
@@ -15,6 +15,10 @@ export class BoardServe {
   private apiUrl = 'https://localhost:7276/api';
   getArticleAPI(para: number) {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
+  }
+
+  getArticleByUserAPI(para: number) {
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/articlesByUser?page=${para}`);
   }
 
   getArticleByKeyword(page: number, keyword: string) {
@@ -48,7 +52,7 @@ export class BoardServe {
     return this.http.get<CommentsDTO[]>(`${this.apiUrl}/Board/Comments/${para}`);
   }
   getAllTags() {
-    return this.http.get
+    return this.http.get<TagDTO[]>
       (`${this.apiUrl}/Board/Tags/all`)
   }
 
@@ -66,6 +70,10 @@ export class BoardServe {
     return this.http.post(`${this.apiUrl}/Board/Tags?articleId=${articleId}`, para)
   }
 
+  postArticleLike(articleId: number) {
+    return this.http.post(
+      `${this.apiUrl}/Board/Articles/Like?articleID=${articleId}`, null)
+  }
 
   putPostAPI(id: number, para: any) {
 
@@ -73,6 +81,8 @@ export class BoardServe {
       `${this.apiUrl}/Post/${id}`, para);
 
   }
+
+
 
 
 }

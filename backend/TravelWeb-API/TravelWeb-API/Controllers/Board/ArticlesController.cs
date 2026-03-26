@@ -41,12 +41,16 @@ namespace TravelWeb_API.Controllers.Board
         // GET: api/Articles 瀏覽(全部文章之瀑布流)async Task<ActionResult<IEnumerable<Article>>>
         [HttpGet("Bypage/{page}")]
         public IActionResult GetArticlesByDate(int page)
-        {            
-            var result = _ArticleService.GetArticles(page);
+        {    
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+
+            var result = _ArticleService.GetArticles(page, userId);
             return Ok(new
             {
                 totalCount = result.TotalCount,
-                articleList = result.Item1
+                articleList = result.ArticleDTOList
             });
         }
 
@@ -62,23 +66,30 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("search")]
         public IActionResult GetArticlesByTitle([FromQuery] int page, [FromQuery] string keyword)
         {
-            var result = _ArticleService.ArticlesByKeyword(page, keyword);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+           
+            var result = _ArticleService.ArticlesByKeyword(page, keyword, userId);
             return Ok(new
             {
-                totalCount = result.Item2,
-                articleList = result.Item1
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
             });
         }
 
         [HttpGet("searchByAll")]
         public IActionResult Search([FromQuery] int page, [FromQuery] ArticleSearchDTO dto)
         {
-            var result = _ArticleService.Search(page,dto);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);            
+            var result = _ArticleService.Search(page,dto, userId);
 
             return Ok(new
             {
-                totalCount = result.Item2,
-                articleList = result.Item1
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
             });
         }
 
@@ -86,12 +97,15 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("searchByDate")]
         public IActionResult GetArticlesByDate(int page, DateTime startTime, DateTime endTime)
         {
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);            
 
-            var result = _ArticleService.ArticlesByDate(page, startTime, endTime);
+            var result = _ArticleService.ArticlesByDate(page, startTime, endTime, userId);
             return Ok(new
             {
-                totalCount = result.Item2,
-                articleList = result.Item1
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
             });
         }
 
@@ -99,12 +113,16 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("searchByTags")]
         public IActionResult GetArticlesByTags([FromQuery]int page, [FromQuery] SearchByTagsDTO searchByTags)
         {
-            var result = _ArticleService.ArticlesByTags(page, searchByTags);
-            
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("無效的 Token");
+            var result = _ArticleService.ArticlesByTags(page, searchByTags, userId);
             return Ok(new
             {
-                totalCount = result.Item2,
-                articleList = result.Item1
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
             });
         }
 
@@ -112,12 +130,33 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("searchByAuthor")]
         public IActionResult GetArticlesByAuthor([FromQuery] int page, [FromQuery]string authorID)
         {
-            var result = _ArticleService.ArticlesByAuthorID(page, authorID);
-
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("無效的 Token");
+            var result = _ArticleService.ArticlesByAuthorID(page, authorID, userId);
             return Ok(new
             {
-                totalCount = result.Item2,
-                articleList = result.Item1
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
+            });
+        }
+
+        //GET:用戶主頁
+       [HttpGet("articlesByUser")]
+        public IActionResult GetArticlesByUser([FromQuery]int page)
+        {
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("無效的 Token");
+            var result = _ArticleService.ArticlesByUserID(page, userId);
+            return Ok(new
+            {
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
             });
         }
 
@@ -136,6 +175,20 @@ namespace TravelWeb_API.Controllers.Board
             Article article = _PostService.AddArtic(Type, userId);
             await _context.SaveChangesAsync();
             return Ok(article.ArticleId);
+        }
+
+
+        //// POST: 收藏
+        [HttpPost("Like")]
+        public async Task<IActionResult> ArticleLike(int articleID)
+        {
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("無效的 Token");
+            _ArticleService.Like(articleID,userId);
+            return Ok();
         }
 
 
