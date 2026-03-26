@@ -77,7 +77,7 @@ namespace TravelWeb_API.Controllers
 
         //POST修改行程，基於版本表與多個行程細項清單
         [HttpPost("{id}/save-snapshot")]
-        public async Task<IActionResult> SaveItinerarySnapshot(int id, [FromForm] ItinerarySnapshotDto dto)
+        public async Task<IActionResult> SaveItinerarySnapshot([FromBody] ItinerarySnapshotDto dto)
         {
             if (dto == null || dto.Items == null)
             {
@@ -105,7 +105,8 @@ namespace TravelWeb_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"儲存快照時發生伺服器錯誤: {ex.Message}");
+                var realMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(500, $"儲存快照時發生伺服器錯誤: {realMessage}");
             }
         }
         //POST修改圖片

@@ -10,6 +10,7 @@ export interface ItineraryItem {
   dayNumber: number;
   attractionId: number;
   placeId: string;
+  googlePlaceId: string;
   sortOrder: number;
   contentDescription: string;
   attractionName: string;

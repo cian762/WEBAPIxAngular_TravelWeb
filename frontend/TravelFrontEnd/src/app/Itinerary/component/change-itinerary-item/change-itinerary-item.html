@@ -99,7 +99,7 @@
           <!-- Main info -->
           <div class="card-info">
             <div class="card-name">
-              @if (item.attractionId > 0 || item.placeId) {
+              @if (!item.attractionId && !item.placeId) {
               <span class="badge-ai">AI 建議</span>
               {{ item.contentDescription }}
               } @else {
@@ -107,7 +107,8 @@
               }
             </div>
             <div class="card-address">
-              @if (item.attractionId) {
+              <!-- 只要有地址字串就顯示地址，不論 ID 是否為 0 -->
+              @if (item.address) {
               <span class="addr-icon">📍</span> {{ item.address }}
               } @else {
               <span class="text-muted">依當下位置彈性安排</span>

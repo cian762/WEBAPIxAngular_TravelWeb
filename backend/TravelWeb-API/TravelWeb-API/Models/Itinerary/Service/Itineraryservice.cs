@@ -127,6 +127,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     ItineraryId = i.ItineraryId,
                     ItineraryName = i.ItineraryName,
                     ItineraryImage = i.ItineraryImage ?? "https://res.cloudinary.com/dcyrbbv4w/image/upload/v1773284561/cld-sample-2.jpg",
+
                     // 抓取「當前使用中」的版本
                     CurrentVersion = i.ItineraryVersions
                         .Where(v => v.CurrentUsageStatus == "Y")
@@ -140,12 +141,15 @@ namespace TravelWeb_API.Models.Itinerary.Service
                                 .ThenBy(item => item.SortOrder)
                                 .Select(item => new ItemDetailDto
                                 {
+                                    AttractionId = item.AttractionId ?? 0,
                                     ItemId = item.ItemId,
                                     SortOrder = item.SortOrder ?? 0,
                                     DayNumber = item.DayNumber ?? 1,
                                     ContentDescription = item.ContentDescription,
                                     // 關鍵：從關聯的 Attraction 表抓取地點資訊
-                                    AttractionName = item.Attraction.Name != null ? item.Attraction.Name : item.ContentDescription,
+                                    AttractionName = item.AttractionName != null ? (item.Attraction.Name ?? item.ContentDescription) : item.ContentDescription,
+                                    GooglePlaceId = item.GooglePlaceId ?? null,
+                                    PlaceName = item.AttractionName ?? null,
                                     Address = item.Attraction.Address != null ? item.Attraction.Address : "建議於附近區域安排",
                                     Latitude = item.Attraction.Latitude != null ? item.Attraction.Latitude : null,
                                     Longitude = item.Attraction.Longitude != null ? item.Attraction.Longitude : null,

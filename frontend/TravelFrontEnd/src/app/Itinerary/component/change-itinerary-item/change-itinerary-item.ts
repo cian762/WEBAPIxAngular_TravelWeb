@@ -79,13 +79,39 @@ export class ItineraryDetailComponent implements OnInit {
         error: (err) => { console.error('上傳失敗', err); alert('上傳失敗，請檢查網絡'); }
       });
   }
+  parseAiDescription(item: any) {
+    const desc = item.contentDescription || '';
 
+    // 如果字串開頭是我們定義的標籤
+    if (desc.startsWith('[AI_NEW_PLACE]')) {
+      // 拆分字串: [標籤]|名稱|PlaceId|地址|緯度|經度|細節
+      const parts = desc.split('|');
+
+      // 更新 item 物件的顯示欄位
+      item.attractionName = parts[1] || '未知地點';
+      // 🛡️ 防禦：如果 AI 沒給 ID，我們給它一個特殊字串 "TEMP_AI_PLACE"
+      item.placeId = (parts[2] && parts[2] !== '0') ? parts[2] : "TEMP_AI_PLACE";
+      item.address = parts[3] || '請確認地址';
+      item.latitude = parseFloat(parts[4]) || null;
+      item.longitude = parseFloat(parts[5]) || null;
+      item.contentDescription = parts[6] || ''; // 把後面的備註還給 description
+      item.isAiSuggestion = true; // 標記為 AI 建議，可以在 UI 顯示不同顏色
+    }
+  }
   loadData() {
     this.http.get<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}`).subscribe(res => {
       this.title = res.itineraryName;
-      this.imageUrl = res.ItineraryImage;
+      this.imageUrl = res.itineraryImage;
       this.date = res.startTime;
       this.days = this.mapApiToDays(res.currentVersion?.items || []);
+      this.days.forEach(day => {
+        day.items.forEach(item => {
+          // 如果 AttractionId 是 0 或 null，才需要解析字串
+          if (!item.attractionId || item.attractionId === 0) {
+            this.parseAiDescription(item);
+          }
+        });
+      });
       if (this.days.length > 0) {
         this.activeDayIndex = this.days[0].day;
       }
@@ -118,6 +144,7 @@ export class ItineraryDetailComponent implements OnInit {
       attractionName: place.name,
       address: place.formatted_address,
       placeId: place.place_id,
+      googlePlaceId: place.place_id,
       latitude: place.geometry.location.lat(),
       longitude: place.geometry.location.lng(),
       startTime: '10:00',
@@ -139,15 +166,29 @@ export class ItineraryDetailComponent implements OnInit {
     const flattenedItems: any[] = [];
     this.days.forEach(day => {
       day.items.forEach(item => {
-        flattenedItems.push({ ...item, dayNumber: day.day });
+        flattenedItems.push({
+          AttractionId: item.attractionId || (item as any).AttractionId || 0,
+          Name: item.attractionName || (item as any).Name,
+          Address: item.address || (item as any).Address,
+          Latitude: item.latitude,
+          Longitude: item.longitude,
+          DayNumber: day.day,
+          ContentDescription: item.contentDescription || "無描述",
+          PlaceId: item.placeId || item.googlePlaceId || null, // 👈 統一使用 PlaceId
+          // 注意：StartTime 的處理見下方第 2 點
+          StartTime: this.combineDateAndTime(this.date, item.startTime),
+          EndTime: item.endTime ? this.combineDateAndTime(this.date, item.endTime) : null
+        });
       });
     });
+
     const payload = {
-      itineraryId: this.itineraryId,
-      items: flattenedItems,
-      versionNote: '手動修改行程'
+      ItineraryId: Number(this.itineraryId),
+      VersionNote: '手動修改行程',
+      Items: flattenedItems
     };
-    this.http.post(`https://localhost:7276/api/Itinerary/SaveSnapshot`, payload)
+    console.log("最後發送的 Payload:", payload);
+    this.http.post(`https://localhost:7276/api/Itinerary/${this.itineraryId}/save-snapshot`, payload)
       .subscribe(() => alert('修改成功'));
   }
 
@@ -164,7 +205,32 @@ export class ItineraryDetailComponent implements OnInit {
     }
     this.updateSortOrders();
   }
+  combineDateAndTime(baseDate: string, timeStr: string | undefined): string | null {
+    if (!timeStr) return null;
+    // 1. 處理 baseDate (避免 1970 的關鍵)
+    const d = new Date(baseDate);
+    if (isNaN(d.getTime())) {
+      console.error("無效的基準日期:", baseDate);
+      return null;
+    }
 
+    // 格式化為 YYYY-MM-DD
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    // 2. 處理 timeStr (只取前 5 碼 HH:mm，防止帶入舊的日期字串)
+    // 如果 timeStr 是 "2026-03-20T10:00:00"，我們只想要 "10:00"
+    let pureTime = "";
+    if (timeStr.includes('T')) {
+      pureTime = timeStr.split('T')[1].substring(0, 5);
+    } else {
+      pureTime = timeStr.substring(0, 5);
+    }
+
+    const result = `${year}-${month}-${day}T${pureTime}:00`;
+    return result;
+  }
   private updateSortOrders() {
     this.days.forEach(day => {
       day.items.forEach((item, index) => {
