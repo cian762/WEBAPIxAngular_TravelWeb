@@ -48,6 +48,11 @@ export class CommentsArea implements OnInit {
     console.log(this.parent);
   }
 
+  removeParent() {
+    this.parent = undefined;
+    this.parentComment = "";
+  }
+
   ReflashComments() {
     this.Serve.getComments(this.id).subscribe((d) => {
       this.commentList = d;

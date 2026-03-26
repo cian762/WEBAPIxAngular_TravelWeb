@@ -1,12 +1,12 @@
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'; // 🔥 新增 ViewChild, ElementRef
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -15,6 +15,7 @@ export class ProfileComponent implements OnInit {
 
   private authService = inject(AuthService);
   private router = inject(Router);
+  // private route = inject(ActivatedRoute);
 
   // 🔥 取得 HTML 中隱藏的 input 元素
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;

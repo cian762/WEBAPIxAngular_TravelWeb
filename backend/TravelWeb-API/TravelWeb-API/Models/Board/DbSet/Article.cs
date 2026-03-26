@@ -24,7 +24,11 @@ public partial class Article
 
     public string? PhotoUrl { get; set; }
 
+    // 導覽屬性
     public virtual ICollection<ArticleFolder> ArticleFolders { get; set; } = new List<ArticleFolder>();
+
+    public virtual ICollection<ArticleLike> ArticleLikes { get; set; } = new List<ArticleLike>();
+    public virtual ICollection<ArticleTag> ArticleTags { get; set; } = new List<ArticleTag>();
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
@@ -33,8 +37,7 @@ public partial class Article
     public virtual ICollection<JournalPage> JournalPages { get; set; } = new List<JournalPage>();
 
     public virtual Post? Post { get; set; }
-
-    // 導覽屬性
+    
     public virtual MemberInformation MemberInformation { get; set; } = null!;
 
 

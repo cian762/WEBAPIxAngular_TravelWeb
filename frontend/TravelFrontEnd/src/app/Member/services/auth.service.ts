@@ -40,11 +40,15 @@ export class AuthService {
   }
 
   // 在你的 AuthService 裡面加入這個方法
-updateProfile(formData: FormData) {
-  // 記得換成你真正的後端網址
-  const apiUrl = 'https://localhost:7276/api/MemberProfile/me';
-  return this.http.put(apiUrl, formData, { withCredentials: true });
-}
+  updateProfile(formData: FormData) {
+    // 記得換成你真正的後端網址
+    const apiUrl = 'https://localhost:7276/api/MemberProfile/me';
+    return this.http.put(apiUrl, formData, { withCredentials: true });
+  }
+
+  submitComplaint(complaintData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Complaint/submit`, complaintData, { withCredentials: true });
+  }
 
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/Auth/logout`, {}, { withCredentials: true }).pipe(
