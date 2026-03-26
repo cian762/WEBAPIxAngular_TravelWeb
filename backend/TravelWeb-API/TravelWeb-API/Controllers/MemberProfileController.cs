@@ -160,5 +160,55 @@ namespace TravelWebApi.Controllers
                 return StatusCode(500, new { message = "更新失敗，請稍後再試。" });
             }
         }
+
+        //// ==========================================
+        //// 🌐 GET: api/MemberProfile/public/{memberId} (查看別人的公開主頁)
+        //// ==========================================
+        //[HttpGet("public/{memberId}")]
+        //[AllowAnonymous] // 這裡設為公開，但如果有傳 Token，我們還是會判斷是否追蹤
+        //public async Task<IActionResult> GetPublicProfile(string memberId)
+        //{
+        //    // 1. 去資料庫找這位「被查看」的會員，並把他的追隨者 (Followers) 抓出來算數量
+        //    var targetMember = await _context.MemberInformations
+        //        .Include(m => m.Followers)
+        //        .FirstOrDefaultAsync(m => m.MemberId == memberId);
+
+        //    if (targetMember == null)
+        //    {
+        //        return NotFound(new { message = "找不到該名會員" });
+        //    }
+
+        //    // 2. 準備要回傳的公開資料 (過濾掉信箱、電話、密碼等敏感資料)
+        //    var publicData = new
+        //    {
+        //        memberId = targetMember.MemberId,
+        //        name = targetMember.Name,
+        //        avatarUrl = targetMember.AvatarUrl ?? "assets/default-avatar.png",
+        //        coverUrl = targetMember.BackgroundUrl ?? "", // 封面
+        //        followersCount = targetMember.Followers.Count, // 計算追隨者數量
+        //        // 如果您資料庫有自介欄位可以加在這裡： bio = targetMember.Bio
+        //    };
+
+        //    // 3. (加碼體驗) 判斷「看這個網頁的人」有沒有登入？如果有，他有沒有追蹤這個人？
+        //    bool isFollowing = false;
+
+        //    // 嘗試從 Token 中抓取目前使用者的 MemberCode
+        //    var myMemberCode = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    if (!string.IsNullOrEmpty(myMemberCode))
+        //    {
+        //        var myInfo = await _context.MemberInformations.FirstOrDefaultAsync(m => m.MemberCode == myMemberCode);
+        //        if (myInfo != null)
+        //        {
+        //            // 檢查目標會員的 Followers 名單中，有沒有我的存在？
+        //            isFollowing = targetMember.Followers.Any(f => f.MemberId == myInfo.MemberId);
+        //        }
+        //    }
+
+        //    return Ok(new
+        //    {
+        //        profile = publicData,
+        //        isFollowing = isFollowing // 告訴前端要顯示「追隨」還是「已追隨」按鈕
+        //    });
+        //}
     }
 }

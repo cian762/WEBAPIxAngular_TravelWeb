@@ -129,6 +129,8 @@ export const routes: Routes = [
     loadComponent: () => import('./Member/profile/profile.component').then(m => m.ProfileComponent)
   },
 
+  { path: 'complaint', loadComponent: () => import('./Member/complaint-form/complaint-form.component').then(m => m.ComplaintFormComponent) },
+
   // 所有不認識的路徑會導向首頁
   { path: '**', redirectTo: '' },
 ];
