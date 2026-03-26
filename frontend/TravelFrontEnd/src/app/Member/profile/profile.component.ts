@@ -15,6 +15,7 @@ export class ProfileComponent implements OnInit {
 
   private authService = inject(AuthService);
   private router = inject(Router);
+  // private route = inject(ActivatedRoute);
 
   // 🔥 取得 HTML 中隱藏的 input 元素
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
