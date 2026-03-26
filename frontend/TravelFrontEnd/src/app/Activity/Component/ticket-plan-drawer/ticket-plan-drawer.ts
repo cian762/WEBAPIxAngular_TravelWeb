@@ -2,7 +2,7 @@ import { OrderDetailDto } from './../../../trip/models/orderMd.model';
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
 import { CreateShoppingCart } from '../../../trip/services/create-shopping-cart';
-import { Router, RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";//連結購物車用
 import { AddToCartDto } from '../../../trip/models/orderMd.model';
 
 @Component({
@@ -23,6 +23,8 @@ export class TicketPlanDrawer {
 
 
   quantity: number = 1;
+
+  constructor(private router: Router) { }//連結購物車用
 
   close() {
     this.quantity = 1;
@@ -51,7 +53,19 @@ export class TicketPlanDrawer {
     });
     this.close();
   }
-
+  //連結購物車用
+  addToOrder() {
+    const orderDetail = {
+      directBuyItems: [{
+        productCode: this.plan?.productCode,
+        quantity: this.quantity,
+        ticketCategoryId: this.plan?.ticketCategoryId
+      }]
+    };
+    console.log(orderDetail);
+    this.router.navigate(['/order'], { state: { data: orderDetail } });
+    this.close();
+  }
 
   addToOrder() {
     const orderDetail = {
