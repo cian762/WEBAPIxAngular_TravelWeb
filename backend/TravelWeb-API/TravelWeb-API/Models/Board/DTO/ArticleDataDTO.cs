@@ -9,6 +9,8 @@
         public string userID { get; set; } = null!;
         public string? userName { get; set; }
         public string? userAvatar { get; set; }
+        public int LikeCount { get; set; }
+        public bool isLike { get; set; }
         public List<TagDTO>? tags { get; set; }
     }
 

@@ -119,16 +119,20 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<ArticleLike>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ArticleLike", "Board");
+            entity.HasKey(e => new { e.ArticleId, e.UserId });
+            entity.ToTable("ArticleLike", "Board");
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
-            entity.HasOne(d => d.Article).WithMany()
+            entity.HasOne(d => d.Article).WithMany(a => a.ArticleLikes)
                 .HasForeignKey(d => d.ArticleId)
                 .HasConstraintName("FK_ArticleLike_Article");
+            entity.HasOne(d => d.MemberInformation).WithMany()
+                  .HasForeignKey(d => d.UserId)
+                  .HasPrincipalKey(m => m.MemberId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_ArticleLike_Member_Information");
         });
 
         modelBuilder.Entity<ArticleSource>(entity =>
@@ -153,7 +157,7 @@ public partial class BoardDbContext : DbContext
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.TagId).HasColumnName("TagID");
 
-            entity.HasOne(d => d.Article).WithMany()
+            entity.HasOne(d => d.Article).WithMany(a => a.ArticleTags)
                 .HasForeignKey(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ArticleTags_Article");

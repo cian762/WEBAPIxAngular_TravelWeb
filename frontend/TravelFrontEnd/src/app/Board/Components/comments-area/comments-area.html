@@ -49,7 +49,10 @@
   <div class="comment-form">
     <h4 style="margin-bottom: 10px;">請留言</h4>
     <div class="d-flex justify-content-start">
-      <p>{{parentComment}}</p>
+      @if(parentComment){
+      <p><a class="genric-btn danger-border radius small" style="width:30px ;" (click)="removeParent()">取消</a>
+        {{parentComment}}</p>
+      }
     </div>
     <form>
       <div class="form-group form-inline">
