@@ -1,0 +1,68 @@
+/* 在你的 app.css 或組件 css 裡 */
+.img-fixed-size {
+  width: 500px;
+  height: 272px;
+  object-fit: cover;
+  /* 關鍵：等比例縮放並裁切，不變形 */
+  object-position: center;
+  /* 從圖片中心點裁切 */
+}
+
+.userAvatar {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  /* 關鍵：等比例縮放並裁切，不變形 */
+  object-position: center;
+  /* 從圖片中心點裁切 */
+}
+
+.user-details p {
+  display: flex;
+  align-items: center;
+  /* 垂直置中 */
+  gap: 6px;
+  justify-content: flex-end;
+  /* 文字與 icon 間距 */
+}
+
+.user-details p a {
+  color: #555;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.user-details p a:hover {
+  color: #e8a838;
+}
+
+/* 統一 icon 大小 */
+.user-details p .lnr,
+.user-details p i {
+  font-size: 14px;
+  /* 依實際調整 */
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+/*===========以下為文章區塊之樣式===========*/
+/* .single-post {
+  padding: 30px;
+  transition: width 0.3s ease;
+}
+
+.single-post:hover {
+  background-color: #fafafd;
+  transform: scale(1.01);
+  box-shadow: 8px 8px 10px#3e3e422c
+} */
+
+.single-post {
+  padding-bottom: 50px;
+  margin-bottom: 50px;
+}
+
+/* ===========以上為文章區塊之樣式===========*/

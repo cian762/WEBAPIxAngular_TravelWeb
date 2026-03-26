@@ -5,13 +5,13 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PopularPost } from "../Components/popular-post/popular-post";
 import { TagClouds } from "../Components/tag-clouds/tag-clouds";
-import localeZhTw from '@angular/common/locales/zh-Hant';
-import { DatePipe, registerLocaleData } from '@angular/common';
 
-registerLocaleData(localeZhTw);
+import { ArticleList } from "../Components/article-list/article-list";
+
+
 @Component({
   selector: 'app-blog-home',
-  imports: [RouterModule, FormsModule, PopularPost, TagClouds, DatePipe],
+  imports: [RouterModule, FormsModule, PopularPost, TagClouds, ArticleList],
   templateUrl: './blog-home.html',
   styleUrl: './blog-home.css',
 })
@@ -67,10 +67,10 @@ export class BlogHome implements OnInit {
 
   }
 
-  goToDetail(id: number): void {
-    console.log(id);
-    this.router.navigate(['Board', 'detail', id]);
-  }
+
+
+
+
 
   goToCreate(): void {
     this.Serve.postPostAPI().subscribe(p => {
@@ -78,9 +78,6 @@ export class BlogHome implements OnInit {
     });
   }
 
-  goToUpdate(id: number): void {
-    this.router.navigate(['Board', 'creat', id]);
-  }
 
   onFocus(event: any) {
     event.target.closest('.search-box').classList.add('focused');
@@ -93,8 +90,6 @@ export class BlogHome implements OnInit {
     const keyword = event.target.value;
 
   }
-
-
 
   onBlur(event: any) {
     setTimeout(() => {

@@ -97,6 +97,16 @@ export const routes: Routes = [
         path: 'detail/:id',
         loadComponent: () => import('./Board/post-detail/post-detail').then(m => m.PostDetail),
       },
+      //私人(可編輯)
+      {
+        path: 'Main',
+        loadComponent: () => import('./Board/personal-homepage/personal-homepage').then(m => m.PersonalHomepage),
+      },
+      //公開(只能看)
+      {
+        path: 'user/:id',
+        loadComponent: () => import('./Board/user-articles-page/user-articles-page').then(m => m.UserArticlesPage),
+      },
     ],
   },
 

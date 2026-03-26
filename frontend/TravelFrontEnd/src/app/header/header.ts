@@ -4,6 +4,7 @@ import { RouterModule, RouterLink } from '@angular/router';
 import { AuthService } from '../Member/services/auth.service'; // 引入服務
 import { CreateShoppingCart } from '../trip/services/create-shopping-cart';
 
+
 @Component({
   selector: 'app-header',
   // ⚠️ 加入 CommonModule，HTML 才能使用 Angular 語法
@@ -54,4 +55,9 @@ export class Header implements OnInit {
       });
     }
   }
+
+
+
+
+
 }

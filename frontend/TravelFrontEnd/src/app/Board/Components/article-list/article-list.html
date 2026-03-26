@@ -1,0 +1,51 @@
+<!-- 文章列起點 -->
+<div class="posts-list">
+  @for (article of articleList; track $index) {
+  <div class="single-post row border-bottom">
+    <div class="col-lg-3  col-md-3 meta-details">
+      <div style="margin-bottom:10px;">
+        <img (click)="goToMemderPage(article.userID)" class="userAvatar" [src]="article.userAvatar">
+      </div>
+      <div class="user-details row">
+        <p class="col-lg-12 col-md-12 col-6">
+          <a (click)="goToMemderPage(article.userID)">{{article.userName}}&nbsp;&nbsp;
+            <span class="lnr lnr-user"></span></a>
+        </p>
+        <p class="col-lg-12 col-md-12 col-6">
+          <span>{{article.createdAt | date:'M月d日 y年':'zh-Hant'}}&nbsp;&nbsp;
+            <span class="lnr lnr-calendar-full"></span></span>
+        </p>
+
+        <p class="col-lg-12 col-md-12 col-6">
+          <a href="#">地點&nbsp;&nbsp;
+            <i class="ri-map-pin-line"></i></a>
+        </p>
+        <p class="col-lg-12 col-md-12 col-6">
+          @if(article.isLike) {
+          <a style="color: #e8a838;" (click)="ToLike(article.articleId)">{{article.likeCount}}&nbsp;&nbsp;<i
+              class="fa-solid fa-thumbs-up"></i></a>
+          } @else {
+          <a (click)="ToLike(article.articleId)">{{article.likeCount}}&nbsp;&nbsp;<i
+              class="fa-regular fa-thumbs-up"></i></a>
+          }
+        </p>
+        <p class="col-lg-12 col-md-12 col-6">
+          <a href="#">06 Comments&nbsp;&nbsp;
+            <span class="lnr lnr-bubble"></span></a>
+        </p>
+      </div>
+    </div>
+    <div class="col-lg-9 col-md-9 ">
+      <div class="feature-img">
+        <img class="img-fluid img-fixed-size" [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+      </div>
+      <a class="posts-title" (click)="goToDetail(article.articleId)">
+        <h3>{{article.title}}</h3>
+      </a>
+      <a (click)="goToDetail(article.articleId)" class="primary-btn">查看詳情</a>
+      <!-- <a (click)="goToUpdate(article.articleId)" class="genric-btn primary">編輯貼文</a> -->
+    </div>
+  </div>
+  }
+</div>
+<!-- 文章列終點 -->
