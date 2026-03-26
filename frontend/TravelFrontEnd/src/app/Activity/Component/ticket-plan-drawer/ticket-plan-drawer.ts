@@ -24,7 +24,6 @@ export class TicketPlanDrawer {
 
   quantity: number = 1;
 
-  constructor(private router: Router) { }//連結購物車用
 
   close() {
     this.quantity = 1;
@@ -67,18 +66,6 @@ export class TicketPlanDrawer {
     this.close();
   }
 
-  addToOrder() {
-    const orderDetail = {
-      directBuyItems: [
-        {
-          productCode: this.plan?.productCode,
-          quantity: this.quantity,
-          ticketCategoryId: this.plan?.ticketCategoryId,
-        }
-      ]
-    };
-    console.log(orderDetail);
-    this.router.navigate(['/order'], { state: { data: orderDetail } });
-  }
+
 }
 
