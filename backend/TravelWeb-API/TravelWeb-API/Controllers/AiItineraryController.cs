@@ -26,13 +26,16 @@ namespace TravelWeb_API.Controllers
         private async Task<int> EnsureAttractionExists(ExternalLocationDto external)
         {
             // 1. 根據 GooglePlaceId 檢查景點是否已存在於資料庫
-            var existing = await _context.Attractions
-                .FirstOrDefaultAsync(a => a.GooglePlaceId == external.GooglePlaceId && a.IsDeleted == false);
-
-            if (existing != null)
+            if (!string.IsNullOrEmpty(external.GooglePlaceId) && external.GooglePlaceId != "TEMP_AI_PLACE")
             {
-                return existing.AttractionId;
+                var existing = await _context.Attractions
+                .FirstOrDefaultAsync(a => a.GooglePlaceId == external.GooglePlaceId && a.IsDeleted == false);
+                if (existing != null)
+                {
+                    return existing.AttractionId;
+                }
             }
+
 
             // 2. 如果不存在，則建立新的 Attraction 實體
             var newAttr = new Models.Itinerary.DBModel.Attraction
@@ -40,7 +43,7 @@ namespace TravelWeb_API.Controllers
                 Name = external.Name,
                 RegionId = 1000,
                 Address = external.Address,
-                GooglePlaceId = external.GooglePlaceId,
+                GooglePlaceId = external.GooglePlaceId == "TEMP_AI_PLACE" ? null : external.GooglePlaceId,
                 Latitude = (decimal?)external.Latitude,
                 Longitude = (decimal?)external.Longitude,
                 CreatedAt = DateTime.Now,

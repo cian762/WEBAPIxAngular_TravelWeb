@@ -119,11 +119,12 @@ namespace TravelWeb_API.Models.Itinerary.Service
                             AttractionId = item.PoiId,
                             DayNumber = day.Day,
                             SortOrder = currentOrder,
-                            ContentDescription = item.Details,
+                            ContentDescription = item.PoiId.HasValue ? item.Details : $"[AI_NEW_PLACE]|{item.Title}|{item.GooglePlaceId}|{item.Location?.Address}|{item.Location?.Lat}|{item.Location?.Lng}|{item.Details}",
                             // 【後果 3】：轉換為絕對時間
                             StartTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.Start),
                             EndTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.End),
-                            ActivityId = item.Type
+                            ActivityId = item.Type,
+                            GooglePlaceId = item.GooglePlaceId
                         });
                         currentOrder += 100;
                     }

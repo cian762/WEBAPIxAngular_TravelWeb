@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TravelWeb_API.Models.MemberSystem;
+﻿namespace TravelWeb_API.Models.MemberSystem;
 
 public partial class MemberInformation
 {

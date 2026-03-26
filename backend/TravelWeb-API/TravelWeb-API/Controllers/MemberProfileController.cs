@@ -3,7 +3,6 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 using TravelWeb_API.Models.MemberSystem;
 using TravelWebApi.DTOs;

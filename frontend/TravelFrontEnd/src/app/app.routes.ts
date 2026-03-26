@@ -80,7 +80,7 @@ export const routes: Routes = [
   {
     path: 'itinerary-detail/:id',
     loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ItineraryDetailComponent),
-    // canActivate:[aGuard]
+    canActivate: [aGuard]
   },
 
   {

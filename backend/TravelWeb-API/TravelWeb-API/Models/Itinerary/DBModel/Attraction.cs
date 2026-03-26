@@ -15,7 +15,7 @@ public partial class Attraction
 
     public int RegionId { get; set; }
 
-    public string? AreaId { get; set; }
+    public string AreaId { get; set; }
 
     public int? ApprovalStatus { get; set; }
 
@@ -40,6 +40,8 @@ public partial class Attraction
     public DateTime CreatedAt { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public int ViewCount { get; set; }
 
     public virtual ICollection<ItineraryItem> ItineraryItems { get; set; } = new List<ItineraryItem>();
 }

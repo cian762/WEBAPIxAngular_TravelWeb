@@ -1,72 +1,175 @@
-<div class="header" [style.background-image]="'url(' + imageUrl + ')'">
-  <input (change)="uploadImage($event)" type="file" class="upload-input" id="coverUpload">
-  <label for="coverUpload" class="upload-btn">上傳檔案</label>
+<!-- change-itinerary-item.html -->
+<div class="page-wrapper">
 
-  <div class="header-card">
-    <h2>{{title}}</h2>
-    <p>{{date}}</p>
+  <!-- ===== TOP HEADER COVER ===== -->
+  <div class="cover-header" [style.background-image]="imageUrl ? 'url(' + imageUrl + ')' : 'none'">
+    <div class="cover-overlay"></div>
+    <div class="cover-content">
+      <div class="cover-text">
+        <h1 class="cover-title">{{ title }}</h1>
+        <p class="cover-date">
+          <span class="date-icon">📅</span> {{ date | date:'yyyy/MM/dd' }}
+        </p>
+      </div>
+      <label for="coverUpload" class="upload-btn">
+        <span class="upload-icon">📷</span> 上傳封面
+      </label>
+      <input (change)="uploadImage($event)" type="file" id="coverUpload" class="upload-input" accept="image/*">
+    </div>
   </div>
-</div>
 
-<div class="main-content" cdkDropListGroup>
-  <div class="days-container">
-    @for (day of days; track day.day; let dayIdx = $index) {
-    <div class="day-column">
-      <div class="day-header">天數(第{{ day.day }}天)</div>
+  <!-- ===== MAIN BODY ===== -->
+  <div class="body-layout" cdkDropListGroup>
 
-      <div class="items-list" cdkDropList [cdkDropListData]="day.items" (cdkDropListDropped)="onDrop($event)">
+    <!-- LEFT: Day Selector Panel -->
+    <aside class="day-sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-icon">🗓</span>
+        <span class="sidebar-title">行程天數</span>
+      </div>
 
-        @for (item of day.items; track $index) {
-        <div class="itinerary-card" cdkDrag>
-          <div class="card-row">
-            <div class="time-box">
-              <input type="time" [(ngModel)]="item.startTime">
-            </div>
-            <div class="info-box">
-              <div class="attraction-name">
-                @if (!item.attractionId) {
-                <span class="badge bg-info-subtle text-info me-1" style="font-size: 0.7rem;">AI 建議</span>
-                {{ item.contentDescription }}
-                } @else {
-                {{ item.attractionName }}
-                }
-              </div>
+      <div class="day-nav-list">
+        <!-- 全部行程 -->
+        <div class="day-nav-item all-item" [class.active]="activeDayIndex === 0" (click)="activeDayIndex = 0">
+          <span class="nav-icon">☰</span>
+          <span class="nav-label">全部行程</span>
+        </div>
 
-              <div class="address">
-                @if (item.attractionId) {
-                {{ item.address }}
-                } @else {
-                <span class="text-muted small">依當下位置彈性安排</span>
-                }
-              </div>
-            </div>
-            <div class="sort-handle" cdkDragHandle>☰</div>
-          </div>
-          <div class="card-footer">
-            <span class="detail-link">詳細資訊</span>
-            <button class="btn-delete" (click)="deleteItem(day, $index)">刪除</button>
-          </div>
+        <!-- 使用 dayTabs 渲染按鈕，確保 1~N 天都會出現 -->
+        @for (dayNum of dayTabs; track dayNum) {
+        <div class="day-nav-item" [class.active]="activeDayIndex === dayNum" (click)="activeDayIndex = dayNum">
+          <span class="nav-label">第{{ dayNum }}天</span>
+
+          <!-- 顯示該天數有的項目數量，若無則顯示 (0) -->
+          <span class="nav-count">
+            ({{ getCountForDay(dayNum) }})
+          </span>
         </div>
         }
-      </div>
-      <button (click)="openSearchModal(day)">+ 新增單筆行程</button>
-    </div>
-    }
-  </div>
 
-  <div class="side-actions">
-    <!-- (click)="saveSnapshot()" -->
-    <button class="btn-primary">儲存快照</button>
-    <button class="btn-secondary">查看過去版本</button>
+        <!-- 新增天數按鈕 -->
+        <div class="day-nav-item add-day" (click)="addExtraDay()">
+          <span class="nav-icon">+</span>
+          <span class="nav-label">新增天數</span>
+        </div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn-save" (click)="changeItem($event)">
+          <span>💾</span> 儲存快照
+        </button>
+        <button class="btn-version">
+          <span>🕑</span> 查看過去版本
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Map + Day Content -->
+    <div class="right-panel">
+
+      <!-- Map placeholder (replace with real Google Map embed if needed) -->
+      <div class="map-area">
+        <div class="map-placeholder">
+          <span>🗺 地圖載入中...</span>
+        </div>
+        <div class="map-legend">
+          <span class="legend-dot"></span> 景點天行程 ({{ totalItems }})
+        </div>
+      </div>
+
+      <!-- Day Tabs Row -->
+      <div class="day-tabs">
+        @for (dayNum of dayTabs; track dayNum) {
+        <button class="day-tab" [class.active]="activeDayIndex === dayNum" (click)="activeDayIndex = dayNum">
+          第{{ dayNum }}天
+          <span class="tab-count">{{ getCountForDay(dayNum) }}</span>
+        </button>
+        }
+      </div>
+
+      <!-- Items for Active Day -->
+
+      @if (activeDayIndex>0) {
+      @let currentDay = getOrCreateDayPlan(activeDayIndex);
+      <div class="items-container" cdkDropList [cdkDropListData]="currentDay.items"
+        (cdkDropListDropped)="onDrop($event)">
+
+        @for (item of currentDay.items; track $index; let i = $index) {
+        <div class="itinerary-card" cdkDrag>
+
+          <!-- Drag handle left -->
+          <div class="drag-handle" cdkDragHandle>
+            <span class="drag-icon">⋮⋮</span>
+          </div>
+
+          <!-- Thumbnail -->
+          <div class="card-thumb">
+            <img [src]="'https://maps.googleapis.com/maps/api/place/photo?maxwidth=80&photoreference=placeholder'"
+              [alt]="item.attractionName"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+            <div class="thumb-fallback">{{ (item.attractionName || '?')[0] }}</div>
+          </div>
+
+          <!-- Main info -->
+          <div class="card-info">
+            <div class="card-name">
+              @if (!item.attractionId && !item.placeId) {
+              <span class="badge-ai">AI 建議</span>
+              {{ item.contentDescription }}
+              } @else {
+              {{ item.attractionName }}
+              }
+            </div>
+            <div class="card-address">
+              <!-- 只要有地址字串就顯示地址，不論 ID 是否為 0 -->
+              @if (item.address) {
+              <span class="addr-icon">📍</span> {{ item.address }}
+              } @else {
+              <span class="text-muted">依當下位置彈性安排</span>
+              }
+            </div>
+
+            <div class="card-description">{{ item.contentDescription }}</div>
+          </div>
+
+          <!-- Order badge -->
+          <div class="order-badge">{{ i + 1 }}</div>
+
+          <!-- Actions -->
+          <div class="card-actions">
+            <button class="btn-icon btn-time" title="設定時間">
+              <span>▶</span>
+            </button>
+            <button class="btn-icon btn-edit" title="編輯">✏️</button>
+            <button class="btn-icon btn-delete" title="刪除" (click)="deleteItem(currentDay, $index)">🗑</button>
+          </div>
+
+        </div>
+        }
+
+        <!-- Add button -->
+        <button class="btn-add-item" (click)="openSearchModal(currentDay)">
+          <span class="plus">＋</span> 新增單筆行程
+        </button>
+      </div>
+      }
+
+
+    </div>
   </div>
 </div>
 
-@if(showSearchModal){
-<div class="my-modal">
-  <div class="modal-body">
-    <h3>搜尋地點</h3>
-    <input #searchInput type="text" class="form-control" placeholder="請輸入景點...">
-    <button (click)="showSearchModal = false">取消</button>
+<!-- ===== SEARCH MODAL ===== -->
+@if (showSearchModal) {
+<div class="modal-backdrop" (click)="showSearchModal = false">
+  <div class="search-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>搜尋地點</h3>
+      <button class="modal-close" (click)="showSearchModal = false">✕</button>
+    </div>
+    <div class="modal-body">
+      <input #searchInput type="text" class="search-input" placeholder="請輸入景點名稱...">
+    </div>
   </div>
 </div>
 }

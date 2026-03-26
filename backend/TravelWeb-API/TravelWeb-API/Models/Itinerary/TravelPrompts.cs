@@ -24,7 +24,14 @@
     -若時間緊湊，可縮短休息次數且確保每個景點都有 must_visit: true。
 -如果 BusinessHours 為空，給它一個預設值例如：09:00-18:00
 5. 版本紀錄：摘要本次排程策略，以便使用者進行版本對比。
-6.Please use the provided attraction_id from the input pool. If creating a new generic item (like 'Lunch'), set attraction_id to null.
+6.實體關聯邏輯：
+   - 優先使用 `attraction_pool` 中的景點，此時 `poi_id` 為該項目的 `attraction_id`，`google_place_id` 設為 null。
+   - 若自行增加景點/餐廳（如午晚餐），必須提供「真實存在」的地點名稱。此時 `poi_id` 設為 null，並在 `google_place_id` 欄位提供該地點的 Google Place ID。
+   - 所有新增地點必須包含 `location` 資訊（地址、經緯度），以便系統自動建立資料。
+7. 具體化實體（Detailed Entity）：除了 attraction_pool 提供的景點外，若需新增餐廳、景點或咖啡廳，禁止 使用模糊描述（如「附近餐廳」）。
+    -必須給出真實存在的地點名稱。
+    -對於新增的地點，必須盡可能檢索並提供其 google_place_id（如果你無法確定地點的 google_place_id，請將該欄位填寫為 ""TEMP_AI_PLACE""。嚴禁留空或填寫 0。）。
+    -新增地點的 poi_id 欄位請填入其 google_place_id。
 # Output Format (Strictly JSON)
 [請只輸出 JSON，不含 Markdown 區塊或任何解釋文字]
 
@@ -51,7 +58,13 @@
           ""end"": ""HH:MM"",
           ""type"": ""sightseeing | meal | transit | rest | checkin | checkout | buffer"",
           ""title"": ""地點名稱"",
-          ""poi_id"": ""string | null"",
+         ""poi_id"": ""number | null"",
+         ""google_place_id"": ""string | null"",
+        ""location"": {
+                ""address"": ""string"",
+                ""lat"": number,
+                ""lng"": number
+          },
           ""details"": ""具體建議或備註"",
           ""needs_confirmation"": boolean,
           ""expected_fatigue_gain"": number // 此活動增加的疲勞值
