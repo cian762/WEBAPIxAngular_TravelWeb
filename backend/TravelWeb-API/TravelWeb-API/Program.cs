@@ -225,6 +225,9 @@ builder.Services.AddHttpClient();
 //{
 //    options.Filters.Add(new AuthorizeFilter());
 //});
+
+builder.Services.AddScoped<IMemberEmailService, MemberEmailService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

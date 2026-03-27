@@ -17,18 +17,57 @@
           <!-- 註冊表單 (綁定 registerForm) -->
           <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-            <h5 class="text-secondary fw-bold border-bottom pb-2 mb-4">帳號資訊</h5>
+           <h5 class="text-secondary fw-bold border-bottom pb-2 mb-4">帳號資訊</h5>
 
-            <!-- Email -->
-            <div class="mb-3">
+            <!-- ========================================== -->
+            <!-- 🔥 修改：Email 輸入與發送驗證碼區塊 -->
+            <!-- ========================================== -->
+            <div class="mb-4">
               <label class="form-label fw-bold text-secondary">Email 信箱 <span class="text-danger">*</span></label>
+
               <div class="input-group">
                 <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
                 <input type="email" class="form-control" formControlName="email" placeholder="example@email.com"
                        [ngClass]="{ 'is-invalid': f['email'].touched && f['email'].invalid }">
+
+                <!-- 發送按鈕 (倒數計時中或已驗證時停用) -->
+                <button type="button" class="btn btn-outline-primary fw-bold px-4"
+                        (click)="sendCode()"
+                        [disabled]="isSendingCode || countdown > 0 || isEmailVerified || f['email'].invalid">
+
+                  <span *ngIf="isSendingCode" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="isEmailVerified" class="bi bi-check-circle-fill text-success me-1"></i>
+
+                  <!-- 顯示文字邏輯 -->
+                  <ng-container *ngIf="!isEmailVerified">
+                    {{ countdown > 0 ? countdown + 's 後重試' : (isSendingCode ? '發送中...' : '發送驗證碼') }}
+                  </ng-container>
+                  <ng-container *ngIf="isEmailVerified">已驗證</ng-container>
+
+                </button>
               </div>
+
               <div *ngIf="f['email'].touched && f['email'].errors?.['required']" class="text-danger small mt-1">請輸入 Email</div>
               <div *ngIf="f['email'].touched && f['email'].errors?.['email']" class="text-danger small mt-1">請輸入有效的 Email 格式</div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- 🔥 新增：輸入 6 位數驗證碼區塊 (發送後才會出現) -->
+            <!-- ========================================== -->
+            <div class="mb-4 p-3 bg-light rounded-3 border border-primary" *ngIf="countdown > 0 && !isEmailVerified">
+              <label class="form-label fw-bold text-primary"><i class="bi bi-shield-lock-fill me-1"></i>請輸入 6 位數驗證碼</label>
+              <div class="input-group shadow-sm">
+                <!-- ⚠️ 這裡使用獨立的 ngModel 綁定，需要去 ts 檔補上 FormsModule 引入！ -->
+                <input type="text" class="form-control text-center fs-5 fw-bold letter-spacing-2"
+                       [(ngModel)]="verificationCodeInput" [ngModelOptions]="{standalone: true}"
+                       placeholder="000000" maxlength="6">
+                <button type="button" class="btn btn-primary fw-bold px-4"
+                        (click)="verifyCode()" [disabled]="isVerifyingCode || verificationCodeInput.length !== 6">
+                  <span *ngIf="isVerifyingCode" class="spinner-border spinner-border-sm me-1"></span>
+                  確認驗證
+                </button>
+              </div>
+              <small class="text-muted mt-2 d-block">驗證碼已寄至您的信箱，10 分鐘內有效。</small>
             </div>
 
             <div class="row g-3 mb-4">

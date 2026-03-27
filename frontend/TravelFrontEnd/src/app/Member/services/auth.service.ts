@@ -73,4 +73,22 @@ export class AuthService {
       catchError(() => of(false)) // 如果報錯或沒登入，就回傳 false
     );
   }
+
+// ==========================================
+  // 📧 寄送 Email 驗證碼
+  // ==========================================
+  sendVerificationCode(email: string): Observable<any> {
+    // 💡 注意：我們傳遞的是純字串，所以要在 header 指定 Content-Type
+    return this.http.post(`${this.apiUrl}/Auth/send-verification-code`, `"${email}"`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // ==========================================
+  // 🔐 比對 Email 驗證碼
+  // ==========================================
+  verifyEmailCode(email: string, code: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/Auth/verify-code`, { email, code });
+  }
+
 }

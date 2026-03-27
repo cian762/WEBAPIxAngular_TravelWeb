@@ -31,6 +31,8 @@ public partial class MemberSystemContext : DbContext
 
     public virtual DbSet<MemberList> MemberLists { get; set; }
 
+    public virtual DbSet<EmailVerification> EmailVerifications { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -203,6 +205,20 @@ public partial class MemberSystemContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.Phone).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<EmailVerification>(entity =>
+        {
+            // 設定 Email 為主鍵
+            entity.HasKey(e => e.Email);
+
+            // 指定資料表名稱與 Schema
+            entity.ToTable("Email_Verification", "Member");
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.VerificationCode).HasMaxLength(6);
+            entity.Property(e => e.ExpiryTime).HasColumnType("datetime");
+
         });
 
         OnModelCreatingPartial(modelBuilder);

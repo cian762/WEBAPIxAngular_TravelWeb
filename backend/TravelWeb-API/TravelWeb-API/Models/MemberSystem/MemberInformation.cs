@@ -16,7 +16,7 @@ public partial class MemberInformation
 
     public string? Status { get; set; }
 
-    //public string? BackgroundUrl { get; set; }
+    public string? BackgroundUrl { get; set; }
 
     public virtual ICollection<MemberComplaint> MemberComplaints { get; set; } = new List<MemberComplaint>();
 

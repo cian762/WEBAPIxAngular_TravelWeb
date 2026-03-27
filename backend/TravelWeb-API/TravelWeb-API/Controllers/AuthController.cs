@@ -10,6 +10,7 @@ using System.Text;
 using TravelWeb_API.DTO.MemberSystemDto;
 using TravelWeb_API.Models;
 using TravelWeb_API.Models.MemberSystem;
+using TravelWeb_API.Services;
 
 namespace TravelWeb_API.Controllers
 {
@@ -171,5 +172,98 @@ namespace TravelWeb_API.Controllers
             // 如果只是初步練習，檢查有無字串即可
             return Ok(true);
         }
+
+        // ==========================================
+        // 📧 POST: api/Auth/send-verification-code (發送驗證碼)
+        // ==========================================
+        [HttpPost("send-verification-code")]
+        public async Task<IActionResult> SendVerificationCode([FromBody] string email, [FromServices] IMemberEmailService emailService)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return BadRequest("信箱不可為空");
+
+            // 1. 檢查信箱是否已經註冊過會員了？
+            bool isAlreadyMember = await _context.MemberLists.AnyAsync(m => m.Email == email);
+            if (isAlreadyMember) return Conflict(new { message = "此信箱已經註冊過會員，請直接登入！" });
+
+            // 2. 產生一組隨機 6 位數驗證碼
+            string code = new Random().Next(100000, 999999).ToString();
+
+            // 3. 尋找暫存表是否已有紀錄
+            var existingRecord = await _context.EmailVerifications.FirstOrDefaultAsync(e => e.Email == email);
+
+            if (existingRecord != null)
+            {
+                // 如果有紀錄，更新驗證碼與到期時間 (10分鐘)
+                existingRecord.VerificationCode = code;
+                existingRecord.ExpiryTime = DateTime.Now.AddMinutes(10);
+
+                // 🔥 確保有強制設回 false
+                existingRecord.IsVerified = false;
+            }
+            else
+            {
+                // 如果沒紀錄，新增一筆
+                var newRecord = new EmailVerification
+                {
+                    Email = email,
+                    VerificationCode = code,
+                    ExpiryTime = DateTime.Now.AddMinutes(10),
+
+                    // 🔥 確保有強制設為 false
+                    IsVerified = false
+                };
+                _context.EmailVerifications.Add(newRecord);
+            }
+
+            // 這一步執行時，資料庫就不會再報 NULL 錯誤了！
+            await _context.SaveChangesAsync();
+
+            // 4. 呼叫 EmailService 把驗證碼寄出去
+            try
+            {
+                await emailService.SendVerificationCodeAsync(email, code);
+                return Ok(new { message = "驗證碼已發送至您的信箱，請查收！" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "寄信失敗，請稍後再試", error = ex.Message });
+            }
+        }
+
+        // ==========================================
+        // 🔐 POST: api/Auth/verify-code (比對前端輸入的驗證碼)
+        // ==========================================
+        public class VerifyCodeDto { public string Email { get; set; } public string Code { get; set; } }
+
+        [HttpPost("verify-code")]
+        public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto request)
+        {
+            var record = await _context.EmailVerifications.FirstOrDefaultAsync(e => e.Email == request.Email);
+
+            if (record == null)
+            {
+                return BadRequest(new { message = "請先發送驗證碼" });
+            }
+
+            // 檢查是否過期
+            if (DateTime.Now > record.ExpiryTime)
+            {
+                return BadRequest(new { message = "驗證碼已過期，請重新發送" });
+            }
+
+            // 比對驗證碼
+            if (record.VerificationCode != request.Code)
+            {
+                return BadRequest(new { message = "驗證碼錯誤" });
+            }
+
+            // 驗證成功！將狀態改為 true
+            record.IsVerified = true;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "信箱驗證成功！" });
+        }
+
+
     }
 }
