@@ -2,7 +2,14 @@
 <div class="page-wrapper">
 
   <!-- ===== TOP HEADER COVER ===== -->
-  <div class="cover-header" [style.background-image]="imageUrl ? 'url(' + imageUrl + ')' : 'none'">
+  <div class="cover-header">
+    <!-- 真實圖片，完整顯示，高度自適應 -->
+    @if (imageUrl) {
+    <img class="cover-img" [src]="imageUrl" alt="封面圖片">
+    } @else {
+    <div class="cover-img-placeholder"></div>
+    }
+    <!-- 疊在圖片上的漸層遮罩 + 文字 -->
     <div class="cover-overlay"></div>
     <div class="cover-content">
       <div class="cover-text">
@@ -100,6 +107,7 @@
           <!-- Drag handle left -->
           <div class="drag-handle" cdkDragHandle>
             <span class="drag-icon">⋮⋮</span>
+            <span class="order-badge">{{ i + 1 }}</span>
           </div>
 
           <!-- Thumbnail -->
@@ -113,11 +121,22 @@
           <!-- Main info -->
           <div class="card-info">
             <div class="card-name">
+              @if (item.isEditing) {
+              <input class="name-edit-input" [(ngModel)]="item.editingName" (keyup.enter)="confirmEdit(item)"
+                (keyup.escape)="cancelEdit(item)" (click)="$event.stopPropagation()"
+                [placeholder]="item.attractionName || item.contentDescription" autofocus>
+              <div class="edit-actions">
+                <button class="btn-confirm" (click)="confirmEdit(item); $event.stopPropagation()">✓</button>
+                <button class="btn-cancel" (click)="cancelEdit(item); $event.stopPropagation()">✕</button>
+              </div>
+              } @else {
+              <!-- 原本的顯示邏輯 -->
               @if (!item.attractionId && !item.placeId) {
               <span class="badge-ai">AI 建議</span>
-              {{ item.contentDescription }}
+              {{ item.editingName || item.contentDescription }}
               } @else {
-              {{ item.attractionName }}
+              {{ item.editingName || item.attractionName }}
+              }
               }
             </div>
             <div class="card-address">
@@ -132,15 +151,14 @@
             <div class="card-description">{{ item.contentDescription }}</div>
           </div>
 
-          <!-- Order badge -->
-          <div class="order-badge">{{ i + 1 }}</div>
+
 
           <!-- Actions -->
           <div class="card-actions">
             <button class="btn-icon btn-time" title="設定時間">
               <span>▶</span>
             </button>
-            <button class="btn-icon btn-edit" title="編輯">✏️</button>
+            <button class="btn-icon btn-edit" title="編輯" (click)="editName($event, item)">✏️</button>
             <button class="btn-icon btn-delete" title="刪除" (click)="deleteItem(currentDay, $index)">🗑</button>
           </div>
 

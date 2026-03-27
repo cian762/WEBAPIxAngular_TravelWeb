@@ -1,10 +1,10 @@
 ﻿using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using System.Text;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
@@ -19,8 +19,7 @@ using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
 
-
-
+QuestPDF.Settings.License = LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
@@ -39,7 +38,7 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
-    
+
 });
 
 builder.Services.AddControllers();
@@ -129,7 +128,7 @@ builder.Services.AddSwaggerGen(
         x.SwaggerDoc("Board", new OpenApiInfo
         {
             Title = "Board"
-        });        
+        });
 
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
@@ -242,7 +241,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(
         x =>
     {
-        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");       
+        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
 
     }

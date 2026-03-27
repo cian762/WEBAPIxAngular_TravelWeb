@@ -17,26 +17,81 @@
 /* ── Cover Header ─────────────────────────────────── */
 .cover-header {
   position: relative;
-  height: 200px;
-  background: #b0bec5 center/cover no-repeat;
-  display: flex;
-  align-items: flex-end;
+  width: 100%;
+  height: calc(50vh - 40px);
+  /* 從頁面頂端到畫面正中央，扣掉 navbar 高度 */
+  overflow: hidden;
 }
 
+/* 圖片完整顯示，寬度 100%，高度自適應 */
+.cover-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  /* 保留上方天空+山頂，不切天空 */
+}
+
+.name-edit-input {
+  border: none;
+  border-bottom: 2px solid #22c55e;
+  outline: none;
+  background: transparent;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  width: 100%;
+  padding: 2px 4px;
+}
+
+.edit-actions {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.btn-confirm {
+  color: #22c55e;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-cancel {
+  color: #ef4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 無圖片時的佔位區塊 */
+.cover-img-placeholder {
+  width: 100%;
+  height: 200px;
+  background: #1a1a2e;
+}
+
+/* 遮罩疊在圖片上 */
 .cover-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%);
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0) 60%);
+  pointer-events: none;
 }
 
+/* 文字與按鈕疊層 */
 .cover-content {
-  position: relative;
-  z-index: 1;
-  width: 100%;
+  position: absolute;
+  inset: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 20px 28px;
+  padding: 20px 24px;
 }
 
 .cover-text {
@@ -330,12 +385,14 @@
 /* Drag handle */
 .drag-handle {
   display: flex;
+  flex-direction: column;
+  /* 上下排列：⋮⋮ 在上，數字在下 */
   align-items: center;
-  padding: 0 10px;
-  cursor: grab;
-  color: #d1d5db;
-  font-size: 1rem;
-  letter-spacing: -2px;
+  justify-content: center;
+  gap: 4px;
+  min-width: 28px;
+  /* 移除原本的 position: absolute（如果有的話） */
+  position: static;
 }
 
 .drag-handle:active {
@@ -442,20 +499,19 @@
 
 /* Order badge */
 .order-badge {
-  position: absolute;
-  top: 10px;
-  right: 44px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  position: static;
   background: #22c55e;
-  color: #fff;
-  font-size: 0.78rem;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 4px rgba(34, 197, 94, 0.3);
+  line-height: 1;
+
 }
 
 /* Card actions */

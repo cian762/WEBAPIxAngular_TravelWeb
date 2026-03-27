@@ -13,5 +13,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public Task<VersionDto> GetItemByVersionAsync(int versionId);
         public Task<string> SaveImagebyid(IFormFile image, int Id);
         public Task<DateTime> ExtendOneDayAsync(int itineraryId);
+        public Task<byte[]> GeneratePdfAsync(ItineraryExportDto data);
+        public Task<byte[]> GetExportFileAsync(int itineraryId);
     }
 }

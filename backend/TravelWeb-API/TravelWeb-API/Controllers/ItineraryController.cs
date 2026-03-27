@@ -164,5 +164,12 @@ namespace TravelWeb_API.Controllers
             // 刪除成功，RESTful 慣例回傳 204
             return NoContent();
         }
+
+        [HttpGet("{itineraryId}/export")]
+        public async Task<IActionResult> ExportItinerary(int itineraryId)
+        {
+            var fileBuffer = await _itineraryService.GetExportFileAsync(itineraryId);
+            return File(fileBuffer, "application/pdf", $"Itinerary_{itineraryId}.pdf");
+        }
     }
 }

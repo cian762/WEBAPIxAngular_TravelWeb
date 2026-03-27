@@ -19,6 +19,8 @@ export interface ItineraryItem {
   longitude?: number;
   startTime?: string;
   endTime?: string;
+  isEditing?: boolean
+  editingName?: string
 }
 
 export interface DayPlan {

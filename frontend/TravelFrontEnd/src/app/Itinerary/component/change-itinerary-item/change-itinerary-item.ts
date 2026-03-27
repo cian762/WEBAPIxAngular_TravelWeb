@@ -33,7 +33,9 @@ export class ItineraryDetailComponent implements OnInit {
   date = '';
   imageUrl = '';
   days: DayPlan[] = [];
-
+  startTime: string = '';
+  endDate: string = '';
+  dayTabs: number[] = [];
   /** 目前顯示的天數（預設第1天） */
   activeDayIndex = 1;
 
@@ -45,14 +47,14 @@ export class ItineraryDetailComponent implements OnInit {
   private currentAddingDay?: DayPlan;
 
   constructor(private activateroute: ActivatedRoute) { }
-
+  /**建立HOOK */
   ngOnInit() {
     this.itineraryId = Number(this.activateroute.snapshot.params['id']);
     if (this.itineraryId) {
       this.loadData();
     }
   }
-
+  /**載入數據後分別對應到天數 */
   private mapApiToDays(items: ItineraryItem[]): DayPlan[] {
     if (!items || items.length === 0) return [];
     const groups = new Map<number, ItineraryItem[]>();
@@ -68,7 +70,7 @@ export class ItineraryDetailComponent implements OnInit {
         items: dayItems.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
       }));
   }
-
+  /**上傳圖片並即時更改 */
   uploadImage(event: any) {
     const file = event.target.files[0];
     if (!file) return;
@@ -80,6 +82,7 @@ export class ItineraryDetailComponent implements OnInit {
         error: (err) => { console.error('上傳失敗', err); alert('上傳失敗，請檢查網絡'); }
       });
   }
+  /**分割AI放入內容的字串 */
   parseAiDescription(item: any) {
     const desc = item.contentDescription || '';
 
@@ -99,13 +102,13 @@ export class ItineraryDetailComponent implements OnInit {
       item.isAiSuggestion = true; // 標記為 AI 建議，可以在 UI 顯示不同顏色
     }
   }
+  /**數共有幾天數 */
   getCountForDay(dayNum: number): number {
     const dayData = this.days.find(d => d.day === dayNum);
     return dayData ? dayData.items.length : 0;
   }
-  startTime: string = '';
-  endDate: string = '';
-  dayTabs: number[] = [];
+
+  /**新增天數的邏輯與呼叫API把時間往後延 */
   addExtraDay() {
     this.http.patch<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}/extend-day`, {})
       .subscribe({
@@ -135,6 +138,7 @@ export class ItineraryDetailComponent implements OnInit {
         }
       });
   }
+  /**初始載入並呼叫API */
   loadData() {
     this.http.get<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}`).subscribe(res => {
       console.log('API 回傳的原始資料:', res);
@@ -161,6 +165,7 @@ export class ItineraryDetailComponent implements OnInit {
 
     });
   }
+  /**顯示空天數並且可自己新增行程 */
   getOrCreateDayPlan(dayNum: number): DayPlan {
     // 先找看看 days 陣列有沒有這一天
     let dayPlan = this.days.find(d => d.day === dayNum);
@@ -178,6 +183,7 @@ export class ItineraryDetailComponent implements OnInit {
 
     return dayPlan;
   }
+  /**生成旁邊的空天數 */
   generateDayTabs(start: string, end: string) {
     const finalStart = start || this.startTime;
     if (!finalStart || !end) {
@@ -197,6 +203,7 @@ export class ItineraryDetailComponent implements OnInit {
     console.log('算出的天數:', diffDays);
     this.dayTabs = Array.from({ length: diffDays > 0 ? diffDays : 1 }, (_, i) => i + 1);
   }
+  /**開啟新增行程的視窗 */
   openSearchModal(day: DayPlan) {
     this.showSearchModal = true;
     this.currentAddingDay = day;
@@ -213,7 +220,7 @@ export class ItineraryDetailComponent implements OnInit {
       }
     }, 100);
   }
-
+  /**新增行程並列成資料 */
   handlePlaceSelection(place: any) {
     if (!place || !this.currentAddingDay) return;
     const newItem: ItineraryItem = {
@@ -228,31 +235,52 @@ export class ItineraryDetailComponent implements OnInit {
       longitude: place.geometry.location.lng(),
       startTime: '10:00',
       sortOrder: (this.currentAddingDay.items.length + 1) * 100,
-      contentDescription: `新增行程`
+      contentDescription: `${place.name}`
     };
     this.currentAddingDay.items.push(newItem);
     this.updateSortOrders();
   }
-
+  /**編輯CONTENTDESCRIPTION */
+  editName(event: Event, item: any) {
+    event.stopPropagation();
+    item.isEditing = true;
+    // 暫存目前名稱，讓使用者看到現有值可以修改
+    item.editingName = item.editingName || item.attractionName || item.contentDescription || '';
+  }
+  /**確認修改 */
+  confirmEdit(item: any): void {
+    // 把暫存名稱存下來，但不呼叫 API
+    // editingName 已經透過 ngModel 雙向綁定更新了
+    item.isEditing = false;
+    // 標記此 item 已被修改，儲存時可以識別哪些需要寫 DB
+    item.isDirty = true;
+  }
+  /**刪除修改 */
+  cancelEdit(item: any): void {
+    // 取消：清除 input，回到原本顯示
+    item.isEditing = false;
+    // editingName 保留之前已確認的值（若有的話），不清除
+  }
+  /**刪除物件 */
   deleteItem(day: DayPlan, index: number) {
     if (confirm('確定要刪除嗎？')) {
       day.items.splice(index, 1);
       this.updateSortOrders();
     }
   }
-
+  /**把ITEM物件扁平化 */
   changeItem(event: any) {
     const flattenedItems: any[] = [];
     this.days.forEach(day => {
       day.items.forEach(item => {
         flattenedItems.push({
           AttractionId: item.attractionId || (item as any).AttractionId || 0,
-          Name: item.attractionName || (item as any).Name,
+          Name: (item as any).editingName || item.attractionName || (item as any).Name,
           Address: item.address || (item as any).Address,
           Latitude: item.latitude,
           Longitude: item.longitude,
           DayNumber: day.day,
-          ContentDescription: item.contentDescription || "無描述",
+          ContentDescription: (item as any).editingName || item.contentDescription || "無描述",
           PlaceId: item.placeId || item.googlePlaceId || null, // 👈 統一使用 PlaceId
           // 注意：StartTime 的處理見下方第 2 點
           StartTime: this.combineDateAndTime(this.date, item.startTime),
@@ -270,7 +298,7 @@ export class ItineraryDetailComponent implements OnInit {
     this.http.post(`https://localhost:7276/api/Itinerary/${this.itineraryId}/save-snapshot`, payload)
       .subscribe(() => alert('修改成功'));
   }
-
+  /**判斷拖拉事件 */
   onDrop(event: CdkDragDrop<ItineraryItem[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -284,6 +312,7 @@ export class ItineraryDetailComponent implements OnInit {
     }
     this.updateSortOrders();
   }
+  /**把時間結合成後端能接受的狀態 */
   combineDateAndTime(baseDate: string, timeStr: string | undefined): string | null {
     if (!timeStr) return null;
     // 1. 處理 baseDate (避免 1970 的關鍵)
@@ -310,6 +339,7 @@ export class ItineraryDetailComponent implements OnInit {
     const result = `${year}-${month}-${day}T${pureTime}:00`;
     return result;
   }
+  /**重新排序 */
   private updateSortOrders() {
     this.days.forEach(day => {
       day.items.forEach((item, index) => {
