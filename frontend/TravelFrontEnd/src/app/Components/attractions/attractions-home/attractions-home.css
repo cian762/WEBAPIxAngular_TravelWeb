@@ -1,49 +1,121 @@
-/* Hero */
-.att-hero {
-  height: 340px;
-  background: url('/assets/img/banner/banner.jpg') center / cover no-repeat;
+/* ===== Hero 輪播 ===== */
+.att-hero-carousel {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
 }
 
-.att-hero__overlay {
+/* 圖片層 */
+.carousel-slides {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.55));
+}
+
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s ease-in-out;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* 暗色遮罩 + 標題 */
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.52) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.carousel-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  margin: 0 0 10px;
+}
+
+.carousel-sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.88);
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* 左右箭頭 */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  background: rgba(255,255,255,0.18);
+  border: none;
+  color: #fff;
+  font-size: 2.8rem;
+  line-height: 1;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.2s;
+  backdrop-filter: blur(4px);
 }
 
-.att-hero__content {
-  text-align: center;
-  color: #fff;
-  position: relative;
-  z-index: 1;
+.carousel-arrow:hover {
+  background: rgba(232, 70, 17, 0.75);
 }
 
-.att-hero__icon {
-  font-size: 2.8rem;
-  margin-bottom: 6px;
+.carousel-arrow--prev { left: 20px; }
+.carousel-arrow--next { right: 20px; }
+
+/* 圓點指示器 */
+.carousel-dots {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 8px;
 }
 
-.att-hero__title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: 6px;
-  margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.8);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
 }
 
-.att-hero__sub {
-  font-size: 1rem;
-  margin-top: 8px;
-  opacity: 0.85;
+.carousel-dot.active {
+  background: #fff;
+  transform: scale(1.25);
 }
 
-/* Main */
+/* ===== Main ===== */
 .att-main {
   padding: 60px 0;
 }
@@ -98,24 +170,15 @@
 
 /* 台灣地圖 */
 .tw-map-wrap {
-  padding: 10px 10px 0;
+  padding: 10px 0 0;
 }
 
-.tw-map {
+.tw-map-img {
   width: 100%;
-  max-width: 190px;
+  max-width: 220px;
   display: block;
   margin: 0 auto;
-}
-
-
-.map-label {
-  font-size: 13px;
-  fill: #fff;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  pointer-events: none;
-  font-weight: 700;
+  transition: opacity 0.3s ease;
 }
 
 /* 地區 Tabs */
@@ -153,7 +216,7 @@
   margin-bottom: 20px;
 }
 
-/* 城市卡片格 */
+/* ===== 城市卡片 ===== */
 .city-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -166,19 +229,18 @@
   }
 }
 
-/* 城市卡片 */
 .city-card {
   position: relative;
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
   transition: transform 0.22s, box-shadow 0.22s;
 }
 
 .city-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
 
 .city-card__img {
@@ -202,7 +264,7 @@
 .city-card__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(0,0,0,0.28);
   display: flex;
   align-items: flex-end;
   padding: 12px;
@@ -217,68 +279,12 @@
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 
-/* ===== 台灣地圖（取代舊的 .map-area 規則）===== */
-.tw-map-wrap {
-  padding: 10px 10px 0;
-}
-
-.tw-map {
-  width: 100%;
-  max-width: 210px;
-  display: block;
-  margin: 0 auto;
-}
-
-/* ===== 台灣地圖 CSS（取代舊的 .map-area / .map-area:hover / .map-area.active）===== */
-
-.tw-map-wrap {
-  padding: 10px 0 0;
-}
-
-.tw-map-img {
-  width: 100%;
-  max-width: 220px;
-  display: block;
-  margin: 0 auto;
-  transition: opacity 0.3s ease;
-}
-
-.tw-map {
-  width: 100%;
-  max-width: 200px;
-  display: block;
-  margin: 0 auto;
-}
-
-.map-region {
-  cursor: pointer;
-}
-
-.map-area {
-  fill: #d0d0d0;
-  stroke: #fff;
-  stroke-width: 1.5;
-  transition: fill 0.22s, filter 0.22s;
-}
-
-.map-region:hover .map-area {
-  fill: #f4a98a;
-  filter: drop-shadow(0 2px 4px rgba(232, 70, 17, 0.3));
-}
-
-.map-region.active .map-area {
-  fill: #e84611;
-  filter: drop-shadow(0 2px 6px rgba(232, 70, 17, 0.5));
-}
-
-.map-label {
-  font-size: 11px;
-  fill: #fff;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  pointer-events: none;
-  font-weight: 700;
+/* RWD */
+@media (max-width: 768px) {
+  .att-hero-carousel { height: 280px; }
+  .carousel-title { font-size: 2rem; letter-spacing: 5px; }
+  .carousel-arrow { width: 40px; height: 40px; font-size: 2rem; }
 }

@@ -1,14 +1,36 @@
 <!-- 景點首頁 -->
 
-<!-- Hero Banner -->
-<section class="att-hero">
-  <div class="att-hero__overlay">
-    <div class="att-hero__content">
-      <div class="att-hero__icon">🗼</div>
-      <h1 class="att-hero__title">觀光景點</h1>
-      <p class="att-hero__sub">探索台灣之美，400+ 精選景點等你發現</p>
+<!-- ===== Hero 輪播 ===== -->
+<section class="att-hero-carousel">
+
+  <!-- 輪播圖片層 -->
+  <div class="carousel-slides">
+    <div class="carousel-slide"
+         *ngFor="let slide of heroSlides; let i = index"
+         [class.active]="currentSlide === i">
+      <img [src]="slide" alt="景點輪播">
     </div>
   </div>
+
+  <!-- 暗色遮罩 + 標題文字 -->
+  <div class="carousel-overlay">
+    <h1 class="carousel-title">觀 光 景 點</h1>
+    <p class="carousel-sub">探索台灣之美，400+ 精選景點等你發現</p>
+  </div>
+
+  <!-- 左右箭頭 -->
+  <button class="carousel-arrow carousel-arrow--prev" (click)="prevSlide()">&#8249;</button>
+  <button class="carousel-arrow carousel-arrow--next" (click)="nextSlide()">&#8250;</button>
+
+  <!-- 圓點指示器 -->
+  <div class="carousel-dots">
+    <button *ngFor="let s of heroSlides; let i = index"
+            class="carousel-dot"
+            [class.active]="currentSlide === i"
+            (click)="goToSlide(i)">
+    </button>
+  </div>
+
 </section>
 
 <!-- 主內容 -->
@@ -42,7 +64,7 @@
 
         <!-- 台灣地圖（圖片切換版） -->
         <div class="tw-map-wrap">
-          <img class="tw-map-img" [src]="'assets/img/attractionCity/' + currentRegion.mapImage"
+          <img class="tw-map-img" [src]="'assets/img/attraction/' + currentRegion.mapImage"
             [alt]="currentRegion.label">
         </div>
       </div>
