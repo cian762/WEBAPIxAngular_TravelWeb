@@ -20,3 +20,11 @@
   position: relative;
   z-index: 1;
 }
+
+.search-hero {
+  /* 讓上方稍微深一點，保護 Navbar 文字；下方淺一點，與內容銜接 */
+  background: linear-gradient(rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%),
+    url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070&auto=format&fit=crop') center/cover;
+  min-height: 350px;
+  /* 稍微縮短一點高度，可以更快看到商品內容 */
+}
