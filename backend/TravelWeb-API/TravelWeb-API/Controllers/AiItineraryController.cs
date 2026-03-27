@@ -14,14 +14,14 @@ namespace TravelWeb_API.Controllers
     [ApiController]
     public class AiItineraryController : ControllerBase
     {
-        private readonly string _memberId;
+
         private readonly IAIItineraryService _aiItineraryService;
         private readonly TravelContext _context;
         public AiItineraryController(IAIItineraryService aiItineraryService, TravelContext travelContext)
         {
             _aiItineraryService = aiItineraryService;
             _context = travelContext;
-            //_memberId = User.FindFirst("MemberId")?.Value ?? "tw_user_001";
+
         }
         private async Task<int> EnsureAttractionExists(ExternalLocationDto external)
         {

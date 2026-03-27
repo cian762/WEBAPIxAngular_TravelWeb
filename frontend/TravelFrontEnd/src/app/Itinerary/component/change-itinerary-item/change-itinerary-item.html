@@ -44,7 +44,7 @@
 
         <!-- 使用 dayTabs 渲染按鈕，確保 1~N 天都會出現 -->
         @for (dayNum of dayTabs; track dayNum) {
-        <div class="day-nav-item" [class.active]="activeDayIndex === dayNum" (click)="activeDayIndex = dayNum">
+        <div class="day-nav-item" [class.active]="activeDayIndex === dayNum" (click)="selectDay(dayNum)">
           <span class="nav-label">第{{ dayNum }}天</span>
 
           <!-- 顯示該天數有的項目數量，若無則顯示 (0) -->
@@ -68,7 +68,12 @@
         <button class="btn-version">
           <span>🕑</span> 查看過去版本
         </button>
+        <button class="btn-export-pdf" (click)="exportPdf()" [disabled]="isExporting">
+          <span>{{ isExporting ? '⏳' : '📄' }}</span>
+          {{ isExporting ? '產生中...' : '匯出 PDF' }}
+        </button>
       </div>
+
     </aside>
 
     <!-- RIGHT: Map + Day Content -->
@@ -76,9 +81,15 @@
 
       <!-- Map placeholder (replace with real Google Map embed if needed) -->
       <div class="map-area">
+        @if (currentDayItinerary && currentDayItinerary.items.length >= 2) {
+        <app-router-map-component [itineraryId]="itineraryId" [dayNumber]="activeDayIndex"
+          [dayItinerary]="currentDayItinerary">
+        </app-router-map-component>
+        } @else {
         <div class="map-placeholder">
-          <span>🗺 地圖載入中...</span>
+          <span>🗺 {{ currentDayItinerary?.items?.length === 1 ? '至少需要 2 個地點才能顯示路線' : '地圖載入中...' }}</span>
         </div>
+        }
         <div class="map-legend">
           <span class="legend-dot"></span> 景點天行程 ({{ totalItems }})
         </div>
@@ -87,7 +98,7 @@
       <!-- Day Tabs Row -->
       <div class="day-tabs">
         @for (dayNum of dayTabs; track dayNum) {
-        <button class="day-tab" [class.active]="activeDayIndex === dayNum" (click)="activeDayIndex = dayNum">
+        <button class="day-tab" [class.active]="activeDayIndex === dayNum" (click)="selectDay(dayNum)">
           第{{ dayNum }}天
           <span class="tab-count">{{ getCountForDay(dayNum) }}</span>
         </button>

@@ -13,11 +13,11 @@ namespace TravelWeb_API.Controllers
     public class ItineraryController : ControllerBase
     {
         private readonly IItineraryservice _itineraryService;
-        private readonly string _memberId;
+
         public ItineraryController(IItineraryservice itineraryService)
         {
             _itineraryService = itineraryService;
-            //_memberId = User.FindFirst("MemberId")?.Value!;
+
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
@@ -142,7 +142,7 @@ namespace TravelWeb_API.Controllers
             {
                 return BadRequest("沒有該行程");
             }
-            var result = _itineraryService.GetItemByVersionAsync(VerId);
+            var result = await _itineraryService.GetItemByVersionAsync(VerId);
             if (result == null)
             {
                 return BadRequest("沒有該行程");
@@ -170,6 +170,13 @@ namespace TravelWeb_API.Controllers
         {
             var fileBuffer = await _itineraryService.GetExportFileAsync(itineraryId);
             return File(fileBuffer, "application/pdf", $"Itinerary_{itineraryId}.pdf");
+        }
+        [HttpGet("{itineraryId}/day/{dayNumber}")]
+        public async Task<ActionResult<DayItineraryDto>> GetDayItinerary(int itineraryId, int dayNumber)
+        {
+            var result = await _itineraryService.GetDayItineraryAsync(itineraryId, dayNumber);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
     }
 }

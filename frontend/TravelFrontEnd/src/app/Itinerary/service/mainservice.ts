@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { DayItineraryDto } from '../interface/itinerarymainmodel';
 
 
 @Injectable({
@@ -16,5 +17,10 @@ export class Mainservice {
   }
   createAIItinerary(data: any): Observable<any> {
     return this.http.post(`${this.CreateAIItineraryAPI}`, data)
+  }
+  getDayItinerary(itineraryId: number, day: number): Observable<DayItineraryDto> {
+    return this.http.get<DayItineraryDto>(
+      `/api/itinerary/${itineraryId}/day/${day}`
+    );
   }
 }

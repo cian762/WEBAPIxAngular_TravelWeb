@@ -15,5 +15,6 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public Task<DateTime> ExtendOneDayAsync(int itineraryId);
         public Task<byte[]> GeneratePdfAsync(ItineraryExportDto data);
         public Task<byte[]> GetExportFileAsync(int itineraryId);
+        public Task<DayItineraryDto> GetDayItineraryAsync(int itineraryId, int dayNumber);
     }
 }
