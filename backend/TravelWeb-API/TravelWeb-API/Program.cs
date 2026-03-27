@@ -167,6 +167,9 @@ builder.Services.AddScoped<QRCodeService>();
 builder.Services.Configure<SmtpSettings>(
     builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddScoped<EmailService>();
+
+//Ticket 相關服務註冊
+builder.Services.AddScoped<TicketService>();
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>

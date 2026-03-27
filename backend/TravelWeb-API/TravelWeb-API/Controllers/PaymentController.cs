@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
+using TravelWeb_API.Services;
 
 namespace TravelWeb_API.Controllers
 {
@@ -13,11 +14,17 @@ namespace TravelWeb_API.Controllers
         private readonly IECPay _ecpayService;
         private readonly IOrder _orderService;
         private readonly TripDbContext _tripDbContext;
-        public PaymentController(IECPay ecpayService, IOrder orderService, TripDbContext tripDbContext)
+        private readonly TicketService _ticketService;
+        private readonly EmailService _emailService;
+        public PaymentController(IECPay ecpayService, IOrder orderService, TripDbContext tripDbContext, TicketService ticketService, EmailService emailService)
         {
             _ecpayService = ecpayService;
             _orderService = orderService;
             _tripDbContext = tripDbContext;
+
+            //20260326 陳冠甫加入QRCode 功能所需注入服務
+            _ticketService = ticketService;
+            _emailService = emailService;
         }
         //呼叫綠界付款畫面
         [HttpPost("Checkout/{orderId}")]
@@ -95,8 +102,14 @@ namespace TravelWeb_API.Controllers
 
 
                         await _tripDbContext.SaveChangesAsync();
+
+                        //QRcode 送信放這
+                        //根據內容物生成 QRCode，每個商品數量代表一個 QRcode
+                        await _ticketService.CreateQrCodeForOrderAsync(orderId);
+
+                        //將該訂單所屬 QRcode 打包用信件方式寄出
+                        await _emailService.SendOrderTicketEmailAsync(orderId);
                     }
-                    //QRcode 送信放這
                 }
             }
 

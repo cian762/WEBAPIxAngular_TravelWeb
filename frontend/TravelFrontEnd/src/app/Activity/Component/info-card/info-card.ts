@@ -175,7 +175,7 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     query.start = this.formatDate(this.startDate);
     query.end = this.formatDate(this.endDate);
     query.pagenumber = page;
-    query.pagesize = 4;
+    query.pagesize = 8;
     query.orderbyparam = this.currentSortParam;
     query.keyword = this.keyword;
 
@@ -200,6 +200,7 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
       this.generatePageNumbers();
 
     });
+    this.FindBookMark();
   }
 
   //看不懂
@@ -261,6 +262,17 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     const year = dateInfo.getFullYear();
     return `${year}-${month}-${date}`;
   };
+
+  FindBookMark() {
+    const element = document.getElementById('bookmark1');
+    const offset = 100;
+
+    if (element) {
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - offset;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
+  }
 }
 
 export class queryParameters {

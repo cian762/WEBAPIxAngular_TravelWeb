@@ -18,22 +18,34 @@ namespace TravelWeb_API.Services
         public async Task CreateQrCodeForOrderAsync(int orderId) 
         {
             var check = await _dbcontext.Orders
-                .Where(o => o.OrderStatus == "已付款")
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
-                
-            if (check == null) return;
+                .Include(o=>o.OrderItems)
+                .ThenInclude(oi=>oi.OrderItemTickets)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.PaymentStatus == "已付款");
 
-            var qrCodeEntities = check.OrderItems
-                .Select(i => new QrcodeInfo
-                { 
-                    OrderId = i.OrderId,
-                    Qrtoken = _qrCodeService.GenerateToken(),
-                    Status = "Unused",
-                    CreateAt = DateTime.Now
-                    //往後再決定要不要加上expiredDate;
-                })
+            if (check == null ) return;
+
+            var target = check.OrderItems.Where(oi => !string.IsNullOrWhiteSpace(oi.ProductCode) &&
+                 (oi.ProductCode.StartsWith("ACT-") || oi.ProductCode.StartsWith("TKT-")))
                 .ToList();
 
+            var qrCodeEntities = new List<QrcodeInfo>();
+            foreach (var item in target) 
+            {
+                var quantity = item.OrderItemTickets.Sum(ot => ot.Quantity);
+                
+                for (int i = 0; i < quantity; i++) 
+                {
+                    qrCodeEntities.Add(new QrcodeInfo
+                    {
+                        OrderId = orderId,
+                        OrderItemId = item.OrderItemId,
+                        Qrtoken = _qrCodeService.GenerateToken(),
+                        Status = "Unused",
+                        CreateAt = DateTime.Now
+                    });
+                }
+            }
+                
             _dbcontext.QrcodeInfos.AddRange(qrCodeEntities);
            
             await _dbcontext.SaveChangesAsync();
