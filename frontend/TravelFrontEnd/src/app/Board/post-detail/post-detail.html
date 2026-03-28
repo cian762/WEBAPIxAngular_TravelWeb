@@ -101,6 +101,23 @@
         </div>
         <app-comments-area [id]="id"></app-comments-area>
       </div>
+
+
+      <!-- 側欄起點 -->
+      <div class="col-lg-4 sidebar-widgets">
+        <div class="widget-wrap">
+          <app-popular-post></app-popular-post>
+          <app-tag-clouds></app-tag-clouds>
+          <app-post-catgories></app-post-catgories>
+          <div class="single-sidebar-widget ads-widget">
+            <a href="#"><img class="img-fluid" src="img/blog/ads-banner.jpg" alt=""></a>
+          </div>
+        </div>
+      </div>
+      <!-- 側欄終點 -->
+
+
+
       <div class="col-lg-4 sidebar-widgets" app-sidebar [post]="post"></div>
     </div>
   </div>
