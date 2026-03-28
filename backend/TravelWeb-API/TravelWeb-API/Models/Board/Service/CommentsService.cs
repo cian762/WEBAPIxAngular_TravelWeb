@@ -21,6 +21,7 @@ namespace TravelWeb_API.Models.Board.Service
 
             var commentList = _context.Comments
                 .Where(c => c.ArticleId == id)
+                .Include(c => c.CommentPhotos)
                 .Include(c => c.MemberInformation)
                 .Include(c => c.InverseParent).ToList();
 
@@ -31,6 +32,7 @@ namespace TravelWeb_API.Models.Board.Service
                 AvatarUrl = c.MemberInformation.AvatarUrl,
                 Contents = c.Contents,
                 CreatedAt = c.CreatedAt,
+                CommentPhoto = c.CommentPhotos?.FirstOrDefault()?.Photo,
                 LikeCount = LikeCount(c),
                 ReplyComments = GetReplyComments(c),
                 isLiked = false,

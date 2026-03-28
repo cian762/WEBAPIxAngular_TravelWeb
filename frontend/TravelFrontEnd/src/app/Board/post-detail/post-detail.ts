@@ -5,6 +5,11 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Sidebar } from "../Components/sidebar/sidebar";
 import { CommentsArea } from "../Components/comments-area/comments-area";
 import { CreateArticleButton } from "../Components/create-article-button/create-article-button";
+import { PopularPost } from "../Components/popular-post/popular-post";
+import { TagClouds } from "../Components/tag-clouds/tag-clouds";
+import { PostCatgories } from "../Components/post-catgories/post-catgories";
+import { AuthorInfoSidebar } from "../Components/author-info-sidebar/author-info-sidebar";
+
 
 
 interface ArticleTag {
@@ -15,7 +20,7 @@ interface ArticleTag {
 
 @Component({
   selector: 'app-post-detail',
-  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton],
+  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton, PopularPost, TagClouds, PostCatgories, AuthorInfoSidebar,],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
@@ -27,6 +32,7 @@ export class PostDetail implements OnInit {
   selectedIndex = 0;
   allPhotoList: string[] = [];
   TagsList: ArticleTag[] = [];
+  post?: PostDetailDto;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -48,7 +54,7 @@ export class PostDetail implements OnInit {
     });
   }
 
-  post?: PostDetailDto;
+
 
   setIndex(index: number) {
     this.selectedIndex = index;

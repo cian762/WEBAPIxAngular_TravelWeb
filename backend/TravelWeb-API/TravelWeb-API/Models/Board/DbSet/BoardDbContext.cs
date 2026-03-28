@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Models.Board.DbSet;
@@ -59,23 +60,40 @@ public partial class BoardDbContext : DbContext
     //=> optionsBuilder.UseSqlServer("Server=.;Database=Travel;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {      
+    {
 
         modelBuilder.Entity<MemberInformation>(entity =>
         {
-            // 1. 指定主鍵
             entity.ToTable("Member_Information", "Member");
-            entity.HasKey(e => e.MemberId);  
+            entity.HasKey(e => e.MemberId);
             entity.Property(e => e.MemberId)
-                .HasMaxLength(50)            
+                .HasMaxLength(50)
                 .HasColumnName("MemberID");
-
-            // 2. 修正資料表名稱與 Schema            
-            entity.ToTable("Member_Information", "Member");
-
-            // 3. 忽略你不想管的關聯 (避免連鎖報錯)
-            entity.Ignore(e => e.MemberComplaints);            
+            // 加這行，讓 BoardDbContext 不要去掃 MemberComplaint 相關的關係
+            entity.Ignore(e => e.MemberComplaints);
+            entity.Ignore(e => e.Followeds);
+            entity.Ignore(e => e.Followers);
         });
+
+
+        modelBuilder.Entity<TagsRegion>(entity =>
+        {
+            entity.HasKey(e => e.RegionId).HasName("PK_標籤_區域表_1");
+            entity.ToTable("Tags_Regions", "Activity");
+            entity.Property(e => e.RegionId)
+                .ValueGeneratedNever()
+                .HasColumnName("RegionID");
+            entity.Property(e => e.RegionName).HasMaxLength(10);
+            entity.Property(e => e.Uid).HasColumnName("UID");
+            entity.HasOne(d => d.UidNavigation).WithMany(p => p.InverseUidNavigation)
+                .HasForeignKey(d => d.Uid)
+                .HasConstraintName("FK_Tags_Regions_Tags_Regions");
+
+            // 切斷所有會連到 Activity 那邊的導航屬性
+            entity.Ignore(e => e.Activities);
+        });
+
+
 
         modelBuilder.Entity<Article>(entity =>
         {
@@ -97,6 +115,12 @@ public partial class BoardDbContext : DbContext
         .HasPrincipalKey(m => m.MemberId)
         .OnDelete(DeleteBehavior.ClientSetNull)
         .HasConstraintName("FK_Article_Member_Information");
+
+            modelBuilder.Entity<Article>()
+            .HasOne(a => a.Region)
+            .WithMany()
+            .HasForeignKey(a => a.RegionID)
+            .HasConstraintName("FK_Article_Region");
 
         });
 
@@ -232,16 +256,15 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<CommentPhoto>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("CommentPhotos", "Board");
+            entity.HasKey(e => new { e.ID });
+            entity.ToTable("CommentPhotos", "Board");
 
             entity.Property(e => e.CommentId).HasColumnName("CommentID");
 
-            entity.HasOne(d => d.Comment).WithMany()
-                .HasForeignKey(d => d.CommentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CommentPhotos_Comment");
+            entity.HasOne(d => d.Comment).WithMany(p => p.CommentPhotos)
+                                         .HasForeignKey(d => d.CommentId)
+                                         .OnDelete(DeleteBehavior.ClientSetNull)
+                                         .HasConstraintName("FK_CommentPhotos_Comment");
         });
 
         modelBuilder.Entity<Journal>(entity =>

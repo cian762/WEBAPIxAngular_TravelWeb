@@ -23,6 +23,8 @@ export class CommentsArea implements OnInit {
   contents = "";
   parent?: number;
   parentComment? = "";
+  selectedImageUrl = "";
+  showPreview: boolean = false;
 
   postComment(contents: string) {
     var CommentDto = {
@@ -57,6 +59,18 @@ export class CommentsArea implements OnInit {
     this.Serve.getComments(this.id).subscribe((d) => {
       this.commentList = d;
     });
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.selectedImageUrl = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
 }

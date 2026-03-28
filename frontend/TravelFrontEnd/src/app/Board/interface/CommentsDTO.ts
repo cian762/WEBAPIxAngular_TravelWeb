@@ -6,5 +6,6 @@ export interface CommentsDTO {
   createdAt: Date,
   likeCount: number,
   isLiked: boolean,
+  commentPhoto?: string,
   replyComments: CommentsDTO[]
 }

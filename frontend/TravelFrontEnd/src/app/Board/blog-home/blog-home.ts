@@ -1,7 +1,7 @@
 import { Component, Input, input, OnInit } from '@angular/core';
 import { ArticleData, ArticleResponse } from '../interface/ArticleData';
 import { BoardServe } from '../Service/board-serve';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PopularPost } from "../Components/popular-post/popular-post";
 import { TagClouds } from "../Components/tag-clouds/tag-clouds";
@@ -19,7 +19,7 @@ import { PostCatgories } from "../Components/post-catgories/post-catgories";
   styleUrl: './blog-home.css',
 })
 export class BlogHome implements OnInit {
-  constructor(private Serve: BoardServe, private router: Router
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router
   ) {
 
   }
@@ -29,9 +29,17 @@ export class BlogHome implements OnInit {
   Keyword = "";
 
   ngOnInit(): void {
-    if (this.articleList.length === 0) {
-      this.ReflashArticles();
-    }
+    this.route.queryParams.subscribe(params => {
+      if (params['TagsId']) {
+        const para: string[] = [];
+        para.push(`TagsId=${params['TagsId']}`);
+        this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
+          this.articleList = d.articleList;
+        });
+      } else {
+        this.ReflashArticles();
+      }
+    });
   }
 
 

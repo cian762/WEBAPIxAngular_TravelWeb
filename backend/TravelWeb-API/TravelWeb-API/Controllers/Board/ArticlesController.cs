@@ -160,6 +160,28 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
+        [HttpGet("curUser")]
+        public IActionResult GetCurUser([FromQuery] int page)
+        {
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("無效的 Token");
+            var member = _memberDb.MemberInformations
+                .FirstOrDefault(m=>m.MemberId==userId);
+            
+            return Ok(member);
+        }
+
+        [HttpGet("authorUser")]
+        public IActionResult GetauthorUser([FromQuery]string userId)
+        {            
+            var member = _memberDb.MemberInformations
+                .FirstOrDefault(m => m.MemberId == userId);
+
+            return Ok(member);
+        }
 
 
 

@@ -1,51 +1,62 @@
 <!-- 文章列起點 -->
-<div class="posts-list">
-  @for (article of articleList; track $index) {
-  <div class="single-post row border-bottom">
-    <div class="col-lg-3  col-md-3 meta-details">
-      <div style="margin-bottom:10px;">
-        <img (click)="goToMemderPage(article.userID)" class="userAvatar" [src]="article.userAvatar">
+<div class="my-container col-6">
+  @for (article of articleList; track $index) {<div class="single-post border-bottom">
+    <!-- 作者 + 地點 -->
+    <div class="post-author-row">
+      <div class="author-info" (click)="goToMemderPage(article.userID)">
+        <img class="userAvatar" [src]="article.userAvatar">
+        <div>
+          <div class="author-name">{{article.userName}}</div>
+          <div class="author-date">
+            {{article.createdAt | date:'M月d日 y年':'zh-Hant'}}
+          </div>
+        </div>
       </div>
-      <div class="user-details row">
-        <p class="col-lg-12 col-md-12 col-6">
-          <a (click)="goToMemderPage(article.userID)">{{article.userName}}&nbsp;&nbsp;
-            <span class="lnr lnr-user"></span></a>
-        </p>
-        <p class="col-lg-12 col-md-12 col-6">
-          <span>{{article.createdAt | date:'M月d日 y年':'zh-Hant'}}&nbsp;&nbsp;
-            <span class="lnr lnr-calendar-full"></span></span>
-        </p>
+      <div class="post-location">
+        <i class="ri-map-pin-line"></i>{{article.regionName}}
+        <button class="btn-more"><i class="ri-more-2-fill"></i></button>
+      </div>
 
-        <p class="col-lg-12 col-md-12 col-6">
-          <a href="#">地點&nbsp;&nbsp;
-            <i class="ri-map-pin-line"></i></a>
-        </p>
-        <p class="col-lg-12 col-md-12 col-6">
-          @if(article.isLike) {
-          <a style="color: #e8a838;" (click)="ToLike(article.articleId)">{{article.likeCount}}&nbsp;&nbsp;<i
-              class="fa-solid fa-thumbs-up"></i></a>
-          } @else {
-          <a (click)="ToLike(article.articleId)">{{article.likeCount}}&nbsp;&nbsp;<i
-              class="fa-regular fa-thumbs-up"></i></a>
-          }
-        </p>
-        <p class="col-lg-12 col-md-12 col-6">
-          <a href="#">06 Comments&nbsp;&nbsp;
-            <span class="lnr lnr-bubble"></span></a>
-        </p>
+    </div>
+
+    <!-- 大圖，無圓角 -->
+    <div class="post-cover">
+      <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+    </div>
+    <!-- 標題 -->
+    <a class="posts-title" (click)="goToDetail(article.articleId)">
+      <h3>
+        <span class="post-type">討論</span>
+        {{article.title}}
+      </h3>
+    </a>
+    <!-- 底列：讚 留言 -->
+    <div class="post-footer">
+      <!-- 標籤 -->
+      @if(article.tags && article.tags.length > 0){
+      <div class="tags">
+        <span>相關標籤:</span>
+        @for (tag of article.tags; track tag.tagId) {
+        <button class="tag-btn" (click)="seachTag(tag.tagId)">
+          <i [class]="tag.icon"></i>&nbsp;{{tag.tagName}}
+        </button>
+        }
+
+      </div>
+      }@else {<span></span>}
+
+      <!-- 讚 留言 -->
+      <div class="post-reactions">
+        <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
+          <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+          {{article.likeCount}}
+        </a>
+        <a class="reaction-item" href="#">
+          <span class="lnr lnr-bubble"></span>
+          N則留言
+        </a>
       </div>
     </div>
-    <div class="col-lg-9 col-md-9 ">
-      <div class="feature-img">
-        <img class="img-fluid img-fixed-size" [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
-      </div>
-      <a class="posts-title" (click)="goToDetail(article.articleId)">
-        <h3>{{article.title}}</h3>
-      </a>
-      <a (click)="goToDetail(article.articleId)" class="primary-btn">查看詳情</a>
-      <!-- <a (click)="goToUpdate(article.articleId)" class="genric-btn primary">編輯貼文</a> -->
-    </div>
-  </div>
-  }
+  </div>}
 </div>
 <!-- 文章列終點 -->

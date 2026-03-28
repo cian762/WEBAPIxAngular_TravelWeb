@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Models.Board.DbSet;
@@ -24,9 +25,11 @@ public partial class Article
 
     public string? PhotoUrl { get; set; }
 
+    public int? RegionID { get; set; }
+
     // 導覽屬性
     public virtual ICollection<ArticleFolder> ArticleFolders { get; set; } = new List<ArticleFolder>();
-
+    public virtual TagsRegion? Region { get; set; }
     public virtual ICollection<ArticleLike> ArticleLikes { get; set; } = new List<ArticleLike>();
     public virtual ICollection<ArticleTag> ArticleTags { get; set; } = new List<ArticleTag>();
 

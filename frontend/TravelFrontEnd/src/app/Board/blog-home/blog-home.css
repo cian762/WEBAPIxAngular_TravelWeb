@@ -3,6 +3,12 @@
   padding-top: 50px;
 }
 
+.my-container {
+  width: 90%;
+  margin: 0 auto;
+}
+
+
 /* ===========以下為標籤搜尋框之樣式=========== */
 .my-dropdown-menu {
   background-color: #fff;
