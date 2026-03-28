@@ -28,10 +28,11 @@ export class IndexItinerary implements AfterViewInit {
   lat: number = 0;
   lng: number = 0;
   initGoogleAutocomplete() {
-    if (typeof google === 'undefined') {
-      console.error('Google API 尚未載入');
+    if (typeof google === 'undefined' || !this.locationInput) {
+      console.error('Google API 尚未載入或找不到 locationInput');
       return;
     }
+
     const autocomplete = new google.maps.places.Autocomplete(
       this.locationInput.nativeElement, {
       // 限制只抓你要的資料（效能更好）
