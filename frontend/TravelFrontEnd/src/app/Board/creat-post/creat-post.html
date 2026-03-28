@@ -1,15 +1,14 @@
-<div class="whole-wrap">
-  <div class="container">
-    <div class="col-8 mx-auto my-5">
+<div class="host-body">
+  <div class="editor-panel ">
+    <div class="">
       <form [formGroup]="form">
         <!-- 上傳圖片區 -->
         @if (!this.photoList[this.coverIndex]) {
         <div class="mb-3">
-          <label class="border rounded-2 border-2 border-dashed p-4 text-center d-block upload-label"
+          <label
+            class="border rounded-2 border-2 border-dashed p-4 d-flex justify-content-center align-items-center upload-label"
             style="cursor: pointer;">
-
-            點擊上傳圖片 <i class="bi bi-images"></i>
-
+            點擊上傳圖片 <i class="bi bi-images ms-1"></i>
             <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden" multiple>
           </label>
         </div>
@@ -42,7 +41,7 @@
               }
               <!-- 新增按鈕 -->
               <label
-                class="thumb-UpdatePhoto-item border rounded-2 border-2 border-dashed text-center d-block upload-label"
+                class="thumb-UpdatePhoto-item border rounded-2 border-2 border-dashed text-center d-block upload-btn"
                 style="cursor: pointer;">
                 上傳更多圖片 <i class="bi bi-images"></i>
                 <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden">
@@ -59,7 +58,8 @@
         </div>
         <div class="mb-3">
           <label for="exampleFormControlTextarea1" class="form-label my-title">文章內文</label>
-          <textarea class="form-control" formControlName="content" placeholder="請輸入內文" rows="3"></textarea>
+          <textarea class="form-control" formControlName="content" placeholder="請輸入內文" rows="3"
+            (input)="onInput($event)"></textarea>
         </div>
         <div class="mb-3">
           <label for="exampleFormControlTextarea1" class="form-label my-title">標籤</label>
@@ -96,6 +96,37 @@
           </div>
         </div>
 
+
+        <div class="row g-2">
+          <div class="col-4">
+            <select class="form-select" (change)="onRegionChange($event)">
+              <option value="">選擇地區</option>
+              <option *ngFor="let region of regions" [value]="region.name">
+                {{ region.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-4">
+            <select class="form-select" (change)="onCityChange($event)" [disabled]="!selectedRegion">
+              <option value="">選擇縣市</option>
+              <option *ngFor="let city of filteredCities" [value]="city.name">
+                {{ city.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-4">
+            <select class="form-select" (change)="onDistrictChange($event)" [disabled]="!selectedCity">
+              <option value="">選擇分區</option>
+              <option *ngFor="let district of filteredDistricts" [value]="district">
+                {{ district }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+
         <div class="single-element-widget">
           <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
           <div class="default-select">
@@ -111,9 +142,11 @@
 
     </div>
 
+    <div class="d-flex justify-content-around">
+      <a href="#" class="genric-btn danger-border radius">刪除文章</a>
+      <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
+    </div>
 
-    <a href="#" class="genric-btn danger-border radius">刪除文章</a>
-    <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
 
 
 

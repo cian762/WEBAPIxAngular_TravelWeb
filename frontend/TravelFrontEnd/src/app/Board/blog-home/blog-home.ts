@@ -7,11 +7,14 @@ import { PopularPost } from "../Components/popular-post/popular-post";
 import { TagClouds } from "../Components/tag-clouds/tag-clouds";
 
 import { ArticleList } from "../Components/article-list/article-list";
+import { CreateArticleButton } from "../Components/create-article-button/create-article-button";
+import { PostCatgories } from "../Components/post-catgories/post-catgories";
+
 
 
 @Component({
   selector: 'app-blog-home',
-  imports: [RouterModule, FormsModule, PopularPost, TagClouds, ArticleList],
+  imports: [RouterModule, FormsModule, PopularPost, TagClouds, ArticleList, CreateArticleButton, PostCatgories],
   templateUrl: './blog-home.html',
   styleUrl: './blog-home.css',
 })
@@ -29,7 +32,6 @@ export class BlogHome implements OnInit {
     if (this.articleList.length === 0) {
       this.ReflashArticles();
     }
-
   }
 
 
@@ -67,16 +69,6 @@ export class BlogHome implements OnInit {
 
   }
 
-
-
-
-
-
-  goToCreate(): void {
-    this.Serve.postPostAPI().subscribe(p => {
-      this.router.navigate(['Board', 'creat', p]);
-    });
-  }
 
 
   onFocus(event: any) {

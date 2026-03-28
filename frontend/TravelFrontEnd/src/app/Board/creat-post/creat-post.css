@@ -1,3 +1,21 @@
+.host-body {
+  background-color: #f9f9ff;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.editor-panel {
+  background-color: #ffffff;
+  padding: 80px 100px;
+
+  box-shadow: 2px 2px 3px #27272721;
+  width: 100%;
+  max-width: 800px;
+  margin: 30px auto;
+
+}
+
+
 .border-dashed {
   border-style: dashed !important;
 }
@@ -17,6 +35,16 @@
   font-size: 16px;
   font-weight: normal;
 }
+
+textarea {
+  resize: none;
+  overflow-y: auto;
+  min-height: 100px;
+  max-height: 800px;
+}
+
+
+
 
 /* ===========以下為標籤搜尋框之樣式=========== */
 .my-dropdown-menu {
@@ -179,7 +207,7 @@
   position: relative;
   /* 關鍵：建立定位基準 */
   width: 100%;
-  /* 填滿父容器 */
+  /* 填滿容器 */
   overflow: hidden;
   /* 如果按鈕稍微超出，會被切掉（選配） */
   padding: 0;
@@ -224,13 +252,29 @@
 /* 1. 定義上傳區域的基礎與懸停樣式 */
 .upload-label {
   cursor: pointer;
+  width: 90%;
+  height: 300px;
+  margin: 0 auto;
   transition: all 0.3s ease-in-out;
   /* 讓變化過程變平滑 */
   background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-btn {
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  /* 讓變化過程變平滑 */
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* 3. 針對內部的 Icon 做額外動畫（選配） */
-.upload-label:hover i {
+.upload-label .upload-btn:hover i {
   animation: bounce 0.5s infinite alternate;
 }
 
@@ -245,7 +289,7 @@
 }
 
 /* 2. 當滑鼠移上去時的變化 */
-.upload-label:hover {
+.upload-label .upload-btn:hover {
   background-color: #f8f9fa;
   /* 淺灰色背景，增加點擊感 */
   border-color: #38a4ff !important;

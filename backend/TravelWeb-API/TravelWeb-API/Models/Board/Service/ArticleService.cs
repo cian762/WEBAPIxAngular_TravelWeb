@@ -131,6 +131,7 @@ namespace TravelWeb_API.Models.Board.Service
             //處理分頁+把資料從DB撈出來
             int pageSize = 10;
             var result = data
+                .Where(a => a.Status == 1)
                 .Distinct() //移除重複資料
                 .Include(a => a.MemberInformation)
                 .Include(a => a.ArticleLikes)  

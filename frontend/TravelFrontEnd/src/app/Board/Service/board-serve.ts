@@ -76,13 +76,13 @@ export class BoardServe {
   }
 
   putPostAPI(id: number, para: any) {
-
     return this.http.put(
       `${this.apiUrl}/Post/${id}`, para);
-
   }
 
-
+  getNewActivity() {
+    return this.http.get(`${this.apiUrl}/ActivityInfo/NewActivity`)
+  }
 
 
 }

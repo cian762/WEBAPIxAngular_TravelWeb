@@ -31,7 +31,7 @@
     </a>
 
 
-    <!-- 底列：編輯 | 讚 留言 -->
+    <!-- 底列：讚 留言 -->
     <div class="post-footer">
       <!-- 標籤 -->
       <div class="post-tags">
@@ -43,9 +43,6 @@
         }
       </div>
 
-
-      <!-- <button type="button" class="btn btn-outline-danger btn-sm"
-            (click)="goToUpdate(article.articleId)">編輯貼文</button> -->
       <div class="post-reactions">
         <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
           <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
@@ -61,7 +58,10 @@
     </div>
 
 
-
+    <!-- 編輯列：文章權限 瀏覽人數 編輯 -->
+    <div class="post-footer">
+      <button type="button" class="btn btn-outline-danger btn-sm" (click)="goToUpdate(article.articleId)">編輯貼文</button>
+    </div>
 
   </div>}
 </div>

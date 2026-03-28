@@ -4,6 +4,8 @@ import { PostDetailDto } from '../interface/PostDetailDto';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Sidebar } from "../Components/sidebar/sidebar";
 import { CommentsArea } from "../Components/comments-area/comments-area";
+import { CreateArticleButton } from "../Components/create-article-button/create-article-button";
+
 
 interface ArticleTag {
   tagID: number;
@@ -13,7 +15,7 @@ interface ArticleTag {
 
 @Component({
   selector: 'app-post-detail',
-  imports: [RouterModule, Sidebar, CommentsArea],
+  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })

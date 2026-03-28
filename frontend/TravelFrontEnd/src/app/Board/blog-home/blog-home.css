@@ -1,45 +1,7 @@
-/* ===========以下為發布文章按鈕之樣式=========== */
-
-.float-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 50px;
-  z-index: 999;
-  width: 50px;
-  height: 50px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  background-color: #f8b600;
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(114, 114, 114, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: width 0.3s ease;
+.host-body {
+  background-color: #f9f9ff;
+  padding-top: 50px;
 }
-
-.float-btn:hover {
-  color: #f8b600;
-  background-color: #fff;
-  border: 1px solid #f8b600;
-  width: 120px;
-}
-
-.float-btn .btn-text {
-  display: none;
-  margin-left: 8px;
-  font-size: 14px;
-}
-
-.float-btn:hover .btn-text {
-  display: inline;
-}
-
-/* ===========以上為發布文章按鈕之樣式=========== */
 
 /* ===========以下為標籤搜尋框之樣式=========== */
 .my-dropdown-menu {

@@ -43,6 +43,18 @@ export class CreatPost implements OnInit {
   selectedIndex: number = 0;
   coverIndex: number = 0;
 
+  regions = [
+    {
+      name: '北部',
+      cities: [
+        {
+          name: '台北市',
+          districts: ['中正區', '大安區', '信義區']
+        }
+      ]
+    }
+  ]
+
   setIndex(index: number) {
     this.selectedIndex = index;
   }
@@ -287,6 +299,42 @@ export class CreatPost implements OnInit {
       this.filteredTags = [];
     }, 200);
   }
+  onInput(event: Event) {
+    const el = event.target as HTMLTextAreaElement;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 800) + 'px';
+  }
 
+
+  selectedRegion: string = '';
+  selectedCity: string = '';
+  selectedDistrict: string = '';
+
+  filteredCities: any[] = [];
+  filteredDistricts: string[] = [];
+
+  onRegionChange(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedRegion = value;
+    this.selectedCity = '';
+    this.selectedDistrict = '';
+    this.filteredDistricts = [];
+
+    const region = this.regions.find(r => r.name === value);
+    this.filteredCities = region ? region.cities : [];
+  }
+
+  onCityChange(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    this.selectedCity = value;
+    this.selectedDistrict = '';
+
+    const city = this.filteredCities.find(c => c.name === value);
+    this.filteredDistricts = city ? city.districts : [];
+  }
+
+  onDistrictChange(event: Event) {
+    this.selectedDistrict = (event.target as HTMLSelectElement).value;
+  }
 
 }
