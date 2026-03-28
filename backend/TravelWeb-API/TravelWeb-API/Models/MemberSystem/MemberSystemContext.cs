@@ -110,9 +110,8 @@ public partial class MemberSystemContext : DbContext
         {
             entity.ToTable("Log_in_record", "Member");
 
-            // 🔥 終極殺手鐧：強制告訴 EF Core 這個欄位由資料庫控制，不准塞值！
             entity.Property(e => e.LoginRecordId)
-                  .UseIdentityColumn() // 明確宣告它是 IDENTITY 欄位 (如果是 SQL Server)
+                  .UseIdentityColumn() 
                   .ValueGeneratedOnAdd();
             entity.Property(e => e.LoginAt).HasColumnType("datetime");
             entity.Property(e => e.MemberCode).HasMaxLength(50);
@@ -209,10 +208,8 @@ public partial class MemberSystemContext : DbContext
 
         modelBuilder.Entity<EmailVerification>(entity =>
         {
-            // 設定 Email 為主鍵
             entity.HasKey(e => e.Email);
 
-            // 指定資料表名稱與 Schema
             entity.ToTable("Email_Verification", "Member");
 
             entity.Property(e => e.Email).HasMaxLength(100);

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router'; // 取消 RouterLink，因為我們要用按鈕觸發防呆
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -18,7 +18,6 @@ export class ComplaintFormComponent implements OnInit {
   memberId = '';
   memberName = '';
 
-  // 預覽圖片用
   selectedFile: File | null = null;
   imagePreviewUrl: string | null = null;
 
@@ -52,7 +51,6 @@ export class ComplaintFormComponent implements OnInit {
     });
   }
 
-  // 處理圖片選擇
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -65,14 +63,12 @@ export class ComplaintFormComponent implements OnInit {
     }
   }
 
-  // 🔥 防呆：取消返回
   onCancel(): void {
     if (confirm('您輸入的內容將會被清空，確定要返回嗎？')) {
       this.router.navigate(['/profile']);
     }
   }
 
-  // 🔥 防呆：確認送出
   onSubmit(): void {
     console.log('表單驗證結果：', this.complaintForm.valid, '錯誤明細：', this.complaintForm.errors);
 
@@ -82,12 +78,11 @@ export class ComplaintFormComponent implements OnInit {
     }
 
     if (!confirm('確定要送出此份申訴表單嗎？送出後將交由專員為您處理。')) {
-      return; // 如果按取消就中斷執行
+      return;
     }
 
     this.isLoading = true;
 
-    // 因為有照片，改用 FormData 包裝
     const formData = new FormData();
     formData.append('Subject', this.complaintForm.value.subject);
     formData.append('Description', this.complaintForm.value.description);
@@ -106,13 +101,11 @@ export class ComplaintFormComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
 
-        // 🔥 如果後端有傳回詳細的 error 字串，我們把它接起來顯示
         const detailError = err.error?.error ? `\n詳細原因：${err.error.error}` : '';
         const msg = err.error?.message || '送出失敗，請稍後再試';
 
         alert(msg + detailError);
 
-        // 🔥 在 F12 裡面用紅色字印出完整的 Error 物件
         console.error('🚨 申訴送出失敗的完整錯誤：', err);
       }
     });
