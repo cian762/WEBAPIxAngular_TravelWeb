@@ -1,10 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+// 🔥 修正 1：改用 ASP.NET Core 正確的 Configuration 命名空間
+using Microsoft.Extensions.Configuration;
+// 🔥 修正 2：補上 JWT 產生所需的命名空間
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.DTO.MemberSystemDto;
+using TravelWeb_API.Models.MemberSystem;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace TravelWeb_API.Controllers
 {
@@ -14,14 +22,15 @@ namespace TravelWeb_API.Controllers
     public class MemberRegisterController : ControllerBase
     {
         private readonly MemberSystemContext _context;
-        private readonly IWebHostEnvironment _env; 
+        private readonly IWebHostEnvironment _env;
+        private readonly IConfiguration _configuration;
 
-        public MemberRegisterController(MemberSystemContext context, IWebHostEnvironment env)
+        public MemberRegisterController(MemberSystemContext context, IWebHostEnvironment env, IConfiguration configuration)
         {
             _context = context;
             _env = env;
+            _configuration = configuration;
         }
-
         [HttpPost]
         public async Task<IActionResult> Register([FromForm] RegisterRequestDto request)
         {
@@ -52,7 +61,7 @@ namespace TravelWeb_API.Controllers
             };
 
             // ==========================================
-            // 🔥 更新：MemberId 產生規則改為「信箱@前字串 + 隨機兩字 (英數混合)」
+            // MemberId 產生規則：「信箱@前字串 + 隨機兩字 (英數混合)」
             // ==========================================
             string emailPrefix = request.Email.Split('@')[0];
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -60,7 +69,7 @@ namespace TravelWeb_API.Controllers
             string randomSuffix = new string(Enumerable.Repeat(chars, 2)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
 
-            string newMemberId = emailPrefix + randomSuffix;
+            string newMemberId = "@" + emailPrefix + randomSuffix;
 
             var newMemberInfo = new MemberInformation
             {
@@ -72,31 +81,51 @@ namespace TravelWeb_API.Controllers
                 Status = "正常"
             };
 
+            // ==========================================
+            // 處理大頭貼上傳 (Cloudinary)
+            // ==========================================
             if (request.AvatarFile != null && request.AvatarFile.Length > 0)
             {
-                string uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads");
+                // 1. 讀取 appsettings.json 中的 Cloudinary 設定
+                var cloudName = _configuration["CloudinarySettings:CloudName"];
+                var apiKey = _configuration["CloudinarySettings:ApiKey"];
+                var apiSecret = _configuration["CloudinarySettings:ApiSecret"];
 
-                if (!Directory.Exists(uploadsFolder))
+                // 2. 初始化 Cloudinary 帳號
+                Account account = new Account(cloudName, apiKey, apiSecret);
+                Cloudinary cloudinary = new Cloudinary(account);
+
+                // 3. 讀取圖片串流並設定上傳參數
+                using var stream = request.AvatarFile.OpenReadStream();
+                var uploadParams = new ImageUploadParams()
                 {
-                    Directory.CreateDirectory(uploadsFolder);
+                    File = new FileDescription(request.AvatarFile.FileName, stream),
+                    Folder = "TravelWeb/Avatars", // 建議在 Cloudinary 建立一個資料夾來集中管理
+                                                  // 🔥 Cloudinary 強大功能：上傳時自動裁切並壓縮成 500x500 正方形的大頭貼
+                    Transformation = new Transformation().Width(500).Height(500).Crop("fill").Gravity("face")
+                };
+
+                // 4. 執行上傳
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                // 5. 檢查上傳是否成功
+                if (uploadResult.Error != null)
+                {
+                    return StatusCode(500, new { message = "圖片上傳失敗", error = uploadResult.Error.Message });
                 }
 
-                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(request.AvatarFile.FileName);
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await request.AvatarFile.CopyToAsync(stream);
-                }
-
-                newMemberInfo.AvatarUrl = "/uploads/" + uniqueFileName;
+                // 6. 將 Cloudinary 產生的安全網址 (https) 存入資料庫
+                newMemberInfo.AvatarUrl = uploadResult.SecureUrl.ToString();
             }
             else
             {
-                // 如果沒有上傳圖片，塞入預設灰人圖片路徑
+                // 如果沒有上傳，可以使用你的預設圖片，或者你也可以把預設圖片傳到 Cloudinary 並填入該網址
                 newMemberInfo.AvatarUrl = "/images/default-avatar.png";
             }
 
+            // ==========================================
+            // 寫入資料庫 (使用 Transaction 確保兩張表都寫入成功)
+            // ==========================================
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
@@ -109,11 +138,26 @@ namespace TravelWeb_API.Controllers
 
                 await transaction.CommitAsync();
 
+                // 註冊成功後自動登入：產生 Token 並存入 Cookie
+                string role = newMemberCode.StartsWith("G") ? "Admin" : "Member";
+
+                // 這裡呼叫了下方的 GenerateJwtToken 方法
+                string token = GenerateJwtToken(newMemberCode, role, newMemberId);
+
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // 如果你在本機沒有用 https 開發，測試時可以先改成 false，上線一定要 true
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddHours(9)
+                };
+                Response.Cookies.Append("AuthToken", token, cookieOptions);
+
                 return Ok(new
                 {
                     message = "會員註冊成功！",
                     memberCode = newMemberCode,
-                    memberId = newMemberId 
+                    memberId = newMemberId
                 });
             }
             catch (Exception ex)
@@ -122,6 +166,38 @@ namespace TravelWeb_API.Controllers
 
                 return StatusCode(500, new { message = "資料庫寫入失敗", error = ex.InnerException?.Message ?? ex.Message });
             }
+        }
+
+        private string GenerateJwtToken(string memberCode, string role, string memberId)
+        {
+            var issuer = _configuration["JwtSettings:Issuer"];
+            var audience = _configuration["JwtSettings:Audience"];
+            var signKey = _configuration["JwtSettings:SignKey"];
+
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, memberCode),
+                new Claim(ClaimTypes.Role, role),
+                new Claim("MemberId", memberId), // 將 MemberId 封裝進 Token
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey));
+            var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = issuer,
+                Audience = audience,
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.AddHours(9),
+                SigningCredentials = signingCredentials
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(securityToken);
         }
 
         // ==========================================
@@ -136,5 +212,28 @@ namespace TravelWeb_API.Controllers
                 return Convert.ToBase64String(hash);
             }
         }
-    }
+
+
+
+        [HttpPost("InitPasswords")]
+        public IActionResult InitPasswords()
+        {
+            var members = _context.MemberLists.Where(m => m.PasswordHash == null).ToList();
+
+            foreach (var member in members)
+            {
+                member.PasswordHash = HashPassword(member.MemberCode);
+            }
+
+            _context.SaveChanges();
+            return Ok("完成");
+        }
+
+
+
+    } 
+
+        
+
+        
 }

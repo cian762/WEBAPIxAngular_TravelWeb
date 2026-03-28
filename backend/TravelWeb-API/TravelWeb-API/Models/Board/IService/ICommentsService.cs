@@ -7,7 +7,7 @@ namespace TravelWeb_API.Models.Board.IService
     {
         
         public List<CommentsDTO> GetComments(int id);
-        public Comment AddComment(PostCommentDto dto);        
+        public Comment AddComment(PostCommentDto dto, string UserId);        
         public bool CommentLike(int commentID, string UserId);
 
     }

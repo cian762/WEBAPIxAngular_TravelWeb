@@ -20,4 +20,6 @@ public partial class OrderItem
     public virtual Order Order { get; set; } = null!;
 
     public virtual ICollection<OrderItemTicket> OrderItemTickets { get; set; } = new List<OrderItemTicket>();
+
+    public virtual ICollection<QrcodeInfo> QrcodeInfos { get; set; } = new List<QrcodeInfo>();
 }

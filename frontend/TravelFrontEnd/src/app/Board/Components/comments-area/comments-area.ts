@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { BoardServe } from '../../board-serve';
+import { BoardServe } from '../../Service/board-serve';
 import { CommentsDTO } from '../../interface/CommentsDTO';
 import { FormsModule } from '@angular/forms';
 
@@ -20,15 +20,13 @@ export class CommentsArea implements OnInit {
 
   @Input() id = 0;
   commentList: CommentsDTO[] = [];
-  UserId = "";
   contents = "";
   parent?: number;
   parentComment? = "";
 
-  postComment(UserId: string, contents: string) {
+  postComment(contents: string) {
     var CommentDto = {
       articleID: this.id,
-      userId: UserId,
       contents: contents,
       parentID: this.parent !== undefined ? this.parent : null,
     }
@@ -48,6 +46,11 @@ export class CommentsArea implements OnInit {
     this.parent = commentID;
     this.parentComment = ("TO" + authorName + ":" + contents);
     console.log(this.parent);
+  }
+
+  removeParent() {
+    this.parent = undefined;
+    this.parentComment = "";
   }
 
   ReflashComments() {

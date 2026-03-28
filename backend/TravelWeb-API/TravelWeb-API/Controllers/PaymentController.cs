@@ -33,54 +33,76 @@ namespace TravelWeb_API.Controllers
             // 返回 Content 並指定為 text/html，瀏覽器收到會立刻自動 Submit 跳轉到綠界
             return Content(htmlForm, "text/html", System.Text.Encoding.UTF8);
         }
+        [HttpPost("PaymentCallback")]
+        public IActionResult PaymentCallback()
+        {
+            // 這裡不做邏輯處理，單純把使用者轉回前端
+            return Redirect("http://localhost:4200/");
+        }
         //綠界回傳
         [HttpPost("EcpayReturn")]
         [Consumes("application/x-www-form-urlencoded")]
         public async Task<IActionResult> EcpayReturn([FromForm] Dictionary<string, string> formData)
         {
-            // 1. 驗證 CheckMacValue
+            // 1. 驗證 CheckMacValue (這步過了才動資料庫)
             if (!_ecpayService.ValidateCheckMacValue(formData))
             {
-                // 如果失敗，會噴 400，這就是你之前在 ngrok 看到的錯誤
                 return BadRequest("CheckMacValue 驗證失敗");
             }
 
-            // 2. 判斷付款狀態 (RtnCode == 1 代表成功)
+            // 2. 判斷付款狀態 (RtnCode == "1" 代表付款成功)
             if (formData["RtnCode"] == "1")
             {
-                string merchantTradeNo = formData["MerchantTradeNo"];
-
-                // 解析訂單 ID (照你原本的邏輯)
-                string idPart = merchantTradeNo.Replace("TW", "").Split('T')[0];
-                if (int.TryParse(idPart, out int orderId))
+                // 從 CustomField1 拿到你的 OrderId
+                if (formData.TryGetValue("CustomField1", out var customField1) && int.TryParse(customField1, out int orderId))
                 {
+                    // 💡 一次把訂單跟交易紀錄都抓出來
                     var order = await _tripDbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+                    var transaction = await _tripDbContext.PaymentTransactions
+                        .FirstOrDefaultAsync(t => t.OrderId == orderId);
 
-                    if (order != null && order.PaymentStatus != "已付款")
+                    if (order != null)
                     {
-                        // 更新訂單
+                        // A. 更新訂單主表狀態
                         order.PaymentStatus = "已付款";
-                        order.OrderStatus = "已處理";
+                        order.OrderStatus = "已處理"; // 或是你定義的下一步狀態
 
-                        // 更新交易紀錄
-                        var transaction = await _tripDbContext.PaymentTransactions
-                            .FirstOrDefaultAsync(t => t.OrderId == orderId && t.TransactionStatus == "待處理");
-
+                        // B. 更新交易明細表 (把綠界回傳的空值填進去)
                         if (transaction != null)
                         {
-                            transaction.ProviderTransactionNo = formData["TradeNo"]; // 綠界的交易序號
+                            // 填入綠界的交易編號 (例如: 2603251634329768)
+                            transaction.ProviderTransactionNo = formData.ContainsKey("TradeNo") ? formData["TradeNo"] : "";
+
+                            // 填入付款方式 (例如: Credit_CreditCard)
+                            transaction.PaymentMethod = formData.ContainsKey("PaymentType") ? formData["PaymentType"] : "ECPay";
+
+                            // 填入實際付款金額 (選填)
+                            // transaction.Amount = decimal.Parse(formData["TradeAmt"]);
+
+                            // 狀態改為成功
                             transaction.TransactionStatus = "成功";
-                            transaction.CompletedAt = DateTime.Now;
+
+                            // 填入完成時間 (優先使用綠界回傳的 PaymentDate)
+                            if (formData.TryGetValue("PaymentDate", out var payDate))
+                            {
+                                transaction.CompletedAt = DateTime.Parse(payDate);
+                            }
+                            else
+                            {
+                                transaction.CompletedAt = DateTime.Now;
+                            }
                         }
+
 
                         await _tripDbContext.SaveChangesAsync();
                     }
+                    //QRcode 送信放這
                 }
             }
 
-            // 3. 💡 成功後必須回傳 1|OK，否則綠界會一直重發通知
+            // 3. 嚴格遵守綠界規範：回傳純文字 1|OK (不然綠界會一直重傳)
             return Content("1|OK");
         }
-    }
 
+    }
 }

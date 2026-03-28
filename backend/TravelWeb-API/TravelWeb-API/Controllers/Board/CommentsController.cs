@@ -44,7 +44,10 @@ namespace TravelWeb_API.Controllers.Board
         [HttpPost("PostComment")]
         public async Task<ActionResult<Comment>> PostComment([FromBody] PostCommentDto dto)
         {
-            Comment comment = _commentsService.AddComment(dto);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? userId = GetUser.Id(token);
+            Comment comment = _commentsService.AddComment(dto, userId);
 
             return NoContent();
         }

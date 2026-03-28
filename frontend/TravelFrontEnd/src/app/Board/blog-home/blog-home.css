@@ -1,18 +1,119 @@
-/* 在你的 app.css 或組件 css 裡 */
-.img-fixed-size {
-  width: 540px;
-  height: 272px;
-  object-fit: cover;
-  /* 關鍵：等比例縮放並裁切，不變形 */
-  object-position: center;
-  /* 從圖片中心點裁切 */
+/* ===========以下為發布文章按鈕之樣式=========== */
+
+.float-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 50px;
+  z-index: 999;
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-color: #f8b600;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(114, 114, 114, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: width 0.3s ease;
 }
 
-.img-fixed-sizeB {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  /* 關鍵：等比例縮放並裁切，不變形 */
-  object-position: center;
-  /* 從圖片中心點裁切 */
+.float-btn:hover {
+  color: #f8b600;
+  background-color: #fff;
+  border: 1px solid #f8b600;
+  width: 120px;
 }
+
+.float-btn .btn-text {
+  display: none;
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+.float-btn:hover .btn-text {
+  display: inline;
+}
+
+/* ===========以上為發布文章按鈕之樣式=========== */
+
+/* ===========以下為標籤搜尋框之樣式=========== */
+.my-dropdown-menu {
+  background-color: #fff;
+  width: 70%;
+  margin: 5px auto;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: #f8b600;
+  border-radius: 999px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  /* transition: all 0.2s ease; */
+  margin: 5px auto;
+  width: 80%;
+}
+
+.search-box.focused {
+  background-color: #fff;
+  border: 1px solid #f8b600;
+}
+
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent !important;
+  font-size: 14px;
+  color: #fff;
+}
+
+.search-box input::placeholder {
+  color: #fff;
+}
+
+.search-box.focused input {
+  color: #f8b600;
+}
+
+.search-box.focused input::placeholder {
+  color: #f8b600;
+}
+
+.search-box button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.search-box.focused button {
+  color: #f8b600;
+}
+
+.search-box input:-webkit-autofill,
+.search-box input:-webkit-autofill:hover,
+.search-box input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+  -webkit-text-fill-color: #f8b600 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.search-box:not(.focused) input:-webkit-autofill,
+.search-box:not(.focused) input:-webkit-autofill:hover,
+.search-box:not(.focused) input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #f8b600 inset !important;
+  -webkit-text-fill-color: #fff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ===========以上為標籤搜尋框之樣式=========== */

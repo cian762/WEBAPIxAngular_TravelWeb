@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TravelWeb_API.Models.MemberSystem;
+﻿namespace TravelWeb_API.Models.MemberSystem;
 
 public partial class MemberInformation
 {
@@ -18,6 +15,8 @@ public partial class MemberInformation
     public string? AvatarUrl { get; set; }
 
     public string? Status { get; set; }
+
+    //public string? BackgroundUrl { get; set; }
 
     public virtual ICollection<MemberComplaint> MemberComplaints { get; set; } = new List<MemberComplaint>();
 

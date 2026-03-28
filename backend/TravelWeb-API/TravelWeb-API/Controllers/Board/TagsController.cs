@@ -26,33 +26,37 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         // GET: Tags
-        [HttpGet]
-        public async Task<IActionResult> getTagsByArticleId([FromQuery]int articleId)
+        [HttpGet("articleId/{articleId}")]
+        public async Task<IActionResult> getTagsByArticleId(int articleId)
         {
             var result = _tagsService.getTagsByArticleId(articleId);
            
             return Ok(result);
         }
 
-        //// GET: Tags/Details/5
-        //public async Task<IActionResult> Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpGet("all")]
+        public async Task<IActionResult> getAllTags()
+        {
+            var result = _tagsService.getAllTags();
+            return Ok(result);
+        }
 
-        //    var articleTag = await _context.ArticleTags
-        //        .Include(a => a.Article)
-        //        .Include(a => a.Tag)
-        //        .FirstOrDefaultAsync(m => m.ArticleId == id);
-        //    if (articleTag == null)
-        //    {
-        //        return NotFound();
-        //    }
+       
 
-        //    return View(articleTag);
-        //}
+        // POST: Tags/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        public async Task<IActionResult> EditTagsByArticleId([FromQuery] int articleId, 
+            [FromBody]List<int>? TagIDList)
+        {
+            bool result=_tagsService.EditTagsByArticleId(articleId, TagIDList);
+            if (result)return Ok();
+            return NotFound();           
+
+        }
+
+
 
         //// GET: Tags/Create
         //public IActionResult Create()
@@ -98,42 +102,7 @@ namespace TravelWeb_API.Controllers.Board
         //    return View(articleTag);
         //}
 
-        //// POST: Tags/Edit/5
-        //// To protect from overposting attacks, enable the specific properties you want to bind to.
-        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, [Bind("ArticleId,TagId")] ArticleTag articleTag)
-        //{
-        //    if (id != articleTag.ArticleId)
-        //    {
-        //        return NotFound();
-        //    }
 
-        //    if (ModelState.IsValid)
-        //    {
-        //        try
-        //        {
-        //            _context.Update(articleTag);
-        //            await _context.SaveChangesAsync();
-        //        }
-        //        catch (DbUpdateConcurrencyException)
-        //        {
-        //            if (!ArticleTagExists(articleTag.ArticleId))
-        //            {
-        //                return NotFound();
-        //            }
-        //            else
-        //            {
-        //                throw;
-        //            }
-        //        }
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    ViewData["ArticleId"] = new SelectList(_context.Articles, "ArticleId", "ArticleId", articleTag.ArticleId);
-        //    ViewData["TagId"] = new SelectList(_context.TagsLists, "TagId", "TagId", articleTag.TagId);
-        //    return View(articleTag);
-        //}
 
         //// GET: Tags/Delete/5
         //public async Task<IActionResult> Delete(int? id)

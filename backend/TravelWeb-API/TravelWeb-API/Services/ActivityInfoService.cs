@@ -114,12 +114,14 @@ namespace TravelWeb_API.Services
                 .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
+                .Where(r=>r.IsSoftDeleted==false)
                 .Average(r => (decimal?)r.Rating) ?? 0;
 
             var commentCount = _activityDbContext.Activities
                 .AsNoTracking()
                 .Where(a => a.ActivityId == activityId)
                 .SelectMany(a => a.Reviews)
+                .Where(r => r.IsSoftDeleted == false && r.MemberId != memberId)
                 .Select(r => r.ReviewId)
                 .Count();
                 

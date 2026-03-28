@@ -1,118 +1,128 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { lastValueFrom, Observable } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, lastValueFrom, Observable, of, tap } from 'rxjs';
 import { CartItem } from '../models/creatshopping.model';
+import { AuthService } from '../../Member/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CreateShoppingCart {
-  private readonly apiUrl = 'https://localhost:7276/api/ShoppingCart/';
-  constructor(private http: HttpClient) { }
-  // 1. 取得購物車清單
-  getCart(memberId: string): Observable<CartItem[]> {
-    return this.http.get<CartItem[]>(`${this.apiUrl}/${memberId}`);
+  private readonly apiUrl = 'https://localhost:7276/api/ShoppingCart';
+  private authService = inject(AuthService); // 用來判斷登入狀態
+  private readonly LOCAL_STORAGE_KEY = 'cart';
+  private cartCountSubject = new BehaviorSubject<number>(0);
+  cartCount$ = this.cartCountSubject.asObservable();
+  constructor(private http: HttpClient) {
+    this.refreshCount(); // 初始化時算一次數量
   }
-
-  /**
-   * 2. 加入購物車 (POST)
-   * 對應後端：AddToCartAsync(AddToCartDTO dto)
-   */
-  addToCart(dto: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/add`, dto);
-  }
-
-  /**
-   * 3. 刪除指定項目 (DELETE) - 支援單選與多選
-   * 對應後端：RemoveItemsAsync(List<int> cartIds, string memberId)
-   */
-  removeItems(cartIds: number[], memberId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/remove-items`, {
-      body: cartIds, // 這裡傳送 List<int>
-      params: new HttpParams().set('memberId', memberId) // 傳送 memberId 參數
-    });
-  }
-
-  /**
-   * 4. 更新數量 (PATCH / PUT)
-   * 對應後端：UpdateQuantityAsync(UpdateCartQtyDTO dto, string memberId)
-   */
-  updateQuantity(cartId: number, quantity: number, memberId: string): Observable<any> {
-    const dto = { cartId, quantity };
-    return this.http.patch(`${this.apiUrl}/update-quantity`, dto, {
-      params: new HttpParams().set('memberId', memberId)
-    });
-  }
-
-  /**
-   * 5. 清空購物車 (DELETE)
-   * 對應後端：ClearCartAsync(string memberId)
-   */
-  clearCart(memberId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/clear/${memberId}`);
-  }
-  // 把遊客的東西搬到會員下的方法
-
-  async syncLocalCartToDB(memberId: string): Promise<void> {
-    const localCart = localStorage.getItem('cart');
-    if (!localCart) return;
-
-    try {
-      const items: any[] = JSON.parse(localCart);
-      if (items.length === 0) return;
-
-      console.log(`正在同步 ${items.length} 項商品至會員 ${memberId}...`);
-
-      // 使用 for...of 確保一筆一筆同步完成
-      for (const item of items) {
-        const dto = {
-          memberId: memberId,
-          productCode: item.productCode,
-          quantity: item.quantity,
-          ticketCategoryId: item.ticketCategoryId
-        };
-
-        // 使用 lastValueFrom 代替 toPromise
-        await lastValueFrom(this.addToCart(dto));
-      }
-
-      // 全部成功後才刪除本地暫存
-      localStorage.removeItem('cart');
-      console.log('同步成功，已清空 LocalStorage');
-    } catch (error) {
-      console.error('同步購物車時發生錯誤:', error);
-      // 注意：這裡可以選擇不刪除 localStorage，讓使用者下次登入再試一次
+  // --- 1. 取得購物車 ---
+  getCart(): Observable<CartItem[]> {
+    if (this.authService.isLoggedIn()) {
+      // 會員：打 API (後端會自動從 Cookie 抓 ID，不須傳 memberId)
+      return this.http.get<CartItem[]>(this.apiUrl, { withCredentials: true }).pipe(
+        tap(items => this.cartCountSubject.next(items.length))
+      );
+    } else {
+      // 遊客：回傳本地資料，並用 of 轉成 Observable 保持介面一致
+      const items = this.getLocalCartItems();
+      this.cartCountSubject.next(items.length);
+      return of(items);
     }
   }
-  // * /將商品存入 LocalStorage(未登入時使用)
 
-  addToLocalCart(item: any) {
-    // 1. 取得現有的購物車 (若無則給空陣列)
-    const localCart = localStorage.getItem('cart');
-    let cart: any[] = localCart ? JSON.parse(localCart) : [];
-
-    // 2. 檢查是否已經有相同的商品 (比對 ProductCode)
-    const existingItem = cart.find(i => i.productCode === item.productCode);
-
-    if (existingItem) {
-      // 若已存在，增加數量
-      existingItem.quantity += item.quantity;
+  // --- 2. 加入購物車 ---
+  addToCart(dto: any): Observable<any> {
+    if (this.authService.isLoggedIn()) {
+      // 會員：打 API
+      return this.http.post(`${this.apiUrl}/add`, dto, { withCredentials: true }).pipe(
+        tap(() => this.refreshCount())
+      );
     } else {
-      // 若不存在，推入新物件 (確保欄位名稱與 CartItem 介面一致)
+      // 遊客：存 LocalStorage
+      this.addToLocalCart(dto);
+      return of({ message: '已加入本地購物車' });
+    }
+  }
+
+  // --- 3. 刪除項目 (支援多選) ---
+  removeItems(cartIds: number[], productCodes: string[]): Observable<any> {
+    if (this.authService.isLoggedIn()) {
+      // 會員：打 API (後端只收 cartIds)
+      return this.http.post(`${this.apiUrl}/remove-items`, { cartIds }, { withCredentials: true }).pipe(
+        tap(() => this.refreshCount())
+      );
+    } else {
+      // 遊客：用 productCode 過濾本地資料
+      let cart = this.getLocalCartItems();
+      cart = cart.filter(item => !productCodes.includes(item.productCode));
+      this.setLocalCartItems(cart);
+      return of({ message: '本地項目已移除' });
+    }
+  }
+
+  // --- 4. 更新數量 ---
+  updateQuantity(cartId: number, quantity: number, productCode: string): Observable<any> {
+    if (this.authService.isLoggedIn()) {
+      const dto = { cartId, quantity };
+      return this.http.patch(`${this.apiUrl}/update-quantity`, dto, { withCredentials: true }).pipe(
+        tap(() => this.refreshCount())
+      );
+    } else {
+      const cart = this.getLocalCartItems();
+      const item = cart.find(i => i.productCode === productCode);
+      if (item) item.quantity = quantity;
+      this.setLocalCartItems(cart);
+      return of({ message: '本地數量已更新' });
+    }
+  }
+
+  // --- 5. 同步功能 (登入後由 AuthService 呼叫) ---
+  syncLocalCartToDb(): void {
+    const items = this.getLocalCartItems();
+    if (items.length === 0) return;
+
+    this.http.post(`${this.apiUrl}/sync`, items, { withCredentials: true }).subscribe({
+      next: () => {
+        localStorage.removeItem(this.LOCAL_STORAGE_KEY);
+        this.refreshCount();
+      }
+    });
+  }
+
+  // --- 輔助方法 (Helper Methods) ---
+
+  private getLocalCartItems(): any[] {
+    const data = localStorage.getItem(this.LOCAL_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  private setLocalCartItems(items: any[]): void {
+    localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(items));
+    this.cartCountSubject.next(items.length);
+  }
+
+  private addToLocalCart(item: any) {
+    const cart = this.getLocalCartItems();
+    const existing = cart.find(i => i.productCode === item.productCode);
+    if (existing) {
+      existing.quantity += item.quantity;
+    } else {
       cart.push({
-        cartId: Date.now(), // 暫時產生一個 ID 供前端渲染使用
-        productCode: item.productCode,
-        productName: item.productName, // 確保你有傳入名稱
-        price: item.price,
-        quantity: item.quantity,
-        ticketCategoryId: item.ticketCategoryId,
-        mainImage: item.mainImage // 如果你有存圖片路徑的話
+        ...item, cartId: Date.now(),
+        coverImage: item.coverImage || item.mainImage
       });
     }
+    this.setLocalCartItems(cart);
+  }
 
-    // 3. 寫回 LocalStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-    console.log('已存入 LocalStorage:', cart);
+  private refreshCount() {
+    this.getCart().subscribe();
+
+  }
+  clearCart() {
+    this.cartCountSubject.next(0);
+    // 如果有需要，也可以在這裡清除 localStorage 的購物車暫存
   }
 
 }

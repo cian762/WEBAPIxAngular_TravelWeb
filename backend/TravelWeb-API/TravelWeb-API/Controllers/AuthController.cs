@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -6,9 +7,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using TravelWeb_API.DTO.MemberSystemDto;
 using TravelWeb_API.Models;
 using TravelWeb_API.Models.MemberSystem;
-using TravelWeb_API.DTO.MemberSystemDto;
 
 namespace TravelWeb_API.Controllers
 {
@@ -53,19 +54,67 @@ namespace TravelWeb_API.Controllers
             // 5. 判斷角色 (G 開頭是管理員 Admin，M 開頭是會員 Member)
             string role = user.MemberCode.StartsWith("G") ? "Admin" : "Member";
 
-            string token = GenerateJwtToken(user.MemberCode, role);
+            // 🔥 1. 產生 Token 時，把 MemberId 也傳進去
+            string memberId = info?.MemberId ?? "";
+            string token = GenerateJwtToken(user.MemberCode, role, memberId);
 
-            // 7. 登入成功，將 Token 與基本資訊回傳給前端
+            // 🔥 2. 將 Token 存入 HttpOnly Cookie 中
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true, // 防止 XSS 攻擊 (前端 JS 讀不到)
+                Secure = true,   // 限制只能在 HTTPS 環境下傳輸
+                SameSite = SameSiteMode.None, // 防止 CSRF 跨站攻擊
+                Expires = DateTime.UtcNow.AddHours(9) // 與 Token 過期時間一致
+            };
+            Response.Cookies.Append("AuthToken", token, cookieOptions);
+
+            // ==========================================
+            // 🚀 3. 關鍵修復：寫入登入紀錄 (Log_in_record)
+            // ==========================================
+            try
+            {
+                // 🔥 就是這麼簡單！我們「只給」MemberCode 和 LoginAt
+                // 絕對不要寫 LoginRecordId = xxx！
+                var loginRecord = new LogInRecord
+                {
+                    MemberCode = user.MemberCode,
+                    LoginAt = DateTime.Now
+                };
+
+                _context.LogInRecords.Add(loginRecord);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // 萬一出錯，把真實原因印出來看
+                Console.WriteLine("🚨 寫入登入紀錄失敗：" + ex.InnerException?.Message ?? ex.Message);
+            }
+
             return Ok(new
             {
                 message = "登入成功",
-                token = token,
                 userCode = user.MemberCode,
-                role = role
+                role = role,
+                 token = token
+                // (可選) 既然存 Cookie 了，這裡可以不用回傳明文 Token，看前端需求
             });
         }
 
-        private string GenerateJwtToken(string memberCode, string role)
+        // 🔥 3. 新增登出 API (用來清除 Cookie)
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("AuthToken", new CookieOptions
+            {
+                Secure = true,
+                SameSite = SameSiteMode.None,
+            });
+
+            return Ok(new { message = "已成功登出" });
+        }
+
+        // 🔥 4. 修改產生 Token 的方法，多接收一個 memberId 參數
+        private string GenerateJwtToken(string memberCode, string role, string memberId)
         {
             var issuer = _configuration["JwtSettings:Issuer"];
             var audience = _configuration["JwtSettings:Audience"];
@@ -73,9 +122,10 @@ namespace TravelWeb_API.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, memberCode), 
-                new Claim(ClaimTypes.Role, role),  
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) 
+                new Claim(JwtRegisteredClaimNames.Sub, memberCode),
+                new Claim(ClaimTypes.Role, role),
+                new Claim("MemberId", memberId), // 🔥 把 MemberId 封裝進 Token
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey));
@@ -104,6 +154,22 @@ namespace TravelWeb_API.Controllers
                 byte[] hash = sha.ComputeHash(bytes);
                 return Convert.ToBase64String(hash);
             }
+        }
+        //檢查登入狀態勿刪搭配路由守門員使用
+        [HttpGet("check-status")]
+        public IActionResult CheckStatus()
+        {
+            // 檢查名為 "AuthToken" 的 Cookie 是否存在
+            var token = Request.Cookies["AuthToken"];
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return Ok(false); // 沒 Cookie，代表沒登入
+            }
+
+            // 進階：你也可以在這裡驗證 JWT Token 是否過期
+            // 如果只是初步練習，檢查有無字串即可
+            return Ok(true);
         }
     }
 }

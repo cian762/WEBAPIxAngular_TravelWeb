@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Mainservice } from '../../service/mainservice';
+import { Router } from '@angular/router';
 
 declare var google: any;
 @Component({
@@ -11,7 +12,7 @@ declare var google: any;
 })
 export class IndexItinerary implements AfterViewInit {
 
-  constructor(private mainService: Mainservice) { }
+  constructor(private mainService: Mainservice, private router: Router) { }
 
   ItineraryName: string = '';
   tripDateTime: string = '';
@@ -90,7 +91,14 @@ export class IndexItinerary implements AfterViewInit {
       .subscribe({
         next: (res) => {
           console.log('成功:', res);
-          alert('建立成功');
+          const newId = res.id;
+
+          if (newId) {
+            // 3. 執行跳轉，帶入 ID 作為路由參數
+            this.router.navigate(['/itinerary-detail', newId]);
+          } else {
+            alert('建立成功，但無法取得行程編號');
+          }
         },
         error: (err) => {
           console.error('錯誤:', err);
@@ -99,14 +107,50 @@ export class IndexItinerary implements AfterViewInit {
       });
   }
   createByAI() {
-    const data = {
-      name: this.ItineraryName,
-      dateTime: this.tripDateTime,
-      location: this.location
+    if (!this.placeId) {
+      alert('請重新選擇正確的地點（需從 Google 下拉選單點擊）');
+      return;
+    }
+    if (this.startDateTime > this.endDateTime) {
+      alert('時間錯誤');
+      return;
+    }
+    const requestBody = {
+      memberId: this.memberId,
+      itineraryName: this.ItineraryName,
+      startTime: new Date(this.startDateTime).toISOString(),
+      endTime: new Date(this.endDateTime).toISOString(),
+      introduction: '初版行程~',
+      itemsToPush: [
+        {
+          externalLocation: {
+            name: this.location,
+            address: this.location,
+            googlePlaceId: this.placeId,   // 👉 要從 autocomplete 拿
+            latitude: this.lat,
+            longitude: this.lng
+          }
+        }
+      ]
     };
+    this.mainService.createAIItinerary(requestBody)
+      .subscribe({
+        next: (res) => {
+          console.log('成功:', res);
+          const newId = res.id;
 
-    console.log('AI 建立:', data);
+          if (newId) {
+            // 3. 執行跳轉，帶入 ID 作為路由參數
+            this.router.navigate(['/itinerary-detail', newId]);
+          } else {
+            alert('建立成功，但無法取得行程編號');
+          }
+        },
+        error: (err) => {
+          console.error('錯誤:', err);
+          alert('建立失敗');
+        }
+      });
 
-    // TODO: 呼叫 AI API
   }
 }

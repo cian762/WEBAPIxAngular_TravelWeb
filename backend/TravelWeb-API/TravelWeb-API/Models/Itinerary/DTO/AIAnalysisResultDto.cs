@@ -1,4 +1,6 @@
-﻿namespace TravelWeb_API.Models.Itinerary.DTO
+﻿using System.Text.Json.Serialization;
+
+namespace TravelWeb_API.Models.Itinerary.DTO
 {
     public class AiItineraryResult
     {
@@ -27,10 +29,17 @@
         public string Type { get; set; }  // "sightseeing", "meal" 等
         public string Title { get; set; }
         public int? PoiId { get; set; }   // 對應 DB 的 attraction_id (可為 null)
+        public string GooglePlaceId { get; set; } // AI 新找的地點 ID
+        public AiLocation Location { get; set; } // AI 新找的地點座標/地址
         public string Details { get; set; }
         public decimal ExpectedFatigueGain { get; set; }
     }
-
+    public class AiLocation
+    {
+        public string Address { get; set; }
+        public double Lat { get; set; }
+        public double Lng { get; set; }
+    }
     public class DayMetrics
     {
         public decimal Feasibility { get; set; }
@@ -50,21 +59,32 @@
     }
     public class AiInputContext
     {
+        [JsonPropertyName("destination")]
         public string Destination { get; set; }
+        [JsonPropertyName("total_days")]
         public int TotalDays { get; set; }
+        [JsonPropertyName("start_date")]
         public DateTime? StartDate { get; set; }
+        [JsonPropertyName("attraction_pool")]
         // 景點池：這是 AI 最需要的「約束條件」
         public List<PoiInfoForAi> AttractionPool { get; set; }
     }
 
     public class PoiInfoForAi
     {
+        [JsonPropertyName("attraction_id")]
         public int AttractionId { get; set; } // 重要：對應您的 DB 主鍵
+        [JsonPropertyName("name")]
         public string Name { get; set; }
+        [JsonPropertyName("latitude")]
         public decimal Latitude { get; set; }
+        [JsonPropertyName("longitude")]
         public decimal Longitude { get; set; }
+        [JsonPropertyName("business_hours")]
         public string BusinessHours { get; set; }
+        [JsonPropertyName("transportinfo")]
         public string TransportInfo { get; set; }
+        [JsonPropertyName("must_visit")]
         public bool MustVisit { get; set; } // 用於滿足您的 Core Logic 4
     }
 }

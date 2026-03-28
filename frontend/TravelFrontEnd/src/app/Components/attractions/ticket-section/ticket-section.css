@@ -178,8 +178,15 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ts-divider {
@@ -195,11 +202,20 @@
   margin-bottom: 12px;
 }
 
-.ts-stock--low { color: #e65100; font-weight: 600; }
-.ts-stock--out { color: #c62828; font-weight: 700; }
+.ts-stock--low {
+  color: #e65100;
+  font-weight: 600;
+}
+
+.ts-stock--out {
+  color: #c62828;
+  font-weight: 700;
+}
 
 /* 數量區塊 */
-.ts-qty-section { margin-bottom: 16px; }
+.ts-qty-section {
+  margin-bottom: 16px;
+}
 
 .ts-sub-title {
   font-size: 0.9rem;
@@ -251,7 +267,9 @@
   transition: background 0.15s;
 }
 
-.ts-qty-btn:hover { background: #ebebeb; }
+.ts-qty-btn:hover {
+  background: #ebebeb;
+}
 
 .ts-qty-val {
   width: 40px;
@@ -296,14 +314,18 @@
   border: 1.5px solid #e84611;
 }
 
-.ts-btn--cart:hover { background: #ffe0b2; }
+.ts-btn--cart:hover {
+  background: #ffe0b2;
+}
 
 .ts-btn--buy {
   background: #e84611;
   color: #fff;
 }
 
-.ts-btn--buy:hover { background: #c73a0e; }
+.ts-btn--buy:hover {
+  background: #c73a0e;
+}
 
 .ts-sold-out-msg {
   text-align: center;
@@ -369,7 +391,9 @@
   line-height: 1;
 }
 
-.ts-drawer__close:hover { color: #1a1a1a; }
+.ts-drawer__close:hover {
+  color: #1a1a1a;
+}
 
 /* Drawer 載入 */
 .ts-drawer__loading {
@@ -402,12 +426,17 @@
 
 .ts-drawer__tag-item {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #333;
-  padding: 4px 0;
+  flex-direction: column;
+  /* ← 改成垂直排列 */
+  gap: 3px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
+
+.ts-drawer__tag-item:last-child {
+  border-bottom: none;
+}
+
 
 .ts-drawer__tag-icon {
   font-style: normal;
@@ -415,11 +444,20 @@
   color: #555;
 }
 
+.ts-drawer__tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
 .ts-drawer__tag-sub {
   font-size: 0.8rem;
   color: #888;
-  margin-top: 4px;
-  padding-left: 20px;
+  padding-left: 22px;
+  /* 對齊圖示後面的文字 */
+  line-height: 1.4;
 }
 
 /* Drawer 各區塊 */
@@ -457,8 +495,15 @@
   padding: 3px 0;
 }
 
-.ts-check { color: #2e7d32; font-weight: 700; }
-.ts-cross { color: #c62828; font-weight: 700; }
+.ts-check {
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.ts-cross {
+  color: #c62828;
+  font-weight: 700;
+}
 
 .ts-drawer__text {
   font-size: 0.88rem;

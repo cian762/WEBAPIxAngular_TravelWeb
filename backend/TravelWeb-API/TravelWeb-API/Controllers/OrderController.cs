@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TravelWeb_API.Models.TripProduct;
+using TravelWeb_API.Models.TripProduct.Enums;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
@@ -12,6 +14,7 @@ namespace TravelWeb_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrder _order;
@@ -19,19 +22,19 @@ namespace TravelWeb_API.Controllers
         public OrderController(IOrder order, IECPay ecpay) {
             _order = order;
             _ecpay = ecpay;
+          
         }
+        private string? CurrentMemberId =>
+          User.FindFirst("MemberId")?.Value ?? // 👈 優先抓你自定義的這個標籤
+          User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ??
+          User.Identity?.Name;
 
-        [HttpPut("cancel/{orderId}/{memberId}")]
-        public async Task<IActionResult> CancelOrder(int orderId, string memberId)
+        // 取得當前登入者 ID 的輔助方法
+        [HttpPut("cancel/{orderId}")]
+        public async Task<IActionResult> CancelOrder(int orderId)
         {
-            // 1. 從 Token 的 Claims 中提取 MemberId (對應你在產生 Token 時設定的 ClaimType)
-            // 通常是 ClaimTypes.NameIdentifier 或 "sub"
-            //var memberId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            //if (string.IsNullOrEmpty(memberId))
-            //{
-            //    return Unauthorized("無法取得用戶資訊");
-            //}
+            var memberId = CurrentMemberId; // 👈 從 Token 抓 ID
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
 
             // 2. 呼叫 Service 執行取消邏輯 (包含狀態機檢查)
             var result = await _order.CancelOrderAsync(orderId, memberId);
@@ -45,8 +48,11 @@ namespace TravelWeb_API.Controllers
             return Ok(new { Message = "訂單已成功取消" });
         }
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto, [FromQuery] string memberId)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
         {
+            var memberId = CurrentMemberId;
+            Console.WriteLine($"目前登入的會員 ID 是: {memberId}");
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             try
             {
                 if (string.IsNullOrEmpty(memberId))
@@ -75,8 +81,10 @@ namespace TravelWeb_API.Controllers
             }
         }
         [HttpGet("my-orders")]
-        public async Task<IActionResult> GetMyOrders([FromQuery] string memberId)
+        public async Task<IActionResult> GetMyOrders()
         {
+            var memberId = CurrentMemberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             try
             {
                 // 1. 檢查 MemberId 是否有傳入
@@ -104,8 +112,10 @@ namespace TravelWeb_API.Controllers
             }
         }
         [HttpGet("{orderId}")]
-        public async Task<IActionResult> GetOrderDetail(int orderId, [FromQuery] string memberId)
+        public async Task<IActionResult> GetOrderDetail(int orderId)
         {
+            var memberId = CurrentMemberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             // 呼叫你剛寫好的服務層
             var detail = await _order.GetOrderDetailAsync(orderId, memberId);
 
@@ -117,8 +127,10 @@ namespace TravelWeb_API.Controllers
             return Ok(detail);
         }
         [HttpPost("preview")]
-        public async Task<IActionResult> GetPreview([FromBody] CreateOrderDto dto, [FromQuery] string memberId)
+        public async Task<IActionResult> GetPreview([FromBody] CreateOrderDto dto)
         {
+            var memberId = CurrentMemberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
             try
             {
                 // 1. 驗證基本輸入
@@ -143,10 +155,56 @@ namespace TravelWeb_API.Controllers
                 // 捕捉 Service 丟出的錯誤（例如：名額不足、找不到商品等）
                 return BadRequest(new { Message = "預覽失敗: " + ex.Message });
             }
+          
         }
+        //這支是從我的訂單這去到綠界結帳的
+        [HttpPost("{orderId}/repay")]
+        public async Task<IActionResult> RepayOrder(int orderId)
+        {
+            // 1. 從 Token 取得目前登入的會員 ID
+            var memberId = CurrentMemberId;
+            if (string.IsNullOrEmpty(memberId)) return Unauthorized();
+
+            try
+            {
+                // 2. 呼叫 Service 取得訂單 (內含 AsNoTracking 與 MemberId 驗證)
+                var order = await _order.GetOrderByIdAsync(orderId, memberId);
+
+                if (order == null)
+                {
+                    return NotFound(new { Message = "找不到該筆訂單，或您無權限存取。" });
+                }
+
+                // 3. 安全檢查：只有「待處理」且「未付款」的訂單才能重新支付
+                // 這裡建議對照你的 OrderStatusNames 常數
+                if (order.OrderStatus != OrderStatusNames.Pending)
+                {
+                    return BadRequest(new { Message = $"訂單狀態為 {order.OrderStatus}，無法重新執行支付。" });
+                }
+
+                if (order.PaymentStatus == "已付款".Trim())
+                {
+                    return BadRequest(new { Message = "此訂單已完成付款，請勿重複支付。" });
+                }
+
+                // 4. 呼叫現有的 _ecpay 服務產生新的綠界 HTML 表單
+                // 因為是 AsNoTracking 抓出來的，這裡傳入 order 物件非常安全
+                string paymentForm = _ecpay.GetPaymentForm(order);
+
+                // 5. 回傳給前端
+                return Ok(new
+                {
+                    Message = "重新取得支付資訊成功",
+                    OrderId = order.OrderId,
+                    PaymentForm = paymentForm
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "重新支付發生錯誤: " + ex.Message });
+            }
+        }
+
     }
-
-
-
 }
 

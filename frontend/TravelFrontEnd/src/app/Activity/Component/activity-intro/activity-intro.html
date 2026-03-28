@@ -1,5 +1,4 @@
 <div class="activity-detail-page container py-4">
-
   <!-- Hero 區 -->
   <section class="hero-gallery card-section mb-4">
     <div class="row g-3">
@@ -231,19 +230,69 @@
               class="h4 text-warning fw-bold"> / 5</span></span>
           <span class="score-text">整體評價</span>
         </div>
-        <div class="review-filter mt-3 mb-4">
-          @for (rule of sortRuleCollection; track $index) {
-          <button class="btn btn-light btn-sm" [class.isActive]="selectedSortRule===rule.label"
-            (click)="changeSortRule(rule.label)">{{rule.value}}</button>
-          }
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="review-filter mt-3 mb-3">
+            @for (rule of sortRuleCollection; track $index) {
+            <button class="btn btn-light btn-sm" [class.isActive]="selectedSortRule===rule.label"
+              (click)="changeSortRule(rule.label)">{{rule.value}}</button>
+            }
+          </div>
+          <button class="btn btn-outline-primary" (click)="toggleCommentForm()">留下足跡</button>
         </div>
-
 
 
         <div class="review-item">
           <div>
-            <p>個人評論</p>
-            <div style="height:80px; border-color: black; border-style:solid;"></div>
+            <app-edit-comment-form [isOpen]="openEditForm" (closed)="isEditFormOpen()"
+              [reviewId]="selectedPersonalReview.reviewId" [initialTitle]="selectedPersonalReview.title"
+              [initialComment]="selectedPersonalReview.comment" [initialRating]="selectedPersonalReview.rating"
+              [initialImages]="selectedPersonalReview.reviewImages"></app-edit-comment-form>
+            @if(personalCommentCollection.length>0)
+            {
+            <p>個人評論 ({{personalCommentCollection.length}})</p>
+            @for (comment of personalCommentCollection; track $index) {
+            <div>
+              <div class="row g-3 mb-2">
+                <div class="col-md-3">
+                  <div class="review-user">
+                    <img src="" alt="使用者頭貼" class="review-avatar">
+                    <div>
+                      <div class="review-name">{{comment.memberId}}</div>
+                      <div class="review-date">{{comment.createDate}}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-9">
+
+                  <div class="review-body">
+                    <div class="row d-flex">
+                      <div class="review-rating col-6">{{'★'.repeat(comment.rating) }}</div>
+                      <div class="col-6 text-end">
+                        <button class="btn btn-outline-primary me-2" (click)="sendTargetToEditForm(comment)">修改</button>
+                        <button class="btn btn-outline-danger me-2"
+                          (click)="deletePersonalComment(comment.reviewId)">刪除</button>
+                      </div>
+                    </div>
+                    <h4 class="review-title">{{comment.title}}</h4>
+                    <p class="review-text">
+                      {{comment.comment}}
+                    </p>
+                    <div class="review-images">
+                      @for (img of comment.reviewImages; track $index) {
+                      <img [src]="img" alt="評論照片">
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            }
+            }
+            <app-user-comment-form [isOpen]="isModalOpen" [activityId]="activityIdFromRoute"
+              (closed)="closeCommentForm()" (commentEmit)="refreshPersonalComment()"></app-user-comment-form>
+
           </div>
           @if(reviewsPackage.commentCount!=0){
           <p>他人評論 ({{reviewsPackage.commentCount}})</p>
@@ -266,13 +315,11 @@
                 <p class="review-text">
                   {{review.comment}}
                 </p>
-
-                @for (img of review.reviewImages; track $index) {
                 <div class="review-images">
+                  @for (img of review.reviewImages; track $index) {
                   <img [src]="img" alt="評論照片">
+                  }
                 </div>
-                }
-
               </div>
             </div>
           </div>

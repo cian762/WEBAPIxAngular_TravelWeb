@@ -18,6 +18,8 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
 
         // 5. 取消訂單：僅限未付款且 Pending 狀態，更新狀態為 Cancelled
         Task<bool> CancelOrderAsync(int orderId, string memberId);
+        //針對現有訂單重新取得支付參數
+        Task<Order?> GetOrderByIdAsync(int orderId, string memberId);
 
     }
 }

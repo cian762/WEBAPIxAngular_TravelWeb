@@ -25,6 +25,10 @@ public partial class ItineraryItem
 
     public DateTime? EndTime { get; set; }
 
+    public string? GooglePlaceId { get; set; }
+
+    public string? AttractionName { get; set; }
+
     public virtual ICollection<AigenerationError> AigenerationErrors { get; set; } = new List<AigenerationError>();
 
     public virtual Attraction Attraction { get; set; }

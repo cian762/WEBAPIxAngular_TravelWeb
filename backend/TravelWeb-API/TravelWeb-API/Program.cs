@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using System.Text;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
@@ -18,9 +19,13 @@ using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
 
-
-
+QuestPDF.Settings.License = LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
+
+// ==========================================
+// 🚀 關鍵修復：替換為正確的 CORS 設定
+// ==========================================
+// 將原本的 myAllowSpecificOrigins 設定刪除，改用這個：
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -28,12 +33,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: myAllowSpecificOrigins,
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.WithOrigins("http://localhost:4200")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
-});
 
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -59,9 +65,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
 
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey!)),
 
             ClockSkew = TimeSpan.Zero
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["AuthToken"];
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                }
+                return Task.CompletedTask;
+            }
         };
     });
 
@@ -137,6 +156,16 @@ builder.Services.AddScoped<ActivityTicketService>();
 builder.Services.AddHttpClient<GoogleRouteForActivityService>();
 builder.Services.AddScoped<ActivityReviewService>();
 builder.Services.AddScoped<CloudinaryPhotoService>();
+
+//QRCode 相關組態強型別引用、QRCode Service 註冊
+builder.Services.Configure<QrCodeSettings>(
+    builder.Configuration.GetSection("QrCodeSettings"));
+builder.Services.AddScoped<QRCodeService>();
+
+//SMTP 相關組態強型別引用、Email Service 註冊
+builder.Services.Configure<SmtpSettings>(
+    builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddScoped<EmailService>();
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
@@ -155,6 +184,8 @@ builder.Services.AddScoped<IItineraryservice, ItineraryService>();
 builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
+builder.Services.AddScoped<IGooglePlaceService, GooglePlaceService>();
+builder.Services.AddHttpClient<GooglePlaceService>();
 //builder.Services.AddControllers()
 //    .AddJsonOptions(options =>
 //    {
@@ -191,7 +222,10 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.Configure<ECPaySetting>(builder.Configuration.GetSection("ECPay"));
 // 3. 註冊 Http 客戶端 (之後查詢訂單會用到)
 builder.Services.AddHttpClient();
-
+//builder.Services.AddControllers(options =>
+//{
+//    options.Filters.Add(new AuthorizeFilter());
+//});
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -220,6 +254,9 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+// 🔥 關鍵順序：必須是 Routing -> Cors -> Auth -> MapControllers
+app.UseRouting();
 
 app.UseCors(myAllowSpecificOrigins);
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
 using TravelWeb_API.Models.Itinerary.DTO;
 using TravelWeb_API.Models.Itinerary.Service;
 
@@ -8,17 +7,17 @@ using TravelWeb_API.Models.Itinerary.Service;
 
 namespace TravelWeb_API.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ItineraryController : ControllerBase
     {
         private readonly IItineraryservice _itineraryService;
-        private readonly string _memberId;
+
         public ItineraryController(IItineraryservice itineraryService)
         {
             _itineraryService = itineraryService;
-            //_memberId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value!;
+
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
@@ -46,6 +45,7 @@ namespace TravelWeb_API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateItinerary([FromBody] ItineraryCreateDto dto)
         {
+            var memberId = User.FindFirst("MemberId")?.Value ?? "tw_user_001";
             // 1. 基本驗證：確保 DTO 不是空的
             if (dto == null)
             {
@@ -61,7 +61,7 @@ namespace TravelWeb_API.Controllers
             try
             {
                 // 3. 呼叫 Service
-                int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto);
+                int newId = await _itineraryService.CreateItineraryWithItemsAsync(dto, memberId);
 
                 // 4. 回傳 201 Created，並在 Header 附上查詢該行程的 URL
 
@@ -74,10 +74,23 @@ namespace TravelWeb_API.Controllers
                 return StatusCode(500, $"伺服器內部錯誤: {ex.Message}");
             }
         }
-
+        //PATCH新增天數
+        [HttpPatch("{id}/extend-day")]
+        public async Task<IActionResult> ExtendItineraryDay(int id)
+        {
+            try
+            {
+                var result = await _itineraryService.ExtendOneDayAsync(id);
+                return Ok(new { success = true, newEndTime = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         //POST修改行程，基於版本表與多個行程細項清單
         [HttpPost("{id}/save-snapshot")]
-        public async Task<IActionResult> SaveItinerarySnapshot(int id, [FromForm] ItinerarySnapshotDto dto)
+        public async Task<IActionResult> SaveItinerarySnapshot([FromBody] ItinerarySnapshotDto dto)
         {
             if (dto == null || dto.Items == null)
             {
@@ -105,10 +118,21 @@ namespace TravelWeb_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"儲存快照時發生伺服器錯誤: {ex.Message}");
+                var realMessage = ex.InnerException?.Message ?? ex.Message;
+                return StatusCode(500, $"儲存快照時發生伺服器錯誤: {realMessage}");
             }
         }
-
+        //POST修改圖片
+        [HttpPost("Savephoto/{Id}")]
+        public async Task<IActionResult> SavePhoto([FromForm] ItineraryImageDto dto, int Id)
+        {
+            var imageUrl = await _itineraryService.SaveImagebyid(dto.Image, Id);
+            if (imageUrl == null)
+            {
+                return BadRequest("圖片上傳失敗");
+            }
+            return Ok(new { url = imageUrl });
+        }
 
         // GET 基於版本找該版本的所有ITEM
         [HttpGet("{VerId}/item")]
@@ -118,7 +142,7 @@ namespace TravelWeb_API.Controllers
             {
                 return BadRequest("沒有該行程");
             }
-            var result = _itineraryService.GetItemByVersionAsync(VerId);
+            var result = await _itineraryService.GetItemByVersionAsync(VerId);
             if (result == null)
             {
                 return BadRequest("沒有該行程");
@@ -139,6 +163,20 @@ namespace TravelWeb_API.Controllers
 
             // 刪除成功，RESTful 慣例回傳 204
             return NoContent();
+        }
+
+        [HttpGet("{itineraryId}/export")]
+        public async Task<IActionResult> ExportItinerary(int itineraryId)
+        {
+            var fileBuffer = await _itineraryService.GetExportFileAsync(itineraryId);
+            return File(fileBuffer, "application/pdf", $"Itinerary_{itineraryId}.pdf");
+        }
+        [HttpGet("{itineraryId}/day/{dayNumber}")]
+        public async Task<ActionResult<DayItineraryDto>> GetDayItinerary(int itineraryId, int dayNumber)
+        {
+            var result = await _itineraryService.GetDayItineraryAsync(itineraryId, dayNumber);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
     }
 }

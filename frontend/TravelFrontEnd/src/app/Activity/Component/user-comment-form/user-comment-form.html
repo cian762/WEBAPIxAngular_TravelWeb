@@ -1,0 +1,74 @@
+@if (isOpen) {
+<div class="comment-modal-backdrop" (click)="closeModal()"></div>
+
+<div class="comment-modal">
+  <div class="comment-modal__header">
+    <div>
+      <h3 class="comment-modal__title">留下足跡</h3>
+      <p class="comment-modal__subtitle">分享你的體驗，幫助其他旅客做決定</p>
+    </div>
+    <button type="button" class="comment-modal__close" (click)="closeModal()">×</button>
+  </div>
+
+  <form [formGroup]="commentForm" (ngSubmit)="submitComment()" class="comment-form">
+    <div class="comment-form__group">
+      <label for="title">標題</label>
+      <input id="title" type="text" formControlName="title" class="comment-form__control" placeholder="例如：風景很美、很適合親子同行">
+    </div>
+
+    <div class="comment-form__group">
+      <label>評分</label>
+      <div class="rating-picker">
+        @for (star of [1,2,3,4,5]; track star) {
+        <button type="button" class="rating-star" [class.active]="isStarActive(star)" (click)="setRating(star)">
+          ★
+        </button>
+        }
+        <span class="rating-text">
+          {{ commentForm.get('rating')?.value || 0 }} / 5
+        </span>
+      </div>
+    </div>
+
+    <div class="comment-form__group">
+      <label for="comment">評論內容</label>
+      <textarea id="comment" rows="5" formControlName="comment" class="comment-form__control"
+        placeholder="可以分享活動流程、環境、服務、值不值得推薦等內容"></textarea>
+    </div>
+
+    <div class="comment-form__group">
+      <label for="images">上傳圖片</label>
+
+      <label class="upload-box">
+        <input id="images" type="file" multiple accept="image/*" (change)="onFileChange($event)" hidden>
+        <div class="upload-box__icon">＋</div>
+        <div class="upload-box__text">點擊上傳旅程照片</div>
+        <div class="upload-box__hint">支援多張圖片</div>
+      </label>
+    </div>
+
+    @if (imagePreviews.length) {
+    <div class="comment-form__group">
+      <div class="preview-grid">
+        @for (preview of imagePreviews; track $index) {
+        <div class="preview-card">
+          <img [src]="preview" alt="預覽圖片" class="preview-card__img">
+          <button type="button" class="preview-card__remove" (click)="removeImage($index)">
+            ×
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <div class="comment-form__actions">
+      <button type="button" class="btn-cancel" (click)="closeModal()">取消</button>
+      <button type="submit" class="btn-submit">
+        <span class="btn-submit__icon">✦</span>
+        送出評論
+      </button>
+    </div>
+  </form>
+</div>
+}

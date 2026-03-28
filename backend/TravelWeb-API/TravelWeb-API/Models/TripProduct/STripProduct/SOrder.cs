@@ -170,9 +170,15 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
         // 2. 訂單預覽：在正式下單前，計算金額與確認商品清單 (不寫入資料庫)
         public async Task<OrderDetailDto> GetCheckoutPreviewAsync(CreateOrderDto dto, string memberId)
         {
-          // 1.決定來源(直接購買 或 購物車)
-                 var itemsToProcess = dto.DirectBuyItems;
-            if (itemsToProcess == null || !itemsToProcess.Any())
+            // 1.決定來源(直接購買 或 購物車)
+            List<AddToCartDTO> itemsToProcess;
+
+            if (dto.DirectBuyItems != null && dto.DirectBuyItems.Any())
+            {
+                // 優先使用直接購買的商品
+                itemsToProcess = dto.DirectBuyItems;
+            }
+            else
             {
                 itemsToProcess = await _context.ShoppingCarts
                     .Where(c => c.MemberId == memberId)
@@ -192,9 +198,9 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             var preview = new OrderDetailDto
             {
                 OrderId = 0,
-                ContactName = dto.ContactName,
-                ContactPhone = dto.ContactPhone,
-                ContactEmail = dto.ContactEmail,
+                ContactName = dto.ContactName!,
+                ContactPhone = dto.ContactPhone!,
+                ContactEmail = dto.ContactEmail!,
                 CustomerNote = dto.CustomerNote,
                 TotalAmount = totalAmount,
                 CreatedAt = DateTime.Now,
@@ -481,6 +487,11 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 .FirstOrDefaultAsync(x => x.ProductCode == code);
 
             return att?.Price ?? 0;
+        }
+        //針對現有訂單重新取得支付在成立訂單後如果不支付可重新再支付
+        public async Task<Order?> GetOrderByIdAsync(int orderId, string memberId)
+        {
+            return await _context.Orders.AsNoTracking().Include(o=>o.OrderItems).FirstOrDefaultAsync(s => s.OrderId == orderId && s.MemberId == memberId);
         }
     }
 }

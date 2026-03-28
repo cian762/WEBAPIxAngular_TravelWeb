@@ -29,7 +29,7 @@ export class Product implements OnInit {
   // 搜尋條件 (繫結到 HTML 表單)
   query: ProductQueryDTO = {
     page: 1,
-    pageSize: 16,
+    pageSize: 12,
     keyword: '',
     tagIds: []
   };

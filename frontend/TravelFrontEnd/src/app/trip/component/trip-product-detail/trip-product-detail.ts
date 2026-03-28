@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductBasic, ProductItinerary, ProductSchedule } from '../../models/tripproduct.model';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductDetailPage } from '../../services/product-detail-page';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-trip-product-detail',
@@ -22,7 +23,7 @@ export class TripProductDetail implements OnInit {
   basicInfo?: ProductBasic;
   schedules: ProductSchedule[] = [];
   itineraries: ProductItinerary[] = [];
-  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart) { }
+  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart, private router: Router) { }
   ngOnInit(): void {
     // 1. 從路由取得 ID (假設路由定義為 product/:id)
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -100,9 +101,40 @@ export class TripProductDetail implements OnInit {
       totalPrice: this.selectedSchedule.price * (this.adultCount + this.childCount)
     };
   }
-
   // 加入購物車
   addToCart(): void {
+    const data = this.getBookingData();
+    if (!data) { alert('請選擇日期與人數'); return; }
+
+    const itemsToProcess = data.items.filter(item => item.qty > 0);
+
+    // 建立 Observable 陣列
+    const requests = itemsToProcess.map(item => {
+      const cartItem = {
+        productCode: data.scheduleId,
+        productName: data.productName,
+        price: item.price,
+        quantity: item.qty,
+        ticketCategoryId: item.ticketType,
+        mainImage: this.basicInfo?.coverImage
+      };
+      console.log('有抓到票種addtocart', cartItem.ticketCategoryId);
+      return this.cartService.addToCart(cartItem);
+    });
+
+    // 使用 forkJoin 等待所有 API 完成
+    forkJoin(requests).subscribe({
+      next: () => {
+        alert(`成功加入購物車！`);
+        // 可以在這裡跳轉或更新購物車圖示數量
+      },
+      error: (err) => {
+        console.error('加入失敗', err);
+        alert('加入購物車失敗，請稍後再試');
+      }
+    });
+  }
+  nowBuy(): void {
     const data = this.getBookingData();
 
     if (!data || !this.selectedSchedule) {
@@ -110,58 +142,32 @@ export class TripProductDetail implements OnInit {
       return;
     }
 
-    // 1. 檢查是否有會員 ID (代表已登入)
-    const memberId = localStorage.getItem('memberId');
+    // 1. 準備要傳給結帳頁面的「直接購買」物件
+    // 注意：這裡的欄位名稱要跟你的後端 CreateOrderDto 一致
+    const checkoutPayload = {
+      directBuyItems: data.items
+        .filter(item => item.qty > 0)
+        .map(item => ({
+          productCode: data.scheduleId,
+          quantity: item.qty,
+          ticketCategoryId: item.ticketType,
 
-    // 2. 過濾掉數量為 0 的項目 (不論大人小孩，有買才送)
-    const itemsToProcess = data.items.filter(item => item.qty > 0);
+        }))
+    };
 
-    if (itemsToProcess.length === 0) {
+
+    if (checkoutPayload.directBuyItems.length === 0) {
       alert('請選擇購買人數');
       return;
     }
 
-    // 3. 根據登入狀態執行不同邏輯
-    itemsToProcess.forEach(item => {
-      const cartItem = {
-        memberId: memberId || '', // 沒登入就給空，之後同步再補
-        productCode: data.scheduleId,
-        productName: data.productName, // LocalStorage 需要名稱來顯示
-        price: item.price,
-        quantity: item.qty,
-        ticketCategoryId: item.ticketType
-      };
+    // 2. 導向結帳頁面
+    // 專業做法：透過導航狀態 (state) 傳遞資料，這樣網址不會變醜，且資料安全
+    this.router.navigate(['/order'], { state: { data: checkoutPayload } });
 
-      if (memberId) {
-        // --- 已登入：打 API 存入資料庫 ---
-        this.cartService.addToCart(cartItem).subscribe({
-          next: () => console.log(`票種 ${item.ticketType} API 存入成功`),
-          error: (err) => console.error('API 存入失敗', err)
-        });
-      } else {
-        // --- 未登入：存入 LocalStorage ---
-        this.cartService.addToLocalCart(cartItem);
-        console.log(`票種 ${item.ticketType} 已暫存至 LocalStorage`);
-      }
-    });
 
-    alert(`成功加入購物車！\n日期：${data.startDate}\n成人：${this.adultCount}位、兒童：${this.childCount}位`);
   }
-  // 立即購買按鈕
-  buyNow(): void {
-    const memberId = localStorage.getItem('memberId');
 
-    if (!memberId) {
-      // 沒登入的話，先存 LocalStorage 再跳轉登入
-      this.addToCart();
-      alert('請先登入會員以完成訂單');
-      // this.router.navigate(['/login'], { queryParams: { returnUrl: '/shopping-cart' } });
-    } else {
-      // 已登入的話，存 API 後直接跳轉
-      this.addToCart();
-      // this.router.navigate(['/shopping-cart']);
-    }
-  }
 }
 
 

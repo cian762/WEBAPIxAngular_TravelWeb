@@ -59,16 +59,18 @@ public partial class BoardDbContext : DbContext
     //=> optionsBuilder.UseSqlServer("Server=.;Database=Travel;Trusted_Connection=True;Encrypt=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-       
+    {      
 
         modelBuilder.Entity<MemberInformation>(entity =>
         {
             // 1. 指定主鍵
-            entity.HasKey(e => e.MemberId);
+            entity.ToTable("Member_Information", "Member");
+            entity.HasKey(e => e.MemberId);  
+            entity.Property(e => e.MemberId)
+                .HasMaxLength(50)            
+                .HasColumnName("MemberID");
 
-            // 2. 修正資料表名稱與 Schema
-            // 如果資料庫裡這張表是在 dbo 底下，就寫 "dbo"；如果是 Member 底下，就寫 "Member"
+            // 2. 修正資料表名稱與 Schema            
             entity.ToTable("Member_Information", "Member");
 
             // 3. 忽略你不想管的關聯 (避免連鎖報錯)
@@ -88,6 +90,14 @@ public partial class BoardDbContext : DbContext
             entity.Property(e => e.UserId)
                 .HasMaxLength(50)
                 .HasColumnName("UserID");
+
+            entity.HasOne(d => d.MemberInformation)
+        .WithMany()
+        .HasForeignKey(d => d.UserId)
+        .HasPrincipalKey(m => m.MemberId)
+        .OnDelete(DeleteBehavior.ClientSetNull)
+        .HasConstraintName("FK_Article_Member_Information");
+
         });
 
         modelBuilder.Entity<ArticleFolder>(entity =>
@@ -109,16 +119,20 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<ArticleLike>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ArticleLike", "Board");
+            entity.HasKey(e => new { e.ArticleId, e.UserId });
+            entity.ToTable("ArticleLike", "Board");
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
-            entity.HasOne(d => d.Article).WithMany()
+            entity.HasOne(d => d.Article).WithMany(a => a.ArticleLikes)
                 .HasForeignKey(d => d.ArticleId)
                 .HasConstraintName("FK_ArticleLike_Article");
+            entity.HasOne(d => d.MemberInformation).WithMany()
+                  .HasForeignKey(d => d.UserId)
+                  .HasPrincipalKey(m => m.MemberId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_ArticleLike_Member_Information");
         });
 
         modelBuilder.Entity<ArticleSource>(entity =>
@@ -143,7 +157,7 @@ public partial class BoardDbContext : DbContext
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.TagId).HasColumnName("TagID");
 
-            entity.HasOne(d => d.Article).WithMany()
+            entity.HasOne(d => d.Article).WithMany(a => a.ArticleTags)
                 .HasForeignKey(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ArticleTags_Article");

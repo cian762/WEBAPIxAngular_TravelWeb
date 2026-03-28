@@ -1,6 +1,23 @@
+import { Data } from "@angular/router";
+
+export interface ArticleResponse {
+  totalCount: number;
+  articleList: ArticleData[];
+}
 export interface ArticleData {
   articleId: number;
-  title: string;
-  photoUrl: string;
-  userName: string;
+  title?: string;
+  createdAt: Date;
+  photoUrl?: string;
+  userID: string;
+  userName?: string;
+  userAvatar?: string;
+  likeCount: number;
+  isLike: boolean;
+  tags?: TagDTO[]
+}
+
+export interface TagDTO {
+  tagId: number;
+  tagName: string;
 }

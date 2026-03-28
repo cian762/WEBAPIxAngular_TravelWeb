@@ -30,9 +30,9 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 3. 防呆：若 AI 格式錯誤，回傳當天零點
             return targetDate;
         }
-        public async Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days)
+        public async Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days, string memberid)
         {
-            // 【前因 1】：AI 需要知道景點的座標與營業時間才能排動線，所以要先從 DB 撈詳細資料
+            // AI 需要知道景點的座標與營業時間才能排動線，所以要先從 DB 撈詳細資料
             var pois = await _context.Attractions
                 .Where(a => selectedPoiIds.Contains(a.AttractionId))
                 .Select(a => new PoiInfoForAi
@@ -41,19 +41,25 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     Name = a.Name,
                     Latitude = a.Latitude ?? 0,
                     Longitude = a.Longitude ?? 0,
-                    BusinessHours = a.BusinessHours,
+                    BusinessHours = string.IsNullOrEmpty(a.BusinessHours) ? "09:00-18:00" : a.BusinessHours,
                     MustVisit = true // 告訴 AI 這些都是必去
                 }).ToListAsync();
-
+            if (!pois.Any())
+            {
+                throw new Exception("景點池為空，AI 無法規劃。請檢查 selectedPoiIds 是否正確傳遞。");
+            }
             var inputContext = new AiInputContext
             {
+
                 TotalDays = days,
                 Destination = dto.ItineraryName,
                 AttractionPool = pois
             };
+            var debugJson = JsonSerializer.Serialize(inputContext);
+            // 呼叫 AI 取得規劃好的 JSON
+            var jsonResult = await _aiService.CallAiAsync(TravelPrompts.CreateItinerarySystemPrompt, debugJson);
+            Console.WriteLine($"DEBUG_RAW_AI: {jsonResult}");
 
-            // 【前因 2】：呼叫 AI 取得規劃好的 JSON
-            var jsonResult = await _aiService.CallAiAsync(TravelPrompts.CreateItinerarySystemPrompt, inputContext);
             // 設定：忽略大小寫差異
             var options = new JsonSerializerOptions
             {
@@ -75,7 +81,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 // 1. 建立行程主表
                 var newItinerary = new DBModel.Itinerary
                 {
-                    MemberId = dto.MemberId,
+                    MemberId = memberid,
                     ItineraryName = dto.ItineraryName,
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,
@@ -92,7 +98,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     VersionNumber = 1,
                     Creator = 1, // 這裡建議從 MemberId 轉換
                     CreateTime = DateTime.Now,
-                    // 【後果 1】：將 AI 的「規劃策略」與「遺漏景點」序列化存入備註，方便以後對比
+                    //將 AI 的「規劃策略」與「遺漏景點」序列化存入備註，方便以後對比
                     VersionRemark = $"[AI策略] {result.Summary.VersionStrategy} | 未排入: {JsonSerializer.Serialize(result.UnplacedPois)}",
                     Source = "AI",
                     CurrentUsageStatus = "Y"
@@ -109,28 +115,29 @@ namespace TravelWeb_API.Models.Itinerary.Service
                         _context.ItineraryItems.Add(new ItineraryItem
                         {
                             VersionId = aiVersion.VersionId,
-                            // 【後果 2】：如果是 AI 生成的通用項 (如午餐)，PoiId 為 null 是正常的
+                            // 如果是 AI 生成的通用項 (如午餐)，PoiId 為 null 是正常的
                             AttractionId = item.PoiId,
                             DayNumber = day.Day,
                             SortOrder = currentOrder,
-                            ContentDescription = item.Details,
-                            // 【後果 3】：轉換為絕對時間
+                            ContentDescription = item.PoiId.HasValue ? item.Details : $"[AI_NEW_PLACE]|{item.Title}|{item.GooglePlaceId}|{item.Location?.Address}|{item.Location?.Lat}|{item.Location?.Lng}|{item.Details}",
+                            // 轉換為絕對時間
                             StartTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.Start),
                             EndTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.End),
-                            ActivityId = item.Type
+                            ActivityId = item.Type,
+                            GooglePlaceId = item.GooglePlaceId
                         });
                         currentOrder += 100;
                     }
                 }
 
                 // 4. 存入 AI 分析報告
-                _context.Aianalyses.Add(new Aianalysis
-                {
-                    VersionId = aiVersion.VersionId,
-                    FeasibilityScore = result.Summary.AnalysisMetrics.OverallFeasibility,
-                    FatigueIndex = result.Summary.AnalysisMetrics.OverallFatigue,
-                    AnalysisTime = DateTime.Now
-                });
+                //_context.Aianalyses.Add(new Aianalysis
+                //{
+                //    VersionId = aiVersion.VersionId,
+                //    FeasibilityScore = result.Summary.AnalysisMetrics.OverallFeasibility,
+                //    FatigueIndex = result.Summary.AnalysisMetrics.OverallFatigue,
+                //    AnalysisTime = DateTime.Now
+                //});
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

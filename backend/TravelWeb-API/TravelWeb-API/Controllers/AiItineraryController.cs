@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.Itinerary.DBContext;
 using TravelWeb_API.Models.Itinerary.DTO;
@@ -8,6 +9,7 @@ using TravelWeb_API.Models.Itinerary.Service;
 
 namespace TravelWeb_API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AiItineraryController : ControllerBase
@@ -19,17 +21,21 @@ namespace TravelWeb_API.Controllers
         {
             _aiItineraryService = aiItineraryService;
             _context = travelContext;
+
         }
         private async Task<int> EnsureAttractionExists(ExternalLocationDto external)
         {
             // 1. 根據 GooglePlaceId 檢查景點是否已存在於資料庫
-            var existing = await _context.Attractions
-                .FirstOrDefaultAsync(a => a.GooglePlaceId == external.GooglePlaceId && a.IsDeleted == false);
-
-            if (existing != null)
+            if (!string.IsNullOrEmpty(external.GooglePlaceId) && external.GooglePlaceId != "TEMP_AI_PLACE")
             {
-                return existing.AttractionId;
+                var existing = await _context.Attractions
+                .FirstOrDefaultAsync(a => a.GooglePlaceId == external.GooglePlaceId && a.IsDeleted == false);
+                if (existing != null)
+                {
+                    return existing.AttractionId;
+                }
             }
+
 
             // 2. 如果不存在，則建立新的 Attraction 實體
             var newAttr = new Models.Itinerary.DBModel.Attraction
@@ -37,7 +43,7 @@ namespace TravelWeb_API.Controllers
                 Name = external.Name,
                 RegionId = 1000,
                 Address = external.Address,
-                GooglePlaceId = external.GooglePlaceId,
+                GooglePlaceId = external.GooglePlaceId == "TEMP_AI_PLACE" ? null : external.GooglePlaceId,
                 Latitude = (decimal?)external.Latitude,
                 Longitude = (decimal?)external.Longitude,
                 CreatedAt = DateTime.Now,
@@ -51,24 +57,12 @@ namespace TravelWeb_API.Controllers
 
             return newAttr.AttractionId;
         }
-        // GET: api/<AiItineraryController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<AiItineraryController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
         // POST api/<AiItineraryController>
         [HttpPost("generate-ai")]
         public async Task<IActionResult> GenerateWithAi([FromBody] ItineraryCreateDto dto)
         {
+            var memberId = User.FindFirst("MemberId")?.Value ?? "tw_user_001";
             if (dto.StartTime == null || dto.EndTime == null)
                 return BadRequest(new { message = "請提供開始與結束日期" });
 
@@ -99,9 +93,9 @@ namespace TravelWeb_API.Controllers
 
                 if (!finalPoiIds.Any())
                     return BadRequest(new { message = "行程必須包含至少一個景點" });
-
+                Console.WriteLine(finalPoiIds);
                 // 3. 呼叫 AI Service 進行規劃與存檔 (此處會進入您寫的 Transaction 邏輯)
-                var resultId = await _aiItineraryService.GenerateNewItineraryAsync(dto, finalPoiIds, totalDays);
+                var resultId = await _aiItineraryService.GenerateNewItineraryAsync(dto, finalPoiIds, totalDays, memberId);
 
                 return Ok(new { id = resultId, message = "AI 行程生成成功" });
             }
@@ -112,6 +106,6 @@ namespace TravelWeb_API.Controllers
             }
         }
 
-       
+
     }
 }

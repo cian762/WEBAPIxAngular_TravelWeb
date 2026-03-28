@@ -1,3 +1,4 @@
+import { reviewResponseDTO } from './../../Interface/reviewResonseDTO';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivityInfoService } from '../../Service/activity-info-service';
@@ -6,26 +7,29 @@ import { productInfoInterface } from '../../Interface/productIntroInterface';
 import { reviewsPackage } from '../../Interface/reviewsPackage';
 import { FormsModule } from '@angular/forms';
 import { RouteService } from '../../Service/route-service';
-
 import { NgFor, NgIf } from '@angular/common';
 import { RouteOptionDto } from '../../Interface/routeOptionDto';
 import { CardInfoModel } from '../../Interface/cardInterface';
 import { TicketPlanDrawer } from '../ticket-plan-drawer/ticket-plan-drawer';
 import { TicketInfoService } from '../../Service/ticket-info-service';
 import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
-import { forkJoin, Subscription } from 'rxjs';
+import { EMPTY, forkJoin, of, Subscription, switchMap } from 'rxjs';
+import { UserCommentForm } from "../user-comment-form/user-comment-form";
+import { PersonalCommentService } from '../../Service/personal-comment-service';
+import { EditCommentForm } from "../edit-comment-form/edit-comment-form";
 
 @Component({
   selector: 'app-activity-intro',
-  imports: [FormsModule, NgIf, NgFor, RouterLink, TicketPlanDrawer],
+  imports: [FormsModule, NgIf, NgFor, RouterLink, TicketPlanDrawer, UserCommentForm, EditCommentForm],
   templateUrl: './activity-intro.html',
   styleUrl: './activity-intro.css',
 })
-export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
+
+export class ActivityIntro implements OnInit, AfterViewInit {
 
   activityIdFromRoute: number = 0;
   isMapViewReady = false;
-  private sub?: Subscription;
+
 
   activityInfo: ActivityInfoInterface = {
     activityId: 0,
@@ -62,6 +66,8 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   suggestionCollection: CardInfoModel[] = [];
 
+  personalCommentCollection: reviewResponseDTO[] = [];
+
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
   map!: google.maps.Map;
 
@@ -69,60 +75,65 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
   private activatedRoute = inject(ActivatedRoute);
   private routeService = inject(RouteService);
   private ticketInfoService = inject(TicketInfoService);
+  private personalCommentService = inject(PersonalCommentService);
 
-
-  ngOnDestroy(): void {
-    // this.sub?.unsubscribe();
-  }
 
   ngOnInit(): void {
-    this.sub = this.activatedRoute.params.subscribe((params) => {
-      const id = Number(params['id']);
-      if (!id) return;
+    //畫面三隻 API 接收回傳結果的 DTO
+    this.suggestionCollection = [];
+    this.productInfoCollection = [];
+    this.reviewsPackage = {
+      activityId: 0,
+      reviews: [],
+      averageRating: 0,
+      commentCount: 0
+    };
 
-      this.activityIdFromRoute = id;
+    //GOOGLE MAP API 相關 DTO
+    this.routeOptions = [];
+    this.selectedRouteIndex = 0;
+    this.routeInfo = {
+      distanceText: '',
+      durationText: ''
+    };
 
-      this.suggestionCollection = [];
-      this.productInfoCollection = [];
-      this.reviewsPackage = {
-        activityId: 0,
-        reviews: [],
-        averageRating: 0,
-        commentCount: 0
-      };
+    if (this.routePolyline) {
+      this.routePolyline.setMap(null);
+    }
 
-      this.routeOptions = [];
-      this.selectedRouteIndex = 0;
-      this.routeInfo = {
-        distanceText: '',
-        durationText: ''
-      };
+    this.activatedRoute.params.pipe(
+      switchMap(params => {
+        const id = Number(params['id']);
+        if (!id) return EMPTY;
 
-      if (this.routePolyline) {
-        this.routePolyline.setMap(null);
+        this.activityIdFromRoute = id;
+        return forkJoin({
+          activityInfo: this.infoService.getActivityDetails(id),
+          reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
+          productInfoCollection: this.infoService.getRelatedTickets(id),
+          personalComments: this.personalCommentService.getPersonalComments(id)
+        });
+
+      })
+    ).subscribe({
+      next: ({ activityInfo, reviewsPackage, productInfoCollection, personalComments }) => {
+        this.activityInfo = activityInfo;
+        this.reviewsPackage = reviewsPackage;
+        this.productInfoCollection = productInfoCollection;
+        this.personalCommentCollection = personalComments;
+        this.tryInitMap();
+        this.getRelatedActivitySuggestion();
+      },
+      error: (err) => {
+        console.log('資料載入失敗', err);
       }
-
-      forkJoin({
-        activityInfo: this.infoService.getActivityDetails(id),
-        reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
-        productInfoCollection: this.infoService.getRelatedTickets(id)
-      }).subscribe({
-        next: ({ activityInfo, reviewsPackage, productInfoCollection }) => {
-          this.activityInfo = activityInfo;
-          this.reviewsPackage = reviewsPackage;
-          this.productInfoCollection = productInfoCollection;
-
-          this.tryInitMap();
-          this.getRelatedActivitySuggestion();
-        },
-        error: (err) => {
-          console.log('資料載入失敗', err);
-        }
-      });
     });
-
-
   }
+
+
+
+
+
 
   getActivityInfo(activityId: number) {
     return this.infoService.getActivityDetails(activityId);
@@ -136,6 +147,11 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
 
   getRelatedTickets(activityId: number) {
     return this.infoService.getRelatedTickets(activityId);
+  }
+
+
+  getPersonalComments(activityId: number) {
+    return this.personalCommentService.getPersonalComments(activityId);
   }
 
   FindBookMark(bookmark: string) {
@@ -154,6 +170,11 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
     this.tryInitMap();
   }
 
+
+
+
+
+  //Google Map 使用到的方法
   tryInitMap(): void {
     if (!this.isMapViewReady) return;
     if (!this.activityInfo.latitude || !this.activityInfo.longitude) return;
@@ -184,8 +205,6 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
     }, 100);
     console.log('地圖載入成功');
   }
-
-
 
 
   //取得使用者定位
@@ -239,6 +258,7 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+
   //選擇交通方式
   routePolyline?: google.maps.Polyline;
   selectedTravelMode: 'DRIVE' | 'WALK' | 'BICYCLE' = 'DRIVE';
@@ -260,7 +280,6 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
       lat: Number(this.activityInfo.latitude),
       lng: Number(this.activityInfo.longitude)
     }
-
 
     this.routeService.getRoute({
       originLat: this.userPosition.lat,
@@ -308,6 +327,11 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
     this.routePolyline.setMap(this.map);
   }
 
+
+
+
+
+  //拿相關的活動推薦用方法
   getRelatedActivitySuggestion() {
     if (this.activityInfo.types.length) {
       console.log('有打進suggestion方法');
@@ -315,6 +339,7 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
       const param = new SuggestionInfo();
       param.activityId = this.activityInfo.activityId;
       param.activityType = this.activityInfo.types;
+
       this.infoService.offerRelatedOptions(param)?.subscribe((data) => {
         this.suggestionCollection = data;
         console.log('建議的活動資訊', this.suggestionCollection);
@@ -336,7 +361,6 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
         this.openPlanDrawer(this.productInfo);
       }
       console.log("ACT-XXXX資料", this.productInfo);
-
     });
   }
 
@@ -356,21 +380,109 @@ export class ActivityIntro implements OnInit, AfterViewInit, OnDestroy {
     { label: 'lowest', value: '最低評分' },
     { label: 'newest', value: '最新評論' },
     { label: 'picFirst', value: '圖片優先' }
-
   ];
 
+
+  //預設的評論篩選條件為 'highest'
   selectedSortRule: string = 'highest';
   changeSortRule(sortRule: string) {
     this.selectedSortRule = sortRule;
-    this.activatedRoute.params.subscribe((params) => {
-      const id = Number(params['id']);
-      this.infoService.getRelatedReviews(id, this.selectedSortRule)
-        .subscribe((data) => {
-          this.reviewsPackage = data;
-        });
-    });
+    this.infoService.getRelatedReviews(this.activityIdFromRoute, this.selectedSortRule)
+      .subscribe((data) => {
+        this.reviewsPackage = data;
+      });
   }
+
+
+
+  //用來觸動 子Component (user-Comment-Form)
+  isModalOpen = false;
+  toggleCommentForm() {
+    this.isModalOpen = !this.isModalOpen;
+    console.log('按下後', this.isModalOpen);
+  }
+
+  openCommentForm(): void {
+    this.isModalOpen = true;
+  }
+
+  closeCommentForm(): void {
+    console.log('父元件 closeCommentForm()被觸發');
+    this.isModalOpen = false;
+  }
+
+
+
+  //當關閉 子Component (user-Comment-Form) 後要觸發的事件
+  refreshPersonalComment(): void {
+    console.log('父元件 refreshPersonalComment()被觸發');
+    this.personalCommentService.getPersonalComments(this.activityIdFromRoute).pipe(
+      switchMap((data) => {
+        console.log("個人評論更新載入成功");
+        this.personalCommentCollection = data;
+
+        //觸動整體評論更新，是為了做到評分也跟著動態修改
+        return this.infoService.getRelatedReviews(this.activityIdFromRoute, this.selectedSortRule);
+      })
+    ).subscribe({
+      next: (res) => {
+        console.log('評論重新載入成功');
+        this.reviewsPackage = res;
+      },
+      error: (err) => {
+        console.log('refreshPersonalComment 發生錯誤', err);
+      }
+    })
+  }
+
+
+  //個人刪除評論使用的方法
+  deletePersonalComment(activityId: number): void {
+    this.personalCommentService.deletePersonalComment(activityId)
+      .subscribe({
+        next: (res) => {
+          console.log('刪除成功', res);
+          //刪除後再觸發 refresh 方法;
+          this.refreshPersonalComment();
+        },
+        error: (err) => {
+          console.log('刪除失敗', err);
+        }
+      });
+  }
+
+
+  //個人評論編輯相關的 子Component (Edit-Comment-Form) 觸動變數/方法
+  openEditForm = false;
+
+  isEditFormOpen() {
+    console.log('壓下 isEditFormOpen');
+    this.openEditForm = !this.openEditForm;
+    this.refreshPersonalComment();
+  }
+
+  selectedPersonalReview: reviewResponseDTO = {
+    title: "",
+    reviewId: 0,
+    memberId: '',
+    comment: '',
+    rating: 0,
+    createDate: new Date(),
+    reviewImages: []
+  };
+
+  sendTargetToEditForm(target: reviewResponseDTO) {
+    this.isEditFormOpen();
+    this.selectedPersonalReview = target;
+  }
+
+
+
+
 }
+
+
+
 
 export class SuggestionInfo {
   activityId: number = 0;
