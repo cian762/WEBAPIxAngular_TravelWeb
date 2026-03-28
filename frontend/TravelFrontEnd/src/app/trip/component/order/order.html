@@ -59,11 +59,63 @@
               <textarea formControlName="customerNote" class="form-control rounded-3 mt-2" rows="4"
                 placeholder="有特別的需求嗎？例如：過敏需求、嬰兒車位置...等"></textarea>
             </div>
+            <div class="col-12 mb-4">
+              <div class="card border border-light-subtle rounded-3 overflow-hidden shadow-sm">
+                <ul class="nav nav-tabs bg-light border-bottom-0" id="policyTab" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active border-0 py-2 px-4 fw-bold text-secondary" id="notice-tab"
+                      data-bs-toggle="tab" data-bs-target="#notice-content" type="button" role="tab"
+                      style="font-size: 0.9rem;">
+                      訂購須知
+                    </button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link border-0 py-2 px-4 fw-bold text-secondary" id="contract-tab"
+                      data-bs-toggle="tab" data-bs-target="#contract-content" type="button" role="tab"
+                      style="font-size: 0.9rem;">
+                      旅遊契約書
+                    </button>
+                  </li>
+                </ul>
+
+                <div class="tab-content p-3 bg-white"
+                  style="height: 200px; overflow-y: auto; font-size: 0.85rem; color: #666; line-height: 1.7;">
+
+                  <div class="tab-pane fade show active" id="notice-content" role="tabpanel">
+                    <p class="fw-bold text-dark">【報名作業說明】</p>
+                    <ul class="ps-3">
+                      <li>本行程需經客服人員確認回覆後始可生效，並依視同雙方簽署觀光局定型化契約。</li>
+                      <li>線上預約並非保證訂位成功，仍需以客服人員回覆確認為準。</li>
+                      <li>若遇天候不佳或不可抗力因素，本公司保有取消或變更行程之權利。</li>
+                      <li>請確保填寫之旅客資料（姓名、身分證、出生年月日）與證件相符。</li>
+                    </ul>
+                  </div>
+
+                  <div class="tab-pane fade" id="contract-content" role="tabpanel">
+                    <p class="fw-bold text-dark text-center">國內旅遊定型化契約書範本</p>
+                    <p>第一條（國內旅遊之意義）本契約所謂國內旅遊，指在臺灣、澎湖、金門、馬祖及其他自由地區之我國疆域範圍內之旅遊。</p>
+                    <p>第二條（適用之範圍）甲乙雙方關於本旅遊之權利義務，依本契約條款之約定定之；本契約中未約定者，適用中華民國有關法令之規定。</p>
+                    <p>第三條（旅遊團費包含之項目）甲方依第[ ]條約定給付之旅遊團費，應包括：交通運輸費、住宿費、膳食費、遊覽費用、領隊人員之差旅費等...</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" id="agreeTerms" formControlName="agreeTerms"
+                  [class.is-invalid]="orderForm.get('agreeTerms')?.invalid && orderForm.get('agreeTerms')?.touched">
+                <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.875rem;">
+                  我已詳細閱讀並同意上述「訂購須知」與「旅遊契約書」內容。
+                </label>
+                <div class="invalid-feedback">
+                  請閱讀並勾選同意條款。
+                </div>
+              </div>
+            </div>
 
             <div class="col-12 d-grid mb-4">
               <button type="submit" class="btn btn-dark btn-lg py-3 fw-bold rounded-pill shadow" [disabled]="isLoading">
                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? '處理中...' : '確認訂購並結帳' }}
+                {{ isLoading ? '處理中...' : '確認訂購' }}
               </button>
             </div>
           </div>

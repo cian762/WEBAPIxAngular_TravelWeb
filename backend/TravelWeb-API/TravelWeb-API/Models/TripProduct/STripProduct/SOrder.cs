@@ -409,8 +409,9 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     {
                         TicketName = oit.TicketNameSnapshot!,
                         UnitPrice = (decimal)oit.UnitPrice!,
-                        Quantity = (int)oit.Quantity!
+                        Quantity = (int)oit.Quantity!,
                     }).ToListAsync();
+                itemDto.Quantity = itemDto.Tickets.Sum(t => t.Quantity);
 
                 detailDto.Items.Add(itemDto);
             }

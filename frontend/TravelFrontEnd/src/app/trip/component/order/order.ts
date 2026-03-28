@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { OrderService } from '../../services/OrderService';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
+import Swal from 'sweetalert2';
 
 
 
@@ -28,12 +29,40 @@ export class Order implements OnInit {
 
 
   ngOnInit(): void {
-    this.initForm();
-    if (!this.checkoutInfo && this.router.navigated) {
+    // 1. 嘗試從 history.state 抓取資料 (包含商品資料與來源網址)
+    const stateData = history.state.data;
+    this.checkoutInfo = stateData; // 假設你原本的變數叫 checkoutInfo
+
+    // 2. 檢查資料是否存在
+    if (!this.checkoutInfo || !this.checkoutInfo.directBuyItems || this.checkoutInfo.directBuyItems.length === 0) {
       console.warn('遺失結帳資訊，準備導回...');
-      // 這裡可以選擇導回購物車或首頁
+      this.handleMissingData(stateData?.fromUrl);
+      return; // 阻斷後續的 loadOrderPreview，避免報錯
     }
+
+    // 3. 資料正常，執行初始化
+    this.initForm();
     this.loadOrderPreview();
+  }
+
+  // 提取出來的錯誤處理方法
+  private handleMissingData(fromUrl?: string) {
+    // 如果有來源網址就回來源，沒有就回首頁
+    const fallbackUrl = fromUrl || '/';
+
+    Swal.fire({
+      title: '結帳資訊逾時',
+      text: '抱歉，系統無法取得您的行程資料，請回到商品頁重新選擇。',
+      icon: 'warning',
+      confirmButtonText: '回到商品頁',
+      confirmButtonColor: '#0d6efd',
+      allowOutsideClick: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 使用 navigateByUrl 導回精確的商品詳情頁
+        this.router.navigateByUrl(fallbackUrl);
+      }
+    });
   }
 
 
@@ -42,10 +71,11 @@ export class Order implements OnInit {
       contactName: ['', Validators.required],
       contactEmail: ['', [Validators.required, Validators.email]],
       contactPhone: ['', [Validators.required, Validators.pattern('^09[0-9]{8}$')]],
-      customerNote: ['']
+      customerNote: [''],
+      agreeTerms: [false, Validators.requiredTrue]
     });
   }
-  /** 2. 載入訂單預覽 (RxJS 呼叫) */
+
   /** 2. 載入訂單預覽 (RxJS 呼叫) */
   loadOrderPreview() {
     this.isLoading = true;

@@ -28,3 +28,31 @@
   min-height: 350px;
   /* 稍微縮短一點高度，可以更快看到商品內容 */
 }
+
+/* 仿東南旅遊 Tab 樣式 */
+.nav-tabs .nav-link {
+  transition: all 0.3s ease;
+  border-bottom: 2px solid transparent !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: #0d6efd !important;
+  /* 選中時變成主色調藍色 */
+  background-color: transparent !important;
+  border-bottom: 2px solid #0d6efd !important;
+  /* 顯示藍色底線 */
+}
+
+/* 美化捲軸 (選用) */
+.tab-content::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: #f8f9fa;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: #dee2e6;
+  border-radius: 10px;
+}

@@ -33,6 +33,9 @@
               (click)="onRepay(order.orderId)">
               前往付款
             </button>
+            <span *ngIf="order.orderStatus !== '待處理'" class="text-success fw-bold">
+              <i class="bi bi-check-circle-fill"></i> 已付款
+            </span>
 
           </td>
         </tr>
