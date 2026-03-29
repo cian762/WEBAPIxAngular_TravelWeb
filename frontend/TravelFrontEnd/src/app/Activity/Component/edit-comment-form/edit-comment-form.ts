@@ -1,5 +1,15 @@
-import { Component, EventEmitter, Input, Output, OnDestroy, OnChanges, SimpleChanges, inject } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
+  inject
+} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PersonalCommentService } from '../../Service/personal-comment-service';
 
 @Component({
@@ -26,6 +36,9 @@ export class EditCommentForm implements OnChanges, OnDestroy {
 
   newImages: File[] = [];
   newImagePreviews: string[] = [];
+
+  isSubmitting = false;
+  submitErrorMessage = '';
 
   editForm = new FormGroup({
     title: new FormControl('', {
@@ -56,9 +69,14 @@ export class EditCommentForm implements OnChanges, OnDestroy {
     this.clearPreviewUrls();
     this.newImages = [];
     this.newImagePreviews = [];
+
+    this.submitErrorMessage = '';
+    this.isSubmitting = false;
+    this.editForm.enable({ emitEvent: false });
   }
 
   setRating(star: number): void {
+    if (this.isSubmitting) return;
     this.editForm.patchValue({ rating: star });
   }
 
@@ -67,6 +85,8 @@ export class EditCommentForm implements OnChanges, OnDestroy {
   }
 
   onNewImagesChange(event: Event): void {
+    if (this.isSubmitting) return;
+
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
 
@@ -80,6 +100,8 @@ export class EditCommentForm implements OnChanges, OnDestroy {
   }
 
   removeExistingImage(index: number): void {
+    if (this.isSubmitting) return;
+
     const targetUrl = this.existingImages[index];
     if (!targetUrl) return;
 
@@ -88,6 +110,8 @@ export class EditCommentForm implements OnChanges, OnDestroy {
   }
 
   removeNewImage(index: number): void {
+    if (this.isSubmitting) return;
+
     const previewUrl = this.newImagePreviews[index];
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -103,6 +127,12 @@ export class EditCommentForm implements OnChanges, OnDestroy {
       return;
     }
 
+    if (this.isSubmitting) return;
+
+    this.isSubmitting = true;
+    this.submitErrorMessage = '';
+    this.editForm.disable({ emitEvent: false });
+
     this.personalCommentService.patchPersonalComment({
       reviewId: this.reviewId,
       title: this.editForm.controls.title.value,
@@ -110,19 +140,28 @@ export class EditCommentForm implements OnChanges, OnDestroy {
       rating: this.editForm.controls.rating.value,
       newImages: this.newImages,
       deletedImageUrls: this.deletedImageUrls
-    }).subscribe({
-      next: (res) => {
-        console.log('修改成功', res);
-        this.saved.emit();
-        this.closeModal();
-      },
-      error: (err) => {
-        console.log('修改失敗', err);
-      }
-    });
+    })
+      .pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+          this.editForm.enable({ emitEvent: false });
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          console.log('修改成功', res);
+          this.saved.emit();
+          this.closed.emit();
+        },
+        error: (err) => {
+          console.log('修改失敗', err);
+          this.submitErrorMessage = '修改失敗，請稍後再試一次';
+        }
+      });
   }
 
   closeModal(): void {
+    if (this.isSubmitting) return;
     this.closed.emit();
   }
 
