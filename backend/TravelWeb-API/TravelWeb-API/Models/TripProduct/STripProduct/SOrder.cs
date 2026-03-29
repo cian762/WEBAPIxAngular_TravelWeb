@@ -19,28 +19,79 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
         // 5. 取消訂單：僅限未付款且 Pending 狀態，更新狀態為 Cancelled
         public async Task<bool> CancelOrderAsync(int orderId, string memberId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
-            if (order == null || order.MemberId != memberId) { return false; }
+            // 1. 一次性抓出訂單、明細、以及明細中的票券數量 (預讀減少 DB 查詢次數)
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.OrderItemTickets)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId && o.MemberId == memberId);
+
+            if (order == null) return false;
+
             // 2. 初始化狀態機
-            // 我們告訴狀態機：目前的狀態在 order.OrderStatus，變更時請寫回該欄位
-            var machine = new StateMachine<string, OrderTrigger>(() => order.OrderStatus!, s => order.OrderStatus = s);
-            // 3. 配置狀態機規則（這就是你的業務邏輯）
-            // 只有在 Pending (待處理) 時，才准許執行 UserCancel
+            var machine = new StateMachine<string, OrderTrigger>(
+                () => order.OrderStatus!,
+                s => order.OrderStatus = s
+            );
+
+            // 配置：只有 Pending 狀態可以執行 UserCancel 變為 Cancelled
             machine.Configure(OrderStatusNames.Pending)
-                .Permit(OrderTrigger.UserCancel, OrderStatusNames.Cancelled);
-            // 4. 檢查是否可以執行「取消」動作
-            if (machine.CanFire(OrderTrigger.UserCancel))
+                   .Permit(OrderTrigger.UserCancel, OrderStatusNames.Cancelled);
+
+            // 3. 檢查是否符合取消資格
+            if (!machine.CanFire(OrderTrigger.UserCancel)) return false;
+
+            // 4. 開始執行取消與回補 (使用 Transaction 確保資料一致)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                // 執行動作（這會自動把 order.OrderStatus 改成 "Cancelled"）
+                // A. 改變訂單狀態 (這會透過狀態機把 order.OrderStatus 改為 Cancelled)
                 machine.Fire(OrderTrigger.UserCancel);
 
-                // 5. 存檔並回傳成功
+                // B. 走訪每一筆明細進行庫存回補
+                foreach (var item in order.OrderItems)
+                {
+                    // 計算該品項的總數量 (加總所有票種)
+                    int totalQty = item.OrderItemTickets.Sum(t => t.Quantity ?? 0);
+                    if (totalQty <= 0) continue;
+
+                    // 判斷當初是扣「行程檔期」還是「一般票券/庫存」
+                    var tripSchedule = await _context.TripSchedules
+                        .FirstOrDefaultAsync(ts => ts.ProductCode == item.ProductCode);
+
+                    if (tripSchedule != null)
+                    {
+                        // 回補行程名額：將已售數量減回來
+                        if (tripSchedule.SoldQuantity.HasValue)
+                        {
+                            tripSchedule.SoldQuantity = Math.Max(0, tripSchedule.SoldQuantity.Value - totalQty);
+                        }
+                    }
+                    else
+                    {
+                        // 回補景點票/一般商品庫存：將剩餘庫存加回去
+                        var stockRecord = await _context.StockInRecords
+                            .FirstOrDefaultAsync(s => s.ProductCode == item.ProductCode);
+
+                        if (stockRecord != null)
+                        {
+                            stockRecord.RemainingStock += totalQty;
+                        }
+                    }
+                }
+
+                // 5. 統一存檔並提交
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
                 return true;
             }
-
-            // 如果目前的狀態（例如：已經是 Completed 或 Active）不能取消，則回傳失敗
-            return false;
+            catch (Exception ex)
+            {
+                // 發生任何錯誤就全部回滾
+                await transaction.RollbackAsync();
+                var detailedMsg = ex.InnerException?.Message ?? ex.Message;
+                throw new Exception($"取消訂單失敗且庫存未回補: {detailedMsg}");
+            }
         }
         // 1. 建立訂單：處理 4 張表寫入與 Transaction，回傳產生的 OrderId
         public async Task<Order> CreateOrderAsync(CreateOrderDto dto, string memberId)

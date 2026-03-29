@@ -113,7 +113,8 @@
             </div>
 
             <div class="col-12 d-grid mb-4">
-              <button type="submit" class="btn btn-dark btn-lg py-3 fw-bold rounded-pill shadow" [disabled]="isLoading">
+              <button type="submit" class="btn btn-dark btn-lg py-3 fw-bold rounded-pill shadow"
+                [disabled]="isLoading || orderForm.invalid">
                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
                 {{ isLoading ? '處理中...' : '確認訂購' }}
               </button>
