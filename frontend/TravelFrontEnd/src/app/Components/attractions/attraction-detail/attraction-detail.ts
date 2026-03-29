@@ -34,21 +34,21 @@ export class AttractionDetailComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-  // 讀 ?tab=tickets 自動切換 Tab
-  this.route.queryParams.subscribe(params => {
-    if (params['tab']) this.activeTab = params['tab'];
-  });
+    // 讀 ?tab=tickets 自動切換 Tab（從購物車編輯按鈕導回來時用）
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) this.activeTab = params['tab'];
+    });
 
-  this.route.paramMap.subscribe(p => {
-    const id = Number(p.get('id'));
-    if (id) {
-      this.svc.getAttractionById(id).subscribe(data => {
-        this.attraction = data;
-        this.loading = false;
-      });
-    }
-  });
-}
+    this.route.paramMap.subscribe(p => {
+      const id = Number(p.get('id'));
+      if (id) {
+        this.svc.getAttractionById(id).subscribe(data => {
+          this.attraction = data;
+          this.loading = false;
+        });
+      }
+    });
+  }
 
   get mainImage(): string {
     if (this.attraction?.images?.length) {
