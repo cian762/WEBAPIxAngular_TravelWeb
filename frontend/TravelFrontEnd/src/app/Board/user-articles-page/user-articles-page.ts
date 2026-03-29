@@ -17,7 +17,7 @@ export class UserArticlesPage implements OnInit {
   constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) {
   }
   articleList: ArticleData[] = [];
-  AllTags: TagDTO[] = [];
+  totalCount: number = 0;
   UserId: string = "";
   curUser: any;
 
@@ -26,8 +26,11 @@ export class UserArticlesPage implements OnInit {
       this.UserId = p.get('id')!;
       this.Serve.getAuthorUser(this.UserId).subscribe((d) => { this.curUser = d; });
     });
-    this.Serve.getArticleByAuthor(1, this.UserId).subscribe(p => this.articleList = p.articleList);
-    this.Serve.getAllTags().subscribe(p => this.AllTags = p);
+    this.Serve.getArticleByAuthor(1, this.UserId).subscribe((p) => {
+      this.articleList = p.articleList;
+      this.totalCount = p.totalCount;
+    });
+
   }
 
 

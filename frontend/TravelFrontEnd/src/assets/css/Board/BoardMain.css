@@ -1,138 +1,84 @@
-  .default-select {
-    height: 40px;
-  }
+.img-wrapper-full {
+  display: block;
+  width: 100%;
+  position: relative;
+}
 
-  .default-select .nice-select {
-    border: none;
-    border-radius: 0px;
-    height: 40px;
-    background: #fff;
-    padding-left: 20px;
-    padding-right: 40px;
-  }
+.img-wrapper-leftside {
+  float: left;
+  width: 50%;
+  padding-right: 14px;
+  position: relative;
+}
 
-  .default-select .nice-select .list {
-    margin-top: 0;
-    border: none;
-    border-radius: 0px;
-    box-shadow: none;
-    width: 100%;
-    padding: 10px 0 10px 0px;
-  }
+.img-wrapper-rightside {
+  float: right;
+  width: 50%;
+  padding-left: 14px;
+  position: relative;
+}
 
-  .default-select .nice-select .list .option {
-    font-weight: 300;
-    -webkit-transition: all 0.3s ease 0s;
-    -moz-transition: all 0.3s ease 0s;
-    -o-transition: all 0.3s ease 0s;
-    transition: all 0.3s ease 0s;
-    line-height: 28px;
-    min-height: 28px;
-    font-size: 12px;
-    padding-left: 20px;
-  }
-
-  .default-select .nice-select .list .option.selected {
-    color: #f8b600;
-    background: transparent;
-  }
-
-  .default-select .nice-select .list .option:hover {
-    color: #f8b600;
-    background: transparent;
-  }
-
-  .default-select .current {
-    margin-right: 50px;
-    font-weight: 300;
-  }
-
-  .default-select .nice-select::after {
-    right: 20px;
-  }
+.inline-img {
+  width: 100%;
+  display: block;
+}
 
 
-  .img-wrapper-full {
-    display: block;
-    width: 100%;
-    position: relative;
-  }
+.test {
+  color: #ff0000;
+}
 
-  .img-wrapper-leftside {
-    float: left;
-    width: 50%;
-    padding-right: 14px;
-    position: relative;
-  }
+/* ── 區塊編輯器容器 */
+.block-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
 
-  .img-wrapper-rightside {
-    float: right;
-    width: 50%;
-    padding-left: 14px;
-    position: relative;
-  }
+/* ── 文字區塊：無框線、無背景、自動撐高 */
+.block-text {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.85;
+  color: #2c2c3a;
+  padding: 8px 22px;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-height: 48px;
+}
 
-  .inline-img {
-    width: 100%;
-    display: block;
-  }
+.block-text::placeholder {
+  color: #c0c0d8;
+}
 
+/* ── 全寬圖片 */
+.block-image-full {
+  width: 100%;
+}
 
-  .test {
-    color: #ff0000;
-  }
+.block-img {
+  width: 100%;
+  display: block;
+}
 
-  /* ── 區塊編輯器容器 */
-  .block-editor {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
+/* ── 半寬列（圖 + 文 並排）*/
+.block-half {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
 
-  /* ── 文字區塊：無框線、無背景、自動撐高 */
-  .block-text {
-    width: 100%;
-    border: none;
-    outline: none;
-    resize: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 15px;
-    line-height: 1.85;
-    color: #2c2c3a;
-    padding: 8px 22px;
-    box-sizing: border-box;
-    overflow: hidden;
-    min-height: 48px;
-  }
+.half-img {
+  width: 50%;
+  flex-shrink: 0;
+}
 
-  .block-text::placeholder {
-    color: #c0c0d8;
-  }
-
-  /* ── 全寬圖片 */
-  .block-image-full {
-    width: 100%;
-  }
-
-  .block-img {
-    width: 100%;
-    display: block;
-  }
-
-  /* ── 半寬列（圖 + 文 並排）*/
-  .block-half {
-    display: flex;
-    width: 100%;
-    align-items: stretch;
-  }
-
-  .half-img {
-    width: 50%;
-    flex-shrink: 0;
-  }
-
-  .half-text {
-    width: 50%;
-    padding: 8px 14px;
-  }
+.half-text {
+  width: 50%;
+  padding: 8px 14px;
+}

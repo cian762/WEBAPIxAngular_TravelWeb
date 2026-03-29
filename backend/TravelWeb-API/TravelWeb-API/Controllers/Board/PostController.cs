@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
@@ -18,17 +19,15 @@ namespace TravelWeb_API.Controllers.Board
     [ApiExplorerSettings(GroupName = "Board")]
     public class PostController : ControllerBase
     {
-        private readonly BoardDbContext _context;
-        private readonly MemberSystemContext _memberDb;
+        private readonly BoardDbContext _context;       
+        
         private readonly IPostService _PostService;
 
         public PostController(BoardDbContext context,
-            IPostService noteService,
-            MemberSystemContext memberDb)
+            IPostService noteService)
         {
             _context = context;
-            _PostService = noteService;
-            _memberDb = memberDb;
+            _PostService = noteService;            
         }
 
         // GET: api/PostsDetailed 瀏覽Post
@@ -42,6 +41,9 @@ namespace TravelWeb_API.Controllers.Board
             if (postDetail == null) return NotFound();
             return postDetail;
         }
+
+        
+
 
         [HttpPost]
         public async Task<ActionResult<int>> PostPost(int id)
@@ -74,8 +76,9 @@ namespace TravelWeb_API.Controllers.Board
                 await _PostService.UpdateArtic(
                     updateDto.id,
                     updateDto.Title, 
-                    updateDto.PhotoUrl, 
-                    updateDto.Status);
+                    updateDto.PhotoUrl,                    
+                    updateDto.Status,
+                    updateDto.regionId);
             if (!isUpdateSuccess)
                 return NotFound();
             else

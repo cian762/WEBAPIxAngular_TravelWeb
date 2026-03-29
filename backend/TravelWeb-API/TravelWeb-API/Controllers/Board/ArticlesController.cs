@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
@@ -23,18 +24,21 @@ namespace TravelWeb_API.Controllers.Board
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
+        private readonly ActivityDbContext _activityDB;
         private readonly IPostService _PostService;
         private readonly IArticleService _ArticleService;
+
 
         public ArticlesController(BoardDbContext context,
             IPostService noteService,
             IArticleService articleService,
-            MemberSystemContext memberDb)
+            MemberSystemContext memberDb, ActivityDbContext activityDB)
         {
             _context = context;
             _PostService = noteService;
             _ArticleService = articleService;
             _memberDb = memberDb;
+            _activityDB = activityDB;
         }
 
         //要分頁
@@ -231,6 +235,19 @@ namespace TravelWeb_API.Controllers.Board
             return Ok(result);
         }
 
-
+        [HttpGet("AllRegions")]
+        public async Task<IActionResult> GetAllRegions()
+        {
+            var regions = await _activityDB.TagsRegions
+            .Where(c => c.UidNavigation != null && c.UidNavigation.Uid == null)
+            .Select(c => new {  c.RegionId, 
+                                c.RegionName,
+                                Dist= _activityDB.TagsRegions
+                                      .Where(d => d.Uid == c.RegionId)
+                                      .Select(d => new { d.RegionId,
+                                                         d.RegionName}).ToList()
+                                                     }).ToListAsync();
+            return Ok(regions);
+        }
     }
 }

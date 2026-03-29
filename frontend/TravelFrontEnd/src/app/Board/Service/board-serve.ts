@@ -56,6 +56,10 @@ export class BoardServe {
       (`${this.apiUrl}/Board/Tags/all`)
   }
 
+  getAllRegions() {
+    return this.http.get(`${this.apiUrl}/Board/Articles/AllRegions`)
+  }
+
 
   postPostAPI() {
     return this.http.post<number>(`${this.apiUrl}/Board/Articles?Type=0`, null, { withCredentials: true }).pipe(

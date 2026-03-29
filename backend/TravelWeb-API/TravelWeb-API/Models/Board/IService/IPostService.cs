@@ -9,7 +9,7 @@ namespace TravelWeb_API.Models.Board.IService
         //Artic(標題物件)
         public Article AddArtic(byte Type,string UserId);
         public Article? GetArticle(int id);
-        public Task<bool> UpdateArtic(int id, string? Title, string? PhotoUrl, byte Status);
+        public Task<bool> UpdateArtic(int id, string? Title, string? PhotoUrl, byte Status,int? regionId);
 
         //Post(快速發文類)
         public void AddPost(Article article);

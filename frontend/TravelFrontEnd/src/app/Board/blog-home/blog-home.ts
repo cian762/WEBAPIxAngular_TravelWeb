@@ -35,6 +35,7 @@ export class BlogHome implements OnInit {
         para.push(`TagsId=${params['TagsId']}`);
         this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
           this.articleList = d.articleList;
+          this.totalCount = d.totalCount;
         });
       } else {
         this.ReflashArticles();

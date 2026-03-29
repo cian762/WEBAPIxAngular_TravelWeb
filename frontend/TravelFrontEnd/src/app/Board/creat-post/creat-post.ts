@@ -1,17 +1,19 @@
 import { TagListDTO } from './../../trip/models/tripproduct.model';
 import { PostDetailDto } from './../interface/PostDetailDto';
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BoardServe } from '../Service/board-serve';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { Cloudinary, CloudinaryImage } from '@cloudinary/url-gen';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { CommonModule } from '@angular/common';
+
 declare var cloudinary: any;
 declare var $: any;
 @Component({
   selector: 'app-creat-post',
-  imports: [FormsModule, ReactiveFormsModule],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule],
   templateUrl: './creat-post.html',
   styleUrl: './creat-post.css',
   standalone: true,
@@ -19,13 +21,26 @@ declare var $: any;
     <advanced-image [cldImg]="img"></advanced-image>
   `,
 })
-export class CreatPost implements OnInit {
+
+
+export class CreatPost implements OnInit, OnDestroy {
   cloudName = "daobwcaga"; // replace with your own cloud name
   uploadPreset = "ml_default"; // replace with your own upload preset
 
-  constructor(private Serve: BoardServe, private route: ActivatedRoute, private http: HttpClient) {
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  private observer!: IntersectionObserver;
 
-  }
+  navItems = [
+    { id: 'sec1' },
+    { id: 'sec2' },
+    { id: 'sec3' },
+    { id: 'sec4' },
+    { id: 'sec5' },
+    { id: 'sec6' },
+  ];
+
+  activeId = 'sec1';
+
   id = 0;
   post?: PostDetailDto;
 
@@ -43,23 +58,37 @@ export class CreatPost implements OnInit {
   selectedIndex: number = 0;
   coverIndex: number = 0;
 
-  regions = [
-    {
-      name: '北部',
-      cities: [
-        {
-          name: '台北市',
-          districts: ['中正區', '大安區', '信義區']
-        }
-      ]
-    }
-  ]
+  regions: any[] = [];
+  selectedRegionId?: number;
+  dists: any[] = [];
 
+  form = new FormGroup({
+    title: new FormControl(),
+    content: new FormControl(),
+    status: new FormControl(),
+    cityId: new FormControl(),
+    distId: new FormControl()
+  })
+
+  //選取的圖片
   setIndex(index: number) {
     this.selectedIndex = index;
   }
 
   ngOnInit(): void {
+    this.observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.activeId = entry.target.id;
+        }
+      });
+    }, { threshold: 0.5 });
+
+    this.navItems.forEach(item => {
+      const el = document.getElementById(item.id);
+      if (el) this.observer.observe(el);
+    });
+
     this.route.paramMap.subscribe(p => {
       this.id = Number(p.get('id'));
       console.log(this.id);
@@ -67,6 +96,7 @@ export class CreatPost implements OnInit {
         this.post = d;
         this.FormReset(d);
         console.log(this.post);
+        this.initRegion();//初始化地區選項
       });
       this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
         this.tagList = d;
@@ -75,23 +105,38 @@ export class CreatPost implements OnInit {
         this.allTags = d;
       });
 
+
+
     });
   }
 
-  form = new FormGroup({
-    title: new FormControl(this.post?.title),
-    content: new FormControl(this.post?.contents),
-    status: new FormControl(),
-    regionId: new FormControl(),
-  })
+  scrollTo(id: string) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 250; // 80 是上欄高度
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
+  ngOnDestroy() {
+    this.observer.disconnect();
+  }
+
+  ngAfterViewInit() {
+    this.cdr.detectChanges();
+  }
+
+
 
   FormReset(post: any) {
     this.form.reset({
       title: post.title,
       content: post.contents,
-      status: post.status
+      status: post.status,
+
     });
-    this.updateSelect();
+    setTimeout(() => {
+      $('#status-select').niceSelect('update');
+    }, 0);
     // 使用 ... 把 postPhoto 陣列拆開來，平鋪進去
     this.coverUrl = post.cover;
     const photos = [];
@@ -107,34 +152,34 @@ export class CreatPost implements OnInit {
     this.photoList = photos;
   }
 
-  ngAfterViewInit() {
-    const $select = $('#status-select');
-    setTimeout(() => {
-      if ($select.length > 0) {
-        $select.niceSelect();
-        console.log('nice-select 已啟動');
-      } else {
-        console.error('找不到 #status-select，請檢查 ID 是否正確');
+
+
+  initNiceSelect() {
+    this.bindSelect('status-select', 'status', false);
+    this.bindSelect('region-select', 'cityId', true);
+    this.bindSelect('dist-select', 'distId', true);
+  }
+
+  bindSelect(id: string, controlName: string, isRegion: boolean) {
+    const $el = $(`#${id}`);
+    if ($el.length === 0) return;
+
+    $el.niceSelect('destroy');
+    $el.niceSelect();
+    $el.on('change', (event: any) => {
+      const val = event.target.value;
+      const parsed = val === '' || val === 'null' ? null : Number(val);
+      this.form.patchValue({ [controlName]: parsed });
+
+      // cityId 變更後，等 Angular 渲染 dist-select 再初始化
+      if (controlName === 'cityId') {
+        this.cdr.detectChanges();
+        setTimeout(() => this.bindSelect('dist-select', 'distId', true), 0);
       }
-    }, 50); // 給 50ms 的緩衝
-
-    // 初始化插件
-    $select.niceSelect();
-    // 監聽插件的變更事件
-    $select.on('change', (event: any) => {
-      const newValue = event.target.value;
-      // 手動將新值塞回 Angular 表單
-      this.form.patchValue({ status: Number(newValue) });
     });
+
   }
 
-  // 4. 當你從 API 拿到資料 (this.post) 要回顯時
-  updateSelect() {
-    // 必須在資料填入後，通知 jQuery 插件更新外觀
-    setTimeout(() => {
-      $('#status-select').niceSelect('update');
-    }, 0);
-  }
 
 
   async onCreat() {
@@ -146,6 +191,15 @@ export class CreatPost implements OnInit {
     console.log(this.photoUrlList);
     this.photoUrlList = this.photoUrlList.filter((url, i) => i !== this.coverIndex);
     console.log(this.photoUrlList);
+    //處理地區選項
+    if (formValue.distId) {
+      this.selectedRegionId = formValue.distId;
+    }
+    else if (formValue.cityId) {
+      this.selectedRegionId = formValue.cityId;
+    }
+
+
     // 將巢狀的表單資料 攤平成後端要的格式
     const postUpdateDto = {
       id: this.id,
@@ -153,7 +207,7 @@ export class CreatPost implements OnInit {
       photoUrl: this.coverUrl ?? null,
       status: Number(formValue.status || 0), // 確保一定是數字 0-255，不要給空值
       content: formValue.content ?? null,
-      regionId: formValue.regionId ?? null,
+      regionId: this.selectedRegionId ?? null,
       photoUrlList: this.photoUrlList ?? null
     };
 
@@ -250,29 +304,6 @@ export class CreatPost implements OnInit {
   }
 
 
-  tryInitSlick() {
-    // 延遲稍微拉長一點點測試 (例如 300ms)
-    setTimeout(() => {
-      const $target = $('.slider-for');
-
-      // 先在控制台印出來，看看這時候 jQuery 到底有沒有抓到東西
-      console.log('目標元素長度:', $target.length);
-
-      if ($target.length > 0) {
-        $target.slick({
-          slidesToShow: 1,
-          asNavFor: '.slider-nav',
-          fade: true
-        });
-        console.log('Slick 初始化成功！');
-      } else {
-        console.warn('Slick 找不到 .slider-for，重試中...');
-        // 如果沒抓到，可以遞迴重試一次
-        // this.tryInitSlick();
-      }
-    }, 300);
-  }
-
 
   selectCover() {
     this.coverIndex = this.selectedIndex;
@@ -287,7 +318,8 @@ export class CreatPost implements OnInit {
   onSeach(event: any) {
     const keyword = event.target.value;
     this.filteredTags = this.allTags.filter(tag =>
-      tag.tagName.includes(keyword)
+      tag.tagName.includes(keyword) &&
+      !this.tagList.some((t: any) => t.tagId === tag.tagId)
     );
   }
 
@@ -305,36 +337,36 @@ export class CreatPost implements OnInit {
     el.style.height = Math.min(el.scrollHeight, 800) + 'px';
   }
 
+  initRegion() {
+    this.Serve.getAllRegions().subscribe((d: any) => {
+      this.regions = d;
 
-  selectedRegion: string = '';
-  selectedCity: string = '';
-  selectedDistrict: string = '';
+      // 先找城市
+      const city = this.regions.find(c => c.regionId === this.post?.regionId);
 
-  filteredCities: any[] = [];
-  filteredDistricts: string[] = [];
+      if (city) {
+        // post.regionId 是城市
+        this.form.patchValue({ cityId: city.regionId });
+      } else {
+        // 找區
+        const foundCity = this.regions.find(c =>
+          c.dist?.some((dist: any) => dist.regionId === this.post?.regionId)
+        );
 
-  onRegionChange(event: Event) {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedRegion = value;
-    this.selectedCity = '';
-    this.selectedDistrict = '';
-    this.filteredDistricts = [];
+        if (foundCity) {
+          this.form.patchValue({
+            cityId: foundCity.regionId,
+            distId: this.post?.regionId
+          });
+        }
+      }
 
-    const region = this.regions.find(r => r.name === value);
-    this.filteredCities = region ? region.cities : [];
+      // 資料進來後再初始化
+      setTimeout(() => {
+        this.initNiceSelect();
+      }, 0);
+    });
   }
 
-  onCityChange(event: Event) {
-    const value = (event.target as HTMLSelectElement).value;
-    this.selectedCity = value;
-    this.selectedDistrict = '';
-
-    const city = this.filteredCities.find(c => c.name === value);
-    this.filteredDistricts = city ? city.districts : [];
-  }
-
-  onDistrictChange(event: Event) {
-    this.selectedDistrict = (event.target as HTMLSelectElement).value;
-  }
 
 }

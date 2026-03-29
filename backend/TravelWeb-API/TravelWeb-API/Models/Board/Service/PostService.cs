@@ -31,7 +31,7 @@ namespace TravelWeb_API.Models.Board.Service
         }
 
 
-        public async Task<bool> UpdateArtic(int id,string? Title,string? PhotoUrl,byte Status)
+        public async Task<bool> UpdateArtic(int id,string? Title,string? PhotoUrl,byte Status,int? regionId)
         {
             Article? article = 
             _context.Articles.FirstOrDefault(a => a.ArticleId == id);
@@ -42,6 +42,7 @@ namespace TravelWeb_API.Models.Board.Service
                 article.PhotoUrl = PhotoUrl;
                 article.Status = Status;                
                 article.UpdatedAt = DateTime.Now;
+                article.RegionID = regionId;
                 await _context.SaveChangesAsync();
                 return true;
             }

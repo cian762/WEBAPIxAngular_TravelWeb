@@ -15,6 +15,7 @@ export interface ArticleData {
   likeCount: number;
   isLike: boolean;
   regionName?: string;
+  commentCount: number;
   tags?: TagDTO[]
 }
 
