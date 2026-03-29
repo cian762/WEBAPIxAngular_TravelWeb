@@ -161,7 +161,7 @@
 
       <!-- 售票區 -->
       <div *ngIf="activeTab === 'tickets'">
-        <app-ticket-section [attractionId]="attraction.attractionId" />
+        <app-ticket-section [attractionId]="attraction.attractionId" [coverImage]="mainImage" />
       </div>
 
       <!-- 周邊資訊 -->
