@@ -115,7 +115,8 @@
   transform: scale(1.25);
 }
 
-/* ===== Main ===== */
+
+/* ===== 主內容區 ===== */
 .att-main {
   padding: 60px 0;
 }
@@ -216,6 +217,7 @@
   margin-bottom: 20px;
 }
 
+
 /* ===== 城市卡片 ===== */
 .city-grid {
   display: grid;
@@ -243,6 +245,7 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
 
+/* padding-top 撐高讓圖片維持比例 */
 .city-card__img {
   padding-top: 65%;
   position: relative;
@@ -261,6 +264,7 @@
   transform: scale(1.06);
 }
 
+/* 文字疊加層：覆蓋整張卡片 */
 .city-card__overlay {
   position: absolute;
   inset: 0;
@@ -281,6 +285,7 @@
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
+
 
 /* RWD */
 @media (max-width: 768px) {

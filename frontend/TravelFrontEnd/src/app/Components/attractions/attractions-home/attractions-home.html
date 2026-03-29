@@ -42,7 +42,7 @@
       <div class="col-lg-4">
         <h2 class="intro-headline">The Heart of Asia<br>旅行台灣 就是現在</h2>
         <p class="intro-body">
-          臺灣因地理資源豐沛，擁有許多特殊地形及奇特的地理景觀。北部的麥北角、北海岸及宜蘭地區，擁有奇異特殊海岸地形，拍達山景水秀、天藍海深；在中南部地區，日月潭的湖光山色、八卦山蠶業，都可充分感受臺灣多元文化及豐富自然景觀。
+          臺灣因地理資源豐沛，擁有許多特殊地形及奇特的地理景觀。北部的麥北角、北海岸及宜蘭地區，擁有奇異特殊海岸地形，山景水秀、天藍海深；在中南部地區，日月潭的湖光山色、八卦山蠶業，都可充分感受臺灣多元文化及豐富自然景觀。
         </p>
         <p class="intro-body">去著、賞著、體驗的臺灣，熱情歡迎您！</p>
 
@@ -64,8 +64,9 @@
 
         <!-- 台灣地圖（圖片切換版） -->
         <div class="tw-map-wrap">
-          <img class="tw-map-img" [src]="'assets/img/attraction/' + currentRegion.mapImage"
-            [alt]="currentRegion.label">
+          <img class="tw-map-img"
+               [src]="'assets/img/attraction/' + currentRegion.mapImage"
+               [alt]="currentRegion.label">
         </div>
       </div>
 
@@ -73,8 +74,10 @@
       <div class="col-lg-8">
         <!-- 地區按鈕 -->
         <div class="region-tabs">
-          <button *ngFor="let r of regions; let i = index" class="region-btn" [class.active]="activeRegion === i"
-            (click)="selectRegion(i)">
+          <button *ngFor="let r of regions; let i = index"
+                  class="region-btn"
+                  [class.active]="activeRegion === i"
+                  (click)="selectRegion(i)">
             {{ r.label }}
           </button>
         </div>
@@ -82,12 +85,14 @@
         <!-- 地區描述 -->
         <p class="region-desc">{{ currentRegion.description }}</p>
 
-        <!-- 城市卡片 -->
+        <!-- 城市卡片格 -->
         <div class="city-grid">
-          <div class="city-card" *ngFor="let city of currentRegion.cities" (click)="goToCity(city)">
+          <div class="city-card"
+               *ngFor="let city of currentRegion.cities"
+               (click)="goToCity(city)">
             <div class="city-card__img">
               <img [src]="city.imageUrl" [alt]="city.name"
-                onerror="this.src='https://placehold.co/400x260?text=No+Image'">
+                   onerror="this.src='https://placehold.co/400x260?text=No+Image'">
             </div>
             <div class="city-card__overlay">
               <span class="city-card__name">{{ city.name }}</span>
