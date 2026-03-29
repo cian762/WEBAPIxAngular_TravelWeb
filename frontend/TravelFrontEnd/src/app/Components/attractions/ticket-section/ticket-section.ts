@@ -13,7 +13,8 @@ import { CreateShoppingCart } from '../../../trip/services/create-shopping-cart'
 })
 export class TicketSectionComponent implements OnInit {
   @Input() attractionId!: number;
-  @Input() coverImage: string = '';   // ← 從父元件接收景點封面圖
+  @Input() coverImage: string = '';
+  @Input() attractionName: string = '';  // ← 景點名稱
 
   loading = true;
   products: AttractionProduct[] = [];
@@ -132,6 +133,9 @@ export class TicketSectionComponent implements OnInit {
       quantity:         qty,
       coverImage:       this.coverImage,
       ticketCategoryId: p.ticketTypeCode ?? 0,
+      attractionId:     this.attractionId,
+      attractionName:   this.attractionName,
+      tags:             p.tags?.map(t => t.tagName) ?? [],
     };
     console.log('加入購物車 dto:', JSON.stringify(dto));
     this.cartService.addToCart(dto).subscribe({

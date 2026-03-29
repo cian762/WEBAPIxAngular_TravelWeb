@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router,RouterModule } from '@angular/router';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
 import { CartItem } from '../../models/creatshopping.model';
 
@@ -15,6 +15,7 @@ import { CartItem } from '../../models/creatshopping.model';
 
 export class Shoppingcart implements OnInit {
   private cartService = inject(CreateShoppingCart);
+   private router = inject(Router);
   constructor(private http: HttpClient) { }
   cartItems: CartItem[] = []; // 使用強型別介面
   isLoading: boolean = true;
@@ -64,7 +65,17 @@ export class Shoppingcart implements OnInit {
       next: () => this.fetchCartData()
     });
   }
-
+ // 編輯：導回景點詳情頁售票區
+  goEdit(item: CartItem) {
+  if (item.attractionId) {
+    this.router.navigate(
+      ['/attractions/detail', item.attractionId],
+      { queryParams: { tab: 'tickets' } }
+    );
+  } else {
+    this.router.navigate(['/attractions']);
+  }
+}
   // 4. 計算總價
   calculateTotal() {
     this.totalAmount = this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
