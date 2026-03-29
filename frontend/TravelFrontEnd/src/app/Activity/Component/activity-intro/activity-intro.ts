@@ -1,5 +1,6 @@
+import { AuthService } from './../../../Member/services/auth.service';
 import { reviewResponseDTO } from './../../Interface/reviewResonseDTO';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivityInfoService } from '../../Service/activity-info-service';
 import { ActivityInfoInterface } from '../../Interface/InfoInterface';
@@ -76,6 +77,8 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   private routeService = inject(RouteService);
   private ticketInfoService = inject(TicketInfoService);
   private personalCommentService = inject(PersonalCommentService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
 
   ngOnInit(): void {
@@ -397,9 +400,22 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
   //用來觸動 子Component (user-Comment-Form)
   isModalOpen = false;
+
   toggleCommentForm() {
-    this.isModalOpen = !this.isModalOpen;
-    console.log('按下後', this.isModalOpen);
+    this.authService.checkAuthStatus().subscribe({
+      next: (res) => {
+        if (res === false) {
+          this.router.navigate(['login']);
+        }
+        console.log('res', res);
+        this.isModalOpen = !this.isModalOpen;
+        console.log('按下後', this.isModalOpen);
+      },
+      error: (err) => {
+        console.error('檢查登入狀態', err);
+        this.router.navigate(['login']);
+      }
+    });
   }
 
   openCommentForm(): void {
@@ -477,8 +493,26 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   }
 
 
+  //推薦分頁邏輯
+  currentIndex = 0;
+  cardsPerView = 3;
 
+  get cardWidthPercent(): number {
+    return 100 / this.cardsPerView;
+  }
 
+  next(): void {
+    const maxIndex = this.suggestionCollection.length - this.cardsPerView;
+    if (this.currentIndex < maxIndex) {
+      this.currentIndex++;
+    }
+  }
+
+  prev(): void {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+    }
+  }
 }
 
 

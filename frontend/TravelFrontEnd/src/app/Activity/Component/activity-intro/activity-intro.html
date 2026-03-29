@@ -68,7 +68,7 @@
 
       <div class="col-lg-7">
         <div class="highlight-box mt-4">
-          <h3 class="highlight-title">活動亮點</h3>
+          <h3 class="highlight-title">活動簡介</h3>
           <ul class="highlight-list">
             <li>{{activityInfo.description}}</li>
           </ul>
@@ -141,19 +141,7 @@
         </div>
 
         <article class="article-content">
-          <h3>活動特色</h3>
-          <p>
-            這裡放活動完整描述，包含活動內容、體驗方式、適合族群、流程說明等。
-          </p>
-
-          <figure class="content-figure">
-            <img src="" alt="活動介紹圖片">
-            <figcaption>圖片說明文字</figcaption>
-          </figure>
-
-          <p>
-            若有多段介紹，可再拆成不同段落，讓頁面更像正式商業網站的內容呈現。
-          </p>
+          <div [innerHTML]="activityInfo.propaganda"></div>
         </article>
 
       </section>
@@ -348,68 +336,76 @@
       </section>
 
       <!-- 推薦活動 -->
-      <section id="suggestion" class="card-section">
-        <div class="section-title-wrap">
+      <section id="suggestion" class="card-section suggestion-section">
+        <div class="section-title-wrap suggestion-header">
           <h2 class="section-title">你可能也會喜歡</h2>
         </div>
 
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mt-1">
+        <button class="slider-side-btn slider-side-btn--left" (click)="prev()" [disabled]="currentIndex === 0"
+          aria-label="上一個推薦">
+          <i class="bi bi-chevron-left"></i>
+        </button>
 
-          <!-- 用for迴圈去跑推薦項目 -->
-          @for (suggest of suggestionCollection; track $index) {
-          <div class="col" [routerLink]="['/ActivityInfo', suggest.activityId]">
-            <div class="activity-card card h-100 border-0 shadow-sm">
-              <div class="activity-card__image-wrap">
-                <img [src]="suggest.coverImageUrl" class="card-img-top activity-card__image" alt="activity image">
-              </div>
+        <button class="slider-side-btn slider-side-btn--right" (click)="next()"
+          [disabled]="currentIndex >= suggestionCollection.length - cardsPerView" aria-label="下一個推薦">
+          <i class="bi bi-chevron-right"></i>
+        </button>
 
-              <div class="card-body activity-card__body">
-                <a class="activity-card__title">{{suggest.title}}</a>
+        <div class="suggestion-slider">
+          <div class="suggestion-track" [style.transform]="'translateX(-' + (currentIndex * cardWidthPercent) + '%)'">
 
-                <div class="activity-card__date">
-                  <i class="bi bi-calendar-event me-2"></i>
-                  {{suggest.start}} ~ {{suggest.end}}
+            @for (suggest of suggestionCollection; track suggest.activityId) {
+            <div class="suggestion-item" [routerLink]="['/ActivityInfo', suggest.activityId]">
+              <div class="activity-card card h-100 border-0 shadow-sm">
+                <div class="activity-card__image-wrap">
+                  <img [src]="suggest.coverImageUrl" class="card-img-top activity-card__image" alt="activity image">
                 </div>
 
-                <div class="activity-card__stats mt-3">
-                  <div class="rating-block">
-                    <span class="rating-block__score">
-                      <i class="bi bi-star-fill me-1"></i>{{suggest.averageRating}}
-                    </span>
-                    <span class="rating-block__text">({{suggest.commentCount}})</span>
-                  </div>
-                  <div class="booking-text">已售 320+</div>
+                <div class="card-body activity-card__body">
+                  <a class="activity-card__title">{{suggest.title}}</a>
 
+                  <div class="activity-card__date">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    {{suggest.start}} ~ {{suggest.end}}
+                  </div>
+
+                  <div class="activity-card__stats mt-3">
+                    <div class="rating-block">
+                      <span class="rating-block__score">
+                        <i class="bi bi-star-fill me-1"></i>{{suggest.averageRating}}
+                      </span>
+                      <span class="rating-block__text">({{suggest.commentCount}})</span>
+                    </div>
+                    <div class="booking-text">已售 320+</div>
+                  </div>
+
+                  <div class="activity-card__bottom mt-3 d-flex justify-content-between">
+                    <div class="view-block">
+                      <i class="bi bi-eye-fill me-1"></i> {{suggest.viewCount}}
+                    </div>
+                    <div>
+                      <p class="fs-2 text-warning">
+                        <strong>{{suggest.referencePrice ? "NT$ " + suggest.referencePrice : "免費參加"}}</strong>
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-
-                <div class="activity-card__bottom mt-3 d-flex justify-content-between">
-                  <div class="view-block">
-                    <i class="bi bi-eye-fill me-1"></i> {{suggest.viewCount}}
+                <div class="card-footer activity-card__footer">
+                  <div class="tag-list">
+                    @for (region of suggest.region; track $index) {
+                    <span class="tag-item"># {{region}}</span>
+                    }
+                    @for (type of suggest.type; track $index) {
+                    <span class="tag-item"># {{type}}</span>
+                    }
                   </div>
-                  <div>
-                    <p class="fs-2 text-warning"><strong>{{suggest.referencePrice?"NT$ "+
-                        suggest.referencePrice:"免費參加"}}</strong></p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card-footer activity-card__footer">
-                <div class="tag-list">
-                  @for (region of suggest.region; track $index) {
-                  <span class="tag-item"># {{region}}</span>
-                  }
-                  @for (type of suggest.type; track $index) {
-                  <span class="tag-item"># {{type}}</span>
-                  }
                 </div>
               </div>
             </div>
+            }
+
           </div>
-          }
-
-
-
         </div>
       </section>
     </div>

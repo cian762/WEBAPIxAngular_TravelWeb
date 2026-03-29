@@ -139,6 +139,11 @@ export const routes: Routes = [
 
   { path: 'complaint', loadComponent: () => import('./Member/complaint-form/complaint-form.component').then(m => m.ComplaintFormComponent) },
 
+  {
+    path: 'qrCode/:token',
+    loadComponent: () => import('./Activity/Component/qrcode-verify/qrcode-verify').then(m => m.QrcodeVerify),
+    canActivate: [aGuard]
+  },
   // 所有不認識的路徑會導向首頁
   { path: '**', redirectTo: '' },
 ];

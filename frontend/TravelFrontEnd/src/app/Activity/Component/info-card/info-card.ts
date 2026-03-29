@@ -8,6 +8,7 @@ import { DatePipe, NgClass } from '@angular/common';
 import { __classPrivateFieldGet } from 'tslib';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, map, of, Subject, switchMap } from 'rxjs';
+import { QrcodeVerify } from "../qrcode-verify/qrcode-verify";
 
 
 
