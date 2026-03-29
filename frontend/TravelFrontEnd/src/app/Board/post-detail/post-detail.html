@@ -41,26 +41,26 @@
             }
           </ul>
           <!-- 左欄文章詳情 -->
-          <p class="date col-lg-12 col-md-12 col-6"><a href="#">article.regionName <i class="ri-map-pin-line"></i></a>
-          </p>
           <div class="col-lg-3  col-md-3 meta-details">
             <div class="user-details row">
-              <p class="date col-lg-12 col-md-12 col-6"><a href="#">{{post?.createdAt}}</a> <span
-                  class="lnr lnr-calendar-full"></span></p>
-
-              <!-- <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
-          <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
-          {{article.likeCount}}
-        </a> -->
-              <p class="comments col-lg-12 col-md-12 col-6"><a href="#">06 Comments</a> <span
-                  class="lnr lnr-bubble"></span></p>
+              <!-- 地區 -->
+              <a>{{post?.regionName}}<i class="ri-map-pin-line"></i></a>
+              <!-- 時間 -->
+              <a> {{post?.createdAt | date:'M月d日 y年':'zh-Hant'}}<span class="lnr lnr-calendar-full"></span></a>
+              <!-- 點讚 -->
+              <a (click)="ToLike(id)">
+                {{post?.likeCount}}
+                <i [class]="post?.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+              </a>
+              <!-- 收藏 -->
+              <a>收藏 <span class="lnr lnr-bubble"></span></a>
+              <!-- 留言 -->
+              <a>{{post?.commentCount}}則留言 <span class="lnr lnr-bubble"></span></a>
+              <!-- 更多 -->
+              <div class="post-location">
+                <button class="btn-more"><i class="ri-more-fill"></i></button>
+              </div>
             </div>
-
-            <div class="post-location">
-              <button class="btn-more"><i class="ri-more-fill"></i></button>
-            </div>
-
-
           </div>
           <!-- 文章標題&內容 -->
           <div class="col-lg-9 col-md-9">

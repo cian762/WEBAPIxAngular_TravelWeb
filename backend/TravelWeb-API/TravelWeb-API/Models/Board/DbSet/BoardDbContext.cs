@@ -342,7 +342,7 @@ public partial class BoardDbContext : DbContext
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
 
-            entity.HasOne(d => d.Article).WithMany()
+            entity.HasOne(d => d.Article).WithMany(p => p.PostPhotos)
                 .HasForeignKey(d => d.ArticleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PostPhotos_Article");

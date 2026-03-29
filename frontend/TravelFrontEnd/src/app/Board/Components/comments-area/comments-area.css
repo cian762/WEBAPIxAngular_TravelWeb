@@ -25,6 +25,9 @@
   display: inline;
 }
 
+.remove-image:hover {
+  color: #f44a40;
+}
 
 
 

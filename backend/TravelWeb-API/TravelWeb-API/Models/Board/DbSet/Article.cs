@@ -40,7 +40,8 @@ public partial class Article
     public virtual ICollection<JournalPage> JournalPages { get; set; } = new List<JournalPage>();
 
     public virtual Post? Post { get; set; }
-    
+    public virtual ICollection<PostPhoto> PostPhotos { get; set; } = new List<PostPhoto>();
+
     public virtual MemberInformation MemberInformation { get; set; } = null!;
 
 

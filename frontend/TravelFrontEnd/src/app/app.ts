@@ -11,10 +11,11 @@ import { Order } from "./trip/component/order/order";
 import { Product } from "./trip/component/product/product";
 import { TripProductDetail } from "./trip/component/trip-product-detail/trip-product-detail";
 import { LoginComponent } from "./Member/login/login.component";
+import { CreatJournal } from "./Board/creat-journal/creat-journal";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer, Banner],
+  imports: [RouterOutlet, Header, Footer, Banner, CreatJournal],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

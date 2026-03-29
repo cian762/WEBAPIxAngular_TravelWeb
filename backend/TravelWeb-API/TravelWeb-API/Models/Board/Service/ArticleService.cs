@@ -127,7 +127,7 @@ namespace TravelWeb_API.Models.Board.Service
                                                      IQueryable<Article> data, int page,string? userID)
         {
             List <ArticleDataDTO> result = GetArticles(page, data, userID);
-            int totalCount = result.Count();
+            int totalCount = data.Count();
                 //GetArticleCount(articles);
             //List<ArticleDataDTO> result = ToArticleDTO(articles,userID);
             return (result, totalCount);
@@ -185,10 +185,10 @@ namespace TravelWeb_API.Models.Board.Service
         //    return result;
         //}
 
-        int GetArticleCount(List<Article> articles)
-        {
-            return articles.Count;
-        }
+        //int GetArticleCount(List<Article> articles)
+        //{
+        //    return articles.Count;
+        //}
 
 
         //List<ArticleDataDTO> ToArticleDTO(List<Article> data, string? userID)

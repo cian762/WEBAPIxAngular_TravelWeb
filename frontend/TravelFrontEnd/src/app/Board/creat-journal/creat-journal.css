@@ -1,0 +1,11 @@
+.cube {
+  height: 300px;
+  width: 300px;
+  background-color: blueviolet;
+}
+
+.ground {
+  height: 1000px;
+  width: 1000px;
+  background-color: rgb(211, 142, 142);
+}

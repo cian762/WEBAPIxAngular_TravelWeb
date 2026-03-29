@@ -1,4 +1,5 @@
-﻿using TravelWeb_API.Models.Board.DbSet;
+﻿using Microsoft.AspNetCore.Mvc;
+using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.MemberSystem;
 
@@ -16,7 +17,7 @@ namespace TravelWeb_API.Models.Board.IService
         public Task<bool> UpdatePost(int id,string? content, int? regionId,List<string>? photos);
 
         //(貼文詳情)
-        public PostDetailDto GetPostDetailed(Article article);
+        public Task<PostDetailDto?> GetPostDetailed(int id,string? currentUserId);
         public Journal GetJournalDetailed(int id);
 
         public void SaveChange();

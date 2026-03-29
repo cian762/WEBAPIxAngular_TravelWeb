@@ -67,14 +67,15 @@
               </span>&nbsp;
               <span>{{parentComment}}</span>
               }
-              @if(selectedImageUrl){
+              @if(selectedImage){
               <span class="preview-wrapper ms-auto">
-                <i class="ri-image-line"></i>
-                <span class="" (mouseenter)="showPreview = true" (mouseleave)="showPreview = false ">
-                  附圖
+                <span class="remove-image" (mouseenter)="showPreview = true" (mouseleave)="showPreview = false"
+                  (click)="removeImage()">
+                  <i class="ri-close-circle-fill"></i>
+                  取消附圖
                   @if (showPreview) {
                   <div class="preview-popup">
-                    <img [src]="selectedImageUrl">
+                    <img [src]="selectedImage">
                   </div>
                   }
                 </span></span>}
@@ -87,7 +88,7 @@
 
             </div>
             <!-- 原本的 textarea -->
-            <textarea class="border-0 w-100 p-3" rows="5" name="message" placeholder="Messege"
+            <textarea class="border-0 w-100 p-3" rows="5" name="message" placeholder="留下一句話..."
               onfocus="this.placeholder = ''" onblur="this.placeholder = 'Messege'" required="" [(ngModel)]="contents"
               style="outline: none; resize: none;"></textarea>
 

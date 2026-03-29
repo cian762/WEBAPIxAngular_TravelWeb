@@ -9,9 +9,10 @@ import { PopularPost } from "../Components/popular-post/popular-post";
 import { TagClouds } from "../Components/tag-clouds/tag-clouds";
 import { PostCatgories } from "../Components/post-catgories/post-catgories";
 import { AuthorInfoSidebar } from "../Components/author-info-sidebar/author-info-sidebar";
+import localeZhTw from '@angular/common/locales/zh-Hant';
+import { DatePipe, registerLocaleData } from '@angular/common';
 
-
-
+registerLocaleData(localeZhTw);
 interface ArticleTag {
   tagID: number;
   tagName: string;
@@ -20,7 +21,7 @@ interface ArticleTag {
 
 @Component({
   selector: 'app-post-detail',
-  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton, PopularPost, TagClouds, PostCatgories, AuthorInfoSidebar,],
+  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton, PopularPost, TagClouds, PostCatgories, AuthorInfoSidebar, DatePipe,],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
@@ -71,4 +72,19 @@ export class PostDetail implements OnInit {
     }
     )
   }
+
+  ToLike(id: number) {
+    if (this.post) {
+      if (!this.post.isLike) {
+        this.post.likeCount++;
+        this.post.isLike = true;
+      }
+      else {
+        this.post.likeCount--;
+        this.post.isLike = false;
+      }
+      this.Serve.postArticleLike(id).subscribe();
+    }
+  }
 }
+//  class="reaction-item" [class.liked]="post?.isLike"
