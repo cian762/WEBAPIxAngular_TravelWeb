@@ -34,6 +34,20 @@ namespace TravelWeb_API.Controllers
             }
             return Ok(result);
         }
+        //GET會員ID抓所有行程
+        [HttpGet("list")]
+        public async Task<IActionResult> GetMyItineraries()
+        {
+            // 從 JWT Token 解析 MemberId
+            var MemberId = User.FindFirst("MemberId")?.Value ?? "tw_user_001";
+
+            if (MemberId == null)
+                return Unauthorized(new { message = "無法解析會員身份，請重新登入。" });
+
+            var itineraries = await _itineraryService.GetItinerariesByMemberAsync(MemberId);
+
+            return Ok(itineraries);
+        }
         //GET抓所有的歷史行程
         [HttpGet("{id}/history")]
         public async Task<IActionResult> GetHistory(int id)

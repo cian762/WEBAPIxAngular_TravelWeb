@@ -2,41 +2,103 @@
    create-itinerary.css
    Travel theme — Gold accent (#f8b600), refined & production-ready
    ================================================================ */
+/* ── Loading Overlay ──────────────────────────── */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 預設隱藏 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.loading-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+  /* 鎖住所有底層點擊 */
+}
+
+.loading-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+/* 旋轉圓圈 */
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(248, 182, 0, 0.2);
+  border-top-color: #f8b600;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 0.9rem;
+  color: #5a6274;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.03em;
+}
 
 /* ── Variables ─────────────────────────────────────────────────── */
 :root {
-  --gold:        #f8b600;
-  --gold-light:  #fff8e1;
-  --gold-mid:    #ffd54f;
-  --gold-dark:   #c49000;
+  --gold: #f8b600;
+  --gold-light: #fff8e1;
+  --gold-mid: #ffd54f;
+  --gold-dark: #c49000;
   --gold-deeper: #7a5800;
   --gold-border: rgba(248, 182, 0, 0.25);
 
-  --text-primary:   #1a1a2e;
+  --text-primary: #1a1a2e;
   --text-secondary: #5a6274;
-  --text-muted:     #9ca3af;
+  --text-muted: #9ca3af;
 
-  --white:       #ffffff;
-  --surface:     #f9f8f6;
-  --card-bg:     #ffffff;
+  --white: #ffffff;
+  --surface: #f9f8f6;
+  --card-bg: #ffffff;
 
-  --shadow-sm:   0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-card: 0 8px 32px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
-  --shadow-lg:   0 20px 60px rgba(0,0,0,.10), 0 8px 20px rgba(0,0,0,.07);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, .08), 0 2px 8px rgba(0, 0, 0, .06);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, .10), 0 8px 20px rgba(0, 0, 0, .07);
 
-  --radius-sm:  8px;
-  --radius-md:  14px;
-  --radius-lg:  24px;
-  --radius-xl:  32px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
 
-  --font-body:  'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --font-body: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
 
-  --header-h:   70px;
-  --footer-h:   60px;
+  --header-h: 70px;
+  --footer-h: 60px;
 }
 
 /* ── Base reset ─────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 body {
   font-family: var(--font-body);
@@ -55,7 +117,7 @@ body {
   background: #04091e;
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(0,0,0,.18);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .18);
 }
 
 .site-logo {
@@ -66,14 +128,16 @@ body {
 }
 
 .site-header nav a {
-  color: rgba(255,255,255,.75);
+  color: rgba(255, 255, 255, .75);
   text-decoration: none;
   font-size: .9rem;
   font-weight: 400;
   transition: color .2s;
 }
 
-.site-header nav a:hover { color: var(--gold); }
+.site-header nav a:hover {
+  color: var(--gold);
+}
 
 /* ── Page Section ───────────────────────────────────────────────── */
 .create-section {
@@ -83,8 +147,8 @@ body {
 
   /* Warm off-white parchment background */
   background:
-    radial-gradient(ellipse 80% 60% at 20% 10%,  rgba(248,182,0,.09) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 85% 80%,  rgba(248,182,0,.06) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(248, 182, 0, .09) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(248, 182, 0, .06) 0%, transparent 55%),
     linear-gradient(160deg, #fdfaf3 0%, #f9f6ed 50%, #faf8f2 100%);
 }
 
@@ -102,7 +166,7 @@ body {
   height: 480px;
   top: -140px;
   left: -120px;
-  background: radial-gradient(circle, rgba(248,182,0,.22) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(248, 182, 0, .22) 0%, transparent 70%);
 }
 
 .bg-blob-2 {
@@ -110,7 +174,7 @@ body {
   height: 360px;
   bottom: -80px;
   right: -60px;
-  background: radial-gradient(circle, rgba(248,182,0,.16) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(248, 182, 0, .16) 0%, transparent 70%);
 }
 
 /* Subtle dot grid overlay */
@@ -118,7 +182,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, rgba(200,170,80,.18) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(200, 170, 80, .18) 1px, transparent 1px);
   background-size: 28px 28px;
   opacity: .6;
 }
@@ -133,8 +197,8 @@ body {
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--gold-dark);
-  background: rgba(248,182,0,.12);
-  border: 1px solid rgba(248,182,0,.28);
+  background: rgba(248, 182, 0, .12);
+  border: 1px solid rgba(248, 182, 0, .28);
   padding: 5px 14px;
   border-radius: 20px;
   margin-bottom: 20px;
@@ -162,7 +226,7 @@ body {
   background: var(--card-bg);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(248,182,0,.15);
+  border: 1px solid rgba(248, 182, 0, .15);
   padding: 44px 48px 40px;
   max-width: 760px;
   margin: 0 auto;
@@ -226,7 +290,10 @@ body {
   position: relative;
 }
 
-.input-wrap-icon { display: flex; align-items: center; }
+.input-wrap-icon {
+  display: flex;
+  align-items: center;
+}
 
 .input-prefix-icon {
   position: absolute;
@@ -256,24 +323,32 @@ body {
   -webkit-appearance: none;
 }
 
-.field-input::placeholder { color: var(--text-muted); font-weight: 300; }
+.field-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 300;
+}
 
 .field-input:hover {
-  border-color: rgba(248,182,0,.4);
+  border-color: rgba(248, 182, 0, .4);
   background: #fffef9;
 }
 
 .field-input:focus {
   border-color: var(--gold);
   background: #fffef5;
-  box-shadow: 0 0 0 4px rgba(248,182,0,.12);
+  box-shadow: 0 0 0 4px rgba(248, 182, 0, .12);
 }
 
 /* Large variant */
-.field-input-lg { padding: 14px 16px; font-size: 1rem; }
+.field-input-lg {
+  padding: 14px 16px;
+  font-size: 1rem;
+}
 
 /* With prefix icon */
-.has-prefix { padding-left: 40px; }
+.has-prefix {
+  padding-left: 40px;
+}
 
 /* Hint text */
 .field-hint {
@@ -290,12 +365,15 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   filter: invert(60%) sepia(60%) saturate(300%) hue-rotate(10deg);
   transition: opacity .2s;
 }
-input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
+
+input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
+}
 
 /* ── Card Divider ───────────────────────────────────────────────── */
 .card-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(248,182,0,.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(248, 182, 0, .3), transparent);
   margin: 8px 0 32px;
 }
 
@@ -327,17 +405,21 @@ input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator { opacity:
   inset: 0;
   opacity: 0;
   transition: opacity .2s;
-  background: rgba(255,255,255,.12);
+  background: rgba(255, 255, 255, .12);
 }
 
-.btn-itinerary:hover::before { opacity: 1; }
+.btn-itinerary:hover::before {
+  opacity: 1;
+}
 
 .btn-itinerary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
 }
 
-.btn-itinerary:active { transform: translateY(0); }
+.btn-itinerary:active {
+  transform: translateY(0);
+}
 
 /* AI button — outlined gold */
 .btn-ai {
@@ -349,7 +431,7 @@ input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator { opacity:
 .btn-ai:hover {
   background: #fff3c0;
   border-color: var(--gold);
-  box-shadow: 0 8px 24px rgba(248,182,0,.18);
+  box-shadow: 0 8px 24px rgba(248, 182, 0, .18);
 }
 
 /* Create button — solid gold */
@@ -362,7 +444,7 @@ input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator { opacity:
 .btn-create:hover {
   background: var(--gold-mid);
   border-color: var(--gold-mid);
-  box-shadow: 0 8px 28px rgba(248,182,0,.32);
+  box-shadow: 0 8px 28px rgba(248, 182, 0, .32);
   filter: brightness(1.04);
 }
 
@@ -420,7 +502,7 @@ input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator { opacity:
   gap: 5px;
 }
 
-.trust-badge + .trust-badge::before {
+.trust-badge+.trust-badge::before {
   content: '·';
   margin-right: 4px;
   opacity: .4;
@@ -433,37 +515,60 @@ input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator { opacity:
   display: flex;
   align-items: center;
   font-size: .82rem;
-  color: rgba(255,255,255,.45);
+  color: rgba(255, 255, 255, .45);
 }
 
 .site-footer a {
-  color: rgba(255,255,255,.5);
+  color: rgba(255, 255, 255, .5);
   text-decoration: none;
   transition: color .2s;
 }
 
-.site-footer a:hover { color: var(--gold); }
+.site-footer a:hover {
+  color: var(--gold);
+}
 
 /* ── Responsive ─────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .create-section { padding: 64px 0 80px; }
+  .create-section {
+    padding: 64px 0 80px;
+  }
 
-  .itinerary-card { padding: 30px 22px 28px; border-radius: var(--radius-lg); }
+  .itinerary-card {
+    padding: 30px 22px 28px;
+    border-radius: var(--radius-lg);
+  }
 
   .field-row {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
-  .field-divider { display: none; }
+  .field-divider {
+    display: none;
+  }
 
-  .btn-row { grid-template-columns: 1fr; }
+  .btn-row {
+    grid-template-columns: 1fr;
+  }
 
-  .section-heading { font-size: 1.65rem; }
+  .section-heading {
+    font-size: 1.65rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .card-glow-line { left: 22px; right: 22px; }
-  .trust-row { flex-direction: column; align-items: center; }
-  .trust-badge + .trust-badge::before { display: none; }
+  .card-glow-line {
+    left: 22px;
+    right: 22px;
+  }
+
+  .trust-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .trust-badge+.trust-badge::before {
+    display: none;
+  }
 }

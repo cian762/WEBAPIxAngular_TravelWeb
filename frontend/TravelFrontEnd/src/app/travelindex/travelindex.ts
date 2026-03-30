@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
 
 @Component({
   selector: 'app-travelindex',
-  imports: [],
+  imports: [HeroSection],
   templateUrl: './travelindex.html',
   styleUrl: './travelindex.css',
 })

@@ -1,0 +1,219 @@
+/* ── Page Layout ─────────────────────────────────── */
+.il-page {
+  min-height: 100vh;
+  padding: 2.5rem 1.5rem 4rem;
+  background: #f5f7fa;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* ── Header ──────────────────────────────────────── */
+.il-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.il-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 0.4rem;
+}
+
+.il-subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── Loading ─────────────────────────────────────── */
+.il-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 5rem;
+  color: #6b7280;
+}
+
+.il-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Error ───────────────────────────────────────── */
+.il-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 480px;
+  margin: 3rem auto 0;
+  padding: 1rem 1.25rem;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  color: #b91c1c;
+}
+
+/* ── Empty State ─────────────────────────────────── */
+.il-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 5rem;
+  color: #9ca3af;
+}
+
+.il-empty-img {
+  width: 160px;
+  opacity: 0.75;
+}
+
+.il-btn-create {
+  padding: 0.65rem 1.5rem;
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.il-btn-create:hover {
+  background: #4338ca;
+}
+
+/* ── Card Grid ───────────────────────────────────── */
+.il-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.75rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Card ────────────────────────────────────────── */
+.il-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.il-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Cover Image */
+.il-card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+
+.il-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.il-card:hover .il-card-img {
+  transform: scale(1.04);
+}
+
+/* Status Badge */
+.il-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0.25rem 0.65rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.il-badge--draft {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.il-badge--planned {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.il-badge--ongoing {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.il-badge--done {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Card Body */
+.il-card-body {
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.il-card-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.45rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.il-card-intro {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0 0 0.85rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.il-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.il-meta-icon {
+  font-size: 0.9rem;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 480px) {
+  .il-title {
+    font-size: 1.5rem;
+  }
+
+  .il-grid {
+    grid-template-columns: 1fr;
+  }
+}

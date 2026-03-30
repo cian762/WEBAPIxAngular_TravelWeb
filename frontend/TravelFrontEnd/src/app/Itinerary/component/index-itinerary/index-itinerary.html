@@ -1,3 +1,10 @@
+<!-- Loading Overlay -->
+<div class="loading-overlay" [class.active]="isLoading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p class="loading-text">{{ loadingMessage }}</p>
+  </div>
+</div>
 <!-- ── Page Section ───────────────────────────── -->
 <section class="create-section">
 

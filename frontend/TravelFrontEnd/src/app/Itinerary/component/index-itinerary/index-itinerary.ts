@@ -13,7 +13,8 @@ declare var google: any;
 export class IndexItinerary implements AfterViewInit {
 
   constructor(private mainService: Mainservice, private router: Router) { }
-
+  isLoading: boolean = false;
+  loadingMessage: string = '';
   ItineraryName: string = '';
   tripDateTime: string = '';
   location: string = '';
@@ -32,12 +33,16 @@ export class IndexItinerary implements AfterViewInit {
       console.error('Google API 尚未載入或找不到 locationInput');
       return;
     }
-
+    const taiwanBounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng(21.8, 119.9),  // 西南角
+      new google.maps.LatLng(25.3, 122.1)   // 東北角
+    );
     const autocomplete = new google.maps.places.Autocomplete(
       this.locationInput.nativeElement, {
       // 限制只抓你要的資料（效能更好）
       fields: ['place_id', 'formatted_address', 'geometry'],
-
+      bounds: taiwanBounds,
+      strictBounds: false,   // true = 絕對鎖死，false = 優先但不強制
       // 限制台灣（可選）
       componentRestrictions: { country: 'tw' }
     }
@@ -53,13 +58,14 @@ export class IndexItinerary implements AfterViewInit {
       this.placeId = place.place_id;
       this.lat = place.geometry.location.lat();
       this.lng = place.geometry.location.lng();
+      console.log({
+        address: this.location,
+        placeId: this.placeId,
+        lat: this.lat,
+        lng: this.lng
+      });
     });
-    console.log({
-      address: this.location,
-      placeId: this.placeId,
-      lat: this.lat,
-      lng: this.lng
-    });
+
   }
 
 
@@ -70,6 +76,8 @@ export class IndexItinerary implements AfterViewInit {
       alert('時間錯誤');
       return;
     }
+    this.isLoading = true;
+    this.loadingMessage = '正在建立行程...';
     const requestBody = {
       memberId: this.memberId,
       itineraryName: this.ItineraryName,
@@ -98,6 +106,7 @@ export class IndexItinerary implements AfterViewInit {
             // 3. 執行跳轉，帶入 ID 作為路由參數
             this.router.navigate(['/itinerary-detail', newId]);
           } else {
+            this.isLoading = false;
             alert('建立成功，但無法取得行程編號');
           }
         },
@@ -112,6 +121,8 @@ export class IndexItinerary implements AfterViewInit {
       alert('請重新選擇正確的地點（需從 Google 下拉選單點擊）');
       return;
     }
+    this.isLoading = true;
+    this.loadingMessage = 'AI 正在規劃行程，請稍候...';
     if (this.startDateTime > this.endDateTime) {
       alert('時間錯誤');
       return;
@@ -144,6 +155,7 @@ export class IndexItinerary implements AfterViewInit {
             // 3. 執行跳轉，帶入 ID 作為路由參數
             this.router.navigate(['/itinerary-detail', newId]);
           } else {
+            this.isLoading = false;
             alert('建立成功，但無法取得行程編號');
           }
         },

@@ -25,6 +25,24 @@ namespace TravelWeb_API.Models.Itinerary.Service
             _fontPath = config["FileSettings:FontPath"];
             _placesService = placesService;
         }
+        //從會員ID抓行程列表
+        public async Task<List<ItineraryCardDto>> GetItinerariesByMemberAsync(string memberId)
+        {
+            return await _context.Itineraries
+                .Where(i => i.MemberId == memberId)
+                .OrderByDescending(i => i.CreateTime)
+                .Select(i => new ItineraryCardDto
+                {
+                    ItineraryId = i.ItineraryId,
+                    ItineraryName = i.ItineraryName,
+                    ItineraryImage = i.ItineraryImage,
+                    Introduction = i.Introduction,
+                    StartTime = i.StartTime,
+                    EndTime = i.EndTime,
+                    CurrentStatus = i.CurrentStatus
+                })
+                .ToListAsync();
+        }
         /*建立主表包含物件*/
         public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto, string memberid)
         {
@@ -38,6 +56,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 {
                     MemberId = memberid,
                     ItineraryName = dto.ItineraryName,
+                    //ItineraryImage = "https://res.cloudinary.com/dcyrbbv4w/image/upload/v1773284561/cld-sample-2.jpg",
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,
                     CreateTime = DateTime.Now,
@@ -437,6 +456,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             var itinerary = await _context.Itineraries
           .Include(i => i.ItineraryVersions)
               .ThenInclude(v => v.ItineraryItems)
+              .ThenInclude(item => item.Attraction)
           .FirstOrDefaultAsync(i => i.ItineraryId == itineraryId);
 
             // 2. NULL 檢查：放在資料查詢之後
@@ -475,12 +495,12 @@ namespace TravelWeb_API.Models.Itinerary.Service
                         .OrderBy(item => item.SortOrder)
                         .Select(item =>
                         {
-                            var (parsedName, parsedDesc) = ParseAiContent(item.AttractionName, item.ContentDescription);
+
                             return new ExportItemDto
                             {
-                                AttractionName = parsedName,       // 解析後的名稱
+                                AttractionName = item.Attraction?.Name ?? "未知地點",
                                 StartTime = item.StartTime?.ToString("HH:mm") ?? "未定",
-                                ContentDescription = parsedDesc,   // 解析後的描述
+                                ContentDescription = item.ContentDescription ?? "",
                                 Activity = item.ActivityId
                             };
                         }).ToList()
@@ -571,25 +591,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 }
             }
         }
-        //用以修改AI生成結果變為可被理解的字串
-        private (string name, string description) ParseAiContent(string? attractionName, string? contentDescription)
-        {
-            var desc = contentDescription ?? "";
 
-            if (desc.StartsWith("[AI_NEW_PLACE]"))
-            {
-                // 格式: [AI_NEW_PLACE]|名稱|PlaceId|地址|緯度|經度|細節
-                var parts = desc.Split('|');
-                var name = (parts.Length > 1 && !string.IsNullOrEmpty(parts[1]))
-                    ? parts[1]
-                    : "未知地點";
-                var detail = parts.Length > 6 ? parts[6] : "";
-                return (name, detail);
-            }
-
-            // 非 AI 生成，直接回傳原本的值
-            return (attractionName ?? "未知地點", desc);
-        }
         #endregion
     }
 }
