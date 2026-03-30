@@ -5,7 +5,7 @@ using TravelWeb_API.Models.attraction;
 
 namespace TravelWeb_API.Controllers.Attraction
 {
-    
+
     [Route("api/[controller]")]
     [ApiController]
     //[ApiExplorerSettings(GroupName = "Attraction")] // ← 加這行
@@ -92,7 +92,7 @@ namespace TravelWeb_API.Controllers.Attraction
             [FromQuery] string? keyword)
         {
             var query = _dbContext.Attractions
-                .Where(a => !a.IsDeleted && a.ApprovalStatus == 1)
+                .Where(a => !a.IsDeleted && a.ApprovalStatus == 1 && a.RegionId != 1000)
                 .AsQueryable();
 
             // 地區篩選（遞迴取所有子地區）
@@ -180,7 +180,7 @@ namespace TravelWeb_API.Controllers.Attraction
         public async Task<IActionResult> GetAttractionDetail(int id)
         {
             var attraction = await _dbContext.Attractions
-                .Where(a => a.AttractionId == id && !a.IsDeleted && a.ApprovalStatus == 1)
+                .Where(a => a.AttractionId == id && !a.IsDeleted && a.ApprovalStatus == 1 && a.RegionId != 1000)
                 .Include(a => a.Images)
                 .Include(a => a.Region)
                 .Include(a => a.AttractionProducts.Where(p => !p.IsDeleted && p.Status == "ACTIVE"))
@@ -300,7 +300,7 @@ namespace TravelWeb_API.Controllers.Attraction
                 .ToListAsync();
 
             var attractionList = await _dbContext.Attractions
-                .Where(a => matchedIds.Contains(a.AttractionId) && !a.IsDeleted && a.ApprovalStatus == 1)
+                .Where(a => matchedIds.Contains(a.AttractionId) && !a.IsDeleted && a.ApprovalStatus == 1 && a.RegionId != 1000)
                 .Include(a => a.Images)
                 .Include(a => a.Region)
                 .OrderByDescending(a => a.ViewCount)
@@ -346,5 +346,3 @@ namespace TravelWeb_API.Controllers.Attraction
         public string? IpAddress { get; set; }
     }
 }
-    
-

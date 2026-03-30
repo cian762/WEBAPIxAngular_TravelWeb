@@ -74,7 +74,7 @@
           <!-- 天氣 -->
           <div class="weather-row">
             <div class="weather-item">
-              <span class="w-icon">⛅</span>
+              <span class="w-icon">{{ weather.weatherEmoji }}</span>
               <div>
                 <div class="w-label">今天天氣</div>
                 <div class="w-val">{{ weather.temp }} °C</div>
@@ -91,7 +91,7 @@
 
           <!-- AQI -->
           <div class="aqi-row">
-            <span class="aqi-emoji">😊</span>
+            <span class="aqi-emoji">{{ weather.aqiEmoji }}</span>
             <div>
               <div class="aqi-label">環境空氣品質指數 AQI</div>
               <div class="aqi-val">{{ weather.aqi }} {{ weather.aqiLabel }}</div>
