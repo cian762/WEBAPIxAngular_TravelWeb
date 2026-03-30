@@ -141,8 +141,18 @@
 
       <!-- 景點特色 -->
       <div *ngIf="activeTab === 'feature'">
-        <p *ngIf="attraction.address"><strong>地址：</strong>{{ attraction.address }}</p>
-        <p *ngIf="attraction.businessHours"><strong>開放時間：</strong>{{ attraction.businessHours }}</p>
+
+        <!-- 介紹文字 -->
+        <div class="feature-desc" *ngIf="attraction.description">
+          <p *ngFor="let para of splitParagraphs(attraction.description)">{{ para }}</p>
+        </div>
+
+        <!-- 基本資訊（無介紹文字時的 fallback） -->
+        <div *ngIf="!attraction.description">
+          <p *ngIf="attraction.address"><strong>地址：</strong>{{ attraction.address }}</p>
+          <p *ngIf="attraction.businessHours"><strong>開放時間：</strong>{{ attraction.businessHours }}</p>
+        </div>
+
       </div>
 
       <!-- 如何前往 -->

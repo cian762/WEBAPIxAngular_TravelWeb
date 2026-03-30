@@ -211,4 +211,9 @@ export class AttractionDetailComponent implements OnInit {
     const lng = this.attraction?.longitude ?? 121.5;
     return `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
   }
+
+  /** 將介紹文字依換行切成段落陣列 */
+  splitParagraphs(text: string): string[] {
+    return text.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
+  }
 }

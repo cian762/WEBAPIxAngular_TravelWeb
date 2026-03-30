@@ -217,6 +217,7 @@ namespace TravelWeb_API.Controllers.Attraction
                 attraction.BusinessHours,
                 attraction.ClosedDaysNote,
                 attraction.TransportInfo,
+                attraction.Description,
                 attraction.Latitude,
                 attraction.Longitude,
                 attraction.ViewCount,

@@ -11,6 +11,7 @@ export interface Attraction {
   businessHours?: string;
   closedDaysNote?: string;
   transportInfo?: string;
+  description?: string;      // 景點介紹文字
   viewCount: number;
   likeCount?: number;
   isLiked?: boolean;
