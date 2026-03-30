@@ -4,6 +4,7 @@ import { CommentsDTO } from '../../interface/CommentsDTO';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { CloudinaryServe } from '../../Service/cloudinary-serve';
 
 @Component({
   selector: 'app-comments-area',
@@ -12,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
   styleUrl: './comments-area.css',
 })
 export class CommentsArea implements OnInit {
-  constructor(private Serve: BoardServe, private http: HttpClient,) {
+  constructor(private _Cserve: CloudinaryServe, private Serve: BoardServe, private http: HttpClient,) {
 
   }
   ngOnInit(): void {
@@ -33,7 +34,7 @@ export class CommentsArea implements OnInit {
 
   async postComment(contents: string) {
     if (this.selectedImageFile) {
-      this.ImageURL = await this.uploadImage(this.selectedImageFile);
+      this.ImageURL = await this._Cserve.uploadImage(this.selectedImageFile);
     }
 
     var CommentDto = {
@@ -91,31 +92,6 @@ export class CommentsArea implements OnInit {
     this.selectedImage = "";
     this.showPreview = false;
   }
-
-
-
-
-  async uploadImage(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', this.uploadPreset);
-
-    const url = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`;
-
-    try {
-      // 使用 firstValueFrom 將 Observable 轉為 Promise
-      // 程式會在這裡停住，直到拿到 API 回傳值
-      const res = await firstValueFrom(this.http.post<any>(url, formData));
-
-      return res.secure_url;
-    } catch (err) {
-      console.error('上傳失敗', err);
-      throw err;
-    }
-  }
-
-
-
 
 }
 
