@@ -207,6 +207,19 @@ namespace TravelWeb_API.Controllers.Attraction
             var likeCount = await _dbContext.AttractionLikes
                 .CountAsync(l => l.AttractionId == id);
 
+            // ✅ 聚合該景點所有上架票券的圖片（供活動介紹區塊使用）
+            var productImages = await _dbContext.AttractionProducts
+                .Where(p => p.AttractionId == id && !p.IsDeleted && p.Status == "ACTIVE")
+                .SelectMany(p => p.AttractionProductImages)
+                .OrderBy(img => img.SortOrder)
+                .Select(img => new
+                {
+                    img.ImageId,
+                    img.ImagePath,
+                    img.Caption
+                })
+                .ToListAsync();
+
             var result = new
             {
                 attraction.AttractionId,
@@ -218,13 +231,15 @@ namespace TravelWeb_API.Controllers.Attraction
                 attraction.ClosedDaysNote,
                 attraction.TransportInfo,
                 attraction.Description,
+                attraction.ActivityIntro,
                 attraction.Latitude,
                 attraction.Longitude,
                 attraction.ViewCount,
-                LikeCount = likeCount,              // 詳細頁右上角 278 👍
+                LikeCount = likeCount,
                 attraction.RegionId,
                 attraction.Region.RegionName,
                 Images = attraction.Images.Select(i => i.ImagePath).ToList(),
+                ProductImages = productImages,
                 Types = types,
                 Products = attraction.AttractionProducts.Select(p => new
                 {
