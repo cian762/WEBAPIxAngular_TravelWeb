@@ -82,8 +82,7 @@
       <!-- Map placeholder (replace with real Google Map embed if needed) -->
       <div class="map-area">
         @if (currentDayItinerary && currentDayItinerary.items.length >= 2) {
-        <app-router-map-component [itineraryId]="itineraryId" [dayNumber]="activeDayIndex"
-          [dayItinerary]="currentDayItinerary">
+        <app-router-map-component [itineraryId]="itineraryId" [dayNumber]="activeDayIndex">
         </app-router-map-component>
         } @else {
         <div class="map-placeholder">

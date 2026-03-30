@@ -86,25 +86,7 @@ export class ItineraryDetailComponent implements OnInit {
       });
   }
   /**分割AI放入內容的字串 */
-  parseAiDescription(item: any) {
-    const desc = item.contentDescription || '';
 
-    // 如果字串開頭是我們定義的標籤
-    if (desc.startsWith('[AI_NEW_PLACE]')) {
-      // 拆分字串: [標籤]|名稱|PlaceId|地址|緯度|經度|細節
-      const parts = desc.split('|');
-
-      // 更新 item 物件的顯示欄位
-      item.attractionName = parts[1] || '未知地點';
-      // 🛡️ 防禦：如果 AI 沒給 ID，我們給它一個特殊字串 "TEMP_AI_PLACE"
-      item.placeId = (parts[2] && parts[2] !== '0') ? parts[2] : "TEMP_AI_PLACE";
-      item.address = parts[3] || '請確認地址';
-      item.latitude = parseFloat(parts[4]) || null;
-      item.longitude = parseFloat(parts[5]) || null;
-      item.contentDescription = parts[6] || ''; // 把後面的備註還給 description
-      item.isAiSuggestion = true; // 標記為 AI 建議，可以在 UI 顯示不同顏色
-    }
-  }
   /**數共有幾天數 */
   getCountForDay(dayNum: number): number {
     const dayData = this.days.find(d => d.day === dayNum);
@@ -173,20 +155,21 @@ export class ItineraryDetailComponent implements OnInit {
       console.log('存入元件後的 startTime:', this.startTime);
       this.generateDayTabs(this.startTime, this.endDate);
       this.days = this.mapApiToDays(res.currentVersion?.items || []);
+      console.log('第一筆 item 原始結構:', res.currentVersion?.items?.[0]);
       if (this.days.length > 0) {
         this.activeDayIndex = this.days[0].day;
       } else {
         this.activeDayIndex = 1;
       }
       this.syncCurrentDayItinerary(this.activeDayIndex);
-      this.days.forEach(day => {
-        day.items.forEach(item => {
-          // 如果 AttractionId 是 0 或 null，才需要解析字串
-          if (!item.attractionId || item.attractionId === 0) {
-            this.parseAiDescription(item);
-          }
-        });
-      });
+      // this.days.forEach(day => {
+      //   day.items.forEach(item => {
+      //     // 如果 AttractionId 是 0 或 null，才需要解析字串
+      //     if (!item.attractionId || item.attractionId === 0) {
+      //       this.parseAiDescription(item);
+      //     }
+      //   });
+      // });
       this.syncCurrentDayItinerary(this.activeDayIndex);
     });
   }

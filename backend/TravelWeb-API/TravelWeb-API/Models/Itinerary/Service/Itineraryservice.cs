@@ -166,8 +166,9 @@ namespace TravelWeb_API.Models.Itinerary.Service
                                     ContentDescription = item.ContentDescription,
                                     // 關鍵：從關聯的 Attraction 表抓取地點資訊
                                     AttractionName = item.AttractionName != null ? (item.Attraction.Name ?? item.ContentDescription) : item.ContentDescription,
-                                    GooglePlaceId = item.GooglePlaceId ?? null,
-                                    PlaceName = item.AttractionName ?? null,
+                                    GooglePlaceId = item.Attraction.GooglePlaceId,
+                                    PlaceId = item.Attraction.GooglePlaceId,
+                                    PlaceName = item.Attraction.Name ?? null,
                                     Address = item.Attraction.Address != null ? item.Attraction.Address : "建議於附近區域安排",
                                     Latitude = item.Attraction.Latitude != null ? item.Attraction.Latitude : null,
                                     Longitude = item.Attraction.Longitude != null ? item.Attraction.Longitude : null,
@@ -397,11 +398,13 @@ namespace TravelWeb_API.Models.Itinerary.Service
             .ToListAsync();
 
             // AI 生成的地點可能沒有 PlaceId，這裡補齊
-            foreach (var item in items.Where(x => string.IsNullOrEmpty(x.Attraction.GooglePlaceId)))
+            foreach (var item in items.Where(x => x.Attraction != null && string.IsNullOrEmpty(x.Attraction.GooglePlaceId)))
             {
                 try
                 {
                     item.Attraction.GooglePlaceId = await _placesService.GetPlaceIdAsync(item.Attraction.Address);
+                    Console.WriteLine($"AttractionId: {item.AttractionId}, Name: {item.Attraction?.Name}, PlaceId: {item.Attraction?.GooglePlaceId}");
+
                 }
                 catch (Exception ex)
                 {
@@ -414,7 +417,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             return new DayItineraryDto
             {
                 DayNumber = dayNumber,
-                Items = items.Select(x => new DayItineraryItemDto
+                Items = items.Where(x => x.Attraction != null).Select(x => new DayItineraryItemDto
                 {
                     Order = x.SortOrder ?? 100,
                     PlaceId = x.Attraction.GooglePlaceId,

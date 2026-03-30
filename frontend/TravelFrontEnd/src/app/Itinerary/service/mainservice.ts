@@ -10,6 +10,7 @@ import { DayItineraryDto } from '../interface/itinerarymainmodel';
 export class Mainservice {
   private CreateItineraryapiUrl = 'https://localhost:7276/api/Itinerary';
   private CreateAIItineraryAPI = 'https://localhost:7276/api/AiItinerary/generate-ai';
+  private GetDayItineraryAPI = '/Itinerary/{itineraryId}/day/{day}';
   constructor(private http: HttpClient) { }
 
   createItinerary(data: any): Observable<any> {
@@ -20,7 +21,7 @@ export class Mainservice {
   }
   getDayItinerary(itineraryId: number, day: number): Observable<DayItineraryDto> {
     return this.http.get<DayItineraryDto>(
-      `/api/itinerary/${itineraryId}/day/${day}`
+      `https://localhost:7276/api/itinerary/${itineraryId}/day/${day}`
     );
   }
 }

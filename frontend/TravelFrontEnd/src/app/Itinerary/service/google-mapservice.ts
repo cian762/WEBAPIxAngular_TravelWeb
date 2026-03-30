@@ -37,9 +37,13 @@ export class GoogleMAPservice {
       travelMode: google.maps.TravelMode.DRIVING,
       optimizeWaypoints: false  // 保持使用者排定的順序
     }, (result, status) => {
+      console.log('Directions status:', status); // 觀察是哪種錯誤
+      console.log('Directions result:', result);  // 觀察 API 回傳的內容
       if (status === 'OK' && result) {
         this.routeCache.set(cacheKey, result); // 存入快取
         renderer.setDirections(result);
+      } else {
+        console.error('路線規劃失敗:', status);
       }
     });
   }

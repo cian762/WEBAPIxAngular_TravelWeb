@@ -164,13 +164,14 @@ namespace TravelWeb_API.Controllers
             // 刪除成功，RESTful 慣例回傳 204
             return NoContent();
         }
-
+        //輸出PDF
         [HttpGet("{itineraryId}/export")]
         public async Task<IActionResult> ExportItinerary(int itineraryId)
         {
             var fileBuffer = await _itineraryService.GetExportFileAsync(itineraryId);
             return File(fileBuffer, "application/pdf", $"Itinerary_{itineraryId}.pdf");
         }
+        //輸出GOOGLE地圖路線
         [HttpGet("{itineraryId}/day/{dayNumber}")]
         public async Task<ActionResult<DayItineraryDto>> GetDayItinerary(int itineraryId, int dayNumber)
         {

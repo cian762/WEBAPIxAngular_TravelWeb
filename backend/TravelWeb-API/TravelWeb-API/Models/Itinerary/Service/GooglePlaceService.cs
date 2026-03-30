@@ -18,9 +18,10 @@
             var url = $"https://maps.googleapis.com/maps/api/place/findplacefromtext/json" +
                       $"?input={Uri.EscapeDataString(address)}" +
                       $"&inputtype=textquery&fields=place_id&key={_apiKey}";
-
+            var raw = await _http.GetStringAsync(url);
+            Console.WriteLine($"Places API 原始回傳: {raw}");
             var response = await _http.GetFromJsonAsync<PlacesApiResponse>(url);
-
+            Console.WriteLine($"反序列化結果: candidates數量={response?.candidates?.Count}, status={response?.status}");
             return response?.candidates?.FirstOrDefault()?.place_id;
         }
 
