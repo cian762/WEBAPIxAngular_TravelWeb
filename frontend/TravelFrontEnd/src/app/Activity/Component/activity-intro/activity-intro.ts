@@ -433,6 +433,7 @@ export class ActivityIntro implements OnInit, AfterViewInit {
     this.selectedSortRule = sortRule;
     this.infoService.getRelatedReviews(this.activityIdFromRoute, this.selectedSortRule)
       .subscribe((data) => {
+        console.log(data);
         this.reviewsPackage = data;
       });
   }

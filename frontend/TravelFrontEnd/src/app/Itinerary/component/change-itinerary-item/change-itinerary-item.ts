@@ -13,6 +13,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { ItineraryItem } from '../../interface/itinerarymainmodel';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 declare const google: any;
 
 @Component({
@@ -24,6 +25,7 @@ declare const google: any;
 })
 export class ItineraryDetailComponent implements OnInit {
   private http = inject(HttpClient);
+  baseUrl: string = environment.apiBaseUrl;
 
   @Input() itineraryId!: number;
   @ViewChild('searchInput') searchInput!: ElementRef;
@@ -74,7 +76,7 @@ export class ItineraryDetailComponent implements OnInit {
     if (!file) return;
     const formDataimg = new FormData();
     formDataimg.append('image', file);
-    this.http.post<any>(`https://localhost:7276/api/Itinerary/Savephoto/${this.itineraryId}`, formDataimg)
+    this.http.post<any>(`${this.baseUrl}/Itinerary/Savephoto/${this.itineraryId}`, formDataimg)
       .subscribe({
         next: (res) => { this.imageUrl = res.url; alert('封面更新成功！'); },
         error: (err) => { console.error('上傳失敗', err); alert('上傳失敗，請檢查網絡'); }
@@ -107,7 +109,7 @@ export class ItineraryDetailComponent implements OnInit {
   endDate: string = '';
   dayTabs: number[] = [];
   addExtraDay() {
-    this.http.patch<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}/extend-day`, {})
+    this.http.patch<any>(`${this.baseUrl}/Itinerary/${this.itineraryId}/extend-day`, {})
       .subscribe({
         next: (res) => {
           // 🚩 防禦性檢查：嘗試抓取大小寫可能的欄位
@@ -136,7 +138,7 @@ export class ItineraryDetailComponent implements OnInit {
       });
   }
   loadData() {
-    this.http.get<any>(`https://localhost:7276/api/Itinerary/${this.itineraryId}`).subscribe(res => {
+    this.http.get<any>(`${this.baseUrl}/Itinerary/${this.itineraryId}`).subscribe(res => {
       console.log('API 回傳的原始資料:', res);
       this.title = res.itineraryName;
       this.imageUrl = res.itineraryImage;
@@ -267,7 +269,7 @@ export class ItineraryDetailComponent implements OnInit {
       Items: flattenedItems
     };
     console.log("最後發送的 Payload:", payload);
-    this.http.post(`https://localhost:7276/api/Itinerary/${this.itineraryId}/save-snapshot`, payload)
+    this.http.post(`${this.baseUrl}/Itinerary/${this.itineraryId}/save-snapshot`, payload)
       .subscribe(() => alert('修改成功'));
   }
 

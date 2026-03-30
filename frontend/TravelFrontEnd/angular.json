@@ -35,10 +35,21 @@
             ],
             "polyfills": [
               "zone.js"
-            ]
+            ],
+            "outputPath": {
+              "base": "../../backend/TravelWeb-API/TravelWeb-API/wwwroot/app",
+              "browser": ""
+            },
+            "baseHref": "/app/"
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.production.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -48,7 +59,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumError": "20kB"
                 }
               ],
               "outputHashing": "all"

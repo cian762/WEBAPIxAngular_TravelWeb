@@ -2,13 +2,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PagedResult, ProductQueryDTO, RegionListDTO, TagListDTO, TripProductDTO } from '../models/tripproduct.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Tripproduct {
   constructor(private readonly http: HttpClient) { }
-  apiUrl = 'https://localhost:7276/api/Trip'
+  baseUrl: string = environment.apiBaseUrl;
+  apiUrl = `${this.baseUrl}/Trip`;
   // 1. 取得初始化資料 (地區與標籤)
   getMetaData(): Observable<{ regions: RegionListDTO[], tags: TagListDTO[] }> {
     return this.http.get<{ regions: RegionListDTO[], tags: TagListDTO[] }>(`${this.apiUrl}/MetaData`);

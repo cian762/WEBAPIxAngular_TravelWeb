@@ -5,6 +5,7 @@ import { reviewsPackage } from '../Interface/reviewsPackage';
 import { productInfoInterface } from '../Interface/productIntroInterface';
 import { SuggestionInfo } from '../Component/activity-intro/activity-intro';
 import { CardInfoModel } from '../Interface/cardInterface';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -13,21 +14,23 @@ export class ActivityInfoService {
 
   constructor(private http: HttpClient) { }
 
+  baseUrl: string = environment.apiBaseUrl;
+
   getActivityDetails(activityId: number) {
 
-    return this.http.get<ActivityInfoInterface>("https://localhost:7276/api/ActivityInfo/" + activityId);
+    return this.http.get<ActivityInfoInterface>(`${this.baseUrl}/ActivityInfo/${activityId}`);
   }
 
   getRelatedReviews(activityId: number, orderRule: string = "highest") {
 
     let params = new HttpParams();
     params = params.set('orderRule', orderRule);
-    return this.http.get<reviewsPackage>(`https://localhost:7276/api/ActivityInfo/${activityId}/Reviews`, { params });
+    return this.http.get<reviewsPackage>(`${this.baseUrl}/ActivityInfo/${activityId}/Reviews`, { params });
   }
 
   getRelatedTickets(activityId: number) {
 
-    return this.http.get<productInfoInterface[]>(`https://localhost:7276/api/ActivityInfo/${activityId}/Tickets`);
+    return this.http.get<productInfoInterface[]>(`${this.baseUrl}/ActivityInfo/${activityId}/Tickets`);
   }
 
   offerRelatedOptions(activityInfo: SuggestionInfo) {
@@ -38,7 +41,7 @@ export class ActivityInfoService {
     activityInfo.activityType.forEach(t => { params = params.append('activityType', t) });
     console.log(params);
 
-    return this.http.get<CardInfoModel[]>('https://localhost:7276/api/ActivityTicket/Suggest', { params });
+    return this.http.get<CardInfoModel[]>(`${this.baseUrl}/ActivityTicket/Suggest`, { params });
   }
 
 }

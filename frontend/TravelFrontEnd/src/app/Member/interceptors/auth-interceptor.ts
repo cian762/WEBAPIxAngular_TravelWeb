@@ -1,8 +1,13 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+
+  let baseUrl = environment.apiBaseUrl;
   // 檢查是不是打給我們自己後端 API 的請求
-  const isApiUrl = req.url.startsWith('https://localhost:7276/api');
+  const isApiUrl = req.url.startsWith(baseUrl);
 
   // 如果是打給我們的 API，就強制掛上 withCredentials: true
   if (isApiUrl) {

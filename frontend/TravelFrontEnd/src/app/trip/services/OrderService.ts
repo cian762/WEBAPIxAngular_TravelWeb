@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CreateOrderDto, OrderDetailDto } from '../models/orderMd.model';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 
 @Injectable({
@@ -9,7 +10,8 @@ import { Observable } from 'rxjs';
 })
 export class OrderService {
   constructor(private http: HttpClient) { }
-  private readonly apiUrl = 'https://localhost:7276/api/Order';
+  baseUrl: string = environment.apiBaseUrl;
+  private readonly apiUrl = `${this.baseUrl}/Order`;
 
   /** 1. 取得結帳預覽 (POST: api/Order/preview) */
   getPreview(dto: CreateOrderDto): Observable<OrderDetailDto> {

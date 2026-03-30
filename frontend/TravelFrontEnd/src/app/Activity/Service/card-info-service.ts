@@ -2,12 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { paginationInterface } from '../Interface/paginationInterface';
 import { queryParameters } from '../Component/info-card/info-card';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CardInfoService {
   constructor(private http: HttpClient) { }
+  baseUrl: string = environment.apiBaseUrl;
 
   FilterCardInfo(query: queryParameters) {
 
@@ -21,7 +23,7 @@ export class CardInfoService {
     params = params.set('pagesize', query.pagesize);
     params = params.set('keyword', query.keyword);
 
-    return this.http.get<paginationInterface>('https://localhost:7276/api/ActivityCard/Query', {
+    return this.http.get<paginationInterface>(`${this.baseUrl}/ActivityCard/Query`, {
       params
     });
   }
@@ -29,6 +31,6 @@ export class CardInfoService {
   keywordSuggestion(keyword: string) {
     let params = new HttpParams();
     params = params.set('searchtext', keyword);
-    return this.http.get<string[]>('https://localhost:7276/api/ActivityCard/Keyword', { params });
+    return this.http.get<string[]>(`${this.baseUrl}/ActivityCard/Keyword`, { params });
   }
 }

@@ -47,7 +47,10 @@ namespace TravelWeb_API.Controllers.Activity
         [HttpGet("verify")]
         public IActionResult RedirectToFrontEnd([FromQuery] QrCodeRequestDTO request)
         {
-            return Redirect($"http://localhost:4200/qrCode/{request.Token}");
+            //return Redirect($"http://localhost:4200/qrCode/{request.Token}");
+
+            //上雲端的時候用下面這一個
+            return Redirect($"https://taiwanstory.site/app/qrCode/{request.Token}");
         }
 
 
