@@ -95,9 +95,15 @@ export const routes: Routes = [
         path: '',
         loadComponent: () => import('./Board/blog-home/blog-home').then(m => m.BlogHome),
       },
+      //創建快速文章
       {
         path: 'creat/:id',
         loadComponent: () => import('./Board/creat-post/creat-post').then(m => m.CreatPost),
+      },
+      //創建部落格
+      {
+        path: 'creatBlog',
+        loadComponent: () => import('./Board/creat-blog/creat-blog').then(m => m.CreatBlog),
       },
       {
         path: 'detail/:id',

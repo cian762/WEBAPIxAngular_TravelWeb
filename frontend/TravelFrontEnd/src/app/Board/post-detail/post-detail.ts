@@ -4,7 +4,15 @@ import { PostDetailDto } from '../interface/PostDetailDto';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Sidebar } from "../Components/sidebar/sidebar";
 import { CommentsArea } from "../Components/comments-area/comments-area";
+import { CreateArticleButton } from "../Components/create-article-button/create-article-button";
+import { PopularPost } from "../Components/popular-post/popular-post";
+import { TagClouds } from "../Components/tag-clouds/tag-clouds";
+import { PostCatgories } from "../Components/post-catgories/post-catgories";
+import { AuthorInfoSidebar } from "../Components/author-info-sidebar/author-info-sidebar";
+import localeZhTw from '@angular/common/locales/zh-Hant';
+import { DatePipe, registerLocaleData } from '@angular/common';
 
+registerLocaleData(localeZhTw);
 interface ArticleTag {
   tagID: number;
   tagName: string;
@@ -13,7 +21,7 @@ interface ArticleTag {
 
 @Component({
   selector: 'app-post-detail',
-  imports: [RouterModule, Sidebar, CommentsArea],
+  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton, PopularPost, TagClouds, PostCatgories, AuthorInfoSidebar, DatePipe,],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
@@ -25,6 +33,7 @@ export class PostDetail implements OnInit {
   selectedIndex = 0;
   allPhotoList: string[] = [];
   TagsList: ArticleTag[] = [];
+  post?: PostDetailDto;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -46,7 +55,7 @@ export class PostDetail implements OnInit {
     });
   }
 
-  post?: PostDetailDto;
+
 
   setIndex(index: number) {
     this.selectedIndex = index;
@@ -63,4 +72,19 @@ export class PostDetail implements OnInit {
     }
     )
   }
+
+  ToLike(id: number) {
+    if (this.post) {
+      if (!this.post.isLike) {
+        this.post.likeCount++;
+        this.post.isLike = true;
+      }
+      else {
+        this.post.likeCount--;
+        this.post.isLike = false;
+      }
+      this.Serve.postArticleLike(id).subscribe();
+    }
+  }
 }
+//  class="reaction-item" [class.liked]="post?.isLike"

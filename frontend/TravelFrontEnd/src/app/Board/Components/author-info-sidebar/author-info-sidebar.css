@@ -1,0 +1,30 @@
+.user-info {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  /* 關鍵：等比例縮放並裁切，不變形 */
+  object-position: center;
+  /* 從圖片中心點裁切 */
+}
+
+
+.my-btn {
+  display: inline-block;
+  outline: none;
+  line-height: 40px;
+  padding: 0 30px;
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-transition: all 0.3s ease 0s;
+  -moz-transition: all 0.3s ease 0s;
+  -o-transition: all 0.3s ease 0s;
+  transition: all 0.3s ease 0s;
+}
+
+
+.my-btn:focus {
+  outline: none;
+}

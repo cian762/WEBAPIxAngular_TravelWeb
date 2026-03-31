@@ -21,6 +21,7 @@ namespace TravelWeb_API.Models.Board.Service
 
             var commentList = _context.Comments
                 .Where(c => c.ArticleId == id)
+                .Include(c => c.CommentPhotos)
                 .Include(c => c.MemberInformation)
                 .Include(c => c.InverseParent).ToList();
 
@@ -31,6 +32,7 @@ namespace TravelWeb_API.Models.Board.Service
                 AvatarUrl = c.MemberInformation.AvatarUrl,
                 Contents = c.Contents,
                 CreatedAt = c.CreatedAt,
+                CommentPhoto = c.CommentPhotos?.FirstOrDefault()?.Photo,
                 LikeCount = LikeCount(c),
                 ReplyComments = GetReplyComments(c),
                 isLiked = false,
@@ -39,7 +41,7 @@ namespace TravelWeb_API.Models.Board.Service
         }
 
 
-        public Comment AddComment(PostCommentDto dto,string UserId)
+        public Comment AddComment(PostCommentDto dto, string UserId)
         {
             Comment comment = new Comment();
             comment.UserId = UserId;
@@ -48,6 +50,10 @@ namespace TravelWeb_API.Models.Board.Service
             comment.Contents = dto.contents;
             //comment.CreatedAt = DateTime.Now;
 
+
+            comment.CommentPhotos = dto.commentPhoto != null
+                        ? new List<CommentPhoto> { new CommentPhoto { Photo = dto.commentPhoto } }
+                        : new List<CommentPhoto>();
             _context.Comments.Add(comment);
             _context.SaveChanges();
             return comment;

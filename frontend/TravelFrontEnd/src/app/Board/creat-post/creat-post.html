@@ -1,121 +1,208 @@
-<div class="whole-wrap">
-  <div class="container">
-    <div class="col-8 mx-auto my-5">
-      <form [formGroup]="form">
-        <!-- 上傳圖片區 -->
-        @if (!this.photoList[this.coverIndex]) {
-        <div class="mb-3">
-          <label class="border rounded-2 border-2 border-dashed p-4 text-center d-block upload-label"
-            style="cursor: pointer;">
-
-            點擊上傳圖片 <i class="bi bi-images"></i>
-
-            <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden" multiple>
-          </label>
-        </div>
-        }
-        @else {
-        <div class="mb-3">
-          <div class="custom-slider-container">
-            <div class="main-display cover-upload-container">
-              <img [src]="photoList[selectedIndex]" class="fade-in">
-              @if (selectedIndex === coverIndex) {
-              <a class="genric-btn info radius set-cover-btn">封面</a>
-              }
-              @else {
-              <a (click)="selectCover()" class="genric-btn info-border radius set-cover-btn">設定為封面</a>
-              }
-            </div>
-            <div class="thumb-nav">
-              <!-- 封面 -->
-              <div class="thumb-item" [class.active]="coverIndex === selectedIndex" (click)="setIndex(coverIndex)">
-                <img [src]="photoList[coverIndex]">
+<div class="host-body">
+  <div class="editor-panel ">
+    <form [formGroup]="form">
+      <!-- 上傳圖片區 -->
+      <section id="sec1">
+        <div class="mb-5">
+          @if (!this.photoList[this.coverIndex]) {
+          <div class="mb-3">
+            <label class="upload-label" style="cursor: pointer;">
+              點擊上傳圖片 <i class="bi bi-images ms-1"></i>
+              <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden" multiple>
+            </label>
+          </div>
+          }
+          @else {
+          <div class="mb-3">
+            <div class="custom-slider-container">
+              <div class="main-display cover-upload-container">
+                <img [src]="photoList[selectedIndex]" class="fade-in">
+                @if (selectedIndex === coverIndex) {
+                <a class="genric-btn info radius set-cover-btn">封面</a>
+                }
+                @else {
+                <a (click)="selectCover()" class="genric-btn info-border radius set-cover-btn">設定為封面</a>
+                }
               </div>
-              <span class="border-end border-2"></span>
-              <!-- 其他圖片 -->
-              @for (img of photoList; track $index) {
-              @if($index != coverIndex){
-              <div class="thumb-item" [class.active]="$index === selectedIndex" (click)="setIndex($index)">
-                <img [src]="img">
+              <div class="thumb-nav">
+                <!-- 封面 -->
+                <div class="thumb-item" [class.active]="coverIndex === selectedIndex" (click)="setIndex(coverIndex)">
+                  <img [src]="photoList[coverIndex]">
+                </div>
+                <span class="border-end border-2"></span>
+                <!-- 其他圖片 -->
+                @for (img of photoList; track $index) {
+                @if($index != coverIndex){
+                <div class="thumb-item" [class.active]="$index === selectedIndex" (click)="setIndex($index)">
+                  <img [src]="img">
+                </div>
+                }
+                }
+                <!-- 新增按鈕 -->
+                <label
+                  class="thumb-UpdatePhoto-item border rounded-2 border-2 border-dashed text-center d-block upload-btn"
+                  style="cursor: pointer;">
+                  上傳更多圖片 <i class="bi bi-images"></i>
+                  <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden">
+                </label>
               </div>
-              }
-              }
-              <!-- 新增按鈕 -->
-              <label
-                class="thumb-UpdatePhoto-item border rounded-2 border-2 border-dashed text-center d-block upload-label"
-                style="cursor: pointer;">
-                上傳更多圖片 <i class="bi bi-images"></i>
-                <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden">
-              </label>
             </div>
           </div>
+          }
         </div>
-        }
-
-
+      </section>
+      <!-- 標題&&內文 -->
+      <section id="sec2">
+        <!-- 標題編輯區 -->
         <div class="mb-3">
           <label for="exampleFormControlInput1" class="form-label my-title">文章標題</label>
           <input type="email" class="form-control" formControlName="title" placeholder="請輸入標題">
         </div>
+        <!-- 內文編輯區 -->
         <div class="mb-3">
           <label for="exampleFormControlTextarea1" class="form-label my-title">文章內文</label>
-          <textarea class="form-control" formControlName="content" placeholder="請輸入內文" rows="3"></textarea>
+          <textarea class="form-control" formControlName="content" placeholder="請輸入內文..." rows="3"
+            (input)="onInput($event)"></textarea>
         </div>
-        <div class="mb-3">
+      </section>
+
+      <!-- 標籤選項 -->
+      <section id="sec3">
+        <div class="mb-5">
           <label for="exampleFormControlTextarea1" class="form-label my-title">標籤</label>
-          <div class="row">
+          <div class="row" style="height:230px">
             <div class="col-6 border-end border-2">
               <label for="exampleFormControlTextarea1" class="form-label">已加入:</label>
-              @for(tag of tagList ; track tag.tagId){
-              <a (click)="removeTag(tag.tagId)" class="genric-btn success small circle m-1 "><i
-                  [class]="tag.icon"></i>{{tag.tagName}} <i class="ri-close-large-line"></i></a>
-              }
+              <div class="tags">
+                @for(tag of tagList ; track tag.tagId){
+                <button (click)="removeTag(tag.tagId)" class="tag-btn m-1"><i
+                    [class]="tag.icon"></i>&nbsp;{{tag.tagName}}&nbsp;<i class="ri-close-large-line"></i></button>
+                }
+              </div>
             </div>
             <div class="col-6">
               <div class="search-form" (submit)="$event.preventDefault()">
-                <div class="search-box">
-                  <input placeholder="搜尋標籤" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event);"
-                    (input)="onSeach($event)">
-                  <button type="button"><i class="fa fa-search"></i></button>
+                <div class="my-3">
+                  <div class="search-box">
+                    <input placeholder="搜尋標籤" name="search" type="text" (focus)="onFocus($event)"
+                      (blur)="onBlur($event);" (input)="onSeach($event)">
+                    <button type="button"><i class="fa fa-search"></i></button>
+                  </div>
+                  @if(filteredTags.length > 0){ <ul class="my-dropdown-menu">
+                    @for(tag of filteredTags; track tag.tagId) {
+                    <li class="dropdown-item" (click)="addTag(tag.tagId); $event.stopPropagation()">{{ tag.tagName }}
+                      <i class="ri-add-large-line"></i>
+                    </li>
+                    }
+                  </ul>}
                 </div>
-                <ul class="my-dropdown-menu">
-                  @for(tag of filteredTags; track tag.tagId) {
-                  <li class="dropdown-item" (click)="addTag(tag.tagId); $event.stopPropagation()">{{ tag.tagName }} <i
-                      class="ri-add-large-line"></i>
-                  </li>
-                  }
-                </ul>
               </div>
 
               <p>最近加入:</p>
-              @for(tag of removeTagList ; track tag.tagId){
-              <a (click)="addTag(tag.tagId)" class="genric-btn success-border small circle mx-1">{{tag.tagName}} <i
-                  class="ri-add-large-line"></i></a>
-              }
+              <div class="tags">
+                @for(tag of removeTagList ; track tag.tagId){
+                <button (click)="addTag(tag.tagId)" class="tag-btn m-1"><i
+                    [class]="tag.icon"></i>&nbsp;{{tag.tagName}}&nbsp;<i class="ri-add-large-line"></i></button>
+                }
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="single-element-widget">
-          <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
-          <div class="default-select">
-            <select formControlName="status" id="status-select">
-              <option [value]="0"><i class="bi bi-lock-fill"></i>私人</option>
-              <option [value]="1"><i class="bi bi-globe-asia-australia"></i>公開</option>
-              <option [value]="2"><i class="bi bi-suit-heart-fill"></i>粉絲</option>
-            </select>
+
+      </section>
+      <!-- 地區選項 -->
+      <section id="sec4">
+        <div class="mb-5 border-bottom">
+          <label class="form-label my-title">標註地區</label>
+          <div class="row mb-5">
+            <div class="col-4">
+              <div class="single-element-widget">
+                <label class="form-label">縣市</label>
+                <div class="default-select">
+                  <select formControlName="cityId" id="region-select">
+                    <option [value]="null">請選擇縣市</option>
+                    @for (city of regions; track $index) {
+                    <option [value]="city.regionId">{{ city.regionName }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              @if(form.get('cityId')?.value) {
+              <div class="single-element-widget">
+                <label class="form-label">鄉/鎮/市/區</label>
+                <div class="default-select">
+                  <select formControlName="distId" id="dist-select">
+                    <option [value]="null">請選擇鄉鎮市區</option>
+                    @for (dist of (regions.find(r => r.regionId === form.get('cityId')?.value)?.dist ?? []); track
+                    $index)
+                    {
+                    <option [value]="dist.regionId">{{ dist.regionName }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              }
+            </div>
+            <div class="col-4">
+              @if(form.get('cityId')?.value) {
+              <div class="single-element-widget">
+                <label class="form-label">鄉/鎮/市/區</label>
+                <div class="default-select">
+                  <select formControlName="distId" id="dist-select">
+                    <option [value]="null">請選擇鄉鎮市區</option>
+                    @for (dist of (regions.find(r => r.regionId === form.get('cityId')?.value)?.dist ?? []); track
+                    $index)
+                    {
+                    <option [value]="dist.regionId">{{ dist.regionName }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+              }
+            </div>
           </div>
         </div>
-
-      </form>
-
-    </div>
-
-
-    <a href="#" class="genric-btn danger-border radius">刪除文章</a>
-    <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
-
-
-
+      </section>
+      <!-- 引用站內活動 -->
+      <section id="sec5">
+        <label class="form-label my-title">引用站內景點&活動</label>
+      </section>
+      <!-- 文章權限選項 -->
+      <section id="sec6">
+        <div class="mb-5 border-bottom">
+          <div class="d-flex justify-content-evenly align-items-center mb-5">
+            <div class="single-element-widget">
+              <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
+              <div class="default-select">
+                <select formControlName="status" id="status-select">
+                  <option [value]="0"><i class="bi bi-lock-fill"></i>私人</option>
+                  <option [value]="1"><i class="bi bi-globe-asia-australia"></i>公開</option>
+                  <option [value]="2"><i class="bi bi-suit-heart-fill"></i>粉絲</option>
+                </select>
+              </div>
+            </div>
+            <span>
+              <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a></span>
+          </div>
+        </div>
+      </section>
+      <div class="d-flex justify-content-around">
+        <a href="#" class="genric-btn danger-border radius">刪除文章</a>
+      </div>
+    </form>
   </div>
 </div>
+
+
+
+<nav class="float-nav">
+  @for (item of navItems; track item.id) {
+  <a class="nav-item" [class.active]="activeId === item.id" (click)="scrollTo(item.id)">
+    <span class="nav-dot"></span>
+    <span class="nav-label">{{ item.id }}</span>
+  </a>
+  }
+</nav>

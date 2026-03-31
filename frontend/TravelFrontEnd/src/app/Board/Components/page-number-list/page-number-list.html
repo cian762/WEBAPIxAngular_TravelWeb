@@ -1,0 +1,30 @@
+<!-- 頁碼 -->
+<nav class="blog-pagination justify-content-center d-flex">
+  <ul class="pagination">
+
+    @if(currentPage!=1){
+    <li class="page-item">
+      <a class="page-link" aria-label="Previous" (click)="changePage(currentPage-1, $event)">
+        <span aria-hidden="true">
+          <span class="lnr lnr-chevron-left"></span>
+        </span>
+      </a>
+    </li>
+    }
+    @for (page of pageNumbers; track page) {
+    <li class="page-item" [class.active]="currentPage === page">
+      <a class="page-link" (click)="changePage(page, $event)">{{page}}</a>
+    </li>
+    }
+    @if(currentPage!=pageNumbers.length){
+    <li class="page-item">
+      <a class="page-link" aria-label="Next" (click)="changePage(currentPage+1, $event)">
+        <span aria-hidden="true">
+          <span class="lnr lnr-chevron-right"></span>
+        </span>
+      </a>
+    </li>
+    }
+
+  </ul>
+</nav>

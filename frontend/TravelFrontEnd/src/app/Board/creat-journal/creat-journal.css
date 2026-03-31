@@ -1,0 +1,59 @@
+.ground {
+  position: relative;
+  height: 1000px;
+  width: 1000px;
+  background-color: rgb(211, 142, 142);
+  overflow: hidden;
+}
+
+.cube {
+  position: absolute;
+  /* height: 300px;
+  width: 300px; */
+  display: inline-block;
+  /* 或 inline-flex，讓寬高由內容決定 */
+  border: 2px solid rgb(0, 42, 255);
+  background-color: rgb(255, 255, 255);
+  /* 必須加，讓子元素 absolute 以此為基準 */
+  cursor: move;
+}
+
+.controller {
+  position: absolute;
+  height: 14px;
+  width: 14px;
+  border: 2px solid rgb(0, 42, 255);
+  background-color: rgb(255, 255, 255);
+}
+
+/* 四個角落位置 */
+.top-left {
+  top: -7px;
+  left: -7px;
+}
+
+.top-right {
+  top: -7px;
+  right: -7px;
+}
+
+.bottom-left {
+  bottom: -7px;
+  left: -7px;
+}
+
+.bottom-right {
+  bottom: -7px;
+  right: -7px;
+}
+
+/* 即時更新 box.width / box.height，Angular 的 [style.width.px] 綁定會自動同步畫面。 */
+.top-left,
+.bottom-right {
+  cursor: nwse-resize;
+}
+
+.top-right,
+.bottom-left {
+  cursor: nesw-resize;
+}
