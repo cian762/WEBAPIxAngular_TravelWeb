@@ -21,6 +21,7 @@
               <div>
                 <h5 class="fw-bold mb-1 text-dark">{{ item.productName }}</h5>
                 <p class="text-muted small mb-2">數量：{{ item.quantity }}</p>
+                <p class="text-muted small mb-2">票種編號：{{ item.ticketCategoryId }}</p>
                 <div class="text-success small">
                   <i class="bi bi-check-circle-fill me-1"></i> 免費取消
                 </div>
@@ -53,7 +54,7 @@
             </div>
           </div>
 
-          <button routerLink="/order" class="btn btn-primary w-100 rounded-pill py-3 fw-bold mb-3 shadow">
+          <button (click)="goToOrder()" class="btn btn-primary w-100 rounded-pill py-3 fw-bold mb-3 shadow">
             前往下單
           </button>
 

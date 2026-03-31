@@ -2140,7 +2140,7 @@ h6 {
 .main-menu {
   padding-bottom: 20px;
   padding-top: 20px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0);
   padding-left: 15px;
   padding-right: 15px;
 }
@@ -2239,9 +2239,9 @@ h6 {
   padding: 0 8px 0px 8px;
   text-decoration: none;
   display: inline-block;
-  color: #fff;
+  color: gray;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 15px;
   text-transform: uppercase;
   outline: none;
 }

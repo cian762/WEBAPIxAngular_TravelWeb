@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AttractionService, AttractionProduct, ProductDetailInfo } from '../attraction.service';
+import { CreateShoppingCart } from '../../../trip/services/create-shopping-cart';
 
 @Component({
   selector: 'app-ticket-section',
@@ -30,7 +32,11 @@ export class TicketSectionComponent implements OnInit {
   drawerLoading = false;
   drawerDetail: ProductDetailInfo | null = null;
 
-  constructor(private svc: AttractionService) { }
+  constructor(
+    private svc: AttractionService,
+    private cartService: CreateShoppingCart,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.svc.getProductsByAttraction(this.attractionId).subscribe(list => {
@@ -102,24 +108,56 @@ export class TicketSectionComponent implements OnInit {
 
   /** 將換行分隔的字串轉成陣列（用於 includes/excludes/eligibility） */
   toLines(text: string | null | undefined): string[] {
-  if (!text) return [];
-  // 同時處理真實換行 \n 和字面上的 \n 字串
-  return text
-    .replace(/\\n/g, '\n')
-    .split('\n')
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
-}
+    if (!text) return [];
+    return text
+      .replace(/\\n/g, '\n')
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+  }
 
   /** 計算小計 */
   getSubtotal(p: AttractionProduct): number {
     return (p.price ?? 0) * (this.qtyMap[p.productId] ?? 1);
   }
 
+  // ── 加入購物車 ────────────────────────────────────────
+
   addToCart(p: AttractionProduct): void {
-    const qty = this.qtyMap[p.productId];
-    // TODO: 串接購物車 API
-    // payload: { productCode: p.productCode, productId: p.productId, qty }
-    alert(`已加入購物車：${p.title} × ${qty}`);
+    const qty = this.qtyMap[p.productId] ?? 1;
+
+    // 組裝符合後端 AddToCartDTO 的 payload
+    // MemberId 不用傳，後端從 JWT Token 自動抓
+    const payload = {
+      productCode: p.productCode,
+      quantity: qty,
+      ticketCategoryId: p.ticketTypeCode ?? null  // 景點票種代號，可能為 null
+    };
+
+    this.cartService.addToCart(payload).subscribe({
+      next: () => {
+        alert(`✅ 已加入購物車：${p.title} × ${qty}`);
+      },
+      error: (err) => {
+        console.error('加入購物車失敗', err);
+        alert('加入購物車失敗，請稍後再試');
+      }
+    });
+  }
+
+  // ── 立即預訂 ──────────────────────────────────────────
+  // TODO: 待串接，目前景點票券的立即預訂流程待確認
+  nowBuy(p: AttractionProduct): void {
+    const qty = this.qtyMap[p.productId] ?? 1;
+
+    const checkoutPayload = {
+      directBuyItems: [{
+        productCode: p.productCode,
+        quantity: qty,
+        ticketCategoryId: p.ticketTypeCode ?? null
+      }]
+    };
+
+    this.router.navigate(['/order'], { state: { data: checkoutPayload } });
   }
 }

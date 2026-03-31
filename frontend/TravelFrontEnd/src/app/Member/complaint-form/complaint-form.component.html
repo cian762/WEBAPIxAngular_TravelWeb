@@ -1,0 +1,85 @@
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+
+      <div class="card shadow-sm border-0 rounded-4 mt-4">
+        <div class="card-header text-white text-center py-4 border-0 rounded-top-4" style="background-color: #00796B;">
+          <h3 class="mb-0 fw-bold"><i class="bi bi-envelope-exclamation-fill"></i> 意見申訴信箱</h3>
+          <p class="mb-0 mt-1 opacity-75 small">我們非常重視您的意見，請詳述您的狀況以利專員處理。</p>
+        </div>
+
+        <div class="card-body p-4 p-md-5 bg-light">
+          <form [formGroup]="complaintForm" (ngSubmit)="onSubmit()">
+
+            <div class="p-3 mb-4 bg-white rounded-3 border">
+              <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3">申訴人基本資料</h6>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <span class="text-muted small">會員代號：</span>
+                  <span class="fw-bold ms-2">{{ memberId }}</span>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <span class="text-muted small">真實姓名：</span>
+                  <span class="fw-bold ms-2">{{ memberName }}</span>
+                </div>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3">申訴內容填寫</h6>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold"><span class="text-danger me-1">(必填)</span>回覆信箱 (Reply Email)</label>
+              <input type="email" class="form-control bg-white" formControlName="replyEmail"
+                     [ngClass]="{ 'is-invalid': f['replyEmail'].touched && f['replyEmail'].invalid }">
+              <div class="text-muted small mt-1">※ 系統已自動帶入您的註冊信箱，您可自行修改為其他聯絡信箱。</div>
+            </div>
+
+            <div class="mb-4 p-3 rounded-3" style="border: 2px dashed #ffc107; background-color: #fffdf5;">
+              <label class="form-label fw-bold"><span class="text-danger me-1">(必填)</span>申訴類型 (Category)</label>
+              <select class="form-select border-warning" formControlName="subject"
+                      [ngClass]="{ 'is-invalid': f['subject'].touched && f['subject'].invalid }">
+                <option value="">-- 請選擇申訴類型 --</option>
+                <option *ngFor="let option of subjectOptions" [value]="option">{{ option }}</option>
+              </select>
+              <div *ngIf="f['subject'].touched && f['subject'].errors?.['required']" class="text-danger small mt-1">請務必選擇申訴類型</div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-bold"><span class="text-danger me-1">(必填)</span>內容詳述 (Content)</label>
+              <textarea class="form-control bg-white" rows="6" formControlName="description"
+                        placeholder="請詳細說明您遇到的問題、發生時間、對象（如特定文章、會員或訂單編號），以便客服人員快速為您處理..."
+                        [ngClass]="{ 'is-invalid': f['description'].touched && f['description'].invalid }"></textarea>
+              <div *ngIf="f['description'].touched && f['description'].errors?.['required']" class="text-danger small mt-1">請填寫申訴內容</div>
+              <div *ngIf="f['description'].touched && f['description'].errors?.['minlength']" class="text-danger small mt-1">內容太短，請至少輸入 10 個字</div>
+            </div>
+
+            <div class="mb-5 p-3 bg-white rounded-3 border" style="border-left: 4px solid #17a2b8 !important;">
+              <label class="form-label fw-bold text-secondary"><i class="bi bi-camera me-2"></i>上傳照片 (非必填)</label>
+              <input type="file" class="form-control mb-3" accept="image/*" (change)="onFileSelected($event)">
+
+              <div *ngIf="imagePreviewUrl" class="text-center bg-light p-2 rounded-3 border">
+                <img [src]="imagePreviewUrl" class="img-fluid rounded" style="max-height: 200px;" alt="佐證預覽">
+                <div class="small text-muted mt-2">※ 預覽照片確認無誤後，請點擊下方確認送出。</div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-center gap-4 mt-4">
+              <button type="button" class="btn btn-outline-secondary px-5 py-2 rounded-pill fw-bold" (click)="onCancel()">
+                <i class="bi bi-x-circle me-1"></i> 取消返回
+              </button>
+
+              <button type="button" class="btn btn-success px-5 py-2 rounded-pill fw-bold shadow-sm" (click)="onSubmit()" [disabled]="isLoading" style="background-color: #00796B; border: none;">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isLoading ? '資料送出中...' : '確認送出申訴' }}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

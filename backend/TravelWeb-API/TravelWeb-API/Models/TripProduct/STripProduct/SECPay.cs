@@ -25,14 +25,16 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             var parameters = new Dictionary<string, string>
             {
                 { "MerchantID", ecpaySection["MerchantID"]! },
-                { "MerchantTradeNo",$"TW{order.OrderId}{DateTime.Now:MMddHH}"},
+                { "MerchantTradeNo",$"TW{order.OrderId}{DateTime.Now:yyMMddHHmmss}"},
                 { "MerchantTradeDate", DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") },
+                { "CustomField1", order.OrderId.ToString() },
                 { "PaymentType", "aio" },
                 { "TotalAmount", ((int)order.TotalAmount!).ToString() },
                 { "TradeDesc", "TravelWeb" },
                 { "ItemName", itemName },
                 { "ReturnURL", ecpaySection["ReturnURL"]! },
-                { "ClientBackURL", ecpaySection["ClientBackURL"]! },
+                //{ "ClientBackURL", ecpaySection["ClientBackURL"]! },
+                { "OrderResultURL", ecpaySection["OrderResultURL"]! },
                 { "ChoosePayment", "Credit" },
                 { "EncryptType", "1" }
             };
@@ -68,7 +70,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
             // 1. 字典排序並串接 (過濾掉 CheckMacValue 且確保沒有 Null)
             var sortedParams = parameters
-                .Where(p => p.Key != "CheckMacValue" && !string.IsNullOrEmpty(p.Value))
+                .Where(p => p.Key != "CheckMacValue")
                 .OrderBy(p => p.Key)
                 .Select(p => $"{p.Key}={p.Value}");
 
@@ -87,7 +89,8 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 .Replace("%21", "!")
                 .Replace("%2a", "*")
                 .Replace("%28", "(")
-                .Replace("%29", ")");
+                .Replace("%29", ")")
+                .Replace("%7e", "~");
 
             // 3. SHA256 加密
             using (var sha256 = SHA256.Create())

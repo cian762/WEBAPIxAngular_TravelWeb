@@ -5,6 +5,7 @@ import { ProductDetailPage } from '../../services/product-detail-page';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-trip-product-detail',
@@ -103,40 +104,35 @@ export class TripProductDetail implements OnInit {
   // 加入購物車
   addToCart(): void {
     const data = this.getBookingData();
+    if (!data) { alert('請選擇日期與人數'); return; }
 
-    if (!data || !this.selectedSchedule) {
-      alert('請選擇出發日期');
-      return;
-    }
-
-    // 過濾掉數量為 0 的項目
     const itemsToProcess = data.items.filter(item => item.qty > 0);
 
-    if (itemsToProcess.length === 0) {
-      alert('請選擇購買人數');
-      return;
-    }
-
-    // 🏆 簡化後的邏輯：直接交給 Service 處理
-    itemsToProcess.forEach(item => {
+    // 建立 Observable 陣列
+    const requests = itemsToProcess.map(item => {
       const cartItem = {
-        // 不需要傳 memberId 了，Service 會自己抓 Token 或判斷遊客
         productCode: data.scheduleId,
         productName: data.productName,
         price: item.price,
         quantity: item.qty,
         ticketCategoryId: item.ticketType,
-        mainImage: this.basicInfo?.coverImage // 建議傳圖片，購物車顯示才好看
+        mainImage: this.basicInfo?.coverImage
       };
-
-      //直接呼叫 Service，它會自己判斷要打 API 還是存 LocalStorage
-      this.cartService.addToCart(cartItem).subscribe({
-        next: () => console.log(`項目 ${item.ticketType} 處理完成`),
-        error: (err) => console.error('處理失敗', err)
-      });
+      console.log('有抓到票種addtocart', cartItem.ticketCategoryId);
+      return this.cartService.addToCart(cartItem);
     });
 
-    alert(`成功加入購物車！\n日期：${data.startDate}\n成人：${this.adultCount}位、兒童：${this.childCount}位`);
+    // 使用 forkJoin 等待所有 API 完成
+    forkJoin(requests).subscribe({
+      next: () => {
+        alert(`成功加入購物車！`);
+        // 可以在這裡跳轉或更新購物車圖示數量
+      },
+      error: (err) => {
+        console.error('加入失敗', err);
+        alert('加入購物車失敗，請稍後再試');
+      }
+    });
   }
   nowBuy(): void {
     const data = this.getBookingData();
@@ -154,7 +150,8 @@ export class TripProductDetail implements OnInit {
         .map(item => ({
           productCode: data.scheduleId,
           quantity: item.qty,
-          ticketCategoryId: item.ticketType
+          ticketCategoryId: item.ticketType,
+
         }))
     };
 
@@ -167,6 +164,7 @@ export class TripProductDetail implements OnInit {
     // 2. 導向結帳頁面
     // 專業做法：透過導航狀態 (state) 傳遞資料，這樣網址不會變醜，且資料安全
     this.router.navigate(['/order'], { state: { data: checkoutPayload } });
+
 
   }
 
