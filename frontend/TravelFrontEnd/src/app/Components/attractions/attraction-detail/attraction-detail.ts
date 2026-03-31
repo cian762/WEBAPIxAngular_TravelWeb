@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AttractionService } from '../attraction.service';
 import { SafeUrlPipe } from '../safe-url.pipe';
@@ -19,6 +19,13 @@ export class AttractionDetailComponent implements OnInit {
   loading = true;
   activeTab = 'feature';
   currentImgIdx = 0;
+  nearbyAttractions: {
+    attractionId: number;
+    name: string;
+    address: string | null;
+    mainImage: string | null;
+    distanceKm: number;
+  }[] = [];
 
   tabs = [
     { key: 'feature', label: '景點特色', icon: '🏞️' },
@@ -66,6 +73,7 @@ export class AttractionDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private svc: AttractionService,
     private http: HttpClient
   ) { }
@@ -82,7 +90,12 @@ export class AttractionDetailComponent implements OnInit {
         this.svc.getAttractionById(id).subscribe(data => {
           this.attraction = data;
           this.loading = false;
-          if (data) this.loadWeather(data);
+          if (data) {
+            this.loadWeather(data);
+            this.svc.getNearbyAttractions(id).subscribe(list => {
+              this.nearbyAttractions = list;
+            });
+          }
         });
       }
     });
@@ -148,22 +161,22 @@ export class AttractionDetailComponent implements OnInit {
 
   /** WMO weathercode → emoji */
   private codeToEmoji(code: number): string {
-    if (code === 0)           return '☀️';
-    if (code <= 2)            return '⛅';
-    if (code <= 3)            return '☁️';
-    if (code <= 49)           return '🌫️';
-    if (code <= 69)           return '🌧️';
-    if (code <= 79)           return '🌨️';
-    if (code <= 99)           return '⛈️';
+    if (code === 0) return '☀️';
+    if (code <= 2) return '⛅';
+    if (code <= 3) return '☁️';
+    if (code <= 49) return '🌫️';
+    if (code <= 69) return '🌧️';
+    if (code <= 79) return '🌨️';
+    if (code <= 99) return '⛈️';
     return '🌤️';
   }
 
   /** EU AQI 數值 → 中文標籤 + emoji */
   private aqiToLabel(aqi: number): { label: string; emoji: string } {
-    if (aqi <= 20)  return { label: '優良', emoji: '😊' };
-    if (aqi <= 40)  return { label: '良好', emoji: '😊' };
-    if (aqi <= 60)  return { label: '普通', emoji: '😐' };
-    if (aqi <= 80)  return { label: '不良', emoji: '😷' };
+    if (aqi <= 20) return { label: '優良', emoji: '😊' };
+    if (aqi <= 40) return { label: '良好', emoji: '😊' };
+    if (aqi <= 60) return { label: '普通', emoji: '😐' };
+    if (aqi <= 80) return { label: '不良', emoji: '😷' };
     if (aqi <= 100) return { label: '很差', emoji: '😷' };
     return { label: '危險', emoji: '⛔' };
   }
@@ -196,6 +209,10 @@ export class AttractionDetailComponent implements OnInit {
 
   addToFavorite(): void {
     alert('請先登入會員');
+  }
+
+  goToNearby(attractionId: number): void {
+    this.router.navigate(['/attractions/detail', attractionId]);
   }
 
   openNav(): void {

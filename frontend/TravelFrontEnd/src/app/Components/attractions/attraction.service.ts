@@ -126,4 +126,18 @@ export class AttractionService {
       `${this.apiUrl}/AttractionProduct/bycode/${productCode}`
     ).pipe(catchError(() => of(null)));
   }
+
+
+  // 取得附近景點（周邊資訊 Tab 用）
+  getNearbyAttractions(attractionId: number, radius = 10, top = 8): Observable<{
+    attractionId: number;
+    name: string;
+    address: string | null;
+    mainImage: string | null;
+    distanceKm: number;
+  }[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/Attraction/${attractionId}/nearby?radius=${radius}&top=${top}`
+    ).pipe(catchError(() => of([])));
+  }
 }

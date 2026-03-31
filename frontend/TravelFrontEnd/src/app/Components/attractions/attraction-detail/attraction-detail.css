@@ -466,3 +466,92 @@
   margin-top: 8px;
   padding-left: 2px;
 }
+
+/* 周邊資訊 */
+.nearby-empty {
+  padding: 40px 0;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.nearby-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+@media (max-width: 992px) {
+  .nearby-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .nearby-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.nearby-card {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+}
+
+.nearby-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
+.nearby-card__img-wrap {
+  position: relative;
+  padding-top: 65%;
+  overflow: hidden;
+  background: #eee;
+}
+
+.nearby-card__img-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.nearby-card:hover .nearby-card__img-wrap img {
+  transform: scale(1.06);
+}
+
+.nearby-card__body {
+  padding: 10px 12px 12px;
+}
+
+.nearby-card__name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-card__addr {
+  font-size: 0.75rem;
+  color: #999;
+  margin: 0 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-card__dist {
+  font-size: 0.78rem;
+  color: #e84611;
+  font-weight: 600;
+}
