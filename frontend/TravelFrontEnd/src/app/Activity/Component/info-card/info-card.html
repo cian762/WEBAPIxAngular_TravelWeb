@@ -135,7 +135,7 @@
   <section class="result-panel shadow-sm">
     <div class="result-panel__top row g-3 align-items-center">
       <div class="col-lg-6">
-        <h2 class="result-panel__title">精選內容</h2>
+        <h2 id="bookmark1" class="result-panel__title">精選內容</h2>
         <div class="result-meta">
           <span class="result-badge">總筆數 {{ pageData.totalRecords }} 筆</span>
           <span class="result-badge">第 {{ pageData.pageNumber }} / {{ pageData.totalPages }} 頁</span>
@@ -159,14 +159,60 @@
 
     <!-- Cards -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mt-1">
-      @for (card of cardData; track $index) {
+
+      @if (isCardsLoading) {
+      @for (item of skeletonCards; track $index) {
+      <div class="col">
+        <div class="activity-card card h-100 border-0 shadow-sm skeleton-card">
+          <div class="activity-card__image-wrap">
+            <div class="skeleton-block skeleton-card__image"></div>
+          </div>
+
+          <div class="card-body activity-card__body">
+            <div class="skeleton-line skeleton-line--title"></div>
+
+            <div class="activity-card__date mt-3">
+              <div class="skeleton-line skeleton-line--date"></div>
+            </div>
+
+            <div class="activity-card__stats mt-3">
+              <div class="rating-block w-100">
+                <div class="skeleton-line skeleton-line--small"></div>
+                <div class="skeleton-line skeleton-line--small"></div>
+              </div>
+            </div>
+
+            <div class="activity-card__bottom mt-3">
+              <div class="price-block">
+                <div class="skeleton-line skeleton-line--label mb-2"></div>
+                <div class="skeleton-line skeleton-line--price"></div>
+              </div>
+
+              <div class="view-block">
+                <div class="skeleton-line skeleton-line--tiny"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer activity-card__footer">
+            <div class="tag-list">
+              <span class="skeleton-tag"></span>
+              <span class="skeleton-tag"></span>
+              <span class="skeleton-tag"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      } @else if (cardData.length > 0) {
+      @for (card of cardData; track card.activityId) {
       <div class="col">
         <div class="activity-card card h-100 border-0 shadow-sm">
           <div class="activity-card__image-wrap">
             <img [src]="card.coverImageUrl" class="card-img-top activity-card__image" alt="activity image">
           </div>
 
-          <div class="card-body activity-card__body" [routerLink]="'/ActivityInfo/'+ card.activityId">
+          <div class="card-body activity-card__body" [routerLink]="'/ActivityInfo/' + card.activityId">
             <a class="activity-card__title">{{ card.title }}</a>
 
             <div class="activity-card__date">
@@ -214,6 +260,18 @@
         </div>
       </div>
       }
+      } @else {
+      <div class="col-12">
+        <div class="empty-result-box">
+          <div class="empty-result-box__icon">
+            <i class="bi bi-search"></i>
+          </div>
+          <h4 class="empty-result-box__title">找不到符合條件的活動</h4>
+          <p class="empty-result-box__text">可以試試放寬日期、地區或活動類型條件</p>
+        </div>
+      </div>
+      }
+
     </div>
 
     <!-- Pagination -->

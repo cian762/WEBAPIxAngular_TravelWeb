@@ -4,19 +4,26 @@ using System.Diagnostics;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board.DbSet;
+using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Services
 {
     public class ActivityReviewService
     {
         private readonly ActivityDbContext _activityDbContext;
-        public ActivityReviewService(ActivityDbContext activityDbContext)
+        private readonly MemberSystemContext _memberDbContext;
+        public ActivityReviewService(ActivityDbContext activityDbContext, MemberSystemContext memberDbContext)
         {
             _activityDbContext = activityDbContext;
+            _memberDbContext = memberDbContext;
         }
 
         public async Task<List<ReviewResponseDTO>> GetPersonalReviews(int activityId, string memberId) 
         {
+
+            string memberName = _memberDbContext.MemberInformations.Where(m => m.MemberCode == memberId).Select(m => m.Name).FirstOrDefault() ?? "無名旅客";
+            string memberAvatar = _memberDbContext.MemberInformations.Where(m => m.MemberCode == memberId).Select(m => m.AvatarUrl).FirstOrDefault() ?? "";
+
 
             var result = await _activityDbContext.Activities
                 .Where(a => a.ActivityId == activityId)
@@ -25,12 +32,14 @@ namespace TravelWeb_API.Services
                 .Select(r => new ReviewResponseDTO
                 {
                     ReviewId = r.ReviewId,
-                    MemberId = r.MemberId,
+                    MemberId = memberName,
+                    MemberAvatar = memberAvatar,
                     Title = r.Title,
                     Comment = r.Comment,
                     Rating = r.Rating,
                     CreateDate = r.CreateDate,
                     ReviewImages = r.ReviewImages.Select(i => i.ImageUrl).ToList()!
+
                 })
                 .ToListAsync();
                 

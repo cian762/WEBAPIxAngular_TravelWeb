@@ -6,4 +6,5 @@ export interface reviewResponseDTO {
   rating: number;
   createDate: Date;
   reviewImages: string[];
+  memberAvatar: string;
 }

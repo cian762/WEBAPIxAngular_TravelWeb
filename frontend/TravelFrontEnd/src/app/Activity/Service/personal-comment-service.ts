@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { postPersonalReviewRequest } from '../Interface/postPersonalReviewRequest';
 import { editPersonalReviewRequest } from '../Interface/editPersonalReviewRequset';
 import { form } from '@angular/forms/signals';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -12,10 +13,10 @@ import { form } from '@angular/forms/signals';
 export class PersonalCommentService {
 
   http = inject(HttpClient);
-  baseUrl: string = "https://localhost:7276/api/PersonalReview";
+  baseUrl: string = environment.apiBaseUrl;
 
   getPersonalComments(activityId: number): Observable<reviewResponseDTO[]> {
-    return this.http.get<reviewResponseDTO[]>(`https://localhost:7276/api/PersonalReview/${activityId}`)
+    return this.http.get<reviewResponseDTO[]>(`${this.baseUrl}/PersonalReview/${activityId}`)
   }
 
   postPersonComment(requset: postPersonalReviewRequest) {
@@ -29,7 +30,7 @@ export class PersonalCommentService {
     //多張圖片用同一個 key (即 reviewImages 這個key) 重複 append
     requset.reviewImages.forEach(file => { formData.append('reviewImages', file) });
 
-    return this.http.post(this.baseUrl, formData);
+    return this.http.post(`${this.baseUrl}/PersonalReview`, formData);
   }
 
   patchPersonalComment(request: editPersonalReviewRequest) {
@@ -42,13 +43,13 @@ export class PersonalCommentService {
     request.newImages.forEach(file => { formData.append('newImages', file) });
     request.deletedImageUrls.forEach(url => { formData.append('deletedImageUrls', url) });
 
-    return this.http.patch(this.baseUrl, formData);
+    return this.http.patch(`${this.baseUrl}/PersonalReview`, formData);
 
   }
 
   deletePersonalComment(reviewId: number) {
     const params = new HttpParams().set('reviewId', reviewId);
-    return this.http.delete(this.baseUrl, { params });
+    return this.http.delete(`${this.baseUrl}/PersonalReview`, { params });
   }
 
 }

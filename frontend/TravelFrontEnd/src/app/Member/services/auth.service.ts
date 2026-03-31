@@ -3,13 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { CreateShoppingCart } from '../../trip/services/create-shopping-cart';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  baseUrl: string = environment.apiBaseUrl;
   private http = inject(HttpClient);
-  private apiUrl = 'https://localhost:7276/api';
+  private apiUrl = this.baseUrl;
   public authState$ = new BehaviorSubject<boolean>(this.isLoggedIn());
 
 
@@ -39,7 +41,8 @@ export class AuthService {
 
 
   updateProfile(formData: FormData) {
-    const apiUrl = 'https://localhost:7276/api/MemberProfile/me';
+    // 記得換成你真正的後端網址
+    const apiUrl = `${this.baseUrl}/MemberProfile/me`;
     return this.http.put(apiUrl, formData, { withCredentials: true });
   }
 

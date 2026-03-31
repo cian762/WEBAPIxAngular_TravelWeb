@@ -2,13 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ProductBasic, ProductItinerary, ProductSchedule } from '../models/tripproduct.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductDetailPage {
   constructor(private readonly http: HttpClient) { }
-  private readonly apiUrl = 'https://localhost:7276/api/Trip';
+  baseUrl: string = environment.apiBaseUrl;
+  private readonly apiUrl = `${this.baseUrl}/Trip`;
   // 1. 取得商品基本資訊
   getBasicInfo(id: number): Observable<ProductBasic> {
     return this.http.get<ProductBasic>(`${this.apiUrl}/${id}/basic`);

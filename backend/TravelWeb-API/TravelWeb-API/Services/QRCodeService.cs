@@ -10,7 +10,7 @@ namespace TravelWeb_API.Services
     {
         private readonly QrCodeSettings _settings;
 
-        public QRCodeService(TripDbContext context, IOptions<QrCodeSettings> options)
+        public QRCodeService(IOptions<QrCodeSettings> options)
         {
             _settings = options.Value;
         }

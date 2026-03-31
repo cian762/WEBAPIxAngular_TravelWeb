@@ -7,7 +7,8 @@ import { CardInfoModel } from '../../Interface/cardInterface';
 import { DatePipe, NgClass } from '@angular/common';
 import { __classPrivateFieldGet } from 'tslib';
 import { FormsModule } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, map, of, Subject, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize, map, of, Subject, switchMap } from 'rxjs';
+import { QrcodeVerify } from "../qrcode-verify/qrcode-verify";
 
 
 
@@ -167,6 +168,9 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
   }
 
 
+  isCardsLoading: boolean = false;
+  skeletonCards = Array.from({ length: 8 });
+
   //傳送挾帶資訊的 API，參數內容要注意
   loadCards(page: number = 1) {
     const query = new queryParameters();
@@ -175,31 +179,49 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     query.start = this.formatDate(this.startDate);
     query.end = this.formatDate(this.endDate);
     query.pagenumber = page;
-    query.pagesize = 4;
+    query.pagesize = 8;
     query.orderbyparam = this.currentSortParam;
     query.keyword = this.keyword;
 
+    this.isCardsLoading = true;
 
     console.log('query送出去的內容: ', query);
-    this.cardService.FilterCardInfo(query).subscribe((res) => {
 
-      //1. 拿回來的資料分裝進 cardData Model
-      this.cardData = res.data;
-      console.log(this.cardData);
+    this.cardService.FilterCardInfo(query)
+      .pipe(
+        finalize(() => {
+          this.isCardsLoading = false;
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.cardData = res.data;
 
-      //2. 拿回來的資料分裝進 pageData Model
-      this.pageData = {
-        pageNumber: res.pageNumber,
-        pageSize: res.pageSize,
-        totalRecords: res.totalRecords,
-        totalPages: res.totalPages
-      }
-      console.log(this.pageData);
+          this.pageData = {
+            pageNumber: res.pageNumber,
+            pageSize: res.pageSize,
+            totalRecords: res.totalRecords,
+            totalPages: res.totalPages
+          };
 
-      this.currentPage = res.pageNumber;
-      this.generatePageNumbers();
+          this.currentPage = res.pageNumber;
+          this.generatePageNumbers();
 
-    });
+          // 移到資料成功回來之後再捲動
+          this.FindBookMark();
+        },
+        error: (err) => {
+          console.log('卡片資料載入失敗', err);
+          this.cardData = [];
+          this.pageData = {
+            pageNumber: 1,
+            pageSize: 8,
+            totalRecords: 0,
+            totalPages: 0
+          };
+          this.generatePageNumbers();
+        }
+      });
   }
 
   //看不懂
@@ -261,6 +283,17 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     const year = dateInfo.getFullYear();
     return `${year}-${month}-${date}`;
   };
+
+  FindBookMark() {
+    const element = document.getElementById('bookmark1');
+    const offset = 100;
+
+    if (element) {
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - offset;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
+  }
 }
 
 export class queryParameters {

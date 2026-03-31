@@ -167,9 +167,8 @@ builder.Services.Configure<SmtpSettings>(
     builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddScoped<EmailService>();
 
-//TicketService 注入
+//Ticket 相關服務註冊
 builder.Services.AddScoped<TicketService>();
-
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
@@ -260,7 +259,11 @@ if (app.Environment.IsDevelopment())
 
 
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+
+
+app.UseStaticFiles();
+app.UseDefaultFiles("/app");
 
 // 🔥 關鍵順序：必須是 Routing -> Cors -> Auth -> MapControllers
 app.UseRouting();
@@ -272,5 +275,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapFallbackToFile("app/index.html");
 
 app.Run();

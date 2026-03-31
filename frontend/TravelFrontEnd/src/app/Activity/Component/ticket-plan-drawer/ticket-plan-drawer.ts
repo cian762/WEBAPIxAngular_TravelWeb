@@ -43,8 +43,13 @@ export class TicketPlanDrawer {
   addToCart() {
     const purchase = {
       productCode: this.plan?.productCode,
+      productName: this.plan?.productName,
+      price: this.plan?.currentPrice,
       quantity: this.quantity,
       ticketCategoryId: this.plan?.ticketCategoryId,
+      mainImage: this.plan?.coverImageUrl,
+      cartId: 0,
+      coverImage: this.plan?.coverImageUrl
     };
     console.log(purchase);
     this.cartService.addToCart(purchase).subscribe((data) => {
@@ -52,19 +57,20 @@ export class TicketPlanDrawer {
     });
     this.close();
   }
-  // //連結購物車用
-  // addToOrder() {
-  //   const orderDetail = {
-  //     directBuyItems: [{
-  //       productCode: this.plan?.productCode,
-  //       quantity: this.quantity,
-  //       ticketCategoryId: this.plan?.ticketCategoryId
-  //     }]
-  //   };
-  //   console.log(orderDetail);
-  //   this.router.navigate(['/order'], { state: { data: orderDetail } });
-  //   this.close();
-  // }
+
+  //連結購物車用
+  addToOrder() {
+    const orderDetail = {
+      directBuyItems: [{
+        productCode: this.plan?.productCode,
+        quantity: this.quantity,
+        ticketCategoryId: this.plan?.ticketCategoryId
+      }]
+    };
+    console.log(orderDetail);
+    this.router.navigate(['/order'], { state: { data: orderDetail } });
+    this.close();
+  }
 
 
 }
