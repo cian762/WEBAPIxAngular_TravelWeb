@@ -9,12 +9,15 @@
         <th>訂單狀態</th>
         <th>訂單詳細</th>
         <th>付款狀態</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       <ng-container *ngFor="let order of orders">
         <tr>
-          <td>#{{ order.orderId }}</td>
+          <td class="fw-bold text-primary">
+            #ORD-{{ order.orderId.toString().padStart(6, '0') }}
+          </td>
           <td>{{ order.createdAt | date:'yyyy/MM/dd HH:mm' }}</td>
           <td>${{ order.totalAmount | number }}</td>
           <td>
@@ -33,7 +36,18 @@
               (click)="onRepay(order.orderId)">
               前往付款
             </button>
-
+            <span *ngIf="order.orderStatus === '已處理' || order.orderStatus === '已完成'" class="text-success fw-bold">
+              <i class="bi bi-check-circle-fill"></i> 已付款
+            </span>
+            <span *ngIf="order.orderStatus === '已取消'" class="text-muted">
+              <i class="bi bi-x-circle"></i> 已關閉
+            </span>
+          </td>
+          <td>
+            <button *ngIf="order.orderStatus === '待處理' || order.orderStatus === '已確認'"
+              class="btn btn-sm btn-outline-danger" (click)="onCancel(order.orderId)">
+              取消訂單
+            </button>
           </td>
         </tr>
 

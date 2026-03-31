@@ -64,9 +64,19 @@ export class AuthService {
     return localStorage.getItem('isLoggedIn') === 'true';
   }
   //20260325李皇毅路由守門員用的方法
+  // 2. 強化 API 檢查方法，增加 tap 來同步狀態
   checkAuthStatus(): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiUrl}/Auth/check-status`).pipe(
-      catchError(() => of(false)) // 如果報錯或沒登入，就回傳 false
+    return this.http.get<boolean>(`${this.apiUrl}/Auth/check-status`, { withCredentials: true }).pipe(
+      tap(isLogged => {
+        // 關鍵：如果 API 說有登入，就幫 localStorage 補上狀態，防止下次再跳彈窗
+        localStorage.setItem('isLoggedIn', isLogged ? 'true' : 'false');
+        this.authState$.next(isLogged);
+      }),
+      catchError(() => {
+        localStorage.setItem('isLoggedIn', 'false');
+        this.authState$.next(false);
+        return of(false);
+      })
     );
   }
 

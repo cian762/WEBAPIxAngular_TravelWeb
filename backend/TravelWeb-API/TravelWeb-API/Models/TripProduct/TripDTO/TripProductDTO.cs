@@ -8,7 +8,7 @@
         public string ?CoverImage { get; set; }
         public decimal? DisplayPrice { get; set; }
         public string ?RegionName { get; set; } // 從 Region 表 Join 過來
-        public string ?CategoryTag { get; set; } // 例如 "冬季賞雪"
+        public List<string>? CategoryTags { get; set; } // 改為 List
         public int? DurationDays { get; set; }
 
 

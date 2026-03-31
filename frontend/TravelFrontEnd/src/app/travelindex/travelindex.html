@@ -171,40 +171,14 @@
       <div class="section-heading">
         <div>
           <p class="eyebrow">Package Tours</p>
-          <h2>熱門套裝行程</h2>
+          <h2 class="section-title">熱門套裝行程</h2>
         </div>
-        <a href="#" class="section-link">更多套裝</a>
+        <a routerLink="tripProduct" class="section-link">更多套裝</a>
       </div>
 
-      <div class="package-grid">
-        @for (pkg of packageList; track pkg.id) {
-        <article class="package-card">
-          <div class="package-card__image">
-            <img [src]="pkg.imageUrl" [alt]="pkg.title">
-          </div>
-
-          <div class="package-card__body">
-            <div class="package-card__days">{{ pkg.days }}</div>
-            <h3>{{ pkg.title }}</h3>
-            <p>{{ pkg.description }}</p>
-
-            <div class="package-card__tags">
-              @for (tag of pkg.tags; track $index) {
-              <span>{{ tag }}</span>
-              }
-            </div>
-
-            <div class="package-card__footer">
-              <span class="score">★ {{ pkg.score }}</span>
-              <span class="price">NT$ {{ pkg.price }}</span>
-            </div>
-          </div>
-        </article>
-        }
-      </div>
+      <app-trip-index></app-trip-index>
     </div>
   </section>
-
   <!-- 旅遊服務 -->
   <section class="section">
     <div class="container">

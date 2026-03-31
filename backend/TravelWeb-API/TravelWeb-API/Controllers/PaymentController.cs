@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
+using TravelWeb_API.Services;
 
 namespace TravelWeb_API.Controllers
 {
@@ -13,12 +14,19 @@ namespace TravelWeb_API.Controllers
         private readonly IECPay _ecpayService;
         private readonly IOrder _orderService;
         private readonly TripDbContext _tripDbContext;
-        public PaymentController(IECPay ecpayService, IOrder orderService, TripDbContext tripDbContext)
+        private readonly EmailService _emailService;
+        private readonly TicketService _ticketService;
+
+        public PaymentController(IECPay ecpayService, IOrder orderService, TripDbContext tripDbContext, EmailService emailService, TicketService ticketService)
         {
             _ecpayService = ecpayService;
             _orderService = orderService;
             _tripDbContext = tripDbContext;
+            _emailService = emailService;
+            _ticketService = ticketService;
         }
+
+
         //呼叫綠界付款畫面
         [HttpPost("Checkout/{orderId}")]
         public IActionResult Checkout(int orderId)
@@ -93,10 +101,11 @@ namespace TravelWeb_API.Controllers
                             }
                         }
 
-
                         await _tripDbContext.SaveChangesAsync();
                     }
                     //QRcode 送信放這
+                    _ticketService.CreateQrCodeForOrderAsync(orderId);
+                    await _emailService.SendOrderTicketEmailAsync(orderId);
                 }
             }
 

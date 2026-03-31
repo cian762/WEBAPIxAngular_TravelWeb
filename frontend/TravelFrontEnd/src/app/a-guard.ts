@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './Member/services/auth.service';
 import { map, take } from 'rxjs';
+import Swal from 'sweetalert2';
 
 export const aGuard: CanActivateFn = (route, state) => {
   let authService$ = inject(AuthService);
@@ -19,9 +20,18 @@ export const aGuard: CanActivateFn = (route, state) => {
       if (res) {
         return true;
       } else {
-        console.log('沒有cookie，是要登入甚麼拉!!');
+        // 在踢人走之前，先噴一個提示
+        const returnUrl = encodeURIComponent(state.url);
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'warning',
+          title: '請先登入以繼續操作',
+          showConfirmButton: false,
+          timer: 5000
+        });
 
-        return router.parseUrl('/login?returnUrl=' + encodeURIComponent(state.url));// 把當前要去的路由當作 returnUrl 帶給登入頁
+        return router.parseUrl(`/login?returnUrl=${returnUrl}`);
       }
     })
   )

@@ -15,6 +15,7 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
 
         // 4. 取得所有地區 (供前端渲染地區切換)
         Task<IEnumerable<RegionListDTO>> GetRegionsAllAsync();
+        Task<IEnumerable<TripProductDTO>> GetHotProductsAsync(int take = 8);
         //=============================================================================================
         //這裡是商品詳細頁
         Task<ProductBasicDto?> GetBasicInfoAsync(int id);
