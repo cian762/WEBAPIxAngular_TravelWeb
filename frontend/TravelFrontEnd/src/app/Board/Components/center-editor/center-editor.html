@@ -1,0 +1,24 @@
+<!-- 中欄：區塊式編輯器 -->
+<div class="block-editor"><ng-container *ngFor="let row of rows; let i = index; trackBy: trackById">
+    <!-- 全寬文字 -->
+    <textarea *ngIf="row.type === 'text-full'" class="block-text" [(ngModel)]="row.text" (input)="autoResize($event)"
+      (focus)="focusedRowIndex = i" placeholder="輸入文字..." rows="1"></textarea>
+    <!-- 全寬圖片 -->
+    <div *ngIf="row.type === 'image-full'" class="block-image-full"><img [src]="row.src" [alt]="row.alt"
+        class="block-img" /></div>
+    <!-- 半寬：圖左文右 -->
+    <div *ngIf="row.type === 'image-left'" class="block-half">
+      <div class="half-img"><img [src]="row.src" [alt]="row.alt" class="block-img" /></div><textarea
+        class="block-text half-text" [(ngModel)]="row.text" (input)="autoResize($event)" (focus)="focusedRowIndex = i"
+        placeholder="輸入文字..." rows="1"></textarea>
+    </div>
+    <!-- 半寬：文左圖右 -->
+    <div *ngIf="row.type === 'image-right'" class="block-half"><textarea class="block-text half-text"
+        [(ngModel)]="row.text" (input)="autoResize($event)" (focus)="focusedRowIndex = i" placeholder="輸入文字..."
+        rows="1"></textarea>
+      <div class="half-img"><img [src]="row.src" [alt]="row.alt" class="block-img" /></div>
+    </div>
+  </ng-container>
+  <!-- 隱藏 file input -->
+  <input #fileInput type="file" accept="image/*" style="display:none" (change)="onFileSelected($event)" />
+</div>

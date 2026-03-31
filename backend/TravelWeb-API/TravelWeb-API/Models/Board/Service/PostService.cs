@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
@@ -31,7 +35,7 @@ namespace TravelWeb_API.Models.Board.Service
         }
 
 
-        public async Task<bool> UpdateArtic(int id,string? Title,string? PhotoUrl,byte Status)
+        public async Task<bool> UpdateArtic(int id,string? Title,string? PhotoUrl,byte Status,int? regionId)
         {
             Article? article = 
             _context.Articles.FirstOrDefault(a => a.ArticleId == id);
@@ -42,6 +46,7 @@ namespace TravelWeb_API.Models.Board.Service
                 article.PhotoUrl = PhotoUrl;
                 article.Status = Status;                
                 article.UpdatedAt = DateTime.Now;
+                article.RegionID = regionId;
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -76,42 +81,39 @@ namespace TravelWeb_API.Models.Board.Service
 
             return article;
         }
-        
-        
 
-        public PostDetailDto? GetPostDetailed(Article article)
-        {           
-            if(article.Type == 0 && article.Post != null)
+
+
+        public async Task<PostDetailDto?> GetPostDetailed(int id, string? currentUserId)
+        {
+            var postDetail = await _context.Articles.Where(a => a.ArticleId == id)
+                .Select(
+                a => new PostDetailDto
                 {
-                Post post = article.Post;
-                MemberInformation? author = 
-                    _memberDb.MemberInformations.FirstOrDefault(x=>x.MemberId==article.UserId);
-                PostDetailDto postDetail = new PostDetailDto();
-                postDetail.Type = article.Type;
-                postDetail.Title = article.Title;
-                postDetail.CreatedAt = article.CreatedAt;
-                postDetail.UpdatedAt = article.UpdatedAt;
-                postDetail.Cover = article.PhotoUrl;
-                postDetail.Contents = post.Contents;
-                postDetail.RegionId = post.RegionId;
-                postDetail.PostPhoto = _context.PostPhotos
-                    .Where(p => p.ArticleId == article.ArticleId)
-                    .Select(p => p.Photo).ToList();
-                postDetail.AuthorName = author.Name;
-                postDetail.AvatarUrl = author.AvatarUrl;
-                postDetail.Status = article.Status; 
-                return postDetail;
-            }
+                    Type = a.Type,
+                    Title = a.Title,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                    Cover = a.PhotoUrl,
+                    Contents = a.Post!.Contents,
+                    RegionId = a.RegionID,
+                    RegionName = a.Region != null ? a.Region.RegionName : null,
+                    PostPhoto = a.PostPhotos
+                .Where(p => p.ArticleId == a.ArticleId)
+                .Select(p => p.Photo).ToList(),
+                    AuthorID = a.UserId,
+                    AuthorName = a.MemberInformation.Name,
+                    AvatarUrl = a.MemberInformation.AvatarUrl,
+                    Status = a.Status,
+                    CommentCount= a.Comments.Count,
+                    LikeCount=a.ArticleLikes.Count,
+                    isLike=a.ArticleLikes.Any(l=>l.UserId==currentUserId)
+                }).FirstOrDefaultAsync();          
 
-            else if (article.Type == 1 && article.Journal != null)
-            {
-                return null;
-            }
-            else
-            {
-                return null;
-            }
+            return postDetail;
         }
+
+        
 
         public Journal GetJournalDetailed(int id)
         {

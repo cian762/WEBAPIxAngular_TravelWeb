@@ -1,3 +1,4 @@
+<div class="search-hero py-5 mb-5 shadow-sm"></div>
 <div class="container mt-5" *ngIf="basicInfo">
   <div class="row g-4 mb-5">
     <div class="col-md-7">
@@ -36,7 +37,8 @@
 
         <div class="mb-3">
           <label class="form-label fw-bold">選擇出發日期</label>
-          <select class="form-select form-select-lg" [(ngModel)]="selectedSchedule">
+          <select class="form-select form-select-lg" [(ngModel)]="selectedSchedule"
+            style="line-height: 1.5; height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem;">
             <option *ngIf="schedules.length === 0" [ngValue]="null">目前無任何檔期</option>
 
             <option *ngIf="schedules.length > 0 && filteredSchedules.length === 0" [ngValue]="null">
@@ -151,4 +153,3 @@
     </div>
   </div>
 </div>
-<!-- ====================================================== -->

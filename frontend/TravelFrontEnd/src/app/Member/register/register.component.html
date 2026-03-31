@@ -17,22 +17,56 @@
           <!-- 註冊表單 (綁定 registerForm) -->
           <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
 
-            <h5 class="text-secondary fw-bold border-bottom pb-2 mb-4">帳號資訊</h5>
+           <h5 class="text-secondary fw-bold border-bottom pb-2 mb-4">帳號資訊</h5>
 
-            <!-- Email -->
-            <div class="mb-3">
+            <!-- ========================================== -->
+            <!-- 🔥 修改：Email 輸入與發送驗證碼區塊 -->
+            <!-- ========================================== -->
+            <div class="mb-4">
               <label class="form-label fw-bold text-secondary">Email 信箱 <span class="text-danger">*</span></label>
+
               <div class="input-group">
                 <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
                 <input type="email" class="form-control" formControlName="email" placeholder="example@email.com"
                        [ngClass]="{ 'is-invalid': f['email'].touched && f['email'].invalid }">
+
+                <!-- 發送按鈕 (倒數計時中或已驗證時停用) -->
+                <button type="button" class="btn btn-outline-primary fw-bold px-4"
+                        (click)="sendCode()"
+                        [disabled]="isSendingCode || countdown > 0 || isEmailVerified || f['email'].invalid">
+
+                  <span *ngIf="isSendingCode" class="spinner-border spinner-border-sm me-1"></span>
+                  <i *ngIf="isEmailVerified" class="bi bi-check-circle-fill text-success me-1"></i>
+
+                  <!-- 顯示文字邏輯 -->
+                  <ng-container *ngIf="!isEmailVerified">
+                    {{ countdown > 0 ? countdown + 's 後重試' : (isSendingCode ? '發送中...' : '發送驗證碼') }}
+                  </ng-container>
+                  <ng-container *ngIf="isEmailVerified">已驗證</ng-container>
+
+                </button>
               </div>
+
               <div *ngIf="f['email'].touched && f['email'].errors?.['required']" class="text-danger small mt-1">請輸入 Email</div>
               <div *ngIf="f['email'].touched && f['email'].errors?.['email']" class="text-danger small mt-1">請輸入有效的 Email 格式</div>
             </div>
 
+            <div class="mb-4 p-3 bg-light rounded-3 border border-primary" *ngIf="countdown > 0 && !isEmailVerified">
+              <label class="form-label fw-bold text-primary"><i class="bi bi-shield-lock-fill me-1"></i>請輸入 6 位數驗證碼</label>
+              <div class="input-group shadow-sm">
+                <input type="text" class="form-control text-center fs-5 fw-bold letter-spacing-2"
+                       [(ngModel)]="verificationCodeInput" [ngModelOptions]="{standalone: true}"
+                       placeholder="000000" maxlength="6">
+                <button type="button" class="btn btn-primary fw-bold px-4"
+                        (click)="verifyCode()" [disabled]="isVerifyingCode || verificationCodeInput.length !== 6">
+                  <span *ngIf="isVerifyingCode" class="spinner-border spinner-border-sm me-1"></span>
+                  確認驗證
+                </button>
+              </div>
+              <small class="text-muted mt-2 d-block">驗證碼已寄至您的信箱，10 分鐘內有效。</small>
+            </div>
+
             <div class="row g-3 mb-4">
-              <!-- 密碼 -->
               <div class="col-md-6">
                 <label class="form-label fw-bold text-secondary">設定密碼 <span class="text-danger">*</span></label>
                 <div class="input-group">
@@ -45,7 +79,6 @@
                 <div *ngIf="f['password'].touched && f['password'].errors?.['pattern']" class="text-danger small mt-1">密碼必須為英數混合</div>
               </div>
 
-              <!-- 確認密碼 -->
               <div class="col-md-6">
                 <label class="form-label fw-bold text-secondary">確認密碼 <span class="text-danger">*</span></label>
                 <div class="input-group">
@@ -60,7 +93,6 @@
             <h5 class="text-secondary fw-bold border-bottom pb-2 mb-4 mt-5">個人基本資料</h5>
 
             <div class="row g-3 mb-3">
-              <!-- 姓名 -->
               <div class="col-md-6">
                 <label class="form-label fw-bold text-secondary">真實姓名 <span class="text-danger">*</span></label>
                 <div class="input-group">
@@ -71,7 +103,6 @@
                 <div *ngIf="f['name'].touched && f['name'].errors?.['required']" class="text-danger small mt-1">姓名為必填</div>
               </div>
 
-              <!-- 電話 -->
               <div class="col-md-6">
                 <label class="form-label fw-bold text-secondary">聯絡電話 <span class="text-danger">*</span></label>
                 <div class="input-group">
@@ -84,7 +115,6 @@
             </div>
 
             <div class="row g-3 mb-4">
-              <!-- 性別 -->
               <div class="col-md-6">
                 <label class="form-label fw-bold text-secondary">性別</label>
                 <select class="form-select" formControlName="gender">
@@ -94,24 +124,20 @@
                 </select>
               </div>
 
-              <!-- 生日 -->
               <div class="col-md-6">
                 <label class="form-label fw-bold text-secondary">出生年月日</label>
                 <input type="date" class="form-control" formControlName="birthDate">
               </div>
             </div>
 
-            <!-- 檔案上傳與預覽區塊 -->
             <div class="mb-5 p-3 bg-light rounded-3 border">
               <label class="form-label fw-bold text-secondary">上傳個人頭像 (非必填)</label>
               <div class="d-flex align-items-center gap-4">
 
-                <!-- 預覽圖 -->
                 <img [src]="imagePreviewUrl || 'assets/default-avatar.png'"
                      class="rounded-circle shadow-sm bg-white"
                      style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #dee2e6;" alt="Avatar Preview" />
 
-                <!-- 選擇檔案按鈕 -->
                 <div class="flex-grow-1">
                   <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)">
                   <small class="text-muted mt-1 d-block">建議上傳正方形圖片，支援 JPG, PNG。</small>
@@ -121,7 +147,6 @@
 
             <hr class="my-4">
 
-            <!-- 按鈕區 -->
             <div class="d-grid gap-2">
               <button type="submit" class="btn btn-success btn-lg shadow-sm fw-bold rounded-pill" [disabled]="isLoading">
                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>

@@ -18,7 +18,6 @@ export class ArticleList {
   @Input() articleList: ArticleData[] = [];
 
 
-
   goToDetail(id: number): void {
     this.router.navigate(['Board', 'detail', id]);
   }
@@ -40,6 +39,17 @@ export class ArticleList {
       }
       this.Serve.postArticleLike(id).subscribe();
     }
+  }
 
+  seachTag(tag: number) {
+    console.log(tag)
+    const para: string[] = [];
+    para.push(`TagsId=${tag}`);
+    this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
+      this.router.navigate(['Board'], {
+        queryParams: { TagsId: tag }
+      });
+    }
+    )
   }
 }

@@ -1,4 +1,4 @@
-/* @import "./assets/css/Board/main.css"; */
+@import "assets/css/Board/BoardMain.css";
 @import 'flatpickr/dist/flatpickr.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 

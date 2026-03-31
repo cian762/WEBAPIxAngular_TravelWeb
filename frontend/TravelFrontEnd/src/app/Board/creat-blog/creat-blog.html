@@ -1,0 +1,144 @@
+<div class="host-body">
+  <div class="editor-workspace">
+
+    <!-- ══ 左欄：圖片列表 ══ -->
+    <div class="side-panel left-panel">
+      <div class="panel-card">
+
+        <div class="panel-card-header">
+          <h5 class="panel-card-title">圖片列</h5>
+          <button class="upload-btn" (click)="triggerListUpload()" title="上傳圖片">
+            <i class="ri-upload-2-line"></i>
+          </button>
+          <input #listFileInput type="file" accept="image/*" multiple style="display:none"
+            (change)="onListFileSelected($event)" />
+        </div>
+
+        <!-- 空白提示 -->
+        <div class="list-empty" *ngIf="imageList.length === 0">
+          <i class="ri-image-line list-empty-icon"></i>
+          <p>尚無圖片</p>
+        </div>
+
+        <!-- 圖片表格 -->
+        <table class="table table-hover img-table" *ngIf="imageList.length > 0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>圖檔</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of imageList; let i = index" [class.row-active]="selectedImageId === item.id"
+              (click)="insertFromList(item)" title="點擊插入編輯器">
+              <td class="td-index">{{ i + 1 }}</td>
+              <td class="td-thumb">
+                <img [src]="item.src" [alt]="item.name" class="row-thumb" />
+                <span class="row-name">{{ item.name }}</span>
+              </td>
+              <td class="td-action">
+                <button class="row-delete" (click)="removeFromList(item.id, $event)" title="移除">
+                  <i class="ri-close-line"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+    <!-- ══ 中欄：富文字編輯器 ══ -->
+    <div class="center-col">
+      <div class="panel-card editor-card">
+
+        <!-- 標題 -->
+        <input class="editor-title" placeholder="標題" [(ngModel)]="pageTitle" />
+
+        <!-- 工具列 -->
+        <div class="editor-toolbar">
+          <button class="regular-button" title="粗體" (click)="format('bold')"><b>B</b></button>
+          <button class="regular-button" title="斜體" (click)="format('italic')"><i>I</i></button>
+          <button class="regular-button" title="底線" (click)="format('underline')"><u>U</u></button>
+          <button class="regular-button" title="刪除線" (click)="format('strikeThrough')"><s>S</s></button>
+          <div class="toolbar-sep"></div>
+          <button class="regular-button" title="靠左" (click)="format('justifyLeft')"><i
+              class="ri-align-left"></i></button>
+          <button class="regular-button" title="置中" (click)="format('justifyCenter')"><i
+              class="ri-align-center"></i></button>
+          <button class="regular-button" title="靠右" (click)="format('justifyRight')"><i
+              class="ri-align-right"></i></button>
+          <div class="toolbar-sep"></div>
+          <button class="regular-button" title="無序清單" (click)="format('insertUnorderedList')"><i
+              class="ri-list-unordered"></i></button>
+          <button class="regular-button" title="有序清單" (click)="format('insertOrderedList')"><i
+              class="ri-list-ordered"></i></button>
+          <div class="toolbar-sep"></div>
+          <button class="regular-button btn-insert-img" (click)="centerEditor.triggerUpload()" title="插入圖片">
+            <i class="ri-image-add-line"></i> 插入圖片
+          </button>
+          <input #fileInput type="file" accept="image/*" multiple style="display:none"
+            (change)="onEditorFileSelected($event)" />
+        </div>
+
+        <div class="drop-hint">
+          <i class="ri-information-line"></i>
+          支援拖放或貼上（Ctrl+V）插入圖片；點擊左欄圖片可直接插入
+        </div>
+
+        <!-- 統一編輯區 -->
+        <app-center-editor #centerEditor></app-center-editor>
+
+        <!-- 狀態列 -->
+        <div class="editor-status">
+          <span>{{ wordCount }} 個詞</span>
+          <span *ngIf="lastSaved" class="saved-hint">
+            <i class="ri-check-line"></i> 已儲存 {{ lastSaved }}
+          </span>
+          <button class="save-btn" (click)="saveContent()">儲存</button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ══ 右欄：圖片編輯器（留空） ══ -->
+    <div class="side-panel right-panel">
+      <div class="panel-card">
+
+        <div class="panel-card-header">
+          <h5 class="panel-card-title">圖片佈局</h5>
+        </div>
+        <div class="row mb-3 px-2">
+          <p class="section-label">圖片排列</p>
+          <div class="d-flex gap-1">
+            <button (click)="centerEditor.setLayout('left')" class="regular-button" title="靠左"><i
+                class="ri-layout-left-2-line"></i></button>
+            <button (click)="centerEditor.setLayout('full')" class="regular-button" title="滿版"><i
+                class="ri-fullscreen-line"></i></button>
+            <button (click)="centerEditor.setLayout('right')" class="regular-button" title="靠右"><i
+                class="ri-layout-right-2-line"></i></button>
+          </div>
+        </div>
+
+        <div class="row mb-3 px-2">
+          <p class="section-label">翻轉</p>
+          <div class="d-flex gap-1">
+            <button class="regular-button" title="水平翻轉"><i class="ri-flip-horizontal-line"></i></button>
+            <button class="regular-button" title="垂直翻轉"><i class="ri-flip-vertical-line"></i></button>
+          </div>
+        </div>
+
+        <!-- 佔位區 -->
+        <!-- <div class="placeholder-area">
+          <i class="ri-scissors-cut-line placeholder-icon"></i>
+          <p class="placeholder-title">圖片編輯器</p>
+          <p class="placeholder-desc">裁切、調色、濾鏡<br>即將推出</p>
+        </div> -->
+
+      </div>
+    </div>
+
+  </div>
+</div>

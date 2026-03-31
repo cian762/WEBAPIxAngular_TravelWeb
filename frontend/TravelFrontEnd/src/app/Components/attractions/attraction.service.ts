@@ -113,4 +113,17 @@ export class AttractionService {
       `${this.apiUrl}/AttractionProduct/stock/${productCode}`
     ).pipe(catchError(() => of({ productCode, remainingStock: 0 })));
   }
+
+  // 用 productCode 查詢景點ID、景點名稱、Tags（供登入後購物車補資料用）
+  getProductByCode(productCode: string): Observable<{
+    productId: number;
+    productCode: string;
+    attractionId: number;
+    attractionName: string | null;
+    tags: string[];
+  } | null> {
+    return this.http.get<any>(
+      `${this.apiUrl}/AttractionProduct/bycode/${productCode}`
+    ).pipe(catchError(() => of(null)));
+  }
 }

@@ -5,10 +5,13 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
+using TravelWeb_API.Models.Itinerary.Service;
 using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Controllers.Board
@@ -18,30 +21,33 @@ namespace TravelWeb_API.Controllers.Board
     [ApiExplorerSettings(GroupName = "Board")]
     public class PostController : ControllerBase
     {
-        private readonly BoardDbContext _context;
-        private readonly MemberSystemContext _memberDb;
+        private readonly BoardDbContext _context;       
+        
         private readonly IPostService _PostService;
 
         public PostController(BoardDbContext context,
-            IPostService noteService,
-            MemberSystemContext memberDb)
+            IPostService noteService)
         {
             _context = context;
-            _PostService = noteService;
-            _memberDb = memberDb;
+            _PostService = noteService;            
         }
 
         // GET: api/PostsDetailed 瀏覽Post
         [HttpGet("{id}")]
         public async Task<ActionResult<PostDetailDto>> GetPostDetail(int id)
-        {
-            Article? article = _context.Articles.Include(a => a.Post).FirstOrDefault(x => x.ArticleId == id);
-            if (article == null) return NotFound();
-            PostDetailDto postDetail =
-                _PostService.GetPostDetailed(article);
-            if (postDetail == null) return NotFound();
-            return postDetail;
+        {   
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var post = await _PostService.GetPostDetailed(id, currentUserId);
+            if (post == null)
+                return NotFound("文章不存在");            
+            if (post.Status != 1 && post.AuthorID != currentUserId)
+                return Forbid();
+
+            return Ok(post);
         }
+
+        
+
 
         [HttpPost]
         public async Task<ActionResult<int>> PostPost(int id)
@@ -74,8 +80,9 @@ namespace TravelWeb_API.Controllers.Board
                 await _PostService.UpdateArtic(
                     updateDto.id,
                     updateDto.Title, 
-                    updateDto.PhotoUrl, 
-                    updateDto.Status);
+                    updateDto.PhotoUrl,                    
+                    updateDto.Status,
+                    updateDto.regionId);
             if (!isUpdateSuccess)
                 return NotFound();
             else

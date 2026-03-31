@@ -11,6 +11,9 @@ export interface Attraction {
   businessHours?: string;
   closedDaysNote?: string;
   transportInfo?: string;
+  description?: string;      // 景點介紹文字（景點特色 Tab）
+  activityIntro?: string;    // 活動介紹文字（售票區 Tab）
+  productImages?: { imageId: number; imagePath: string; caption: string | null }[];
   viewCount: number;
   likeCount?: number;
   isLiked?: boolean;

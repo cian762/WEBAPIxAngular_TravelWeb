@@ -6,3 +6,57 @@
   object-position: center;
   /* 從圖片中心點裁切 */
 }
+
+.close-circle {
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.close-circle .hover-icon {
+  display: none;
+  color: #f44a40;
+}
+
+.close-circle:hover .default-icon {
+  display: none;
+}
+
+.close-circle:hover .hover-icon {
+  display: inline;
+}
+
+.remove-image:hover {
+  color: #f44a40;
+}
+
+
+
+/* === 留言附圖漂浮框 === */
+.preview-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.preview-popup img {
+  width: 200px;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-popup {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  /* left: 50%; */
+  background: #fff;
+  padding: 6px;
+  z-index: 999;
+  box-shadow: 2px 2px 3px #27272721;
+}
+
+.comment-photo {
+  width: 350px;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}

@@ -13,11 +13,11 @@ namespace TravelWeb_API.Controllers
     public class ItineraryController : ControllerBase
     {
         private readonly IItineraryservice _itineraryService;
-        private readonly string _memberId;
+
         public ItineraryController(IItineraryservice itineraryService)
         {
             _itineraryService = itineraryService;
-            //_memberId = User.FindFirst("MemberId")?.Value!;
+
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
@@ -33,6 +33,20 @@ namespace TravelWeb_API.Controllers
                 return NotFound("找不到該行程");
             }
             return Ok(result);
+        }
+        //GET會員ID抓所有行程
+        [HttpGet("list")]
+        public async Task<IActionResult> GetMyItineraries()
+        {
+            // 從 JWT Token 解析 MemberId
+            var MemberId = User.FindFirst("MemberId")?.Value ?? "tw_user_001";
+
+            if (MemberId == null)
+                return Unauthorized(new { message = "無法解析會員身份，請重新登入。" });
+
+            var itineraries = await _itineraryService.GetItinerariesByMemberAsync(MemberId);
+
+            return Ok(itineraries);
         }
         //GET抓所有的歷史行程
         [HttpGet("{id}/history")]
@@ -142,7 +156,7 @@ namespace TravelWeb_API.Controllers
             {
                 return BadRequest("沒有該行程");
             }
-            var result = _itineraryService.GetItemByVersionAsync(VerId);
+            var result = await _itineraryService.GetItemByVersionAsync(VerId);
             if (result == null)
             {
                 return BadRequest("沒有該行程");
@@ -163,6 +177,21 @@ namespace TravelWeb_API.Controllers
 
             // 刪除成功，RESTful 慣例回傳 204
             return NoContent();
+        }
+        //輸出PDF
+        [HttpGet("{itineraryId}/export")]
+        public async Task<IActionResult> ExportItinerary(int itineraryId)
+        {
+            var fileBuffer = await _itineraryService.GetExportFileAsync(itineraryId);
+            return File(fileBuffer, "application/pdf", $"Itinerary_{itineraryId}.pdf");
+        }
+        //輸出GOOGLE地圖路線
+        [HttpGet("{itineraryId}/day/{dayNumber}")]
+        public async Task<ActionResult<DayItineraryDto>> GetDayItinerary(int itineraryId, int dayNumber)
+        {
+            var result = await _itineraryService.GetDayItineraryAsync(itineraryId, dayNumber);
+            if (result == null) return NotFound();
+            return Ok(result);
         }
     }
 }

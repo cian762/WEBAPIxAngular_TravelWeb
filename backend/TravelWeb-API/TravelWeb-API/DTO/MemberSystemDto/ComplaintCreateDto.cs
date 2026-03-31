@@ -15,7 +15,6 @@ namespace TravelWebApi.DTOs
         [EmailAddress(ErrorMessage = "信箱格式錯誤")]
         public string ReplyEmail { get; set; } = null!;
 
-        // 🔥 新增圖片上傳欄位 (非必填)
         public IFormFile? ImageFile { get; set; }
     }
 }

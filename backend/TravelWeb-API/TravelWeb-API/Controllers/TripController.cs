@@ -49,6 +49,27 @@ namespace TravelWeb_API.Controllers
                 Tags = tags
             });
         }
+        //首頁用輪播
+        [HttpGet("Hot")]
+        public async Task<ActionResult<IEnumerable<TripProductDTO>>> GetHotTours(int take = 8)
+        {
+            try
+            {
+                var result = await _tripproduct.GetHotProductsAsync(take);
+
+                if (result == null || !result.Any())
+                {
+                    return NotFound("目前沒有熱門行程資料");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // 實務上建議記錄 log
+                return StatusCode(500, $"伺服器發生錯誤: {ex.Message}");
+            }
+        }
         //=====================================================
         //這裡是商品詳細頁
 

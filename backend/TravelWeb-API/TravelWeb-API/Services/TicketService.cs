@@ -16,7 +16,7 @@ namespace TravelWeb_API.Services
         }
 
         //將成功付款訂單中的商品明細，轉換成 QRCode Token 寫進資料庫
-        public async Task CreateQrCodeForOrderAsync(int orderId) 
+        public void CreateQrCodeForOrderAsync(int orderId) 
         {
             var check = await _dbcontext.Orders
                 .Include(o=>o.OrderItems)
@@ -49,7 +49,7 @@ namespace TravelWeb_API.Services
                 
             _dbcontext.QrcodeInfos.AddRange(qrCodeEntities);
            
-            await _dbcontext.SaveChangesAsync();
+            _dbcontext.SaveChanges();
         }
 
 

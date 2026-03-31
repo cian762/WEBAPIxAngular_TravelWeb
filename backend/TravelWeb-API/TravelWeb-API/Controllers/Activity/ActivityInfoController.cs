@@ -64,5 +64,16 @@ namespace TravelWeb_API.Controllers.Activity
         }
 
 
+        //這是文章討論那邊用來抓近期活動的        
+        [HttpGet("NewActivity")]
+        public IActionResult GetNewActivity()
+        {
+            var result = _activityInfoService.GetNewActivity();
+            return Ok(result);
+        }
+
+        
+
+
     }
 }

@@ -184,5 +184,24 @@ namespace TravelWeb_API.Services
                 
                 return products;
         }
+
+
+
+
+        //GetNewActivity這是文章討論那邊用來抓近期活動的
+        public List<NewActivity> GetNewActivity()
+        {
+            List<NewActivity> results = _activityDbContext.Activities
+                .Take(10)
+                .Select(a => new NewActivity { activityId= a.ActivityId, title=a.Title })
+                .ToList();
+
+            return results;
+        }
+        //GetNewActivity這是文章討論那邊用來抓近期活動的
+        public class NewActivity {
+            public int activityId { get; set; }
+            public string? title { get; set; }
+        }
     }
 }

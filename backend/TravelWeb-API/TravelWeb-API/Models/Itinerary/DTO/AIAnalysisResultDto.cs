@@ -37,8 +37,8 @@ namespace TravelWeb_API.Models.Itinerary.DTO
     public class AiLocation
     {
         public string Address { get; set; }
-        public double Lat { get; set; }
-        public double Lng { get; set; }
+        public decimal Lat { get; set; }
+        public decimal Lng { get; set; }
     }
     public class DayMetrics
     {

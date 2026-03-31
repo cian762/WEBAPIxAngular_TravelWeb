@@ -14,10 +14,13 @@ export interface ArticleData {
   userAvatar?: string;
   likeCount: number;
   isLike: boolean;
+  regionName?: string;
+  commentCount: number;
   tags?: TagDTO[]
 }
 
 export interface TagDTO {
   tagId: number;
   tagName: string;
+  icon: string;
 }

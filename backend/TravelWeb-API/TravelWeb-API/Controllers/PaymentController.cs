@@ -26,6 +26,8 @@ namespace TravelWeb_API.Controllers
             _ticketService = ticketService;
             _emailService = emailService;
         }
+
+
         //呼叫綠界付款畫面
         [HttpPost("Checkout/{orderId}")]
         public IActionResult Checkout(int orderId)
@@ -102,7 +104,6 @@ namespace TravelWeb_API.Controllers
                                 transaction.CompletedAt = DateTime.Now;
                             }
                         }
-
 
                         await _tripDbContext.SaveChangesAsync();
 

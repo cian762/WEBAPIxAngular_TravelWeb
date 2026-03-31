@@ -10,6 +10,25 @@
     <span class="current">{{ cityName }}</span>
   </div>
 </div>
+
+<!-- 城市介紹區塊（從城市點進來且有靜態資料時顯示） -->
+<div class="city-intro-block" *ngIf="!isFromTag && cityIntro">
+  <!-- Banner 圖片：全寬 -->
+  <div class="city-intro__banner">
+    <img [src]="cityIntro.image" [alt]="cityName" class="city-intro__banner-img">
+  </div>
+  <!-- 文字內容：置中 -->
+  <div class="city-intro__content-wrap">
+    <h2 class="city-intro__city-name">{{ cityName }}</h2>
+    <h3 class="city-intro__heading">{{ cityIntro.heading }}</h3>
+    <p class="city-intro__para" *ngFor="let para of cityIntro.paragraphs">{{ para }}</p>
+    <p class="city-intro__para" *ngIf="cityIntro.link">
+      更多旅遊資訊，詳見
+      <a [href]="cityIntro.link.url" target="_blank" class="city-intro__link">{{ cityIntro.link.label }}</a>。
+    </p>
+  </div>
+</div>
+
 <!-- Tag 標題（只有從 tag 點進來才顯示） -->
 <div class="tag-title-bar" *ngIf="isFromTag">
   <div class="container">
@@ -17,22 +36,6 @@
     <a routerLink="/attractions/tags" class="tags-link-top">
       景點標籤列表 <span class="tag-hash">#</span>
     </a>
-  </div>
-</div>
-<!-- 大 Tab：觀光景點 / 當期活動 / 遊程推薦 -->
-<div class="main-tabs">
-  <div class="container">
-    <div class="main-tabs__inner">
-      <button class="main-tab" [class.active]="activeTab === 'attractions'" (click)="switchTab('attractions')">
-        <i class="fa fa-map-marker"></i> 觀光景點
-      </button>
-      <button class="main-tab" [class.active]="activeTab === 'activities'" (click)="switchTab('activities')">
-        <i class="fa fa-calendar"></i> 當期活動
-      </button>
-      <button class="main-tab" [class.active]="activeTab === 'itineraries'" (click)="switchTab('itineraries')">
-        <i class="fa fa-suitcase"></i> 遊程推薦
-      </button>
-    </div>
   </div>
 </div>
 
@@ -63,7 +66,6 @@
             <i class="fa fa-search"></i>
           </button>
         </div>
-
       </div>
       <p class="result-hint" *ngIf="!loading">
         共找到 <strong>{{ attractions.length }}</strong> 個景點
@@ -121,17 +123,3 @@
   </section>
 
 </ng-container>
-
-<!-- ===== 當期活動（等待串接） ===== -->
-<section class="list-section" *ngIf="activeTab === 'activities'">
-  <div class="container py-5 text-center text-muted">
-    <p>當期活動串接中，請等待隊友 API...</p>
-  </div>
-</section>
-
-<!-- ===== 遊程推薦（等待串接） ===== -->
-<section class="list-section" *ngIf="activeTab === 'itineraries'">
-  <div class="container py-5 text-center text-muted">
-    <p>遊程推薦串接中，請等待隊友 API...</p>
-  </div>
-</section>

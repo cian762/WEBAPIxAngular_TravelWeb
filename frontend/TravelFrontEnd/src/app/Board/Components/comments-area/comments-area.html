@@ -14,6 +14,9 @@
           <p class="comment">
             {{comment.contents}}
           </p>
+          @if(comment.commentPhoto){
+          <img class="comment-photo" [src]="comment.commentPhoto">
+          }
         </div>
       </div>
       <div class="reply-btn">
@@ -45,21 +48,51 @@
   }
   }
 
-
+  <!-- 以下為發佈留言 -->
   <div class="comment-form">
     <h4 style="margin-bottom: 10px;">請留言</h4>
     <div class="d-flex justify-content-start">
-      @if(parentComment){
-      <p><a class="genric-btn danger-border radius small" style="width:30px ;" (click)="removeParent()">取消</a>
-        {{parentComment}}</p>
-      }
     </div>
     <form>
       <div class="form-group form-inline">
         <div class="form-group">
-          <textarea class="form-control mb-10" rows="5" name="message" placeholder="Messege"
-            onfocus="this.placeholder = ''" onblur="this.placeholder = 'Messege'" required=""
-            [(ngModel)]="contents">{{ contents }}</textarea>
+          <!-- 上傳區 -->
+          <div class="form-control p-0 mb-10" style="overflow: visible;">
+            <!-- 上方工具列 -->
+            <div class="d-flex align-items-center px-3 py-2 border-bottom">
+              @if(parentComment){
+              <span class="close-circle" (click)="removeParent()">
+                <i class="ri-close-circle-line default-icon"></i>
+                <i class="ri-close-circle-fill hover-icon"></i>
+              </span>&nbsp;
+              <span>{{parentComment}}</span>
+              }
+              @if(selectedImage){
+              <span class="preview-wrapper ms-auto">
+                <span class="remove-image" (mouseenter)="showPreview = true" (mouseleave)="showPreview = false"
+                  (click)="removeImage()">
+                  <i class="ri-close-circle-fill"></i>
+                  取消附圖
+                  @if (showPreview) {
+                  <div class="preview-popup">
+                    <img [src]="selectedImage">
+                  </div>
+                  }
+                </span></span>}
+              @else{
+              <label class="ms-auto" style="cursor: pointer;">
+                <i class="ri-image-add-fill"></i> 新增圖片
+                <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden">
+              </label>
+              }
+
+            </div>
+            <!-- 原本的 textarea -->
+            <textarea class="border-0 w-100 p-3" rows="5" name="message" placeholder="留下一句話..."
+              onfocus="this.placeholder = ''" onblur="this.placeholder = 'Messege'" required="" [(ngModel)]="contents"
+              style="outline: none; resize: none;"></textarea>
+
+          </div>
         </div>
         <a (click)="postComment(contents)" class="primary-btn text-uppercase">送出</a>
       </div>

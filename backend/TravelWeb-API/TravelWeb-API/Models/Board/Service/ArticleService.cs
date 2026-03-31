@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.Board.DbSet;
@@ -22,12 +23,14 @@ namespace TravelWeb_API.Models.Board.Service
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) GetArticles(int page, string? userId)
         {
-            return BuildPagedResult(_context.Articles, page, userId);
+            IQueryable<Article> data = _context.Articles.Where(a => a.Status == 1);
+            return BuildPagedResult(data, page, userId);
         }
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByKeyword(int page,string keyword, string? userId)
         {            
             IQueryable<Article> data = _context.Articles
+                .Where(a => a.Status == 1)
                 .Where(a => (a.Title != null && a.Title.Contains(keyword)) ||
                 a.UserId.Contains(keyword));
             return BuildPagedResult(data, page, userId);
@@ -39,6 +42,7 @@ namespace TravelWeb_API.Models.Board.Service
             endTime = endTime.AddDays(1);
 
             IQueryable<Article> data = _context.Articles
+                .Where(a => a.Status == 1)
                 .Where(a => a.CreatedAt >= startTime && 
                       a.CreatedAt <= endTime);
 
@@ -62,7 +66,8 @@ namespace TravelWeb_API.Models.Board.Service
             {
                 data = _context.ArticleTags
                               .Where(t => tagIds.Contains(t.TagId))
-                              .Select(t => t.Article);                              
+                              .Select(t => t.Article)
+                              .Where(a => a.Status == 1);                              
                               
             }
 
@@ -72,6 +77,7 @@ namespace TravelWeb_API.Models.Board.Service
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByAuthorID(int page, string authorID, string? userId)
         {
             IQueryable<Article> data = _context.Articles
+                .Where(a => a.Status == 1)
                 .Where(a => a.UserId == authorID);
 
             return BuildPagedResult(data, page,userId);
@@ -79,7 +85,7 @@ namespace TravelWeb_API.Models.Board.Service
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) Search(int page, ArticleSearchDTO dto, string? userId)
         {
-            IQueryable<Article> query = _context.Articles.AsQueryable();
+            IQueryable<Article> query = _context.Articles.Where(a => a.Status == 1).AsQueryable();
 
             // 標題
             if (!string.IsNullOrEmpty(dto.Keyword))
@@ -120,54 +126,95 @@ namespace TravelWeb_API.Models.Board.Service
         private (List<ArticleDataDTO> ArticleDTOList, int TotalCount) BuildPagedResult(
                                                      IQueryable<Article> data, int page,string? userID)
         {
-            List<Article> articles = GetArticles(page, data, userID);
-            int totalCount = GetArticleCount(articles);
-            List<ArticleDataDTO> result = ToArticleDTO(articles,userID);
+            List <ArticleDataDTO> result = GetArticles(page, data, userID);
+            int totalCount = data.Count();
+                //GetArticleCount(articles);
+            //List<ArticleDataDTO> result = ToArticleDTO(articles,userID);
             return (result, totalCount);
         }
 
-        List<Article> GetArticles(int page, IQueryable<Article> data,string? userID)
+        List<ArticleDataDTO> GetArticles(int page, IQueryable<Article> data, string? userID)
         {
-            //處理分頁+把資料從DB撈出來
             int pageSize = 10;
-            var result = data
-                .Distinct() //移除重複資料
-                .Include(a => a.MemberInformation)
-                .Include(a => a.ArticleLikes)  
-                .Include(a => a.ArticleTags)
+            return data                
                 .OrderByDescending(a => a.CreatedAt)
-               .Skip((page - 1) * pageSize)
-               .Take(pageSize)
-               .ToList();
-            return result;
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new ArticleDataDTO
+                {
+                    articleId = a.ArticleId,
+                    title = a.Title,
+                    CreatedAt = a.CreatedAt,
+                    photoUrl = a.PhotoUrl,
+                    userID = a.UserId,
+                    userName = a.MemberInformation.Name,
+                    userAvatar = a.MemberInformation.AvatarUrl,
+                    RegionID = a.RegionID,
+                    RegionName = a.Region != null
+                        ? $"{a.Region.UidNavigation.RegionName},{a.Region.RegionName}"
+                        : null,
+                    LikeCount = a.ArticleLikes.Count(),
+                    isLike = a.ArticleLikes.Any(l => l.UserId == userID),
+                    tags = a.ArticleTags
+                        .Select(t => new TagDTO 
+                        { TagId = t.TagId, TagName = t.Tag.TagName ,icon=t.Tag.icon})
+                        .ToList(),
+                    CommentCount = a.Comments.Count(),
+                })
+                .ToList();
         }
 
-        int GetArticleCount(List<Article> articles)
-        {
-            return articles.Count;
-        }
+        //List<Article> GetArticles(int page, IQueryable<Article> data, string? userID)
+        //{
+        //    //處理分頁+把資料從DB撈出來
+        //    int pageSize = 10;
+        //    var result = data
+        //        .Where(a => a.Status == 1)
+        //        .Distinct() //移除重複資料
+        //        .Include(a => a.MemberInformation)
+        //        .Include(a => a.ArticleLikes)
+        //        .Include(a => a.ArticleTags)
+        //        .ThenInclude(t => t.Tag)
+        //        .Include(a => a.Region)
+        //        .ThenInclude(r => r!.UidNavigation)
+        //        .Include(a=>a.Comments)
+        //        .OrderByDescending(a => a.CreatedAt)
+        //       .Skip((page - 1) * pageSize)
+        //       .Take(pageSize)
+        //       .ToList();
+        //    return result;
+        //}
+
+        //int GetArticleCount(List<Article> articles)
+        //{
+        //    return articles.Count;
+        //}
 
 
-        List<ArticleDataDTO> ToArticleDTO(List<Article> data, string? userID)
-        {
-            //資料扁平化
-            var result = data.Select(a => new ArticleDataDTO
-            {
-                articleId = a.ArticleId,
-                title = a.Title,
-                CreatedAt = a.CreatedAt,
-                photoUrl = a.PhotoUrl,
-                userID = a.UserId,
-                userName = a.MemberInformation.Name,
-                userAvatar = a.MemberInformation.AvatarUrl,
-                LikeCount = a.ArticleLikes.Count,
-                isLike = a.ArticleLikes.Any(l => l.UserId == userID),
-                tags = a.ArticleTags.Select(t=>new TagDTO {TagId=t.TagId}).ToList()
+        //List<ArticleDataDTO> ToArticleDTO(List<Article> data, string? userID)
+        //{
+        //    //資料扁平化
+        //    var result = data.Select(a => new ArticleDataDTO
+        //    {
+        //        articleId = a.ArticleId,
+        //        title = a.Title,
+        //        CreatedAt = a.CreatedAt,
+        //        photoUrl = a.PhotoUrl,
+        //        userID = a.UserId,
+        //        userName = a.MemberInformation.Name,
+        //        userAvatar = a.MemberInformation.AvatarUrl,
+        //        RegionID = a.RegionID,
+        //        RegionName = ($"{a.Region?.UidNavigation?.RegionName},{a.Region?.RegionName}"),
+        //        LikeCount = a.ArticleLikes.Count,
+        //        isLike = a.ArticleLikes.Any(l => l.UserId == userID),
+        //        tags = a.ArticleTags
+        //        .Select(t => new TagDTO { TagId = t.TagId, TagName = t.Tag.TagName }).ToList(),
+        //        CommentCount = a.Comments.Count,
 
-            }).ToList();
+        //    }).ToList();
 
-            return result;
-        }
+        //    return result;
+        //}
 
         public void Like(int articleID, string userID)
         {
@@ -193,11 +240,12 @@ namespace TravelWeb_API.Models.Board.Service
         }
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByUserID(int page, string userId)
-        {
-            IQueryable<Article> data = _context.Articles
-                .Where(a => a.UserId == userId);
+        {int pageSize = 10;
+            var data = _context.Articles
+                .Where(a => a.UserId == userId);          
 
             return BuildPagedResult(data, page, userId);
         }
+      
     }
 }
