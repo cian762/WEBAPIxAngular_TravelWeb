@@ -50,6 +50,51 @@
   background-color: #e7f3ff; /* FB 藍色背景 */
   color: #1877f2; /* FB 藍色文字 */
   font-weight: bold;
+
+  /* ==========================================
+   模仿 Facebook 的列表與按鈕樣式
+   ========================================== */
+
+/* FB 風格的灰色動作按鈕 */
+.fb-action-btn {
+  background-color: #e4e6eb; /* FB 經典淺灰 */
+  color: #050505;            /* FB 經典深灰文字 */
+  border: none;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.fb-action-btn:hover {
+  background-color: #d8dadf; /* 滑鼠移過去變深灰 */
+  color: #050505;
+}
+
+/* 讓列表項目中間有微微的底線區隔 */
+.border-bottom-md {
+  border-bottom: 1px solid #f0f2f5 !important;
+}
+
+/* ==========================================
+   意見申訴卡片樣式
+   ========================================== */
+
+/* 滑鼠變手指 */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* 讓卡片邊框在大螢幕時出現分隔線 */
+@media (min-width: 768px) {
+  .border-md-start {
+    border-left: 1px solid #dee2e6 !important;
+  }
+}
+
+/* 展開內容時的淡入動畫 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 }
 
 /* 響應式微調 (手機版大頭貼置中) */

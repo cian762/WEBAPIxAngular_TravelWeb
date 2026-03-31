@@ -105,4 +105,20 @@ export class AuthService {
   resetPassword(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/Auth/reset-password`, data);
   }
+
+  // ==========================================
+  // 👥 切換追隨狀態 (追隨 / 取消追隨)
+  // ==========================================
+  toggleFollow(followedId: string): Observable<any> {
+    const data = { followedId: followedId };
+    return this.http.post(`${this.apiUrl}/Follow/toggle`, data, { withCredentials: true });
+  }
+
+  // ==========================================
+  // 🚫 切換封鎖狀態 (封鎖 / 解除封鎖)
+  // ==========================================
+  toggleBlock(blockedId: string, reason?: string): Observable<any> {
+    const data = { blockedId: blockedId, reason: reason };
+    return this.http.post(`${this.apiUrl}/Block/toggle`, data, { withCredentials: true });
+  }
 }

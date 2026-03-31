@@ -1,5 +1,4 @@
-﻿// 檔案：Services/MemberEmailService.cs
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using MimeKit.Text;
@@ -55,24 +54,18 @@ namespace TravelWeb_API.Services
             }
         }
 
-        // ==========================================
-        // 🔥 請把下面這整段貼在這裡！(寄送「重設密碼」專屬驗證信)
-        // ==========================================
         public async Task SendPasswordResetEmailAsync(string toEmail, string code, string resetLink)
         {
             var email = new MimeMessage();
 
-            // 從 appsettings.json 讀取寄件人資訊
             email.From.Add(new MailboxAddress(
                 _config["EmailSettings:SenderName"],
                 _config["EmailSettings:SenderEmail"]));
 
             email.To.Add(MailboxAddress.Parse(toEmail));
 
-            // 設定信件主旨
             email.Subject = "[Travelista] 您的重設密碼驗證信";
 
-            // 設計超有質感的 HTML 信件內容 (包含 4 位數驗證碼與按鈕)
             string htmlBody = $@"
                 <div style='font-family: ""Helvetica Neue"", Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eaeaea;'>
                     
@@ -102,7 +95,6 @@ namespace TravelWeb_API.Services
 
             email.Body = new TextPart(TextFormat.Html) { Text = htmlBody };
 
-            // 執行寄信動作
             using var smtp = new SmtpClient();
             try
             {

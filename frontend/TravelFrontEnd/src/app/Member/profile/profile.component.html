@@ -38,12 +38,6 @@
           <p class="text-muted fw-bold mb-2">{{ userProfile.followersCount || 0 }} 位追隨者</p>
         </div>
 
-        <div
-          class="mt-3 mt-md-auto mb-md-2 text-center text-md-end d-flex align-items-end gap-2 justify-content-center">
-          <button class="btn btn-primary fw-bold shadow-sm">
-            <i class="bi bi-plus-lg me-1"></i> 新增限時動態
-          </button>
-        </div>
       </div>
 
     </div>
@@ -72,7 +66,7 @@
                 [class.active]="activeTab === 'complaints'" (click)="switchTab('complaints')">意見申訴</button>
               <hr class="my-2">
               <button class="list-group-item list-group-item-action fw-bold border-0 rounded-3 my-1 text-danger"
-                (click)="onLogout()">安全登出</button>
+                (click)="onLogout()">登出</button>
             </div>
           </div>
         </div>
@@ -98,7 +92,6 @@
                 <div class="col-sm-3 text-muted fw-bold">登入密碼</div>
                 <div class="col-sm-9 d-flex justify-content-between align-items-center">
                   <span class="fw-semibold text-secondary">********</span>
-                  <button class="btn btn-sm btn-outline-primary rounded-pill">變更密碼</button>
                 </div>
               </div>
             </div>
@@ -136,11 +129,93 @@
               <router-outlet></router-outlet>
             </div>
 
-            <div *ngIf="activeTab === 'blocked'">
+            <!-- ========================================== -->
+            <!-- 3. 追隨清單 -->
+            <!-- ========================================== -->
+            <div *ngIf="activeTab === 'following'">
+              <div class="border-bottom pb-3 mb-2">
+                <h4 class="fw-bold mb-1 text-dark">追隨清單</h4>
+                <p class="text-muted small mb-0">這些是你正在追隨的會員，他們的最新動態會出現在你的頁面中。</p>
+              </div>
+
+              <!-- 沒資料時的空狀態 -->
+              <div *ngIf="!userProfile.followingList || userProfile.followingList.length === 0"
+                class="text-center py-5">
+                <i class="bi bi-people text-muted" style="font-size: 3.5rem;"></i>
+                <h6 class="text-muted mt-3 fw-bold">目前還沒有追隨任何人</h6>
+              </div>
+
+              <!-- 追隨列表 -->
+              <div class="list-group list-group-flush">
+                <div *ngFor="let f of userProfile.followingList"
+                  class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 border-bottom-0 border-bottom-md">
+
+                  <!-- 左側：大頭貼與名稱 -->
+                  <div class="d-flex align-items-center gap-3 cursor-pointer" routerLink="/profile/{{ f.memberId }}">
+                    <img [src]="f.avatarUrl || 'assets/default-avatar.png'"
+                      class="rounded-circle object-fit-cover shadow-sm border" style="width: 52px; height: 52px;"
+                      alt="avatar">
+                    <div class="lh-sm">
+                      <h6 class="mb-1 fw-bold text-dark">{{ f.name }}</h6>
+                      <small class="text-muted">{{ f.memberId }}</small>
+                    </div>
+                  </div>
+
+                  <!-- 右側：動作按鈕 (模仿 FB 樣式) -->
+                  <button class="btn fb-action-btn fw-bold rounded-3 px-3 py-2" (click)="unfollowUser(f.memberId)">
+                    取消追隨
+                  </button>
+
+                </div>
+              </div>
             </div>
 
+            <!-- ========================================== -->
+            <!-- 4. 黑名單 -->
+            <!-- ========================================== -->
+            <div *ngIf="activeTab === 'blocked'">
+              <div class="border-bottom pb-3 mb-2">
+                <h4 class="fw-bold mb-1 text-dark">封鎖名單</h4>
+                <p class="text-muted small mb-0">一旦你封鎖了對方，對方就無法看見你的內容、標記你或傳送訊息給你。</p>
+              </div>
+
+              <!-- 沒資料時的空狀態 -->
+              <div *ngIf="!userProfile.blackList || userProfile.blackList.length === 0" class="text-center py-5">
+                <i class="bi bi-person-x text-muted" style="font-size: 3.5rem;"></i>
+                <h6 class="text-muted mt-3 fw-bold">目前沒有封鎖任何人</h6>
+              </div>
+
+              <!-- 黑名單列表 -->
+              <div class="list-group list-group-flush">
+                <div *ngFor="let b of userProfile.blackList"
+                  class="list-group-item d-flex justify-content-between align-items-center py-3 px-0 border-bottom-0 border-bottom-md">
+
+                  <!-- 左側：大頭貼與名稱 -->
+                  <div class="d-flex align-items-center gap-3">
+                    <img [src]="b.avatarUrl || 'assets/default-avatar.png'"
+                      class="rounded-circle object-fit-cover shadow-sm border" style="width: 52px; height: 52px;"
+                      alt="avatar">
+                    <div class="lh-sm">
+                      <h6 class="mb-1 fw-bold text-dark">{{ b.name || '未知使用者' }}</h6>
+                      <small class="text-muted">{{ b.blockedId }}</small>
+                    </div>
+                  </div>
+
+                  <!-- 右側：動作按鈕 (模仿 FB 樣式) -->
+                  <button class="btn fb-action-btn fw-bold rounded-3 px-3 py-2" (click)="unblockUser(b.blockedId)">
+                    解除封鎖
+                  </button>
+
+                </div>
+              </div>
+            </div>
+
+           <!-- ========================================== -->
+            <!-- 5. 意見申訴紀錄 (可展開詳細內容 - 優化版) -->
+            <!-- ========================================== -->
             <div *ngIf="activeTab === 'complaints'">
 
+              <!-- 頂部標題與新增按鈕 -->
               <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
                 <h4 class="fw-bold mb-0 text-dark">
                   <i class="bi bi-chat-square-text-fill me-2 text-primary"></i> 意見申訴紀錄
@@ -150,69 +225,97 @@
                 </a>
               </div>
 
+              <!-- 沒資料時的空狀態 -->
               <div *ngIf="!userProfile.complaints || userProfile.complaints.length === 0" class="text-center text-muted py-5 bg-light rounded-4 border mt-4">
                 <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
                 <h6 class="fw-bold">目前沒有任何申訴紀錄</h6>
                 <p class="mb-0 small">如果您在使用過程中有任何問題或建議，歡迎點擊上方按鈕新增申訴。</p>
               </div>
 
-              <div *ngIf="userProfile.complaints && userProfile.complaints.length > 0" class="table-responsive mt-3">
-                <table class="table table-hover align-middle border rounded-3 overflow-hidden shadow-sm">
+              <!-- 有資料時的列表 (改用卡片堆疊風格，取代傳統表格避免太擠) -->
+              <div *ngIf="userProfile.complaints && userProfile.complaints.length > 0" class="mt-2">
 
-                  <thead class="table-light text-secondary">
-                    <tr>
-                      <th class="ps-4">案件編號</th>
-                      <th>主旨</th>
-                      <th>投訴時間</th>
-                      <th>處理狀態</th>
-                      <th class="text-end pe-4">操作</th>
-                    </tr>
-                  </thead>
+                <!-- 使用 ngFor 跑迴圈印出每一筆紀錄 -->
+                <ng-container *ngFor="let c of userProfile.complaints; let i = index">
 
-                  <tbody>
-                    <ng-container *ngFor="let c of userProfile.complaints; let i = index">
+                  <!-- 單筆申訴的卡片外框 -->
+                  <div class="card mb-3 border-0 shadow-sm rounded-4 overflow-hidden" style="background-color: #fcfcfc;">
 
-                      <tr>
-                        <td class="ps-4 fw-bold text-primary">{{ c.id }}</td>
-                        <td class="fw-semibold text-dark">{{ c.subject || '未分類投訴' }}</td>
-                        <td class="text-muted small">{{ c.date }}</td>
-                        <td>
-                          <span class="badge rounded-pill px-3 py-2 shadow-sm"
-                                [ngClass]="{'bg-success': c.status === '已處理', 'bg-warning text-dark': c.status === '處理中', 'bg-secondary': c.status === '已檢視'}">
+                    <!-- 1. 摘要列 (可點擊整塊區域展開) -->
+                    <div class="card-body p-4 cursor-pointer position-relative" (click)="c.isExpanded = !c.isExpanded"
+                         style="transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f5f7fa';" onmouseout="this.style.backgroundColor='transparent';">
+
+                      <div class="row align-items-center g-3">
+                        <!-- 左側資訊 (佔 9 格) -->
+                        <div class="col-md-9 d-flex flex-column flex-md-row gap-md-4 align-items-md-center">
+
+                          <!-- 案件編號 -->
+                          <div>
+                            <span class="text-muted small fw-bold d-block mb-1">案件編號</span>
+                            <span class="fw-bold text-primary fs-6">{{ c.id }}</span>
+                          </div>
+
+                          <!-- 主旨 -->
+                          <div class="flex-grow-1 border-md-start ps-md-4 mt-3 mt-md-0">
+                            <span class="text-muted small fw-bold d-block mb-1">主旨</span>
+                            <span class="fw-bold text-dark fs-6">{{ c.subject || '未分類投訴' }}</span>
+                          </div>
+
+                          <!-- 時間 -->
+                          <div class="border-md-start ps-md-4 mt-3 mt-md-0">
+                            <span class="text-muted small fw-bold d-block mb-1">投訴時間</span>
+                            <span class="text-secondary small">{{ c.date }}</span>
+                          </div>
+                        </div>
+
+                        <!-- 右側狀態與按鈕 (佔 3 格) -->
+                        <div class="col-md-3 d-flex flex-column align-items-md-end text-md-end mt-3 mt-md-0">
+
+                          <!-- 狀態標籤 -->
+                          <span class="badge rounded-pill px-3 py-2 shadow-sm mb-2" style="font-size: 0.85rem;"
+                                [ngClass]="{'bg-success': c.status === '已處理', 'bg-warning text-dark': c.status === '處理中', 'bg-secondary': c.status === '審核中'}">
                             {{ c.status }}
                           </span>
-                        </td>
-                        <td class="text-end pe-4">
-                          <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold"
-                                  (click)="c.isExpanded = !c.isExpanded">
-                            {{ c.isExpanded ? '收合' : '詳細內容' }} <i class="bi" [ngClass]="c.isExpanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-                          </button>
-                        </td>
-                      </tr>
 
-                      <tr *ngIf="c.isExpanded" class="bg-light">
-                        <td colspan="5" class="p-4 border-bottom">
-                          <div class="row g-4">
-                            <div class="col-md-12">
-                              <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-file-earmark-text me-2"></i>投訴內容詳述</h6>
-                              <div class="p-3 bg-white border rounded-3 text-dark" style="white-space: pre-wrap;">
-                                {{ c.desc }}
-                              </div>
-                            </div>
-                            <div class="col-md-12" *ngIf="c.compensation">
-                              <h6 class="fw-bold text-success mb-2"><i class="bi bi-reply-fill me-2"></i>官方處理結果</h6>
-                              <div class="p-3 bg-white border border-success rounded-3 text-dark" style="white-space: pre-wrap;">
-                                {{ c.compensation }}
-                              </div>
-                            </div>
+                          <!-- 展開箭頭 -->
+                          <div class="text-primary small fw-bold mt-1">
+                            {{ c.isExpanded ? '收合' : '查看詳細' }} <i class="bi fs-6 ms-1 align-middle" [ngClass]="c.isExpanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                           </div>
-                        </td>
-                      </tr>
 
-                    </ng-container>
-                  </tbody>
+                        </div>
+                      </div>
+                    </div>
 
-                </table>
+                    <!-- 2. 隱藏的詳細內容區塊 (點擊後向下展開) -->
+                    <div *ngIf="c.isExpanded" class="bg-white border-top p-4" style="animation: fadeIn 0.3s ease-in-out;">
+                      <div class="row g-4">
+
+                        <!-- 投訴內容詳述 -->
+                        <div class="col-md-8">
+
+                          <!-- 顯示回覆信箱 -->
+                          <div class="mb-4 bg-light p-3 rounded-3 border-start border-4 border-primary">
+                            <span class="text-muted fw-bold small me-2">指定回覆信箱：</span>
+                            <span class="fw-semibold text-dark">{{ c.email }}</span>
+                          </div>
+
+                          <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-file-earmark-text me-2"></i>投訴內容詳述</h6>
+                          <div class="p-3 bg-light border border-light rounded-3 text-dark shadow-sm" style="white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;">{{ c.desc }}</div>
+                        </div>
+
+                        <!-- 附圖預覽 (如果有) -->
+                        <div class="col-md-4" *ngIf="c.imageUrl">
+                          <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-image me-2"></i>佐證照片</h6>
+                          <a [href]="c.imageUrl" target="_blank" title="點擊放大查看">
+                            <img [src]="c.imageUrl" class="img-fluid rounded-4 border shadow-sm w-100" style="max-height: 250px; object-fit: cover; cursor: zoom-in;" alt="佐證照片">
+                          </a>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                </ng-container>
               </div>
             </div>
 
