@@ -35,6 +35,10 @@ public partial class Attraction
 
     public string? TransportInfo { get; set; }
 
+    public string? Description { get; set; }  // 景點介紹文字
+
+    public string? ActivityIntro { get; set; }  // 售票區活動介紹文字
+
     public DateTime CreatedAt { get; set; }
 
     public bool IsDeleted { get; set; }

@@ -71,18 +71,12 @@
           此票種已售完
         </div>
 
-        <!-- 數量選擇 -->
+       <!-- 數量選擇 -->
         <div class="ts-qty-section" *ngIf="!isSoldOut(p.productCode)">
           <div class="ts-sub-title">選擇數量</div>
           <div class="ts-qty-row">
             <span class="ts-qty-label">每人</span>
             <div class="ts-price-qty">
-              <div class="ts-price-wrap">
-                <span class="ts-price">NT$ {{ p.price | number }}</span>
-                <span class="ts-original-price" *ngIf="p.originalPrice && p.originalPrice > (p.price ?? 0)">
-                  NT$ {{ p.originalPrice | number }}
-                </span>
-              </div>
               <div class="ts-qty-ctrl">
                 <button class="ts-qty-btn" (click)="decQty(p.productId)">−</button>
                 <span class="ts-qty-val">{{ qtyMap[p.productId] }}</span>
@@ -91,7 +85,6 @@
             </div>
           </div>
         </div>
-
         <!-- 小計 + 按鈕 -->
         <div class="ts-card__footer" *ngIf="!isSoldOut(p.productCode)">
           <span class="ts-subtotal">NT$ {{ getSubtotal(p) | number }}</span>

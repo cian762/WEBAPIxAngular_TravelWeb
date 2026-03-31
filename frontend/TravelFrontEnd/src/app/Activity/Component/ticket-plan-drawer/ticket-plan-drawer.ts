@@ -52,19 +52,19 @@ export class TicketPlanDrawer {
     });
     this.close();
   }
-  //連結購物車用
-  addToOrder() {
-    const orderDetail = {
-      directBuyItems: [{
-        productCode: this.plan?.productCode,
-        quantity: this.quantity,
-        ticketCategoryId: this.plan?.ticketCategoryId
-      }]
-    };
-    console.log(orderDetail);
-    this.router.navigate(['/order'], { state: { data: orderDetail } });
-    this.close();
-  }
+  // //連結購物車用
+  // addToOrder() {
+  //   const orderDetail = {
+  //     directBuyItems: [{
+  //       productCode: this.plan?.productCode,
+  //       quantity: this.quantity,
+  //       ticketCategoryId: this.plan?.ticketCategoryId
+  //     }]
+  //   };
+  //   console.log(orderDetail);
+  //   this.router.navigate(['/order'], { state: { data: orderDetail } });
+  //   this.close();
+  // }
 
 
 }
