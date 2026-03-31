@@ -71,7 +71,7 @@
           此票種已售完
         </div>
 
-       <!-- 數量選擇 -->
+        <!-- 數量選擇 -->
         <div class="ts-qty-section" *ngIf="!isSoldOut(p.productCode)">
           <div class="ts-sub-title">選擇數量</div>
           <div class="ts-qty-row">
@@ -160,6 +160,12 @@
     </div>
     <hr class="ts-divider"
       *ngIf="drawerDetail.detail?.includes || drawerDetail.detail?.excludes || drawerDetail.detail?.eligibility">
+
+    <!-- 活動亮點 -->
+    <div class="ts-drawer__section" *ngIf="drawerDetail.detail?.contentDetails">
+      <h5 class="ts-drawer__section-title">活動亮點</h5>
+      <p class="ts-drawer__text">{{ drawerDetail.detail?.contentDetails }}</p>
+    </div>
 
     <!-- 方案詳情 -->
     <div class="ts-drawer__section"
