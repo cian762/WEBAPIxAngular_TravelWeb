@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.TripProduct.ITripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 
@@ -8,33 +9,41 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
     {
      private readonly TripDbContext _context;
 
+     private readonly ActivityDbContext _acts;
+
      private readonly string _mvcBaseUrl;
 
-        public SShoppingCart(TripDbContext context,IConfiguration config)
+        public SShoppingCart(TripDbContext context,IConfiguration config, ActivityDbContext acts)
         {
             _context = context;
+             _acts = acts;
             _mvcBaseUrl = config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
         }
         //加入購物車的方法
         public async Task AddToCartAsync(AddToCartDTO dto)
         {
-            // 檢查 Unique Index (MemberId + ProductCode)
+            // 💡 關鍵修正：判斷條件必須包含 TicketCategoryId
             var existingItem = await _context.ShoppingCarts
-                .FirstOrDefaultAsync(c => c.MemberId == dto.MemberId && c.ProductCode == dto.ProductCode);
+                .FirstOrDefaultAsync(c =>
+                    c.MemberId == dto.MemberId &&
+                    c.ProductCode == dto.ProductCode &&
+                    c.TicketCategoryId == dto.TicketCategoryId); // ✨ 加上這一行
 
             if (existingItem != null)
             {
+                // 如果「同產品且同票種」已存在，才累加數量
                 existingItem.Quantity += dto.Quantity;
                 _context.ShoppingCarts.Update(existingItem);
             }
             else
             {
+                // 如果票種不同，視為新項目，執行 Add
                 var newItem = new ShoppingCart
                 {
                     MemberId = dto.MemberId!,
                     ProductCode = dto.ProductCode,
                     Quantity = dto.Quantity,
-                    TicketCategoryId = dto.TicketCategoryId, // 前端傳入
+                    TicketCategoryId = dto.TicketCategoryId,
                     CreatedAt = DateTime.Now
                 };
                 await _context.ShoppingCarts.AddAsync(newItem);
@@ -76,6 +85,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 var trip = await _context.TripSchedules
                     .Where(s => s.ProductCode == item.ProductCode)
                     .Select(s => new {
+                        s.TripProductId,
                         s.TripProduct.ProductName,
                         s.TripProduct.CoverImage,
                         s.Price,
@@ -89,6 +99,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     dto.Price = trip.Price ?? 0;
                     string url ="/PImages/" + trip.CoverImage!;
                     dto.CoverImage = CartItemDTO.GetFullUrl(url,_mvcBaseUrl);
+                    dto.TargetId = trip.TripProductId;
                     resultList.Add(dto);
                     continue;
                 }
@@ -98,6 +109,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 .Where(a => a.ProductCode == item.ProductCode)
                 .Select(a => new
                 {
+                    a.AttractionId,
                     a.Attraction.Name,
                     a.Title,
                     a.Price,
@@ -108,6 +120,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
                 if (attr != null)
                 {
+                    dto.TargetId = attr.AttractionId;
                     dto.ProductName = $"{attr.Name} ({attr.Title})";
                     dto.Price = attr.Price ?? 0;
                     dto.CoverImage = CartItemDTO.GetFullUrl(attr.CoverImage!, _mvcBaseUrl);
@@ -118,83 +131,40 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 }
 
                 // --- 第三段：找「活動票券」(ImageUrl 存的是 Cloudinary 網址) ---
-                var act = await _context.AcitivityTickets
+                // --- 第三段：找「活動票券」(ACT) ---
+                // 1. 先從 _context (TripDbContext) 抓出票券基本資訊
+                var ticket = await _context.AcitivityTickets
                     .Where(t => t.ProductCode == item.ProductCode)
                     .Select(t => new {
+                        t.ProductCode,
                         t.ProductName,
                         t.CoverImageUrl,
                         t.CurrentPrice
-                        // 直接拿這張表的圖片欄位！
-                    })
-                    .FirstOrDefaultAsync();
+                    }).FirstOrDefaultAsync();
 
-                if (act != null)
+                if (ticket != null)
                 {
-                    dto.ProductName = act.ProductName;
-                    dto.Price = (decimal)act.CurrentPrice!;
+                    // 2. 使用拿到 ProductCode，去 _act (ActivityDbContext) 的中間表查 ActivityID
+                    // 因為這張表在另一個 DB，所以要分開查詢
+                    var detail = await _acts.ActivityTicketDetails
+                        .Where(d => d.ProductCode == ticket.ProductCode)
+                        .Select(d => new { d.ActivityId })
+                        .FirstOrDefaultAsync();
 
-                    // 直接把這張表的 ActivityImageUrl 丟進去處理
-                    dto.CoverImage =act.CoverImageUrl;
+                    if (detail != null)
+                    {
+                        dto.TargetId = (int)detail.ActivityId!; // 💡 成功從另一個 DB 抓到導頁 ID
+                        dto.ProductName = ticket.ProductName;
+                        dto.Price = (decimal)(ticket.CurrentPrice ?? 0);
+                        dto.CoverImage = ticket.CoverImageUrl;
+                        dto.TargetId = (int)(detail.ActivityId ?? 0);
 
-                    resultList.Add(dto);
+                        resultList.Add(dto);
+                    }
                 }
+
             }
             return resultList;
-        }
-        //遊客跟使用者搬遷購物車內容========這支目前用不到了
-        public async Task MigrateCartAsync(string guestId, string memberId)
-        {
-            // 1. 安全檢查：如果 ID 一樣，直接結束
-            if (guestId == memberId) return;
-
-            // 2. 身分判定：利用我們約定的 "GUEST_" 前綴
-            if (!guestId.StartsWith("GUEST_"))
-            {
-                throw new Exception("無效的遊客識別碼");
-            }
-
-            // 3. 確保目標 memberId 真的存在於會員資料表 (避免把東西搬到不存在的帳號)
-            var isRealMember = await _context.MemberInformations
-                .AnyAsync(m => m.MemberId == memberId);
-
-            if (!isRealMember)
-            {
-                throw new Exception("會員帳號不存在");
-            }
-
-            // 4. 抓取遊客的所有購物車項目
-            var guestItems = await _context.ShoppingCarts
-                .Where(c => c.MemberId == guestId)
-                .ToListAsync();
-
-            if (!guestItems.Any()) return;
-
-            // 5. 抓取會員原本的購物車項目 (用來比對重複)
-            var memberItems = await _context.ShoppingCarts
-                .Where(c => c.MemberId == memberId)
-                .ToListAsync();
-
-            foreach (var guestItem in guestItems)
-            {
-                // 檢查會員是否買過同樣的產品 (ProductCode)
-                var duplicateItem = memberItems
-                    .FirstOrDefault(m => m.ProductCode == guestItem.ProductCode);
-
-                if (duplicateItem != null)
-                {
-                    // 如果重複，把遊客的數量加給會員，然後刪除遊客這筆
-                    duplicateItem.Quantity += guestItem.Quantity;
-                    _context.ShoppingCarts.Remove(guestItem);
-                }
-                else
-                {
-                    // 如果沒重複，直接把這筆遊客紀錄「過戶」給會員
-                    guestItem.MemberId = memberId;
-                }
-            }
-
-            // 6. 存檔
-            await _context.SaveChangesAsync();
         }
 
         //刪除購物車支援多選跟單選

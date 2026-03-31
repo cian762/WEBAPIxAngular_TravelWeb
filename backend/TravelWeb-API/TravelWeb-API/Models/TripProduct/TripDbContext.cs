@@ -440,7 +440,7 @@ public partial class TripDbContext : DbContext
 
             entity.ToTable("ShoppingCart", "product");
 
-            entity.HasIndex(e => new { e.MemberId, e.ProductCode }, "UX_ShoppingCart_User_Schedule").IsUnique();
+            entity.HasIndex(e => new { e.MemberId, e.ProductCode, e.TicketCategoryId }, "UX_ShoppingCart_User_Schedule").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")

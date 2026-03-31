@@ -45,11 +45,11 @@ namespace TravelWeb_API.Controllers
         [HttpPost("PaymentCallback")]
         public IActionResult PaymentCallback()
         {
-            // 這裡不做邏輯處理，單純把使用者轉回前端
-            //return Redirect("http://localhost:4200/");
-            
+            //這裡不做邏輯處理，單純把使用者轉回前端
+            return Redirect("http://localhost:4200/");
+
             //部屬時要改成下面這個
-            return Redirect("https://taiwanstory.site/app/");
+            //return Redirect("https://taiwanstory.site/app/");
         }
         //綠界回傳
         [HttpPost("EcpayReturn")]
