@@ -6,6 +6,9 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
 import { forkJoin } from 'rxjs';
+import Swal from 'sweetalert2';
+import { AuthService } from '../../../Member/services/auth.service';
+
 
 @Component({
   selector: 'app-trip-product-detail',
@@ -23,7 +26,7 @@ export class TripProductDetail implements OnInit {
   basicInfo?: ProductBasic;
   schedules: ProductSchedule[] = [];
   itineraries: ProductItinerary[] = [];
-  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart, private router: Router) { }
+  constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart, private router: Router, private authService: AuthService) { }
   ngOnInit(): void {
     // 1. 從路由取得 ID (假設路由定義為 product/:id)
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -125,7 +128,7 @@ export class TripProductDetail implements OnInit {
     // 使用 forkJoin 等待所有 API 完成
     forkJoin(requests).subscribe({
       next: () => {
-        alert(`成功加入購物車！`);
+        Swal.fire(`成功加入購物車！`);
         // 可以在這裡跳轉或更新購物車圖示數量
       },
       error: (err) => {
@@ -136,39 +139,53 @@ export class TripProductDetail implements OnInit {
   }
   nowBuy(): void {
     const data = this.getBookingData();
-
     if (!data || !this.selectedSchedule) {
-      alert('請選擇出發日期');
+      Swal.fire('提示', '請選擇出發日期', 'warning');
       return;
     }
 
-    // 1. 準備要傳給結帳頁面的「直接購買」物件
-    // 注意：這裡的欄位名稱要跟你的後端 CreateOrderDto 一致
-    const checkoutPayload = {
-      directBuyItems: data.items
-        .filter(item => item.qty > 0)
-        .map(item => ({
-          productCode: data.scheduleId,
-          quantity: item.qty,
-          ticketCategoryId: item.ticketType,
-
-        }))
-    };
-
-
-    if (checkoutPayload.directBuyItems.length === 0) {
-      alert('請選擇購買人數');
+    const items = data.items.filter(item => item.qty > 0);
+    if (items.length === 0) {
+      Swal.fire('提示', '請選擇購買人數', 'warning');
       return;
     }
 
-    // 2. 導向結帳頁面
-    // 專業做法：透過導航狀態 (state) 傳遞資料，這樣網址不會變醜，且資料安全
-    this.router.navigate(['/order'], { state: { data: checkoutPayload } });
+    // --- 改用 Observable 進行權威檢查 ---
+    this.authService.checkAuthStatus().subscribe(isLoggedIn => {
+      if (!isLoggedIn) {
+        // 真的沒登入，才跳彈窗
+        Swal.fire({
+          title: '請先登入',
+          text: '登入後即可完成行程預訂',
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonText: '前往登入',
+          cancelButtonText: '先逛逛',
+          confirmButtonColor: '#0d6efd',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+          }
+        });
+      } else {
+        // 確定已登入，直接執行導向，這時 state 絕對不會丟失！
+        const checkoutPayload = {
+          productId: this.basicInfo?.tripProductId,
+          fromUrl: this.router.url,
+          directBuyItems: items.map(item => ({
+            productCode: data.scheduleId,
+            quantity: item.qty,
+            ticketCategoryId: item.ticketType,
+          }))
+        };
 
-
+        this.router.navigate(['/order'], { state: { data: checkoutPayload } });
+      }
+    });
   }
-
 }
+
+
 
 
 

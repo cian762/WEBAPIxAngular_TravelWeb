@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
+using TravelWeb_API.Models.MemberSystem;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 
 namespace TravelWeb_API.Services
@@ -8,9 +9,11 @@ namespace TravelWeb_API.Services
     public class ActivityInfoService
     {
         private readonly ActivityDbContext _activityDbContext;
-        public ActivityInfoService(ActivityDbContext activityDbContext)
+        private readonly MemberSystemContext _memberDbContext;
+        public ActivityInfoService(ActivityDbContext activityDbContext, MemberSystemContext memberSystemContext)
         {
             _activityDbContext = activityDbContext;
+            _memberDbContext = memberSystemContext;
         }
 
         public async Task<ActivityInfoResponseDTO?> GetSpecificActivityInfo(int activityId)
@@ -96,18 +99,40 @@ namespace TravelWeb_API.Services
                     .ThenByDescending(r => r.CreateDate);
             }
 
-            var result = await reviews
-                .Select(r => new ReviewResponseDTO
+            // 1. 先從 Activity 撈出評論 (假設 reviews 已經從 _activityDbContext 拿到了)
+            // 如果還沒拿，建議先 .ToList() 確保資料進到記憶體，方便後續比對
+            var reviewList = reviews.ToList();
+
+            // 2. 收集所有評論中出現過的 MemberId (去重複，減少查詢負擔)
+            var memberIds = reviewList.Select(r => r.MemberId).Distinct().ToList();
+
+            // 3. 去 MemberDbContext 撈出這些人的資料，並轉成 Dictionary
+            // Key 是 MemberCode, Value 是包含名字與大頭貼的物件
+            var memberLookup = (from m in _memberDbContext.MemberInformations
+                                where memberIds.Contains(m.MemberCode)
+                                select new { m.MemberCode, m.Name, m.AvatarUrl })
+                               .ToDictionary(m => m.MemberCode, m => m);
+
+            // 4. 最後用 Select 把兩者揉在一起
+            List<ReviewResponseDTO> result = reviewList.Select(r =>
+            {
+                // 從 Dictionary 找人，找不到就給預設值
+                memberLookup.TryGetValue(r.MemberId, out var m);
+
+                return new ReviewResponseDTO
                 {
                     ReviewId = r.ReviewId,
-                    MemberId = r.MemberId,
+                    MemberId = m?.Name ?? "無名旅客", // 這裡你原本把名字塞進 MemberId 欄位
+                    MemberAvatar = m?.AvatarUrl ?? "",
                     Title = r.Title,
                     Comment = r.Comment,
                     Rating = r.Rating,
                     CreateDate = r.CreateDate,
-                    ReviewImages = r.ReviewImages.Select(i => i.ImageUrl).ToList()!
-                })
-                .ToListAsync();
+                    ReviewImages = r.ReviewImages?.Select(i => i.ImageUrl).ToList() ?? new List<string>()
+                };
+            })
+            .ToList();
+
 
 
             var averageRating = _activityDbContext.Activities
@@ -158,6 +183,26 @@ namespace TravelWeb_API.Services
                 .ToListAsync();
                 
                 return products;
+        }
+
+
+
+
+        //GetNewActivity這是文章討論那邊用來抓近期活動的
+        public List<NewActivity> GetNewActivity()
+        {
+            List<NewActivity> results = _activityDbContext.Activities
+                //多一個where 條件去篩選掉已經過期的活動
+                .Select(a => new NewActivity { activityId= a.ActivityId, title=a.Title })
+                .Take(10)
+                .ToList();
+
+            return results;
+        }
+        //GetNewActivity這是文章討論那邊用來抓近期活動的
+        public class NewActivity {
+            public int activityId { get; set; }
+            public string? title { get; set; }
         }
     }
 }

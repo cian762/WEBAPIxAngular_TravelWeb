@@ -1,9 +1,11 @@
-﻿using MailKit.Net.Smtp;
+﻿using Azure.Storage.Blobs.Models;
+using MailKit.Net.Smtp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Utils;
 using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Asn1.X509;
 using TravelWeb_API.Models.TripProduct;
 
 namespace TravelWeb_API.Services
@@ -24,19 +26,19 @@ namespace TravelWeb_API.Services
         public async Task SendOrderTicketEmailAsync(int orderId)
         {
             var order = await _dbcontext.Orders
+                .Include(o=>o.OrderItems)
+                .ThenInclude(oi=>oi.QrcodeInfos)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (order == null) return;
 
-            var orderItems = order.OrderItems
-                .Select(oi => new
-                {
-                    ProductCode = oi.ProductCode,
-                    ProductNameSnapshot = oi.ProductNameSnapshot,
-                    QRcodeId = oi.QrcodeInfos.Select(q => q.QrcodeId).First(),
-                    QRToken = oi.QrcodeInfos.Select(q => q.Qrtoken).First(),
-                    ExpiredDate = oi.QrcodeInfos.Select(q => q.ExpiredDate).First(),
-                });
+            var qrcodes = await _dbcontext.QrcodeInfos
+                .Include(q=>q.Order) //剛剛忘了加這一行
+                .Where(q => q.OrderId == orderId)
+                .OrderBy(q => q.QrcodeId)
+                .ToListAsync();
+
+            if (!qrcodes.Any()) return;
 
             //開始寫 Email 區塊
             var message = new MimeMessage();
@@ -52,24 +54,28 @@ namespace TravelWeb_API.Services
                 <p>以下是您的電子票券：</p>
             ";
 
-            int index = 1;
 
-            foreach (var ticket in orderItems) 
+
+            int index = 1;
+            foreach (var ticket in qrcodes)
             {
-                string verifyUrl = _qrCodeService.BuildVerifyUrl(ticket.QRToken);
+                string verifyUrl = _qrCodeService.BuildVerifyUrl(ticket.Qrtoken);
                 byte[] qrImageBytes = _qrCodeService.GenerateQrPngBytes(verifyUrl);
 
                 //把 QRcode PNG 嵌入到 Email 中
-                var image = builder.LinkedResources.Add($"qrcode_{ticket.QRcodeId}.png",qrImageBytes);
+                var image = builder.LinkedResources.Add($"qrcode_{ticket.QrcodeId}.png",qrImageBytes);
                 image.ContentId = MimeUtils.GenerateMessageId();
 
                 string expireText = ticket.ExpiredDate?.ToString() ?? "無限期使用";
 
+                string productName = _dbcontext.OrderItems.Where(oi => oi.OrderItemId == ticket.OrderItemId).Select(oi => oi.ProductNameSnapshot).FirstOrDefault() ?? "無產品名稱";
+                string productCode = _dbcontext.OrderItems.Where(oi => oi.OrderItemId == ticket.OrderItemId).Select(oi => oi.ProductCode).FirstOrDefault() ?? "無產品代碼";
+
                 html += $@"
                     <hr />
                     <h3>票券 {index}</h3>
-                    <p>商品名稱：{ticket.ProductNameSnapshot}</p>
-                    <p>票券代碼：{ticket.QRToken}</p>
+                    <p>商品名稱：{productName}</p>
+                    <p>票券代碼：{productCode}</p>
                     <p>使用期限：{expireText}</p>
                     <p><img src=""cid:{image.ContentId}"" alt=""QR Code"" style=""width:220px; height:220px;"" /></p>
                     <p>若無法顯示圖片，請聯絡客服。</p>
@@ -120,5 +126,18 @@ namespace TravelWeb_API.Services
         public int QRCodeId { get; set; }
         public string ProductName { get; set; } = string.Empty;
         public string QRToken { get; set; } = string.Empty;
+    }
+
+
+    public class TicketInfo 
+    {
+        public string ProductCode { get; set; } = string.Empty;
+        public string ProductName { get; set; } = string.Empty;
+
+        public TicketInfo(string productCode, string productName)
+        {
+            ProductCode = productCode;
+            ProductName = productName;
+        }
     }
 }

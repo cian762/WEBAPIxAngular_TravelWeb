@@ -1,0 +1,465 @@
+.host-body {
+  background-color: #f9f9ff;
+  padding-top: 50px;
+}
+
+.left-panel {
+  background-color: #ffffff;
+  box-shadow: 2px 2px 3px #27272721;
+}
+
+
+.right-panel {
+  background-color: #ffffff;
+  box-shadow: 2px 2px 3px #27272721;
+}
+
+.regular-button {
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+  font-size: 30px;
+  border: none;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.regular-button:hover {
+  box-shadow: 2px 2px 3px #27272721;
+}
+
+
+
+
+
+
+/* ══ 延續你的設計語言 ══════════════════════════
+   白卡 + #f9f9ff 背景 + box-shadow: 2px 2px 3px
+   ════════════════════════════════════════════ */
+
+/* ── 覆蓋背景（讓 host-body 撐滿） */
+:host {
+  display: block;
+}
+
+.host-body {
+  background-color: #f9f9ff;
+  min-height: 100vh;
+  padding: 24px 20px;
+}
+
+/* ── 三欄佈局 */
+.editor-workspace {
+  display: grid;
+  grid-template-columns: 260px 760px 240px;
+  gap: 16px;
+  align-items: start;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ══ 白卡基底（延續 left-panel / right-panel 風格）*/
+.panel-card {
+  background-color: #ffffff;
+  box-shadow: 2px 2px 3px #27272721;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* ── Panel Header */
+.panel-card-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f5;
+}
+
+.panel-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c2c3a;
+  margin: 0;
+  flex: 1;
+}
+
+.section-label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+/* ── 上傳按鈕（右上角小按鈕） */
+.upload-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: #f9f9ff;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #6c6c99;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+
+  &:hover {
+    background: #ebebff;
+    box-shadow: 2px 2px 3px #27272721;
+  }
+}
+
+/* ── 空白提示 */
+.list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 16px;
+  color: #b0b0c8;
+  font-size: 13px;
+  text-align: center;
+
+  .list-empty-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+/* ══ 圖片表格 */
+.img-table {
+  margin: 0;
+  font-size: 13px;
+
+  thead th {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    background: #fafaff;
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f5;
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: background .12s;
+
+    &:hover {
+      background: #f5f5ff;
+    }
+
+    &.row-active {
+      background: #eeeeff;
+    }
+  }
+
+  td {
+    vertical-align: middle;
+    padding: 6px 10px;
+    border-color: #f5f5fa;
+  }
+}
+
+.td-index {
+  color: #aaa;
+  font-size: 11px;
+  width: 28px;
+}
+
+.td-thumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #f0f0f5;
+  flex-shrink: 0;
+}
+
+.row-name {
+  font-size: 12px;
+  color: #3a3a4a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+  display: block;
+}
+
+.td-action {
+  width: 28px;
+}
+
+.row-delete {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  border-radius: 50%;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+
+  &:hover {
+    background: #ffe5e5;
+    color: #e53935;
+  }
+}
+
+/* ══ 中欄 */
+.center-col {
+  min-width: 0;
+}
+
+.editor-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 標題輸入 */
+.editor-title {
+  width: 100%;
+  padding: 14px 18px 10px;
+  font-size: 20px;
+  font-weight: 700;
+  border: none;
+  border-bottom: 2px solid #e8e8f5;
+  outline: none;
+  color: #2c2c3a;
+  background: transparent;
+
+  &::placeholder {
+    color: #c0c0d8;
+    font-weight: 400;
+  }
+
+  &:focus {
+    border-bottom-color: #9090cc;
+  }
+}
+
+/* 工具列：延續 regular-button 風格 */
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #f0f0f5;
+  background: #fafaff;
+}
+
+/* ── regular-button（完全對齊你的 CSS）*/
+.regular-button {
+  width: 36px;
+  height: 36px;
+  margin: 2px;
+  font-size: 16px;
+  border: none;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #3a3a5a;
+  transition: all .15s;
+
+  &:hover {
+    box-shadow: 2px 2px 3px #27272721;
+    background: #f5f5ff;
+  }
+
+  &:active {
+    box-shadow: inset 1px 1px 2px #27272730;
+  }
+}
+
+.btn-insert-img {
+  width: auto;
+  padding: 0 12px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f0f0ff;
+  color: #5555aa;
+
+  &:hover {
+    background: #e5e5ff;
+    box-shadow: 2px 2px 3px #27272721;
+  }
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 22px;
+  background: #e8e8f0;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* 拖放提示 */
+.drop-hint {
+  padding: 4px 18px;
+  font-size: 11px;
+  color: #b0b0c8;
+  background: #fdfcff;
+  border-bottom: 1px solid #f0f0f5;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── 統一編輯區 */
+.unified-editor {
+  min-height: 480px;
+  padding: 15px 15px;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.85;
+  color: #2c2c3a;
+  word-break: break-word;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  &:empty::before {
+    content: attr(data-placeholder);
+    color: #c0c0d8;
+    pointer-events: none;
+  }
+
+  &.drag-over {
+    background: #f5f5ff;
+    outline: 2px dashed #9090cc;
+    outline-offset: -4px;
+  }
+
+
+
+  .img-delete {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #e53935;
+    color: white;
+    font-size: 11px;
+    cursor: pointer;
+    display: none;
+  }
+
+  :deep(b),
+  :deep(strong) {
+    font-weight: 700;
+  }
+
+  :deep(i),
+  :deep(em) {
+    font-style: italic;
+  }
+
+  :deep(u) {
+    text-decoration: underline;
+  }
+
+  :deep(s) {
+    text-decoration: line-through;
+  }
+
+  :deep(ul),
+  :deep(ol) {
+    padding-left: 20px;
+  }
+}
+
+/* 狀態列 */
+.editor-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border-top: 1px solid #f0f0f5;
+  font-size: 12px;
+  color: #aaa;
+  background: #fafaff;
+}
+
+.saved-hint {
+  color: #7ab87a;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.save-btn {
+  margin-left: auto;
+  padding: 5px 20px;
+  border-radius: 6px;
+  border: none;
+  background: #6060bb;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+  box-shadow: 2px 2px 3px #27272721;
+
+  &:hover {
+    background: #4a4a99;
+  }
+}
+
+/* ══ 右欄佔位 */
+.placeholder-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  color: #c0c0d0;
+  border: 2px dashed #e8e8f5;
+  margin: 12px;
+  border-radius: 8px;
+}
+
+.placeholder-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+  display: block;
+  opacity: .5;
+}
+
+.placeholder-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8888aa;
+  margin-bottom: 4px;
+}
+
+.placeholder-desc {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #b8b8cc;
+  margin: 0;
+}

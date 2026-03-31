@@ -23,7 +23,7 @@
   "private": true,
   "packageManager": "npm@11.8.0",
   "dependencies": {
-    "@angular/cdk": "^21.2.3",
+    "@angular/cdk": "^21.2.4",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
     "@angular/core": "^21.1.0",
@@ -38,6 +38,7 @@
     "remixicon": "^4.9.1",
     "rxjs": "~7.8.0",
     "slick-carousel": "^1.8.1",
+    "sweetalert2": "^11.26.24",
     "tslib": "^2.3.0",
     "zone.js": "^0.16.1"
   },

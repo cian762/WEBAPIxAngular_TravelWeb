@@ -6,4 +6,5 @@ export interface reviewsInterface {
   rating: number,
   createDate: Date,
   reviewImages: string[],
+  memberAvatar: string,
 }

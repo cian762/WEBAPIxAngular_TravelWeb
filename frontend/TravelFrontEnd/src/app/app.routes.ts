@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 import { aGuard } from './a-guard';
 import { ProfileComponent } from './Member/profile/profile.component';
+import { ResetPasswordComponent } from './Member/reset-password/reset-password.component';
 
 export const routes: Routes = [
   {
@@ -94,9 +95,15 @@ export const routes: Routes = [
         path: '',
         loadComponent: () => import('./Board/blog-home/blog-home').then(m => m.BlogHome),
       },
+      //創建快速文章
       {
         path: 'creat/:id',
         loadComponent: () => import('./Board/creat-post/creat-post').then(m => m.CreatPost),
+      },
+      //創建部落格
+      {
+        path: 'creatBlog',
+        loadComponent: () => import('./Board/creat-blog/creat-blog').then(m => m.CreatBlog),
       },
       {
         path: 'detail/:id',
@@ -129,6 +136,7 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./Member/register/register.component').then(m => m.RegisterComponent)
   },
+   { path: 'reset-password', component: ResetPasswordComponent },
   {
     path: 'profile',
     component: ProfileComponent, // 這是你目前顯示頭像和 Sidebar 的元件
@@ -143,6 +151,11 @@ export const routes: Routes = [
 
   { path: 'complaint', loadComponent: () => import('./Member/complaint-form/complaint-form.component').then(m => m.ComplaintFormComponent) },
 
+  {
+    path: 'qrCode/:token',
+    loadComponent: () => import('./Activity/Component/qrcode-verify/qrcode-verify').then(m => m.QrcodeVerify),
+    canActivate: [aGuard]
+  },
   // 所有不認識的路徑會導向首頁
   { path: '**', redirectTo: '' },
 ];

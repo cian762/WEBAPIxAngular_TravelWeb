@@ -159,5 +159,33 @@ namespace TravelWeb_API.Controllers.Attraction
 
             return Ok(types);
         }
+
+        // ────────────────────────────────────────────
+        // GET /api/attractionproduct/bycode/{productCode}
+        // 用 ProductCode 查詢 attractionId、景點名稱、Tags
+        // 供購物車補齊顯示資訊用
+        // ────────────────────────────────────────────
+        [HttpGet("bycode/{productCode}")]
+        public async Task<IActionResult> GetByProductCode(string productCode)
+        {
+            var product = await _dbContext.AttractionProducts
+                .Where(p => p.ProductCode == productCode && !p.IsDeleted)
+                .Include(p => p.Attraction)
+                .Include(p => p.Tags)
+                .Select(p => new
+                {
+                    p.ProductId,
+                    p.ProductCode,
+                    p.AttractionId,
+                    AttractionName = p.Attraction != null ? p.Attraction.Name : null,
+                    Tags = p.Tags.Select(t => t.TagName).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (product == null)
+                return NotFound(new { message = "找不到此票券" });
+
+            return Ok(product);
+        }
     }
 }

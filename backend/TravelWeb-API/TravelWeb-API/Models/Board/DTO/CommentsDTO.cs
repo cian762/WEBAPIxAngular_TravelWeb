@@ -11,7 +11,7 @@ namespace TravelWeb_API.Models.Board.DTO
         public DateTime CreatedAt { get; set; }
         public int LikeCount { get; set; }
         public bool isLiked { get; set; }
-
+        public string? CommentPhoto { get; set; }
         public List<CommentsDTO>? ReplyComments { get; set; }
 
     }

@@ -1,0 +1,23 @@
+<p>creat-journal works!</p>
+<div class="mb-3">
+  <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+  <input class="form-control" type="file" (change)="onFileSelected($event)" multiple>
+</div>
+<div class="ground">
+  @for (image of imageboxes; track image.id) {
+  <div class="cube" [style.width.px]="image.width" [style.height.px]="image.height" [style.left.px]="image.x"
+    [style.top.px]="image.y" (mousedown)="startDrag($event, image)">
+
+    <div class="controller top-left" (mousedown)="startResize($event, 'top-left', image.id); $event.stopPropagation()">
+    </div>
+    <div class="controller top-right"
+      (mousedown)="startResize($event, 'top-right', image.id); $event.stopPropagation()"></div>
+    <div class="controller bottom-left"
+      (mousedown)="startResize($event, 'bottom-left', image.id); $event.stopPropagation()"></div>
+    <div class="controller bottom-right"
+      (mousedown)="startResize($event, 'bottom-right', image.id); $event.stopPropagation()"></div>
+
+    <img [src]="image.imageUrl" width="100%" height="100%">
+  </div>
+  }
+</div>

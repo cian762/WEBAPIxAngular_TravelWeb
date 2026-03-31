@@ -59,8 +59,6 @@
 }
 
 
-
-
 /* 類型 Tab */
 .type-nav {
   background: #fff;
@@ -271,7 +269,6 @@
   font-size: 0.74rem;
   font-weight: 600;
   display: inline-block;
-  /* ← 確保有這行 */
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -280,7 +277,6 @@
   background-color: #e84c3d;
   color: #fff;
   transform: translateY(-2px);
-
 }
 
 .att-card__addr {
@@ -302,7 +298,6 @@
 
 .search-bar__inner {
   flex: 1;
-  /* 讓搜尋框佔滿剩餘空間 */
 }
 
 .tags-link {
@@ -355,3 +350,85 @@
   text-decoration: none;
   font-weight: 600;
 }
+
+
+/* ─── 城市介紹區塊 ─────────────────────────────────────────── */
+
+/* 整個區塊：撐滿頁面寬度，不加任何 container 限制 */
+.city-intro-block {
+  width: 100%;
+  background: #fff;
+  overflow: hidden;
+}
+
+/* Banner 圖片：全寬，固定高度裁切 */
+.city-intro__banner {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;   /* 消除 img 下方間隙 */
+}
+
+.city-intro__banner-img {
+  width: 100%;
+  height: 380px;
+  object-fit: cover;
+  object-position: center 40%;
+  display: block;
+}
+
+/* 文字區：限制最大寬度並水平置中，模仿觀光局排版 */
+.city-intro__content-wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 36px 20px 44px;
+}
+
+/* 城市名稱：置中大標 */
+.city-intro__city-name {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #222;
+  text-align: center;
+  margin-bottom: 28px;
+  letter-spacing: 2px;
+}
+
+/* 副標題：靠左粗體 */
+.city-intro__heading {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #222;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+/* 內文段落 */
+.city-intro__para {
+  font-size: 0.92rem;
+  color: #444;
+  line-height: 1.95;
+  margin-bottom: 12px;
+}
+
+/* 超連結 */
+.city-intro__link {
+  color: #e84611;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.city-intro__link:hover {
+  text-decoration: underline;
+}
+
+/* 手機版 */
+@media (max-width: 768px) {
+  .city-intro__banner-img {
+    height: 220px;
+  }
+  .city-intro__content-wrap {
+    padding: 24px 16px 28px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── */

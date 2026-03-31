@@ -19,6 +19,8 @@ public partial class MemberInformation
 
     public string? Status { get; set; }
 
+    public string? BackgroundUrl { get; set; }
+
     public virtual ICollection<ItineraryProductCollection> ItineraryProductCollections { get; set; } = new List<ItineraryProductCollection>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();

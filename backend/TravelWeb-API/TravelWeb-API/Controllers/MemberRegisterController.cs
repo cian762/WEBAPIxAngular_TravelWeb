@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-// 🔥 修正 1：改用 ASP.NET Core 正確的 Configuration 命名空間
 using Microsoft.Extensions.Configuration;
-// 🔥 修正 2：補上 JWT 產生所需的命名空間
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -60,9 +58,6 @@ namespace TravelWeb_API.Controllers
                 PasswordHash = HashPassword(request.Password)
             };
 
-            // ==========================================
-            // MemberId 產生規則：「信箱@前字串 + 隨機兩字 (英數混合)」
-            // ==========================================
             string emailPrefix = request.Email.Split('@')[0];
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             var random = new Random();
@@ -81,51 +76,37 @@ namespace TravelWeb_API.Controllers
                 Status = "正常"
             };
 
-            // ==========================================
-            // 處理大頭貼上傳 (Cloudinary)
-            // ==========================================
             if (request.AvatarFile != null && request.AvatarFile.Length > 0)
             {
-                // 1. 讀取 appsettings.json 中的 Cloudinary 設定
                 var cloudName = _configuration["CloudinarySettings:CloudName"];
                 var apiKey = _configuration["CloudinarySettings:ApiKey"];
                 var apiSecret = _configuration["CloudinarySettings:ApiSecret"];
 
-                // 2. 初始化 Cloudinary 帳號
                 Account account = new Account(cloudName, apiKey, apiSecret);
                 Cloudinary cloudinary = new Cloudinary(account);
 
-                // 3. 讀取圖片串流並設定上傳參數
                 using var stream = request.AvatarFile.OpenReadStream();
                 var uploadParams = new ImageUploadParams()
                 {
                     File = new FileDescription(request.AvatarFile.FileName, stream),
-                    Folder = "TravelWeb/Avatars", // 建議在 Cloudinary 建立一個資料夾來集中管理
-                                                  // 🔥 Cloudinary 強大功能：上傳時自動裁切並壓縮成 500x500 正方形的大頭貼
+                    Folder = "TravelWeb/Avatars", 
                     Transformation = new Transformation().Width(500).Height(500).Crop("fill").Gravity("face")
                 };
 
-                // 4. 執行上傳
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
 
-                // 5. 檢查上傳是否成功
                 if (uploadResult.Error != null)
                 {
                     return StatusCode(500, new { message = "圖片上傳失敗", error = uploadResult.Error.Message });
                 }
 
-                // 6. 將 Cloudinary 產生的安全網址 (https) 存入資料庫
                 newMemberInfo.AvatarUrl = uploadResult.SecureUrl.ToString();
             }
             else
             {
-                // 如果沒有上傳，可以使用你的預設圖片，或者你也可以把預設圖片傳到 Cloudinary 並填入該網址
                 newMemberInfo.AvatarUrl = "/images/default-avatar.png";
             }
 
-            // ==========================================
-            // 寫入資料庫 (使用 Transaction 確保兩張表都寫入成功)
-            // ==========================================
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
@@ -138,16 +119,14 @@ namespace TravelWeb_API.Controllers
 
                 await transaction.CommitAsync();
 
-                // 註冊成功後自動登入：產生 Token 並存入 Cookie
                 string role = newMemberCode.StartsWith("G") ? "Admin" : "Member";
 
-                // 這裡呼叫了下方的 GenerateJwtToken 方法
                 string token = GenerateJwtToken(newMemberCode, role, newMemberId);
 
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true, // 如果你在本機沒有用 https 開發，測試時可以先改成 false，上線一定要 true
+                    Secure = true, 
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTime.UtcNow.AddHours(9)
                 };
@@ -178,7 +157,7 @@ namespace TravelWeb_API.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, memberCode),
                 new Claim(ClaimTypes.Role, role),
-                new Claim("MemberId", memberId), // 將 MemberId 封裝進 Token
+                new Claim("MemberId", memberId), 
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -200,9 +179,6 @@ namespace TravelWeb_API.Controllers
             return tokenHandler.WriteToken(securityToken);
         }
 
-        // ==========================================
-        // 密碼加密方法 (SHA256)
-        // ==========================================
         private string HashPassword(string password)
         {
             using (SHA256 sha = SHA256.Create())

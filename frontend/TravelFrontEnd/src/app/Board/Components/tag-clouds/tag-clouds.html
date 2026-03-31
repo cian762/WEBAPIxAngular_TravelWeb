@@ -1,17 +1,8 @@
 <div class="single-sidebar-widget tag-cloud-widget">
-  <h4 class="tagcloud-title">Tag Clouds</h4>
+  <h4 class="tagcloud-title"><i class="ri-chat-smile-ai-line"></i> 人氣標籤</h4>
   <ul>
-    <li><a href="#">Technology</a></li>
-    <li><a href="#">Fashion</a></li>
-    <li><a href="#">Architecture</a></li>
-    <li><a href="#">Fashion</a></li>
-    <li><a href="#">Food</a></li>
-    <li><a href="#">Technology</a></li>
-    <li><a href="#">Lifestyle</a></li>
-    <li><a href="#">Art</a></li>
-    <li><a href="#">Adventure</a></li>
-    <li><a href="#">Food</a></li>
-    <li><a href="#">Lifestyle</a></li>
-    <li><a href="#">Adventure</a></li>
+    @for (tag of allTags; track $index) {
+    <li><a href="#">{{tag.tagName}}</a></li>
+    }
   </ul>
-</div>
+</div><!-- #4cd3e3 -->

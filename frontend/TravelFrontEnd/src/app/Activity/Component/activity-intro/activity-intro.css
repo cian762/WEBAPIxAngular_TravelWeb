@@ -372,7 +372,7 @@
 }
 
 .activity-card__title {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #111827;
   text-decoration: none;
@@ -398,7 +398,7 @@
   color: #2563eb;
   border-radius: 999px;
   padding: 4px 10px;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 600;
 }
 
@@ -516,4 +516,226 @@
 .route-step-item {
   padding: 10px 0;
   border-top: 1px solid #eef2f7;
+}
+
+/* 推薦用分頁 Css */
+.suggestion-section {
+  position: relative;
+}
+
+.suggestion-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.suggestion-slider {
+  overflow: hidden;
+  width: 100%;
+  padding: 0 28px;
+  /* 留給左右按鈕一點呼吸空間 */
+}
+
+.suggestion-track {
+  display: flex;
+  transition: transform 0.5s ease;
+  will-change: transform;
+  margin: 0 -12px;
+}
+
+.suggestion-item {
+  flex: 0 0 33.3333%;
+  padding: 0 12px;
+  box-sizing: border-box;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.suggestion-item .activity-card {
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.suggestion-item .activity-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+.slider-side-btn {
+  position: absolute;
+  top: 52%;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  color: #243b53;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    opacity 0.25s ease;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.slider-side-btn i {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.slider-side-btn:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.06);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.22);
+  background: #ffffff;
+}
+
+.slider-side-btn:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.slider-side-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.slider-side-btn--left {
+  left: -6px;
+}
+
+.slider-side-btn--right {
+  right: -6px;
+}
+
+.activity-card__body,
+.activity-card__footer,
+.activity-card__title,
+.activity-card__date,
+.activity-card__bottom {
+  min-width: 0;
+  word-break: break-word;
+}
+
+.skel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #e9ecef;
+}
+
+.skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.65) 50%,
+      transparent 100%);
+  animation: skel-shimmer 1.2s infinite;
+}
+
+@keyframes skel-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skel-title {
+  height: 36px;
+  width: 70%;
+}
+
+.skel-subtitle {
+  height: 28px;
+  width: 180px;
+}
+
+.skel-line {
+  height: 16px;
+  border-radius: 999px;
+}
+
+.skel-badge {
+  width: 72px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+.skel-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.skel-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+
+.skel-hero-main {
+  width: 100%;
+  height: 420px;
+  border-radius: 24px;
+}
+
+.skel-hero-thumb {
+  width: 100%;
+  height: 200px;
+  border-radius: 20px;
+}
+
+.skel-ticket-image {
+  width: 100%;
+  height: 140px;
+  border-radius: 18px;
+}
+
+.skel-article {
+  width: 100%;
+  height: 420px;
+  border-radius: 20px;
+}
+
+.skel-map {
+  width: 100%;
+  height: 420px;
+  border-radius: 20px;
+}
+
+.skel-suggest-image {
+  width: 100%;
+  height: 220px;
+  border-radius: 18px 18px 0 0;
+}
+
+@media (max-width: 991px) {
+  .skel-hero-main {
+    height: 260px;
+  }
+
+  .skel-hero-thumb {
+    height: 140px;
+  }
+
+  .skel-map,
+  .skel-article {
+    height: 280px;
+  }
 }

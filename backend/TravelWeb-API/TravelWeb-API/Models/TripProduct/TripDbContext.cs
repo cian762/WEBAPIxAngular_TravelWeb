@@ -325,7 +325,7 @@ public partial class TripDbContext : DbContext
 
             entity.ToTable("PaymentTransactions", "product");
 
-            entity.HasIndex(e => e.ProviderTransactionNo, "UQ__PaymentT__10C5588BD82A9F25").IsUnique();
+            entity.HasIndex(e => e.ProviderTransactionNo, "UQ__PaymentT__10C5588BD82A9F25")/*.IsUnique()*/;
 
             entity.Property(e => e.CompletedAt).HasColumnType("datetime");
             entity.Property(e => e.CreatedAt)

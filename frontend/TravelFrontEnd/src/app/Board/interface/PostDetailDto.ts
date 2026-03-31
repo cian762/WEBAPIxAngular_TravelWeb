@@ -6,8 +6,20 @@ export interface PostDetailDto {
   updatedAt?: Date,
   contents?: string,
   regionId?: number,
+  regionName?: string,
   postPhoto?: string[],
   status: number,
   avatarUrl: string,
-  authorName: string
+  authorName: string,
+  authorID: string,
+  commentCount: number,
+  likeCount: number,
+  isLike: boolean,
+
+
+
+
+
+
+
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TravelWeb_API.Models.Board.DbSet;
 
 namespace TravelWeb_API.Models.ActivityModel;
 
@@ -16,4 +17,6 @@ public partial class TagsRegion
     public virtual TagsRegion? UidNavigation { get; set; }
 
     public virtual ICollection<Activity> Activities { get; set; } = new List<Activity>();
+
+    //public ICollection<Article> Articles { get; set; }= new List<Article>();
 }

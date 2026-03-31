@@ -31,6 +31,8 @@ public partial class MemberSystemContext : DbContext
 
     public virtual DbSet<MemberList> MemberLists { get; set; }
 
+    public virtual DbSet<EmailVerification> EmailVerifications { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -108,9 +110,8 @@ public partial class MemberSystemContext : DbContext
         {
             entity.ToTable("Log_in_record", "Member");
 
-            // 🔥 終極殺手鐧：強制告訴 EF Core 這個欄位由資料庫控制，不准塞值！
             entity.Property(e => e.LoginRecordId)
-                  .UseIdentityColumn() // 明確宣告它是 IDENTITY 欄位 (如果是 SQL Server)
+                  .UseIdentityColumn() 
                   .ValueGeneratedOnAdd();
             entity.Property(e => e.LoginAt).HasColumnType("datetime");
             entity.Property(e => e.MemberCode).HasMaxLength(50);
@@ -203,6 +204,18 @@ public partial class MemberSystemContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.Phone).HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<EmailVerification>(entity =>
+        {
+            entity.HasKey(e => e.Email);
+
+            entity.ToTable("Email_Verification", "Member");
+
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.VerificationCode).HasMaxLength(6);
+            entity.Property(e => e.ExpiryTime).HasColumnType("datetime");
+
         });
 
         OnModelCreatingPartial(modelBuilder);

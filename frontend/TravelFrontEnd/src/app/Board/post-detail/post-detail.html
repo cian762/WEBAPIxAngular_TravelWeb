@@ -1,10 +1,13 @@
+<app-create-article-button></app-create-article-button>
 <!-- Start post-content Area -->
 <section class="post-content-area single-post-area">
   <div class="container">
     <div class="row">
       <div class="col-lg-8 posts-list">
         <!-- 內文區在這 -->
+
         <div class="single-post row">
+          <!-- 圖片輪播組件 -->
           <div class="col-lg-12">
             <div class="feature-img">
               <div class="mb-3">
@@ -12,6 +15,7 @@
                   <div class="main-display cover-upload-container">
                     <img class="img-fluid fade-in" [src]="allPhotoList[selectedIndex]">
                   </div>
+                  @if(allPhotoList.length>1){
                   <div class="thumb-nav">
                     @for (img of allPhotoList; track $index) {
                     <div class="thumb-item" [class.active]="$index === selectedIndex" (click)="setIndex($index)">
@@ -19,44 +23,65 @@
                     </div>
                     }
                   </div>
+                  }
+
                 </div>
               </div>
             </div>
           </div>
-
+          <!-- 標籤 -->
+          <ul class="tags">
+            @for (tag of TagsList; track $index)
+            {
+            <li>
+              <a class="tag-btn" (click)="seachTag(tag)">
+                <i [class]="tag.icon"></i>&nbsp;{{tag.tagName}}
+              </a>
+            </li>
+            }
+          </ul>
+          <!-- 左欄文章詳情 -->
           <div class="col-lg-3  col-md-3 meta-details">
-            <ul class="tags">
-              @for (tag of TagsList; track $index)
-              {
-              <li><a (click)="seachTag(tag)"><i [class]="tag.icon"></i>{{tag.tagName}}, </a></li>
-              }
-            </ul>
             <div class="user-details row">
-              <p class="user-name col-lg-12 col-md-12 col-6"><a href="#">{{post?.authorName}}</a> <span
-                  class="lnr lnr-user"></span></p>
-              <p class="date col-lg-12 col-md-12 col-6"><a href="#">{{post?.createdAt}}</a> <span
-                  class="lnr lnr-calendar-full"></span></p>
-              <p class="view col-lg-12 col-md-12 col-6"><a href="#">1.2M Views</a> <span class="lnr lnr-eye"></span></p>
-              <p class="comments col-lg-12 col-md-12 col-6"><a href="#">06 Comments</a> <span
-                  class="lnr lnr-bubble"></span></p>
-              <ul class="social-links col-lg-12 col-md-12 col-6">
-                <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                <li><a href="#"><i class="fa fa-github"></i></a></li>
-                <li><a href="#"><i class="fa fa-behance"></i></a></li>
-              </ul>
+              <!-- 地區 -->
+              <a>{{post?.regionName}}<i class="ri-map-pin-line"></i></a>
+              <!-- 時間 -->
+              <a> {{post?.createdAt | date:'M月d日 y年':'zh-Hant'}}<span class="lnr lnr-calendar-full"></span></a>
+              <!-- 點讚 -->
+              <a (click)="ToLike(id)">
+                {{post?.likeCount}}
+                <i [class]="post?.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+              </a>
+              <!-- 收藏 -->
+              <a>收藏 <span class="lnr lnr-bubble"></span></a>
+              <!-- 留言 -->
+              <a>{{post?.commentCount}}則留言 <span class="lnr lnr-bubble"></span></a>
+              <!-- 更多 -->
+              <div class="post-location">
+                <button class="btn-more"><i class="ri-more-fill"></i></button>
+              </div>
             </div>
           </div>
-
+          <!-- 文章標題&內容 -->
           <div class="col-lg-9 col-md-9">
             <h3 class="mt-20 mb-20">{{post?.title}}</h3>
-            <p class="excert">
+            <div class="excert" [innerHTML]="post?.contents">
               {{post?.contents}}
-            </p>
+            </div>
+
           </div>
         </div>
         <!-- 內文區結束 -->
-        <div class="navigation-area">
+        <!-- 引用的站內連結 -->
+        @if(false){
+        <div class="quotes">
+          MCSE boot camps have its supporters and its detractors. Some people do not understand why you should have
+          to spend money on boot camp when you can get the MCSE study materials yourself at a fraction of the camp
+          price. However, who has the willpower to actually sit through a self-imposed MCSE training.
+        </div>
+        }
+
+        <!-- <div class="navigation-area">
           <div class="row">
             <div class="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
               <div class="thumb">
@@ -87,10 +112,28 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
         <app-comments-area [id]="id"></app-comments-area>
       </div>
-      <div class="col-lg-4 sidebar-widgets" app-sidebar [post]="post"></div>
+
+
+      <!-- 側欄起點 -->
+      <div class="col-lg-4 sidebar-widgets">
+        <div class="widget-wrap">
+          <app-author-info-sidebar [post]="post"></app-author-info-sidebar>
+          <app-popular-post></app-popular-post>
+          <app-tag-clouds></app-tag-clouds>
+          <app-post-catgories></app-post-catgories>
+          <div class="single-sidebar-widget ads-widget">
+            <a href="#"><img class="img-fluid" src="img/blog/ads-banner.jpg" alt=""></a>
+          </div>
+        </div>
+      </div>
+      <!-- 側欄終點 -->
+
+
+
+      <!-- <div class="col-lg-4 sidebar-widgets" app-sidebar [post]="post"></div> -->
     </div>
   </div>
 </section>

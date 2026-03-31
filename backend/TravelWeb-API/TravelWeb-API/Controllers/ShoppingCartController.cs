@@ -119,22 +119,6 @@ namespace TravelWeb_API.Controllers
             await _cart.SyncCartAsync(dtos, memberId);
             return Ok(new { message = "同步完成" });
         }
-        //遊客轉會員購物車搬遷這支目前先不用
-        //[HttpPost("migrate")]
-        //public async Task<IActionResult> Migrate([FromBody] MigrateCartDto dto)
-        //{
-        //    try
-        //    {
-        //        await _cart.MigrateCartAsync(dto.GuestId, dto.MemberId);
-        //        return Ok(new { success = true, message = "購物車合併成功" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // 如果 Service 丟出「無效遊客」或「帳號不存在」，這裡會抓到
-        //        return BadRequest(new { success = false, message = ex.Message });
-        //    }
-        //}
-
 
     }
 }

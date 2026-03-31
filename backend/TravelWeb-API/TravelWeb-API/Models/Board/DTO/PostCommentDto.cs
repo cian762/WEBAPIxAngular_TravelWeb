@@ -6,5 +6,7 @@
         public string contents { get; set; } = null!;
         public int? parentID { get; set; }
 
+        public string? commentPhoto { get; set; }
+
     }
 }

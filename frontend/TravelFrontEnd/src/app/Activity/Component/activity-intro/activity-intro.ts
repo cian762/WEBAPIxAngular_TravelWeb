@@ -1,5 +1,6 @@
+import { AuthService } from './../../../Member/services/auth.service';
 import { reviewResponseDTO } from './../../Interface/reviewResonseDTO';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivityInfoService } from '../../Service/activity-info-service';
 import { ActivityInfoInterface } from '../../Interface/InfoInterface';
@@ -13,7 +14,7 @@ import { CardInfoModel } from '../../Interface/cardInterface';
 import { TicketPlanDrawer } from '../ticket-plan-drawer/ticket-plan-drawer';
 import { TicketInfoService } from '../../Service/ticket-info-service';
 import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
-import { EMPTY, forkJoin, of, Subscription, switchMap } from 'rxjs';
+import { EMPTY, finalize, forkJoin, of, Subscription, switchMap, tap } from 'rxjs';
 import { UserCommentForm } from "../user-comment-form/user-comment-form";
 import { PersonalCommentService } from '../../Service/personal-comment-service';
 import { EditCommentForm } from "../edit-comment-form/edit-comment-form";
@@ -29,7 +30,8 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
   activityIdFromRoute: number = 0;
   isMapViewReady = false;
-
+  isPageLoading = true;
+  isSuggestionLoading = true;
 
   activityInfo: ActivityInfoInterface = {
     activityId: 0,
@@ -76,44 +78,55 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   private routeService = inject(RouteService);
   private ticketInfoService = inject(TicketInfoService);
   private personalCommentService = inject(PersonalCommentService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
 
   ngOnInit(): void {
-    //畫面三隻 API 接收回傳結果的 DTO
-    this.suggestionCollection = [];
-    this.productInfoCollection = [];
-    this.reviewsPackage = {
-      activityId: 0,
-      reviews: [],
-      averageRating: 0,
-      commentCount: 0
-    };
-
-    //GOOGLE MAP API 相關 DTO
-    this.routeOptions = [];
-    this.selectedRouteIndex = 0;
-    this.routeInfo = {
-      distanceText: '',
-      durationText: ''
-    };
-
-    if (this.routePolyline) {
-      this.routePolyline.setMap(null);
-    }
-
     this.activatedRoute.params.pipe(
+      tap(() => {
+        this.isPageLoading = true;
+        this.isSuggestionLoading = true;
+
+        this.suggestionCollection = [];
+        this.productInfoCollection = [];
+        this.personalCommentCollection = [];
+        this.currentIndex = 0;
+
+        this.reviewsPackage = {
+          activityId: 0,
+          reviews: [],
+          averageRating: 0,
+          commentCount: 0
+        };
+
+        this.routeOptions = [];
+        this.selectedRouteIndex = 0;
+        this.routeInfo = {
+          distanceText: '',
+          durationText: ''
+        };
+
+        if (this.routePolyline) {
+          this.routePolyline.setMap(null);
+        }
+      }),
       switchMap(params => {
         const id = Number(params['id']);
-        if (!id) return EMPTY;
+        if (!id) {
+          this.isPageLoading = false;
+          this.isSuggestionLoading = false;
+          return EMPTY;
+        }
 
         this.activityIdFromRoute = id;
+
         return forkJoin({
           activityInfo: this.infoService.getActivityDetails(id),
           reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
           productInfoCollection: this.infoService.getRelatedTickets(id),
           personalComments: this.personalCommentService.getPersonalComments(id)
         });
-
       })
     ).subscribe({
       next: ({ activityInfo, reviewsPackage, productInfoCollection, personalComments }) => {
@@ -121,10 +134,21 @@ export class ActivityIntro implements OnInit, AfterViewInit {
         this.reviewsPackage = reviewsPackage;
         this.productInfoCollection = productInfoCollection;
         this.personalCommentCollection = personalComments;
-        this.tryInitMap();
+
+        // 先把正式畫面渲染出來
+        this.isPageLoading = false;
+
+        // 推薦活動先跑，避免被地圖初始化錯誤卡住
         this.getRelatedActivitySuggestion();
+
+        // 等 DOM 把 #mapContainer 渲染出來後再初始化地圖
+        setTimeout(() => {
+          this.tryInitMap();
+        }, 0);
       },
       error: (err) => {
+        this.isPageLoading = false;
+        this.isSuggestionLoading = false;
         console.log('資料載入失敗', err);
       }
     });
@@ -177,12 +201,15 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   //Google Map 使用到的方法
   tryInitMap(): void {
     if (!this.isMapViewReady) return;
+    if (!this.mapContainer?.nativeElement) return;
     if (!this.activityInfo.latitude || !this.activityInfo.longitude) return;
 
     this.initMap();
   }
 
   initMap(): void {
+    if (!this.mapContainer?.nativeElement) return;
+
     const center = {
       lat: Number(this.activityInfo.latitude),
       lng: Number(this.activityInfo.longitude)
@@ -203,9 +230,9 @@ export class ActivityIntro implements OnInit, AfterViewInit {
       google.maps.event.trigger(this.map, 'resize');
       this.map.setCenter(center);
     }, 100);
+
     console.log('地圖載入成功');
   }
-
 
   //取得使用者定位
   userMarker?: google.maps.Marker;
@@ -333,18 +360,35 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
   //拿相關的活動推薦用方法
   getRelatedActivitySuggestion() {
-    if (this.activityInfo.types.length) {
-      console.log('有打進suggestion方法');
+    this.isSuggestionLoading = true;
+    this.currentIndex = 0;
 
-      const param = new SuggestionInfo();
-      param.activityId = this.activityInfo.activityId;
-      param.activityType = this.activityInfo.types;
-
-      this.infoService.offerRelatedOptions(param)?.subscribe((data) => {
-        this.suggestionCollection = data;
-        console.log('建議的活動資訊', this.suggestionCollection);
-      });
+    if (!this.activityInfo.types.length) {
+      this.suggestionCollection = [];
+      this.isSuggestionLoading = false;
+      return;
     }
+
+    console.log('有打進suggestion方法');
+
+    const param = new SuggestionInfo();
+    param.activityId = this.activityInfo.activityId;
+    param.activityType = this.activityInfo.types;
+
+    this.infoService.offerRelatedOptions(param)?.pipe(
+      finalize(() => {
+        this.isSuggestionLoading = false;
+      })
+    ).subscribe({
+      next: (data) => {
+        this.suggestionCollection = data ?? [];
+        console.log('建議的活動資訊', this.suggestionCollection);
+      },
+      error: (err) => {
+        console.log('推薦活動載入失敗', err);
+        this.suggestionCollection = [];
+      }
+    });
   }
 
 
@@ -389,6 +433,7 @@ export class ActivityIntro implements OnInit, AfterViewInit {
     this.selectedSortRule = sortRule;
     this.infoService.getRelatedReviews(this.activityIdFromRoute, this.selectedSortRule)
       .subscribe((data) => {
+        console.log(data);
         this.reviewsPackage = data;
       });
   }
@@ -397,9 +442,22 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
   //用來觸動 子Component (user-Comment-Form)
   isModalOpen = false;
+
   toggleCommentForm() {
-    this.isModalOpen = !this.isModalOpen;
-    console.log('按下後', this.isModalOpen);
+    this.authService.checkAuthStatus().subscribe({
+      next: (res) => {
+        if (res === false) {
+          this.router.navigate(['login']);
+        }
+        console.log('res', res);
+        this.isModalOpen = !this.isModalOpen;
+        console.log('按下後', this.isModalOpen);
+      },
+      error: (err) => {
+        console.error('檢查登入狀態', err);
+        this.router.navigate(['login']);
+      }
+    });
   }
 
   openCommentForm(): void {
@@ -468,7 +526,8 @@ export class ActivityIntro implements OnInit, AfterViewInit {
     comment: '',
     rating: 0,
     createDate: new Date(),
-    reviewImages: []
+    reviewImages: [],
+    memberAvatar: '',
   };
 
   sendTargetToEditForm(target: reviewResponseDTO) {
@@ -477,8 +536,26 @@ export class ActivityIntro implements OnInit, AfterViewInit {
   }
 
 
+  //推薦分頁邏輯
+  currentIndex = 0;
+  cardsPerView = 3;
 
+  get cardWidthPercent(): number {
+    return 100 / this.cardsPerView;
+  }
 
+  next(): void {
+    const maxIndex = this.suggestionCollection.length - this.cardsPerView;
+    if (this.currentIndex < maxIndex) {
+      this.currentIndex++;
+    }
+  }
+
+  prev(): void {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+    }
+  }
 }
 
 

@@ -1,0 +1,30 @@
+<div class="container">
+  <div class="swiper mySwiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide" *ngFor="let item of hotTrips">
+        <a [routerLink]="['trip-detail/', item.tripProductId]" class="card-link">
+          <article class="trip-card">
+            <div class="card-img-wrapper">
+              <img [src]="item.coverImage" [alt]="item.productName">
+            </div>
+            <div class="card-content">
+              <div class="duration">{{ item.durationDays }}天{{ item.durationDays-1 }}夜</div>
+              <h3 class="product-name">{{ item.productName }}</h3>
+              <p class="description">{{ item.regionName }}</p>
+              <div class="tags">
+                <span class="tag" *ngFor="let tag of item.categoryTags">#{{ tag }}</span>
+              </div>
+              <div class="card-footer">
+                <span class="price">NT$ <strong>{{ item.displayPrice | number }}</strong></span>
+              </div>
+            </div>
+          </article>
+        </a>
+      </div>
+    </div>
+
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-pagination"></div>
+  </div>
+</div>
