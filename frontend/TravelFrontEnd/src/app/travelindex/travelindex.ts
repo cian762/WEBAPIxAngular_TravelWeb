@@ -1,15 +1,12 @@
 import { Component } from '@angular/core';
 import { TripIndex } from "../trip/component/trip-index/trip-index";
 import { RouterLink } from '@angular/router';
+import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
 
 @Component({
   selector: 'app-travelindex',
-  imports: [TripIndex, RouterLink],
-// import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
+  imports: [TripIndex, RouterLink, HeroSection],
 
-// @Component({
-//   selector: 'app-travelindex',
-//   imports: [HeroSection],
   templateUrl: './travelindex.html',
   styleUrl: './travelindex.css',
 })

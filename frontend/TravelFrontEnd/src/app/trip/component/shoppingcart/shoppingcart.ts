@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
 import { CartItem } from '../../models/creatshopping.model';
 import { AttractionService } from '../../../Components/attractions/attraction.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-shoppingcart',
@@ -15,17 +16,14 @@ import { AttractionService } from '../../../Components/attractions/attraction.se
 })
 export class Shoppingcart implements OnInit {
   private cartService = inject(CreateShoppingCart);
-  constructor(private http: HttpClient, private router: Router) { }
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private attractionSvc = inject(AttractionService);
+
   cartItems: CartItem[] = []; // 使用強型別介面
   isLoading: boolean = true;
   totalAmount: number = 0;
 
-  constructor(
-    private http: HttpClient,
-    private cartService: CreateShoppingCart,
-    private attractionSvc: AttractionService,
-    private router: Router
-  ) { }
 
   ngOnInit(): void {
     this.fetchCartData();
