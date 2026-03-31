@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { TripIndex } from "../trip/component/trip-index/trip-index";
 import { RouterLink } from '@angular/router';
 import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
+import { ActivityIndexCard } from "../Activity/Component/activity-index-card/activity-index-card";
 
 @Component({
   selector: 'app-travelindex',
-  imports: [TripIndex, RouterLink, HeroSection],
+  imports: [TripIndex, RouterLink, HeroSection, ActivityIndexCard],
 
   templateUrl: './travelindex.html',
   styleUrl: './travelindex.css',
