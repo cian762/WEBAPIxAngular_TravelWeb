@@ -12,4 +12,5 @@ public partial class AttractionTypeMapping
     public virtual Attraction Attraction { get; set; } = null!;
 
     public virtual AttractionTypeCategory AttractionType { get; set; } = null!;
+
 }

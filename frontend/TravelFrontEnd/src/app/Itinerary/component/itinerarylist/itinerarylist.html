@@ -1,0 +1,65 @@
+<section class="il-page">
+
+  <!-- Header -->
+  <header class="il-header">
+    <h1 class="il-title">我的行程</h1>
+    <p class="il-subtitle">管理與規劃你的每一段旅程</p>
+  </header>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+  <div class="il-loading">
+    <div class="il-spinner"></div>
+    <p>載入中…</p>
+  </div>
+  }
+
+  <!-- Error -->
+  @if (errorMsg()) {
+  <div class="il-error">
+    <span class="il-error-icon">⚠️</span>
+    <p>{{ errorMsg() }}</p>
+  </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && !errorMsg() && itineraries().length === 0) {
+  <div class="il-empty">
+    <img src="assets/images/empty-trip.svg" alt="尚無行程" class="il-empty-img" />
+    <p>尚無行程，快來建立第一個旅遊計畫吧！</p>
+    <button class="il-btn-create" routerLink="/itinerary">＋ 建立行程</button>
+  </div>
+  }
+
+  <!-- Card Grid -->
+  @if (!isLoading() && itineraries().length > 0) {
+  <div class="il-grid">
+    @for (item of itineraries(); track item.itineraryId) {
+    <article class="il-card" (click)="goToDetail(item.itineraryId)">
+
+      <!-- Cover Image -->
+      <div class="il-card-img-wrap">
+        <img [src]="item.itineraryImage || getFallbackImage()" [alt]="item.itineraryName" class="il-card-img"
+          (error)="$any($event.target).src = getFallbackImage()" />
+        <!-- Status Badge -->
+        <span class="il-badge il-badge--{{ item.currentStatus ?? 'draft' }}">
+          {{ getStatusLabel(item.currentStatus) }}
+        </span>
+      </div>
+
+      <!-- Card Body -->
+      <div class="il-card-body">
+        <h2 class="il-card-name">{{ item.itineraryName }}</h2>
+        <p class="il-card-intro">{{ item.introduction || '暫無敘述' }}</p>
+        <div class="il-card-meta">
+          <span class="il-meta-icon">📅</span>
+          <span>{{ formatDate(item.startTime) }} — {{ formatDate(item.endTime) }}</span>
+        </div>
+      </div>
+
+    </article>
+    }
+  </div>
+  }
+
+</section>

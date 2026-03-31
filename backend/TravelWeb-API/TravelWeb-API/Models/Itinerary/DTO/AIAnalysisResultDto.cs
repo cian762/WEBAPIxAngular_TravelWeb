@@ -29,10 +29,17 @@ namespace TravelWeb_API.Models.Itinerary.DTO
         public string Type { get; set; }  // "sightseeing", "meal" 等
         public string Title { get; set; }
         public int? PoiId { get; set; }   // 對應 DB 的 attraction_id (可為 null)
+        public string GooglePlaceId { get; set; } // AI 新找的地點 ID
+        public AiLocation Location { get; set; } // AI 新找的地點座標/地址
         public string Details { get; set; }
         public decimal ExpectedFatigueGain { get; set; }
     }
-
+    public class AiLocation
+    {
+        public string Address { get; set; }
+        public decimal Lat { get; set; }
+        public decimal Lng { get; set; }
+    }
     public class DayMetrics
     {
         public decimal Feasibility { get; set; }

@@ -29,7 +29,7 @@ public partial class Activity
 
     public decimal? Latitude { get; set; }
 
-    public int? ViewCount { get; set; }
+    public int ViewCount { get; set; }
 
     public virtual ICollection<ActivityImage> ActivityImages { get; set; } = new List<ActivityImage>();
 

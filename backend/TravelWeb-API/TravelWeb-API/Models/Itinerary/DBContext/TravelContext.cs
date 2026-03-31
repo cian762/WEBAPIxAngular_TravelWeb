@@ -156,6 +156,7 @@ public partial class TravelContext : DbContext
                 .HasAnnotation("Relational:DefaultConstraintName", "DF__Attractio__regio__793DFFAF")
                 .HasColumnName("RegionID");
             entity.Property(e => e.TransportInfo).HasColumnName("transport_info");
+            entity.Property(e => e.ViewCount).HasColumnName("view_count");
             entity.Property(e => e.Website)
                 .HasMaxLength(500)
                 .HasColumnName("website");

@@ -20,7 +20,8 @@ export const aGuard: CanActivateFn = (route, state) => {
         return true;
       } else {
         console.log('沒有cookie，是要登入甚麼拉!!');
-        return router.parseUrl('/login');
+
+        return router.parseUrl('/login?returnUrl=' + encodeURIComponent(state.url));// 把當前要去的路由當作 returnUrl 帶給登入頁
       }
     })
   )

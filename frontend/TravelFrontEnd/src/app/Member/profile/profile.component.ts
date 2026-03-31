@@ -1,12 +1,12 @@
-import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'; // 🔥 新增 ViewChild, ElementRef
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterOutlet],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -16,7 +16,6 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // 🔥 取得 HTML 中隱藏的 input 元素
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
   @ViewChild('coverInput') coverInput!: ElementRef<HTMLInputElement>;
 
@@ -26,8 +25,8 @@ export class ProfileComponent implements OnInit {
     accountInfo: {},
     memberInfo: {},
     followingList: [],
-    blackList:[],
-    complaints:[]
+    blackList: [],
+    complaints: []
   };
 
   ngOnInit(): void {
@@ -37,14 +36,12 @@ export class ProfileComponent implements OnInit {
         this.userProfile.memberId = data.memberId;
         this.userProfile.name = data.name;
 
-        // 處理大頭貼
         if (data.avatarUrl && data.avatarUrl.trim() !== '') {
           this.userProfile.avatarUrl = data.avatarUrl;
         } else {
           this.userProfile.avatarUrl = 'assets/default-avatar.png';
         }
 
-        // 🔥 處理封面圖片：讀取後端的 backgroundUrl
         if (data.backgroundUrl && data.backgroundUrl.trim() !== '') {
           this.userProfile.coverUrl = data.backgroundUrl;
         } else {
@@ -71,7 +68,6 @@ export class ProfileComponent implements OnInit {
     this.activeTab = tabName;
   }
 
-  // 🔥 1. 觸發隱藏的 input 點擊事件，打開檔案總管
   triggerUpload(type: 'avatar' | 'cover'): void {
     if (type === 'avatar') {
       this.avatarInput.nativeElement.click();
@@ -80,24 +76,20 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  // 🔥 2. 當使用者選好圖片後觸發此函式，發送給後端
   onFileSelected(event: Event, type: 'avatar' | 'cover'): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const formData = new FormData();
 
-      // ⚠️ 屬性名稱必須跟後端 C# 的 MemberProfileUpdateDto 一模一樣
       if (type === 'avatar') {
         formData.append('AvatarFile', file);
       } else {
         formData.append('BackgroundFile', file);
       }
 
-      // 呼叫 API 更新資料
       this.authService.updateProfile(formData).subscribe({
         next: (res: any) => {
-          // 上傳成功，將後端回傳的 Cloudinary 網址更新到畫面上
           if (type === 'avatar' && res.avatarUrl) {
             this.userProfile.avatarUrl = res.avatarUrl;
           } else if (type === 'cover' && res.backgroundUrl) {
@@ -111,13 +103,12 @@ export class ProfileComponent implements OnInit {
         }
       });
 
-      // 清空 input，確保下次選同一張圖也能觸發 change 事件
       input.value = '';
     }
   }
 
   onLogout(): void {
-    if(confirm('確定要登出嗎？')) {
+    if (confirm('確定要登出嗎？')) {
       this.authService.logout().subscribe({
         next: () => {
           this.router.navigate(['/login']);

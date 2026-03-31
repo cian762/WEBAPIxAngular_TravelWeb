@@ -1,10 +1,10 @@
 ﻿using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
 using System.Text;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
@@ -19,8 +19,7 @@ using TravelWeb_API.Models.TripProduct.STripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 using TravelWeb_API.Services;
 
-
-
+QuestPDF.Settings.License = LicenseType.Community;
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
@@ -39,7 +38,7 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
-    
+
 });
 
 builder.Services.AddControllers();
@@ -129,7 +128,7 @@ builder.Services.AddSwaggerGen(
         x.SwaggerDoc("Board", new OpenApiInfo
         {
             Title = "Board"
-        });        
+        });
 
         x.DocInclusionPredicate((docName, apiDesc) =>
         {
@@ -157,6 +156,16 @@ builder.Services.AddScoped<ActivityTicketService>();
 builder.Services.AddHttpClient<GoogleRouteForActivityService>();
 builder.Services.AddScoped<ActivityReviewService>();
 builder.Services.AddScoped<CloudinaryPhotoService>();
+
+//QRCode 相關組態強型別引用、QRCode Service 註冊
+builder.Services.Configure<QrCodeSettings>(
+    builder.Configuration.GetSection("QrCodeSettings"));
+builder.Services.AddScoped<QRCodeService>();
+
+//SMTP 相關組態強型別引用、Email Service 註冊
+builder.Services.Configure<SmtpSettings>(
+    builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddScoped<EmailService>();
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
@@ -175,6 +184,8 @@ builder.Services.AddScoped<IItineraryservice, ItineraryService>();
 builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
+builder.Services.AddScoped<IGooglePlaceService, GooglePlaceService>();
+builder.Services.AddHttpClient<GooglePlaceService>();
 //builder.Services.AddControllers()
 //    .AddJsonOptions(options =>
 //    {
@@ -215,6 +226,9 @@ builder.Services.AddHttpClient();
 //{
 //    options.Filters.Add(new AuthorizeFilter());
 //});
+
+builder.Services.AddScoped<IMemberEmailService, MemberEmailService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -232,7 +246,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(
         x =>
     {
-        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");       
+        x.SwaggerEndpoint("/swagger/Board/swagger.json", "Board");
         x.SwaggerEndpoint("/swagger/TravelWeb-API/swagger.json", "TravelWeb-API");
 
     }

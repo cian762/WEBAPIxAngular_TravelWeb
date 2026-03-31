@@ -1,0 +1,232 @@
+<div class="travel-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__mask"></div>
+
+    <div class="container hero__inner">
+      <div class="hero__content">
+        <h1>找到下一段旅行靈感</h1>
+        <p>
+          從熱門景點、在地活動、主題文章到套裝行程，
+          一站式規劃你的旅遊體驗。
+        </p>
+
+        <div class="hero-search">
+          <input type="text" placeholder="搜尋景點、活動、文章、套裝行程">
+          <button>搜尋</button>
+        </div>
+
+        <div class="hero-tags">
+          <span>熱門：</span>
+          <a href="#">台北</a>
+          <a href="#">花蓮</a>
+          <a href="#">溫泉</a>
+          <a href="#">親子景點</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 會員收藏 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Member Picks</p>
+          <h2>會員收藏</h2>
+        </div>
+        <a href="#" class="section-link">查看全部</a>
+      </div>
+
+      <div class="card-scroll">
+        @for (item of favoriteList; track item.id) {
+        <article class="travel-card travel-card--horizontal">
+          <div class="travel-card__image">
+            <img [src]="item.imageUrl" [alt]="item.title">
+            <span class="badge badge--favorite">已收藏</span>
+          </div>
+          <div class="travel-card__body">
+            <div class="travel-card__meta">{{ item.region }}・{{ item.category }}</div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 組員嵌入區 -->
+  <section class="section section--embed">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Team Module</p>
+          <h2>精選功能專區</h2>
+        </div>
+      </div>
+      <app-hero-section></app-hero-section>
+      <div class="embed-grid">
+
+        <!-- <app-team-feature-b></app-team-feature-b>
+        <app-team-feature-c></app-team-feature-c> -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 熱門文章推薦 -->
+  <section class="section section--soft">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Travel Stories</p>
+          <h2>熱門文章推薦</h2>
+        </div>
+        <a href="#" class="section-link">更多文章</a>
+      </div>
+
+      <div class="article-grid">
+        @for (article of articleList; track article.id) {
+        <article class="article-card">
+          <div class="article-card__image">
+            <img [src]="article.imageUrl" [alt]="article.title">
+          </div>
+          <div class="article-card__body">
+            <div class="article-card__tag">{{ article.tag }}</div>
+            <h3>{{ article.title }}</h3>
+            <p>{{ article.summary }}</p>
+            <div class="article-card__footer">
+              <span>{{ article.date }}</span>
+              <a href="#">閱讀更多</a>
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 熱門活動 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Popular Events</p>
+          <h2>熱門活動</h2>
+        </div>
+        <a href="#" class="section-link">更多活動</a>
+      </div>
+
+      <div class="product-grid">
+        @for (event of eventList; track event.id) {
+        <article class="product-card">
+          <div class="product-card__image">
+            <img [src]="event.imageUrl" [alt]="event.title">
+            <span class="badge badge--hot">熱門</span>
+          </div>
+          <div class="product-card__body">
+            <div class="product-card__location">{{ event.location }}</div>
+            <h3>{{ event.title }}</h3>
+            <p>{{ event.description }}</p>
+            <div class="product-card__footer">
+              <span class="score">★ {{ event.score }}</span>
+              <span class="price">NT$ {{ event.price }}</span>
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 熱門景點 -->
+  <section class="section section--destination">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Top Attractions</p>
+          <h2>熱門景點</h2>
+        </div>
+        <a href="#" class="section-link">更多景點</a>
+      </div>
+
+      <div class="destination-grid">
+        @for (spot of attractionList; track spot.id) {
+        <article class="destination-card">
+          <img [src]="spot.imageUrl" [alt]="spot.title">
+          <div class="destination-card__overlay">
+            <span>{{ spot.region }}</span>
+            <h3>{{ spot.title }}</h3>
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 熱門套裝行程 -->
+  <section class="section section--soft">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Package Tours</p>
+          <h2>熱門套裝行程</h2>
+        </div>
+        <a href="#" class="section-link">更多套裝</a>
+      </div>
+
+      <div class="package-grid">
+        @for (pkg of packageList; track pkg.id) {
+        <article class="package-card">
+          <div class="package-card__image">
+            <img [src]="pkg.imageUrl" [alt]="pkg.title">
+          </div>
+
+          <div class="package-card__body">
+            <div class="package-card__days">{{ pkg.days }}</div>
+            <h3>{{ pkg.title }}</h3>
+            <p>{{ pkg.description }}</p>
+
+            <div class="package-card__tags">
+              @for (tag of pkg.tags; track $index) {
+              <span>{{ tag }}</span>
+              }
+            </div>
+
+            <div class="package-card__footer">
+              <span class="score">★ {{ pkg.score }}</span>
+              <span class="price">NT$ {{ pkg.price }}</span>
+            </div>
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 旅遊服務 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Travel Guide</p>
+          <h2>旅遊服務入口</h2>
+        </div>
+      </div>
+
+      <div class="service-grid">
+        @for (item of serviceList; track item.title) {
+        <a href="#" class="service-card">
+          <div class="service-card__icon">{{ item.icon }}</div>
+          <div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.desc }}</p>
+          </div>
+        </a>
+        }
+      </div>
+    </div>
+  </section>
+
+</div>

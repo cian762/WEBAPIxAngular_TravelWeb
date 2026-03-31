@@ -79,7 +79,6 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
 
   ngOnInit(): void {
-
     //畫面三隻 API 接收回傳結果的 DTO
     this.suggestionCollection = [];
     this.productInfoCollection = [];
@@ -102,17 +101,19 @@ export class ActivityIntro implements OnInit, AfterViewInit {
       this.routePolyline.setMap(null);
     }
 
-
     this.activatedRoute.params.pipe(
       switchMap(params => {
         const id = Number(params['id']);
         if (!id) return EMPTY;
+
+        this.activityIdFromRoute = id;
         return forkJoin({
           activityInfo: this.infoService.getActivityDetails(id),
           reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
           productInfoCollection: this.infoService.getRelatedTickets(id),
           personalComments: this.personalCommentService.getPersonalComments(id)
         });
+
       })
     ).subscribe({
       next: ({ activityInfo, reviewsPackage, productInfoCollection, personalComments }) => {
@@ -127,36 +128,6 @@ export class ActivityIntro implements OnInit, AfterViewInit {
         console.log('資料載入失敗', err);
       }
     });
-
-    // this.activatedRoute.params.subscribe((params) => {
-    //   const id = Number(params['id']);
-    //   if (!id) return;
-
-    //   //用來存取 Router 上的 ActivityId 變數
-    //   this.activityIdFromRoute = id;
-
-    //   //將 4 隻 API 拿到的資料全部收齊後，再渲染畫面，如果有其中一隻API出問題，則會讓所有 API 拉取結果清空
-    //   forkJoin({
-    //     activityInfo: this.infoService.getActivityDetails(id),
-    //     reviewsPackage: this.infoService.getRelatedReviews(id, this.selectedSortRule),
-    //     productInfoCollection: this.infoService.getRelatedTickets(id),
-    //     personalComments: this.personalCommentService.getPersonalComments(id)
-    //   }).subscribe({
-    //     next: ({ activityInfo, reviewsPackage, productInfoCollection, personalComments }) => {
-    //       this.activityInfo = activityInfo;
-    //       this.reviewsPackage = reviewsPackage;
-    //       this.productInfoCollection = productInfoCollection;
-    //       this.personalCommentCollection = personalComments;
-    //       this.tryInitMap();
-    //       this.getRelatedActivitySuggestion();
-    //     },
-    //     error: (err) => {
-    //       console.log('資料載入失敗', err);
-    //     }
-    //   });
-    // });
-
-
   }
 
 

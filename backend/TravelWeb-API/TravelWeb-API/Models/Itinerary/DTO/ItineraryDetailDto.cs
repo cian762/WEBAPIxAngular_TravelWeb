@@ -31,7 +31,7 @@
         public string? ContentDescription { get; set; }
 
         // 來自 Attractions 表的欄位 (由 LINQ Join 取得)
-        public int AttractionId { get; set; }
+        public int? AttractionId { get; set; }
         public string AttractionName { get; set; }
         public string? Address { get; set; }
         public string? GooglePlaceId { get; set; }
@@ -39,6 +39,10 @@
         public decimal? Longitude { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
+        public string? PlaceId { get; set; }
+        public string? PlaceName
+        {
+            get; set;
+        }
     }
-
 }

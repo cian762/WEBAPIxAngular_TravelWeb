@@ -190,6 +190,12 @@ public partial class AttractionsContext : DbContext
             entity.HasOne(d => d.Product).WithMany()
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_AttractionProductDetails_AttractionProducts");
+
+            entity.Property(e => e.ValidityNote)
+    .HasMaxLength(500)
+    .HasColumnName("validity_note");    // ← 補上
+
+
         });
 
         modelBuilder.Entity<AttractionProductFavorite>(entity =>
@@ -365,6 +371,9 @@ public partial class AttractionsContext : DbContext
             entity.Property(e => e.TagName)
                 .HasMaxLength(50)
                 .HasColumnName("tag_name");
+            entity.Property(e => e.Description)
+    .HasMaxLength(500)
+    .HasColumnName("description");
         });
 
         modelBuilder.Entity<TagsRegion>(entity =>
