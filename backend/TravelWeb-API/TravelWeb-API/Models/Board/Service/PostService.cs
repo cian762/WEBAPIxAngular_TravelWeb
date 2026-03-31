@@ -105,10 +105,12 @@ namespace TravelWeb_API.Models.Board.Service
                     AuthorName = a.MemberInformation.Name,
                     AvatarUrl = a.MemberInformation.AvatarUrl,
                     Status = a.Status,
-                    CommentCount= a.Comments.Count,
-                    LikeCount=a.ArticleLikes.Count,
-                    isLike=a.ArticleLikes.Any(l=>l.UserId==currentUserId)
-                }).FirstOrDefaultAsync();          
+                    CommentCount = a.Comments.Count,
+                    LikeCount = a.ArticleLikes.Count,
+                    isLike = a.ArticleLikes.Any(l => l.UserId == currentUserId),
+                    isCollect = a.ArticleFolders.Any(c => c.UserId == currentUserId),
+
+                }).FirstOrDefaultAsync();
 
             return postDetail;
         }

@@ -41,7 +41,7 @@ namespace TravelWeb_API.Controllers.Board
             if (post == null)
                 return NotFound("文章不存在");            
             if (post.Status != 1 && post.AuthorID != currentUserId)
-                return Forbid();
+                return NotFound("沒有瀏覽此篇文章的權限"); ;
 
             return Ok(post);
         }

@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 import { aGuard } from './a-guard';
+import { ProfileComponent } from './Member/profile/profile.component';
+import { ResetPasswordComponent } from './Member/reset-password/reset-password.component';
 
 export const routes: Routes = [
   {
@@ -71,7 +73,7 @@ export const routes: Routes = [
     )
     , canActivate: [aGuard]
   },
-  //*行程建立路由*/
+  /**行程建立路由*/
   {
     path: 'itinerary',
     loadComponent: () => import('./Itinerary/component/index-itinerary/index-itinerary').then(m => m.IndexItinerary)
@@ -79,7 +81,11 @@ export const routes: Routes = [
   {
     path: 'itinerary-detail/:id',
     loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ItineraryDetailComponent),
-    // canActivate:[aGuard]
+    canActivate: [aGuard]
+  }, {
+    path: 'Itinerarylist',
+    loadComponent: () => import('./Itinerary/component/itinerarylist/itinerarylist').then(m => m.Itinerarylist),
+    canActivate: [aGuard]
   },
 
   {
@@ -113,13 +119,18 @@ export const routes: Routes = [
         path: 'user/:id',
         loadComponent: () => import('./Board/user-articles-page/user-articles-page').then(m => m.UserArticlesPage),
       },
+      //404
+      {
+        path: '404',
+        loadComponent: () => import('./Board/page404/page404').then(m => m.Page404),
+      },
     ],
   },
 
   {
     path: '',
     loadComponent: () =>
-      import('./Member/login/login.component').then(m => m.LoginComponent),
+      import('./travelindex/travelindex').then(m => m.Travelindex),
   },
 
   {
@@ -130,11 +141,26 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./Member/register/register.component').then(m => m.RegisterComponent)
   },
+  { path: 'reset-password', component: ResetPasswordComponent },
   {
     path: 'profile',
-    loadComponent: () => import('./Member/profile/profile.component').then(m => m.ProfileComponent)
+    component: ProfileComponent, // 這是你目前顯示頭像和 Sidebar 的元件
+    children: [
+      {
+        path: 'orderdetails', // 這裡不要加 /
+        loadComponent: () => import('./trip/component/order-details/order-details').then(
+          m => m.OrderDetails
+        )
+      }],
   },
 
+  { path: 'complaint', loadComponent: () => import('./Member/complaint-form/complaint-form.component').then(m => m.ComplaintFormComponent) },
+
+  {
+    path: 'qrCode/:token',
+    loadComponent: () => import('./Activity/Component/qrcode-verify/qrcode-verify').then(m => m.QrcodeVerify),
+    canActivate: [aGuard]
+  },
   // 所有不認識的路徑會導向首頁
   { path: '**', redirectTo: '' },
 ];

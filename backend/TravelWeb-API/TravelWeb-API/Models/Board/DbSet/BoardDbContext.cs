@@ -188,7 +188,7 @@ public partial class BoardDbContext : DbContext
 
             entity.HasOne(d => d.Tag).WithMany()
                 .HasForeignKey(d => d.TagId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ArticleTags_TagsList");
         });
 
@@ -219,14 +219,14 @@ public partial class BoardDbContext : DbContext
 
             entity.HasOne(d => d.Article).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.ArticleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Comment_Article");
 
             // 自我引用配置
             entity.HasOne(d => d.Parent)                  // 每個子留言有一個「母物件」
                 .WithMany(p => p.InverseParent)           // 每個母留言有多個「子物件」
                 .HasForeignKey(d => d.ParentId)           // 外鍵是 ParentID
-                .OnDelete(DeleteBehavior.ClientSetNull)   // 限制刪除行為
+                .OnDelete(DeleteBehavior.Cascade)  // 一起刪除
                 .HasConstraintName("FK_Comment_Comment"); // 與資料庫一致的約束名稱           
 
             entity.HasOne(d => d.MemberInformation)          // Comment 有一個 MemberInformation
@@ -250,7 +250,7 @@ public partial class BoardDbContext : DbContext
 
             entity.HasOne(d => d.Comment).WithMany(p => p.CommentLikes)
                 .HasForeignKey(d => d.CommentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_CommentLike_Comment");
         });
 
@@ -263,7 +263,7 @@ public partial class BoardDbContext : DbContext
 
             entity.HasOne(d => d.Comment).WithMany(p => p.CommentPhotos)
                                          .HasForeignKey(d => d.CommentId)
-                                         .OnDelete(DeleteBehavior.ClientSetNull)
+                                         .OnDelete(DeleteBehavior.Cascade)
                                          .HasConstraintName("FK_CommentPhotos_Comment");
         });
 
@@ -331,7 +331,7 @@ public partial class BoardDbContext : DbContext
 
             entity.HasOne(d => d.Article).WithOne(p => p.Post)
                 .HasForeignKey<Post>(d => d.ArticleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Post_Article");
         });
 
@@ -344,7 +344,7 @@ public partial class BoardDbContext : DbContext
 
             entity.HasOne(d => d.Article).WithMany(p => p.PostPhotos)
                 .HasForeignKey(d => d.ArticleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_PostPhotos_Article");
         });
 

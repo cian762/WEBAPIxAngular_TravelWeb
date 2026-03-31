@@ -174,6 +174,8 @@
       <section id="sec6">
         <div class="mb-5 border-bottom">
           <div class="d-flex justify-content-evenly align-items-center mb-5">
+            <span><button (click)="deleteArticle()" class="genric-btn danger-border radius">刪除文章</button>
+            </span>
             <div class="single-element-widget">
               <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
               <div class="default-select">
@@ -184,13 +186,11 @@
                 </select>
               </div>
             </div>
-            <span>
-              <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a></span>
           </div>
         </div>
       </section>
       <div class="d-flex justify-content-around">
-        <a href="#" class="genric-btn danger-border radius">刪除文章</a>
+        <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
       </div>
     </form>
   </div>
