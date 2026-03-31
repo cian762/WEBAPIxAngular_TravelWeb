@@ -1,0 +1,574 @@
+/* ================================================================
+   create-itinerary.css
+   Travel theme — Gold accent (#f8b600), refined & production-ready
+   ================================================================ */
+/* ── Loading Overlay ──────────────────────────── */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 20, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 預設隱藏 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.loading-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+  /* 鎖住所有底層點擊 */
+}
+
+.loading-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+/* 旋轉圓圈 */
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(248, 182, 0, 0.2);
+  border-top-color: #f8b600;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 0.9rem;
+  color: #5a6274;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+/* ── Variables ─────────────────────────────────────────────────── */
+:root {
+  --gold: #f8b600;
+  --gold-light: #fff8e1;
+  --gold-mid: #ffd54f;
+  --gold-dark: #c49000;
+  --gold-deeper: #7a5800;
+  --gold-border: rgba(248, 182, 0, 0.25);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #5a6274;
+  --text-muted: #9ca3af;
+
+  --white: #ffffff;
+  --surface: #f9f8f6;
+  --card-bg: #ffffff;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, .08), 0 2px 8px rgba(0, 0, 0, .06);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, .10), 0 8px 20px rgba(0, 0, 0, .07);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  --font-body: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+
+  --header-h: 70px;
+  --footer-h: 60px;
+}
+
+/* ── Base reset ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--surface);
+  color: var(--text-primary);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Placeholder Header ─────────────────────────────────────────── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: #04091e;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .18);
+}
+
+.site-logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .02em;
+}
+
+.site-header nav a {
+  color: rgba(255, 255, 255, .75);
+  text-decoration: none;
+  font-size: .9rem;
+  font-weight: 400;
+  transition: color .2s;
+}
+
+.site-header nav a:hover {
+  color: var(--gold);
+}
+
+/* ── Page Section ───────────────────────────────────────────────── */
+.create-section {
+  position: relative;
+  padding: 96px 0 112px;
+  overflow: hidden;
+
+  /* Warm off-white parchment background */
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(248, 182, 0, .09) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(248, 182, 0, .06) 0%, transparent 55%),
+    linear-gradient(160deg, #fdfaf3 0%, #f9f6ed 50%, #faf8f2 100%);
+}
+
+/* Decorative background blobs */
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(60px);
+  opacity: .45;
+}
+
+.bg-blob-1 {
+  width: 480px;
+  height: 480px;
+  top: -140px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(248, 182, 0, .22) 0%, transparent 70%);
+}
+
+.bg-blob-2 {
+  width: 360px;
+  height: 360px;
+  bottom: -80px;
+  right: -60px;
+  background: radial-gradient(circle, rgba(248, 182, 0, .16) 0%, transparent 70%);
+}
+
+/* Subtle dot grid overlay */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(200, 170, 80, .18) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: .6;
+}
+
+/* ── Section Typography ─────────────────────────────────────────── */
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  background: rgba(248, 182, 0, .12);
+  border: 1px solid rgba(248, 182, 0, .28);
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.section-heading {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+
+.section-sub {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 44px;
+  font-weight: 300;
+}
+
+/* ── Main Card ──────────────────────────────────────────────────── */
+.itinerary-card {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(248, 182, 0, .15);
+  padding: 44px 48px 40px;
+  max-width: 760px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* Top golden accent line */
+.card-glow-line {
+  position: absolute;
+  top: 0;
+  left: 48px;
+  right: 48px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold-mid), var(--gold), transparent);
+  border-radius: 0 0 4px 4px;
+  opacity: .8;
+}
+
+/* ── Field Groups ───────────────────────────────────────────────── */
+.field-group {
+  margin-bottom: 26px;
+}
+
+/* Side-by-side date row */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0 12px;
+  align-items: end;
+  margin-bottom: 26px;
+}
+
+.field-divider {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  padding-bottom: 12px;
+  text-align: center;
+  user-select: none;
+}
+
+/* Label */
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.label-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Input wrapper */
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap-icon {
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix-icon {
+  position: absolute;
+  left: 14px;
+  font-size: .95rem;
+  pointer-events: none;
+  z-index: 1;
+  line-height: 1;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Base input */
+.field-input {
+  display: block;
+  width: 100%;
+  background: #fafaf8;
+  border: 1.5px solid #ebe9e2;
+  border-radius: var(--radius-sm);
+  padding: 11px 16px;
+  font-size: .93rem;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.field-input:hover {
+  border-color: rgba(248, 182, 0, .4);
+  background: #fffef9;
+}
+
+.field-input:focus {
+  border-color: var(--gold);
+  background: #fffef5;
+  box-shadow: 0 0 0 4px rgba(248, 182, 0, .12);
+}
+
+/* Large variant */
+.field-input-lg {
+  padding: 14px 16px;
+  font-size: 1rem;
+}
+
+/* With prefix icon */
+.has-prefix {
+  padding-left: 40px;
+}
+
+/* Hint text */
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: .76rem;
+  color: var(--text-muted);
+}
+
+/* datetime-local calendar icon tint */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: .5;
+  filter: invert(60%) sepia(60%) saturate(300%) hue-rotate(10deg);
+  transition: opacity .2s;
+}
+
+input[type="datetime-local"]:hover::-webkit-calendar-picker-indicator {
+  opacity: 1;
+}
+
+/* ── Card Divider ───────────────────────────────────────────────── */
+.card-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(248, 182, 0, .3), transparent);
+  margin: 8px 0 32px;
+}
+
+/* ── Action Buttons ─────────────────────────────────────────────── */
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.btn-itinerary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-align: left;
+  overflow: hidden;
+  transition: transform .18s, box-shadow .18s, filter .18s;
+}
+
+.btn-itinerary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .2s;
+  background: rgba(255, 255, 255, .12);
+}
+
+.btn-itinerary:hover::before {
+  opacity: 1;
+}
+
+.btn-itinerary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+}
+
+.btn-itinerary:active {
+  transform: translateY(0);
+}
+
+/* AI button — outlined gold */
+.btn-ai {
+  background: var(--gold-light);
+  border: 1.5px solid var(--gold-border);
+  color: var(--gold-deeper);
+}
+
+.btn-ai:hover {
+  background: #fff3c0;
+  border-color: var(--gold);
+  box-shadow: 0 8px 24px rgba(248, 182, 0, .18);
+}
+
+/* Create button — solid gold */
+.btn-create {
+  background: var(--gold);
+  border: 1.5px solid var(--gold);
+  color: #1a1a2e;
+}
+
+.btn-create:hover {
+  background: var(--gold-mid);
+  border-color: var(--gold-mid);
+  box-shadow: 0 8px 28px rgba(248, 182, 0, .32);
+  filter: brightness(1.04);
+}
+
+.btn-icon {
+  font-size: 1.45rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.btn-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.btn-title {
+  font-size: .93rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.btn-desc {
+  font-size: .75rem;
+  font-weight: 400;
+  opacity: .7;
+}
+
+.btn-arrow {
+  font-size: .95rem;
+  opacity: .5;
+  flex-shrink: 0;
+  transition: transform .18s, opacity .18s;
+}
+
+.btn-itinerary:hover .btn-arrow {
+  transform: translateX(3px);
+  opacity: .9;
+}
+
+/* ── Trust Badges ───────────────────────────────────────────────── */
+.trust-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.trust-badge {
+  font-size: .78rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.trust-badge+.trust-badge::before {
+  content: '·';
+  margin-right: 4px;
+  opacity: .4;
+}
+
+/* ── Placeholder Footer ─────────────────────────────────────────── */
+.site-footer {
+  height: var(--footer-h);
+  background: #04091e;
+  display: flex;
+  align-items: center;
+  font-size: .82rem;
+  color: rgba(255, 255, 255, .45);
+}
+
+.site-footer a {
+  color: rgba(255, 255, 255, .5);
+  text-decoration: none;
+  transition: color .2s;
+}
+
+.site-footer a:hover {
+  color: var(--gold);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .create-section {
+    padding: 64px 0 80px;
+  }
+
+  .itinerary-card {
+    padding: 30px 22px 28px;
+    border-radius: var(--radius-lg);
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .field-divider {
+    display: none;
+  }
+
+  .btn-row {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    font-size: 1.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-glow-line {
+    left: 22px;
+    right: 22px;
+  }
+
+  .trust-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .trust-badge+.trust-badge::before {
+    display: none;
+  }
+}

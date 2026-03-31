@@ -1,4 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using QuestPDF.Drawing;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using TravelWeb_API.Models.Itinerary.DBContext;
 using TravelWeb_API.Models.Itinerary.DBModel;
 using TravelWeb_API.Models.Itinerary.DTO;
@@ -8,12 +12,36 @@ namespace TravelWeb_API.Models.Itinerary.Service
     {
         private readonly TravelContext _context;
         private readonly ICloudinaryService _imageUploadService;
-
-        public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService)
+        private readonly IConfiguration _config;
+        private readonly string _fontPath;
+        static bool isfontexist = false;
+        private static readonly object _fontLock = new object();
+        private readonly GooglePlaceService _placesService;
+        public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService, IConfiguration config, GooglePlaceService placesService)
         {
             _imageUploadService = cloudinaryService;
             _context = context;
-
+            _config = config;
+            _fontPath = config["FileSettings:FontPath"];
+            _placesService = placesService;
+        }
+        //從會員ID抓行程列表
+        public async Task<List<ItineraryCardDto>> GetItinerariesByMemberAsync(string memberId)
+        {
+            return await _context.Itineraries
+                .Where(i => i.MemberId == memberId)
+                .OrderByDescending(i => i.CreateTime)
+                .Select(i => new ItineraryCardDto
+                {
+                    ItineraryId = i.ItineraryId,
+                    ItineraryName = i.ItineraryName,
+                    ItineraryImage = i.ItineraryImage,
+                    Introduction = i.Introduction,
+                    StartTime = i.StartTime,
+                    EndTime = i.EndTime,
+                    CurrentStatus = i.CurrentStatus
+                })
+                .ToListAsync();
         }
         /*建立主表包含物件*/
         public async Task<int> CreateItineraryWithItemsAsync(ItineraryCreateDto dto, string memberid)
@@ -28,6 +56,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 {
                     MemberId = memberid,
                     ItineraryName = dto.ItineraryName,
+                    //ItineraryImage = "https://res.cloudinary.com/dcyrbbv4w/image/upload/v1773284561/cld-sample-2.jpg",
                     StartTime = dto.StartTime,
                     EndTime = dto.EndTime,
                     CreateTime = DateTime.Now,
@@ -156,8 +185,9 @@ namespace TravelWeb_API.Models.Itinerary.Service
                                     ContentDescription = item.ContentDescription,
                                     // 關鍵：從關聯的 Attraction 表抓取地點資訊
                                     AttractionName = item.AttractionName != null ? (item.Attraction.Name ?? item.ContentDescription) : item.ContentDescription,
-                                    GooglePlaceId = item.GooglePlaceId ?? null,
-                                    PlaceName = item.AttractionName ?? null,
+                                    GooglePlaceId = item.Attraction.GooglePlaceId,
+                                    PlaceId = item.Attraction.GooglePlaceId,
+                                    PlaceName = item.Attraction.Name ?? null,
                                     Address = item.Attraction.Address != null ? item.Attraction.Address : "建議於附近區域安排",
                                     Latitude = item.Attraction.Latitude != null ? item.Attraction.Latitude : null,
                                     Longitude = item.Attraction.Longitude != null ? item.Attraction.Longitude : null,
@@ -254,7 +284,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                             AttractionId = finalAttractionId,
                             DayNumber = dayGroup.Key,
                             SortOrder = currentSortOrder,
-                            ContentDescription = item.ContentDescription,
+                            ContentDescription = item.Name,
                             StartTime = item.StartTime,
                             EndTime = item.EndTime
                         };
@@ -273,6 +303,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 throw;
             }
         }
+        //軟刪除
         public async Task<bool> SoftDeleteItineraryAsync(int itineraryId)
         {
             var itinerary = await _context.Itineraries
@@ -287,6 +318,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 4. 存檔並回傳結果
             return await _context.SaveChangesAsync() > 0;
         }
+        //查看過去版本
         public async Task<List<ItineraryVersionHistoryDto>> GetVersionHistoryAsync(int itineraryId)
         {
             return await _context.ItineraryVersions
@@ -303,7 +335,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 })
                 .ToListAsync();
         }
-
+        //查看過去版本細項
         public async Task<VersionDto> GetItemByVersionAsync(int versionId)
         {
 #pragma warning disable CS8603 // 可能有 Null 參考傳回。
@@ -333,6 +365,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         }).FirstOrDefaultAsync();
 #pragma warning restore CS8603 // 可能有 Null 參考傳回。
         }
+        //儲存圖片
         public async Task<string> SaveImagebyid(IFormFile image, int Id)
 
         {
@@ -360,6 +393,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 4. 回傳網址給前端，讓前端可以 [style.background-image] 顯示
             return imageUrl;
         }
+        //額外增加一天
         public async Task<DateTime> ExtendOneDayAsync(int itineraryId)
         {
             var itinerary = await _context.Itineraries.FindAsync(itineraryId);
@@ -372,6 +406,192 @@ namespace TravelWeb_API.Models.Itinerary.Service
             await _context.SaveChangesAsync();
             return itinerary.EndTime.Value;
         }
+        #region GOOGLE地圖
+        public async Task<DayItineraryDto> GetDayItineraryAsync(int itineraryId, int dayNumber)
+        {
+            var items = await _context.ItineraryItems
+                .Include(x => x.Attraction)          // ← 必加
+    .Include(x => x.Version) // ← Where 用到 Version 也要 Include
+            .Where(x => x.Version.ItineraryId == itineraryId && x.DayNumber == dayNumber)
+            .OrderBy(x => x.SortOrder)
+            .ToListAsync();
 
+            // AI 生成的地點可能沒有 PlaceId，這裡補齊
+            foreach (var item in items.Where(x => x.Attraction != null && string.IsNullOrEmpty(x.Attraction.GooglePlaceId)))
+            {
+                try
+                {
+                    item.Attraction.GooglePlaceId = await _placesService.GetPlaceIdAsync(item.Attraction.Address);
+                    Console.WriteLine($"AttractionId: {item.AttractionId}, Name: {item.Attraction?.Name}, PlaceId: {item.Attraction?.GooglePlaceId}");
+
+                }
+                catch (Exception ex)
+                {
+                    // 查不到就留空，不影響其他地點
+                    Console.WriteLine($"Places API 查詢失敗：{item.Attraction.Address}, {ex.Message}");
+                }
+            }
+            await _context.SaveChangesAsync();
+
+            return new DayItineraryDto
+            {
+                DayNumber = dayNumber,
+                Items = items.Where(x => x.Attraction != null).Select(x => new DayItineraryItemDto
+                {
+                    Order = x.SortOrder ?? 100,
+                    PlaceId = x.Attraction.GooglePlaceId,
+                    PlaceName = x.Attraction.Name,
+                    Address = x.Attraction.Address,
+                    ArrivalTime = x.StartTime.HasValue ? x.StartTime.Value.TimeOfDay : (TimeSpan?)null,
+                    DepartureTime = x.EndTime.HasValue ? x.EndTime.Value.TimeOfDay : (TimeSpan?)null,
+                }).ToList()
+            };
+        }
+
+        #endregion
+        #region  PDF
+        //基於ID建成DTO給PDF
+        public async Task<byte[]> GetExportFileAsync(int itineraryId)
+        {
+            var itinerary = await _context.Itineraries
+          .Include(i => i.ItineraryVersions)
+              .ThenInclude(v => v.ItineraryItems)
+              .ThenInclude(item => item.Attraction)
+          .FirstOrDefaultAsync(i => i.ItineraryId == itineraryId);
+
+            // 2. NULL 檢查：放在資料查詢之後
+            if (itinerary == null) throw new Exception("找不到該行程");
+
+            var activeVersion = itinerary.ItineraryVersions
+                .FirstOrDefault(v => v.CurrentUsageStatus == "Y");
+
+            if (activeVersion == null) throw new Exception("該行程沒有啟用的版本");
+
+            // 3. 計算總天數 (基於行程起迄時間)
+            int totalDays = 1;
+            if (itinerary.StartTime.HasValue && itinerary.EndTime.HasValue)
+            {
+                totalDays = (itinerary.EndTime.Value.Date - itinerary.StartTime.Value.Date).Days + 1;
+            }
+
+            // 4. 組裝 DTO 並「補全天數」
+            var exportDto = new ItineraryExportDto
+            {
+                ItineraryName = itinerary.ItineraryName,
+                Introduction = itinerary.Introduction,
+                StartTime = itinerary.StartTime,
+                EndTime = itinerary.EndTime,
+                Days = new List<ExportDayDetailDto>()
+            };
+
+            for (int d = 1; d <= totalDays; d++)
+            {
+                var dayDetail = new ExportDayDetailDto
+                {
+                    DayNumber = d,
+                    // 從 activeVersion.ItineraryItems 中找尋該天的項目
+                    Items = activeVersion.ItineraryItems
+                        .Where(item => item.DayNumber == d)
+                        .OrderBy(item => item.SortOrder)
+                        .Select(item =>
+                        {
+
+                            return new ExportItemDto
+                            {
+                                AttractionName = item.Attraction?.Name ?? "未知地點",
+                                StartTime = item.StartTime?.ToString("HH:mm") ?? "未定",
+                                ContentDescription = item.ContentDescription ?? "",
+                                Activity = item.ActivityId
+                            };
+                        }).ToList()
+                };
+                exportDto.Days.Add(dayDetail);
+            }
+
+            // 5. 確保字型已註冊並產生 PDF
+            EnsureFontRegistered();
+            return await GeneratePdfAsync(exportDto);
+        }
+        //輸出PDF
+        public async Task<byte[]> GeneratePdfAsync(ItineraryExportDto data)
+        {
+            return await Task.Run(() =>
+            {
+                return Document.Create(container =>
+             {
+                 container.Page(page =>
+                 {
+                     page.Margin(50);
+                     page.DefaultTextStyle(x => x.FontSize(12).FontFamily(_config["FileSettings:FontFamilyName"]));
+
+                     // 標題區
+                     page.Header().Text(data.ItineraryName).FontSize(24).SemiBold().FontColor(Colors.Blue.Medium);
+
+                     page.Content().Column(col =>
+                     {
+                         col.Item().PaddingVertical(10).Text(data.Introduction);
+
+                         // 依據行程天數生成內容
+                         foreach (var day in data.Days)
+                         {
+                             col.Item().PaddingTop(10).Element(c => DayHeader(c, day.DayNumber));
+
+                             if (day.Items != null && day.Items.Any())
+                             {
+                                 col.Item().Table(table =>
+                                 {
+                                     table.ColumnsDefinition(columns =>
+                                     {
+                                         columns.ConstantColumn(80); // 時間
+                                         columns.RelativeColumn();   // 地點與活動
+                                     });
+
+                                     foreach (var item in day.Items)
+                                     {
+                                         table.Cell().Text(item.StartTime);
+                                         table.Cell().Column(c =>
+                                         {
+                                             c.Item().Text(item.AttractionName).Bold();
+                                             c.Item().Text(item.ContentDescription).FontSize(10).FontColor(Colors.Grey.Medium);
+                                         });
+                                     }
+                                 });
+                             }
+                             else
+                             {
+                                 col.Item().Text(t => { t.Span("今日暫無排定行程").Italic().FontColor(Colors.Grey.Lighten1); });
+                             }
+                         }
+                     });
+                 });
+             }).GeneratePdf();
+            });
+        }
+        //輔助PDF美化標題的方法
+        private void DayHeader(IContainer container, int dayNum)
+        {
+            container.Background(Colors.Grey.Lighten3).Padding(5).Text($"第 {dayNum} 天").SemiBold();
+        }
+        //判斷字形是否載入的方法
+        private void EnsureFontRegistered()
+        {
+            if (!isfontexist)
+            {
+                lock (_fontLock)
+                {
+                    if (!isfontexist) // Double-check locking
+                    {
+                        if (File.Exists(_fontPath))
+                        {
+                            // 建議使用 File.OpenRead 讀取後要 Dispose，或者直接傳路徑字串
+                            FontManager.RegisterFont(File.OpenRead(_fontPath));
+                            isfontexist = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
     }
 }

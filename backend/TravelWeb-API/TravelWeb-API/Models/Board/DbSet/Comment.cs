@@ -17,13 +17,12 @@ public partial class Comment
     public string? Contents { get; set; }
 
     public DateTime CreatedAt { get; set; }
-
+ // 導覽屬性
     public virtual Article Article { get; set; } = null!;
     public virtual MemberInformation MemberInformation { get; set; } = null!;
 
-    public virtual ICollection<CommentLike> CommentLikes { get; set; } = new List<CommentLike>();
-
-    // 導覽屬性
+    public virtual ICollection<CommentLike>? CommentLikes { get; set; } = new List<CommentLike>();
+    public virtual ICollection<CommentPhoto>? CommentPhotos { get; set; } = new List<CommentPhoto>();
     public virtual Comment? Parent { get; set; } // 指向母物件
     public virtual ICollection<Comment> InverseParent { get; set; } = new List<Comment>(); // 所有的子物件
 }

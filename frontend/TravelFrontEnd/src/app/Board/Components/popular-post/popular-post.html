@@ -1,49 +1,18 @@
 <div class="single-sidebar-widget popular-post-widget">
-  <h4 class="popular-title">熱門文章</h4>
+  <h4 class="popular-title"><i class="bi bi-fire"></i> 熱門文章</h4>
   <div class="popular-post-list">
+    @for (article of articleSamples; track $index) {
     <div class="single-post-list d-flex flex-row align-items-center">
       <div class="thumb">
-        <img class="img-fluid" src="img/blog/pp1.jpg" alt="">
+        <img class="img-fluid img-fluid-size" [src]="article.cover" alt="">
       </div>
       <div class="details">
         <a href="blog-single.html">
-          <h6>Space The Final Frontier</h6>
+          <h6>{{article.title}}</h6>
         </a>
-        <p>02 Hours ago</p>
+        <p>{{article.creatat| date:'M月d日 y年':'zh-Hant'}}</p>
       </div>
     </div>
-    <div class="single-post-list d-flex flex-row align-items-center">
-      <div class="thumb">
-        <img class="img-fluid" src="img/blog/pp2.jpg" alt="">
-      </div>
-      <div class="details">
-        <a href="blog-single.html">
-          <h6>The Amazing Hubble</h6>
-        </a>
-        <p>02 Hours ago</p>
-      </div>
-    </div>
-    <div class="single-post-list d-flex flex-row align-items-center">
-      <div class="thumb">
-        <img class="img-fluid" src="img/blog/pp3.jpg" alt="">
-      </div>
-      <div class="details">
-        <a href="blog-single.html">
-          <h6>Astronomy Or Astrology</h6>
-        </a>
-        <p>02 Hours ago</p>
-      </div>
-    </div>
-    <div class="single-post-list d-flex flex-row align-items-center">
-      <div class="thumb">
-        <img class="img-fluid" src="img/blog/pp4.jpg" alt="">
-      </div>
-      <div class="details">
-        <a href="blog-single.html">
-          <h6>Asteroids telescope</h6>
-        </a>
-        <p>02 Hours ago</p>
-      </div>
-    </div>
+    }
   </div>
 </div>

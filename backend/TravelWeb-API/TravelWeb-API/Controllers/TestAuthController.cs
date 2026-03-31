@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace TravelWeb_API.Controllers // 請確認這裡的名字跟您的專案一樣
+namespace TravelWeb_API.Controllers 
 {
     [Route("api/[controller]")]
     [ApiController]

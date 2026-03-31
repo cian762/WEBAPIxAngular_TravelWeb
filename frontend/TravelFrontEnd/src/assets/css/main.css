@@ -3589,7 +3589,7 @@ body.mobile-nav-active #mobile-nav-toggle {
 }
 
 .widget-wrap {
-  background: #fafaff;
+  background: #ffffff;
   padding: 20px 0px;
   border: 1px solid #eee;
 }
@@ -3695,7 +3695,7 @@ body.mobile-nav-active #mobile-nav-toggle {
 }
 
 .widget-wrap .popular-post-widget .popular-title {
-  background: #f8b600;
+  background: #f44a40;
   color: #fff;
   text-align: center;
   padding: 12px 0px;
@@ -3857,7 +3857,7 @@ body.mobile-nav-active #mobile-nav-toggle {
 }
 
 .widget-wrap .tag-cloud-widget .tagcloud-title {
-  background: #f8b600;
+  background: #4cd3e3;
   color: #fff;
   text-align: center;
   padding: 12px 0px;
@@ -3877,7 +3877,7 @@ body.mobile-nav-active #mobile-nav-toggle {
 }
 
 .widget-wrap .tag-cloud-widget ul li:hover {
-  background: #f8b600;
+  background: #4cd3e3;
 }
 
 .widget-wrap .tag-cloud-widget ul li:hover a {

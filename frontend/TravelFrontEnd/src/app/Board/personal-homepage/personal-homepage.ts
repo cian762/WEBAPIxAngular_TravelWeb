@@ -18,7 +18,10 @@ export class PersonalHomepage implements OnInit {
   }
   articleList: ArticleData[] = [];
   AllTags: TagDTO[] = [];
+  curUser: any;
+
   ngOnInit(): void {
+    this.Serve.getCurUser().subscribe(d => this.curUser = d);
     this.Serve.getArticleByUserAPI(1).subscribe(p => this.articleList = p.articleList);
     this.Serve.getAllTags().subscribe(p => this.AllTags = p);
   }

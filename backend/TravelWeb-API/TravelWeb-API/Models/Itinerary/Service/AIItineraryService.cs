@@ -30,9 +30,43 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 3. 防呆：若 AI 格式錯誤，回傳當天零點
             return targetDate;
         }
+        public async Task<int> EnsureAttractionExists(ExternalLocationDto external)
+        {
+            // 1. 根據 GooglePlaceId 檢查景點是否已存在於資料庫
+            if (!string.IsNullOrEmpty(external.GooglePlaceId) && external.GooglePlaceId != "TEMP_AI_PLACE")
+            {
+                var existing = await _context.Attractions
+                .FirstOrDefaultAsync(a => a.GooglePlaceId == external.GooglePlaceId && a.IsDeleted == false);
+                if (existing != null)
+                {
+                    return existing.AttractionId;
+                }
+            }
+
+
+            // 2. 如果不存在，則建立新的 Attraction 實體
+            var newAttr = new Models.Itinerary.DBModel.Attraction
+            {
+                Name = external.Name,
+                RegionId = 1000,
+                Address = external.Address,
+                GooglePlaceId = external.GooglePlaceId == "TEMP_AI_PLACE" ? null : external.GooglePlaceId,
+                Latitude = (decimal?)external.Latitude,
+                Longitude = (decimal?)external.Longitude,
+                CreatedAt = DateTime.Now,
+                IsDeleted = false
+            };
+
+            _context.Attractions.Add(newAttr);
+
+            // 3. 儲存變更以取得資料庫自動產生的 AttractionId
+            await _context.SaveChangesAsync();
+
+            return newAttr.AttractionId;
+        }
         public async Task<int> GenerateNewItineraryAsync(ItineraryCreateDto dto, List<int> selectedPoiIds, int days, string memberid)
         {
-            // 【前因 1】：AI 需要知道景點的座標與營業時間才能排動線，所以要先從 DB 撈詳細資料
+            // AI 需要知道景點的座標與營業時間才能排動線，所以要先從 DB 撈詳細資料
             var pois = await _context.Attractions
                 .Where(a => selectedPoiIds.Contains(a.AttractionId))
                 .Select(a => new PoiInfoForAi
@@ -56,7 +90,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 AttractionPool = pois
             };
             var debugJson = JsonSerializer.Serialize(inputContext);
-            // 【前因 2】：呼叫 AI 取得規劃好的 JSON
+            // 呼叫 AI 取得規劃好的 JSON
             var jsonResult = await _aiService.CallAiAsync(TravelPrompts.CreateItinerarySystemPrompt, debugJson);
             Console.WriteLine($"DEBUG_RAW_AI: {jsonResult}");
 
@@ -98,7 +132,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     VersionNumber = 1,
                     Creator = 1, // 這裡建議從 MemberId 轉換
                     CreateTime = DateTime.Now,
-                    // 【後果 1】：將 AI 的「規劃策略」與「遺漏景點」序列化存入備註，方便以後對比
+                    //將 AI 的「規劃策略」與「遺漏景點」序列化存入備註，方便以後對比
                     VersionRemark = $"[AI策略] {result.Summary.VersionStrategy} | 未排入: {JsonSerializer.Serialize(result.UnplacedPois)}",
                     Source = "AI",
                     CurrentUsageStatus = "Y"
@@ -112,15 +146,36 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     int currentOrder = 100;
                     foreach (var item in day.Schedule)
                     {
+                        int? finalAttractionId = null;
+
+                        if (item.PoiId.HasValue)
+                        {
+                            // ✅ 使用者原本選的景點，直接用既有的 AttractionId
+                            finalAttractionId = item.PoiId.Value;
+                        }
+                        else
+                        {
+                            // ✅ AI 新增的地點 → 呼叫 EnsureAttractionExists 建立 Attraction
+                            var externalDto = new ExternalLocationDto
+                            {
+                                Name = item.Title,
+                                Address = item.Location?.Address,
+                                GooglePlaceId = item.GooglePlaceId, // AI 有回傳就帶，沒有就 null
+                                Latitude = item.Location?.Lat ?? 0,
+                                Longitude = item.Location?.Lng ?? 0
+                            };
+
+                            finalAttractionId = await EnsureAttractionExists(externalDto);
+                        }
                         _context.ItineraryItems.Add(new ItineraryItem
                         {
                             VersionId = aiVersion.VersionId,
-                            // 【後果 2】：如果是 AI 生成的通用項 (如午餐)，PoiId 為 null 是正常的
-                            AttractionId = item.PoiId,
+                            // 如果是 AI 生成的通用項 (如午餐)，PoiId 為 null 是正常的
+                            AttractionId = finalAttractionId,
                             DayNumber = day.Day,
                             SortOrder = currentOrder,
-                            ContentDescription = item.PoiId.HasValue ? item.Details : $"[AI_NEW_PLACE]|{item.Title}|{item.GooglePlaceId}|{item.Location?.Address}|{item.Location?.Lat}|{item.Location?.Lng}|{item.Details}",
-                            // 【後果 3】：轉換為絕對時間
+                            ContentDescription = item.Details,
+                            // 轉換為絕對時間
                             StartTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.Start),
                             EndTime = CombineDateAndTime((DateTime)dto.StartTime, day.Day, item.End),
                             ActivityId = item.Type,

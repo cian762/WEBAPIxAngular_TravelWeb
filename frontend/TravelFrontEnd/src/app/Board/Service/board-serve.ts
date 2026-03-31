@@ -34,7 +34,7 @@ export class BoardServe {
   }
 
   getArticleByTags(page: number, isprecise: boolean, TagsId?: string[]) {
-    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByTags?page=${page}&${TagsId}isprecise=false`)
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByTags?page=${page}&${TagsId}&isprecise=false`)
   }
 
   getArticleByAllSearch(page: number, authorId?: string) {
@@ -54,6 +54,10 @@ export class BoardServe {
   getAllTags() {
     return this.http.get<TagDTO[]>
       (`${this.apiUrl}/Board/Tags/all`)
+  }
+
+  getAllRegions() {
+    return this.http.get(`${this.apiUrl}/Board/Articles/AllRegions`)
   }
 
 
@@ -76,12 +80,20 @@ export class BoardServe {
   }
 
   putPostAPI(id: number, para: any) {
-
     return this.http.put(
       `${this.apiUrl}/Post/${id}`, para);
-
   }
 
+  getNewActivity() {
+    return this.http.get(`${this.apiUrl}/ActivityInfo/NewActivity`)
+  }
+
+  getCurUser() {
+    return this.http.get(`${this.apiUrl}/Board/Articles/curUser?page=1`)
+  }
+  getAuthorUser(para: string) {
+    return this.http.get(`${this.apiUrl}/Board/Articles/authorUser?userId=${para}`)
+  }
 
 
 
