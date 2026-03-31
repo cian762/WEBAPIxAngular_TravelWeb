@@ -34,6 +34,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.23" />
     <PackageReference Include="QRCoder" Version="1.7.0" />
+    <PackageReference Include="QuestPDF" Version="2026.2.4" />
     <PackageReference Include="Stateless" Version="5.20.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
@@ -41,6 +42,16 @@
   <ItemGroup>
     <Folder Include="Models\ActivityModel\" />
     <Folder Include="Repositories\" />
+    <Folder Include="wwwroot\fonts\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\fonts\NotoSansTC-VariableFont_wght.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\fonts\微軟正黑體.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

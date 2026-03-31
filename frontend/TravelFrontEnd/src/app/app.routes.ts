@@ -73,7 +73,7 @@ export const routes: Routes = [
     )
     , canActivate: [aGuard]
   },
-  //*行程建立路由*/
+  /**行程建立路由*/
   {
     path: 'itinerary',
     loadComponent: () => import('./Itinerary/component/index-itinerary/index-itinerary').then(m => m.IndexItinerary)
@@ -81,6 +81,10 @@ export const routes: Routes = [
   {
     path: 'itinerary-detail/:id',
     loadComponent: () => import('./Itinerary/component/change-itinerary-item/change-itinerary-item').then(m => m.ItineraryDetailComponent),
+    canActivate: [aGuard]
+  }, {
+    path: 'Itinerarylist',
+    loadComponent: () => import('./Itinerary/component/itinerarylist/itinerarylist').then(m => m.Itinerarylist),
     canActivate: [aGuard]
   },
 
