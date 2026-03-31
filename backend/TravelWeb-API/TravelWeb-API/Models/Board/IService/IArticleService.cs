@@ -12,6 +12,9 @@ namespace TravelWeb_API.Models.Board.IService
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByAuthorID(int page, string authorID, string? userId);
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) Search(int page, ArticleSearchDTO dto, string? userId);
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByUserID(int page, string userId);
-        public void Like(int articleID, string authorID);
+        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByCollect(int page, string userId);
+        public void Like(int articleID, string userId);
+        public Task Collect(int articleID, string userId);
+        public Task<bool> DeleteArticle(int articleID, string? authorID);
     }
 }

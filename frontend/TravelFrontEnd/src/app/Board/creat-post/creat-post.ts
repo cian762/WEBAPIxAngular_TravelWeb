@@ -8,8 +8,11 @@ import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFor
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
-declare var cloudinary: any;
+
+
+var cloudinary: any;
 declare var $: any;
 @Component({
   selector: 'app-creat-post',
@@ -27,7 +30,7 @@ export class CreatPost implements OnInit, OnDestroy {
   cloudName = "daobwcaga"; // replace with your own cloud name
   uploadPreset = "ml_default"; // replace with your own upload preset
 
-  constructor(private Serve: BoardServe, private route: ActivatedRoute, private http: HttpClient, private cdr: ChangeDetectorRef) { }
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router,) { }
   private observer!: IntersectionObserver;
 
   navItems = [
@@ -183,6 +186,14 @@ export class CreatPost implements OnInit, OnDestroy {
 
 
   async onCreat() {
+    Swal.fire({
+      title: "上傳中...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     await this.uploadAllParallel();
     const formValue = this.form.value;
     console.log("this.coverIndex", this.coverIndex);
@@ -215,9 +226,20 @@ export class CreatPost implements OnInit, OnDestroy {
     const isSuccess = await this.isUploadSuccess(this.id, postUpdateDto);
 
     if (isSuccess) {
-      alert('成功');
-    } else {
-      console.log('更新失敗');
+      Swal.fire({
+        title: "上傳完成!",
+        icon: "success",
+        showCancelButton: true,
+        confirmButtonText: "返回主頁",
+        cancelButtonText: "繼續編輯"
+      }).then((result) => {
+        /* Read more about isConfirmed, isDenied below */
+        if (result.isConfirmed) {
+          this.router.navigate(['Board/Main']);
+        }
+        else if (result.isDismissed) Swal.close();
+      });
+
     }
   }
 
@@ -369,4 +391,27 @@ export class CreatPost implements OnInit, OnDestroy {
   }
 
 
+
+  deleteArticle() {
+    Swal.fire({
+      title: "刪除文章!",
+      text: "確定要刪除這篇文章嗎?\n刪除後無法復原",
+      icon: "warning",
+      showCloseButton: true,
+      confirmButtonText: "刪除",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.Serve.deleteArticle(this.id).subscribe(() => {
+          Swal.fire({
+            text: "文章已成功刪除",
+            icon: "success",
+            showConfirmButton: false,
+            timer: 1500
+          });
+          this.router.navigate(['Board/Main']);
+        });
+      }
+    });
+
+  }
 }

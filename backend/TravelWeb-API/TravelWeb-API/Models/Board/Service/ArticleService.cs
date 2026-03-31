@@ -27,8 +27,8 @@ namespace TravelWeb_API.Models.Board.Service
             return BuildPagedResult(data, page, userId);
         }
 
-        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByKeyword(int page,string keyword, string? userId)
-        {            
+        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByKeyword(int page, string keyword, string? userId)
+        {
             IQueryable<Article> data = _context.Articles
                 .Where(a => a.Status == 1)
                 .Where(a => (a.Title != null && a.Title.Contains(keyword)) ||
@@ -36,14 +36,14 @@ namespace TravelWeb_API.Models.Board.Service
             return BuildPagedResult(data, page, userId);
         }
 
-        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByDate(int page, DateTime startTime,DateTime endTime, string? userId)
-        {            
-           // startTime = Convert.ToDateTime("2010/05/07");
+        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByDate(int page, DateTime startTime, DateTime endTime, string? userId)
+        {
+            // startTime = Convert.ToDateTime("2010/05/07");
             endTime = endTime.AddDays(1);
 
             IQueryable<Article> data = _context.Articles
                 .Where(a => a.Status == 1)
-                .Where(a => a.CreatedAt >= startTime && 
+                .Where(a => a.CreatedAt >= startTime &&
                       a.CreatedAt <= endTime);
 
             return BuildPagedResult(data, page, userId);
@@ -53,7 +53,7 @@ namespace TravelWeb_API.Models.Board.Service
         {
             IQueryable<Article> data;
             var tagIds = searchByTags.TagsId;
-            
+
             if (searchByTags.isprecise)
             {
                 data = _context.ArticleTags
@@ -67,8 +67,8 @@ namespace TravelWeb_API.Models.Board.Service
                 data = _context.ArticleTags
                               .Where(t => tagIds.Contains(t.TagId))
                               .Select(t => t.Article)
-                              .Where(a => a.Status == 1);                              
-                              
+                              .Where(a => a.Status == 1);
+
             }
 
             return BuildPagedResult(data, page, userId);
@@ -80,7 +80,7 @@ namespace TravelWeb_API.Models.Board.Service
                 .Where(a => a.Status == 1)
                 .Where(a => a.UserId == authorID);
 
-            return BuildPagedResult(data, page,userId);
+            return BuildPagedResult(data, page, userId);
         }
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) Search(int page, ArticleSearchDTO dto, string? userId)
@@ -124,11 +124,11 @@ namespace TravelWeb_API.Models.Board.Service
         }
 
         private (List<ArticleDataDTO> ArticleDTOList, int TotalCount) BuildPagedResult(
-                                                     IQueryable<Article> data, int page,string? userID)
+                                                     IQueryable<Article> data, int page, string? userID)
         {
-            List <ArticleDataDTO> result = GetArticles(page, data, userID);
+            List<ArticleDataDTO> result = GetArticles(page, data, userID);
             int totalCount = data.Count();
-                //GetArticleCount(articles);
+            //GetArticleCount(articles);
             //List<ArticleDataDTO> result = ToArticleDTO(articles,userID);
             return (result, totalCount);
         }
@@ -136,7 +136,7 @@ namespace TravelWeb_API.Models.Board.Service
         List<ArticleDataDTO> GetArticles(int page, IQueryable<Article> data, string? userID)
         {
             int pageSize = 10;
-            return data                
+            return data
                 .OrderByDescending(a => a.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -156,8 +156,8 @@ namespace TravelWeb_API.Models.Board.Service
                     LikeCount = a.ArticleLikes.Count(),
                     isLike = a.ArticleLikes.Any(l => l.UserId == userID),
                     tags = a.ArticleTags
-                        .Select(t => new TagDTO 
-                        { TagId = t.TagId, TagName = t.Tag.TagName ,icon=t.Tag.icon})
+                        .Select(t => new TagDTO
+                        { TagId = t.TagId, TagName = t.Tag.TagName, icon = t.Tag.icon })
                         .ToList(),
                     CommentCount = a.Comments.Count(),
                 })
@@ -222,7 +222,7 @@ namespace TravelWeb_API.Models.Board.Service
             if (like == null)
             {
                 _context.ArticleLikes
-                    .Add(new ArticleLike { ArticleId = articleID, UserId = userID });                
+                    .Add(new ArticleLike { ArticleId = articleID, UserId = userID });
             }
             else
             {
@@ -231,7 +231,7 @@ namespace TravelWeb_API.Models.Board.Service
             _context.SaveChanges();
         }
 
-         ArticleLike? isLiked(int articleID, string userID)
+        ArticleLike? isLiked(int articleID, string userID)
         {
             var like
                 = _context.ArticleLikes
@@ -240,12 +240,78 @@ namespace TravelWeb_API.Models.Board.Service
         }
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByUserID(int page, string userId)
-        {int pageSize = 10;
+        {
+            int pageSize = 10;
             var data = _context.Articles
-                .Where(a => a.UserId == userId);          
+                .Where(a => a.UserId == userId);
 
             return BuildPagedResult(data, page, userId);
         }
-      
+
+        public async Task<bool> DeleteArticle(int articleID, string? authorID)
+        {
+            var article = await _context.Articles
+                .Where(a => a.ArticleId == articleID)
+                .Include(a => a.Comments)
+                .ThenInclude(c => c.CommentPhotos)
+                .Include(a => a.Comments)
+                .ThenInclude(c => c.CommentLikes)
+                .Include(a => a.Comments)
+                .ThenInclude(c => c.InverseParent)
+                .ThenInclude(ic => ic.CommentLikes)
+                .Include(a => a.Comments)
+                .ThenInclude(c => c.InverseParent)
+                .ThenInclude(ic => ic.CommentPhotos)
+                .Include(a => a.ArticleLikes)
+                .Include(a => a.ArticleTags)
+                .Include(a => a.ArticleFolders)
+                .Include(a => a.Post)
+                .Include(a => a.PostPhotos)
+                .FirstOrDefaultAsync(); ;
+
+            if (article != null && article.UserId == authorID)
+            {
+                _context.Articles.Remove(article);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+            //.Include(a=>a.Journal)
+            //.Include(a=>a.JournalPages)
+            //.Include(a=>a.jo)
+            //.ThenInclude(j=>j.)            
+        }
+
+        public async Task Collect(int articleID, string userId)
+        {
+            ArticleFolder? collect = isCollect(articleID, userId);
+            if (collect == null)
+            {
+                await _context.ArticleFolders
+                    .AddAsync(new ArticleFolder { ArticleId = articleID, UserId = userId });
+            }
+            else
+            {
+                _context.ArticleFolders.Remove(collect);
+            }
+           await _context.SaveChangesAsync();
+        }
+
+        ArticleFolder? isCollect(int articleID, string userID)
+        {
+            var collect
+                = _context.ArticleFolders
+                .FirstOrDefault(c => c.ArticleId == articleID && c.UserId == userID);
+            return collect;
+        }
+
+        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByCollect(int page, string userId)
+        {
+            var data = _context.ArticleFolders
+                .Where(c => c.UserId == userId)
+                .Select(c => c.Article);
+            return BuildPagedResult(data, page, userId);
+        }
     }
+    
 }

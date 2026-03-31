@@ -1,3 +1,4 @@
+<app-create-article-button></app-create-article-button>
 <div class="host-body">
   <div>
     <!-- 用戶資訊起點 -->
@@ -7,72 +8,104 @@
         <h3 class="text-center">{{curUser.name}}</h3>
       </div>
     </div>
-    <!-- 文章列起點 -->
-    <div class="container mt-5 col-6">
-      @for (article of articleList; track $index) {<div class="single-post border-bottom">
-        <!-- 作者 + 地點 -->
-        <div class="post-author-row">
-          <div class="author-info" (click)="goToMemderPage(article.userID)">
-            <img class="userAvatar" [src]="article.userAvatar">
-            <div>
-              <div class="author-name">{{article.userName}}</div>
-              <div class="author-date">
-                {{article.createdAt | date:'M月d日 y年':'zh-Hant'}}
+
+    <!-- 導覽列 -->
+    <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button"
+          role="tab" aria-controls="home" aria-selected="true">公開</button>
+      </li>
+      <!-- <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button"
+          role="tab" aria-controls="profile" aria-selected="false">粉絲</button>
+      </li> -->
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button"
+          role="tab" aria-controls="profile" aria-selected="false">非公開</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button"
+          role="tab" aria-controls="contact" aria-selected="false">收藏</button>
+      </li>
+    </ul>
+
+    <!-- 內容 -->
+    <div class="tab-content" id="myTabContent">
+      <!-- 文章列起點 -->
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div class="container mt-5 col-6">
+          @for (article of articleList; track $index) {<div class="single-post border-bottom">
+            <!-- 作者 + 地點 -->
+            <div class="post-author-row">
+              <div class="author-info" (click)="goToMemderPage(article.userID)">
+                <img class="userAvatar" [src]="article.userAvatar">
+                <div>
+                  <div class="author-name">{{article.userName}}</div>
+                  <div class="author-date">
+                    {{article.createdAt | date:'M月d日 y年':'zh-Hant'}}
+                  </div>
+                </div>
+              </div>
+              <div class="post-location">
+                <i class="ri-map-pin-line"></i>地點
               </div>
             </div>
-          </div>
-          <div class="post-location">
-            <i class="ri-map-pin-line"></i>地點
-          </div>
-        </div>
 
-        <!-- 大圖，無圓角 -->
-        <div class="post-cover">
-          <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
-        </div>
-        <!-- 標題 -->
-        <a class="posts-title" (click)="goToDetail(article.articleId)">
-          <h3>
-            <span class="post-type">討論</span>
-            {{article.title}}
-          </h3>
-        </a>
-
-
-        <!-- 底列：讚 留言 -->
-        <div class="post-footer">
-          <!-- 標籤 -->
-          <div class="post-tags">
-            <span class="tags-label">相關標籤:</span>
-            @for (tag of article.tags; track tag.tagId) {
-            <button class="btn btn-danger btn-sm">
-              {{AllTags.find(t => t.tagId === tag.tagId)?.tagName}}
-            </button>
-            }
-          </div>
-
-          <div class="post-reactions">
-            <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
-              <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
-              {{article.likeCount}}
-            </a>
-            <a class="reaction-item" href="#">
-              <span class="lnr lnr-bubble"></span>
-              N則留言
+            <!-- 大圖，無圓角 -->
+            <div class="post-cover">
+              <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+            </div>
+            <!-- 標題 -->
+            <a class="posts-title" (click)="goToDetail(article.articleId)">
+              <h3>
+                <span class="post-type">討論</span>
+                {{article.title}}
+              </h3>
             </a>
 
-          </div>
 
+            <!-- 底列：讚 留言 -->
+            <div class="post-footer">
+              <!-- 標籤 -->
+              <div class="post-tags">
+                <span class="tags-label">相關標籤:</span>
+                @for (tag of article.tags; track tag.tagId) {
+                <button class="btn btn-danger btn-sm">
+                  {{AllTags.find(t => t.tagId === tag.tagId)?.tagName}}
+                </button>
+                }
+              </div>
+
+              <div class="post-reactions">
+                <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
+                  <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+                  {{article.likeCount}}
+                </a>
+                <a class="reaction-item" href="#">
+                  <span class="lnr lnr-bubble"></span>
+                  N則留言
+                </a>
+
+              </div>
+
+            </div>
+
+
+            <!-- 編輯列：文章權限 瀏覽人數 編輯 -->
+            <div class="post-footer">
+              <button type="button" class="btn btn-outline-danger btn-sm"
+                (click)="goToUpdate(article.articleId)">編輯貼文</button>
+            </div>
+
+          </div>}
         </div>
-
-
-        <!-- 編輯列：文章權限 瀏覽人數 編輯 -->
-        <div class="post-footer">
-          <button type="button" class="btn btn-outline-danger btn-sm"
-            (click)="goToUpdate(article.articleId)">編輯貼文</button>
-        </div>
-
-      </div>}
+      </div><!-- 文章列終點 -->
+      <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
+      <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <app-article-list class="col-lg-8" [articleList]="collectList"
+          (tagSelected)="onTagSelected($event)"></app-article-list>
+      </div>
     </div>
-    <!-- 文章列終點 -->
+
+
   </div>

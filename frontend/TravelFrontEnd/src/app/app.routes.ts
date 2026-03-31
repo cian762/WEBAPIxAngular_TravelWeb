@@ -119,6 +119,11 @@ export const routes: Routes = [
         path: 'user/:id',
         loadComponent: () => import('./Board/user-articles-page/user-articles-page').then(m => m.UserArticlesPage),
       },
+      //404
+      {
+        path: '404',
+        loadComponent: () => import('./Board/page404/page404').then(m => m.Page404),
+      },
     ],
   },
 

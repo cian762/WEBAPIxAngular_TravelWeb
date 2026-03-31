@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ArticleData } from '../../interface/ArticleData';
 import { BoardServe } from '../../Service/board-serve';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,7 +16,7 @@ export class ArticleList {
   constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) {
   }
   @Input() articleList: ArticleData[] = [];
-
+  @Output() tagSelected = new EventEmitter<number>();
 
   goToDetail(id: number): void {
     this.router.navigate(['Board', 'detail', id]);
@@ -42,14 +42,20 @@ export class ArticleList {
   }
 
   seachTag(tag: number) {
-    console.log(tag)
-    const para: string[] = [];
-    para.push(`TagsId=${tag}`);
-    this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
-      this.router.navigate(['Board'], {
-        queryParams: { TagsId: tag }
-      });
-    }
-    )
+    console.log('seachTag emit', tag);
+    this.tagSelected.emit(tag);
+    // console.log(tag)
+    // const para: string[] = [];
+    // para.push(`TagsId=${tag}`);
+    // window.location.href = `/Board?TagsId=${tag}`;
+    // this.router.navigate(['Board'], {  // 或你的目標路由
+    //   queryParams: { TagsId: tag }
+    // });
+    // this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
+    //   this.router.navigate([''], {
+    //     queryParams: { TagsId: tag }
+    //   });
+    // }
+    // )
   }
 }

@@ -53,7 +53,10 @@
                 <i [class]="post?.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
               </a>
               <!-- 收藏 -->
-              <a>收藏 <span class="lnr lnr-bubble"></span></a>
+              <a (click)="ToCollect(id)">
+                {{post?.isCollect ? "已收藏":"收藏"}}
+                <i [class]="post?.isCollect ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+              </a>
               <!-- 留言 -->
               <a>{{post?.commentCount}}則留言 <span class="lnr lnr-bubble"></span></a>
               <!-- 更多 -->
@@ -113,7 +116,7 @@
             </div>
           </div>
         </div> -->
-        <app-comments-area [id]="id"></app-comments-area>
+        <app-comments-area [id]="id" [commentCount]="post?.commentCount?? 0"></app-comments-area>
       </div>
 
 

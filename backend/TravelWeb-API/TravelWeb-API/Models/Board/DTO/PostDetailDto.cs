@@ -17,8 +17,8 @@
         public string? RegionName { get; set; }
         public int CommentCount { get; set; }
         public int LikeCount { get; set; }
-        public bool isLike { get; set; }       
-
+        public bool isLike { get; set; }
+        public bool isCollect { get; set; }
 
     }
 }
