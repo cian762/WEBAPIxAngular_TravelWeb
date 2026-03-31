@@ -1,12 +1,202 @@
-.ground {
-  position: relative;
-  height: 1000px;
-  width: 1000px;
-  background-color: rgb(211, 142, 142);
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms ease;
+}
+
+.box-textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: #aaa;
+}
+
+/* ============右欄================= */
+.right-panel {
+  width: 250px;
+  height: 800px;
+}
+
+.panel-card {
+  background-color: #ffffff;
+  box-shadow: 2px 2px 3px #27272721;
+  border-radius: 6px;
+  /* 超出元素邊界的內容直接被隱藏，不會產生滾動條 */
   overflow: hidden;
 }
 
+/* ── Panel Header */
+.panel-card-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f5;
+}
+
+.panel-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c2c3a;
+  margin: 0;
+  flex: 1;
+}
+
+.section-label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+/* ── 上傳按鈕（右上角小按鈕） */
+.upload-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: #f9f9ff;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #6c6c99;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+
+  &:hover {
+    background: #ebebff;
+    box-shadow: 2px 2px 3px #27272721;
+  }
+}
+
+
+/* ── 空白提示 */
+.list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 16px;
+  color: #b0b0c8;
+  font-size: 13px;
+  text-align: center;
+
+  .list-empty-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+/* ══ 圖片表格 */
+.img-table {
+  margin: 0;
+  font-size: 13px;
+
+  thead th {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    background: #fafaff;
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f5;
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: background .12s;
+
+    &:hover {
+      background: #f5f5ff;
+    }
+
+    &.row-active {
+      background: #eeeeff;
+    }
+  }
+
+  td {
+    vertical-align: middle;
+    padding: 6px 10px;
+    border-color: #f5f5fa;
+  }
+}
+
+.td-index {
+  color: #aaa;
+  font-size: 11px;
+  width: 28px;
+}
+
+.td-thumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #f0f0f5;
+  flex-shrink: 0;
+}
+
+.row-name {
+  font-size: 12px;
+  color: #3a3a4a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+  display: block;
+}
+
+.td-action {
+  width: 28px;
+}
+
+.row-delete {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  border-radius: 50%;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+
+  &:hover {
+    background: #ffe5e5;
+    color: #e53935;
+  }
+}
+
+
+
+/* ============中欄================= */
+.ground {
+  position: relative;
+  height: 500px;
+  width: 800px;
+  margin: 50px 0px;
+  background-color: rgb(255, 255, 255);
+  overflow: hidden;
+  box-shadow: 2px 2px 3px #27272721;
+}
+
 .cube {
+  width: 100px;
   position: absolute;
   /* height: 300px;
   width: 300px; */

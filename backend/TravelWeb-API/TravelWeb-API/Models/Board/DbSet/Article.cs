@@ -35,7 +35,7 @@ public partial class Article
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
-    public virtual Journal? Journal { get; set; }
+    public virtual ICollection<Journal> Journals { get; set; }= new List<Journal>();
 
     public virtual ICollection<JournalPage> JournalPages { get; set; } = new List<JournalPage>();
 

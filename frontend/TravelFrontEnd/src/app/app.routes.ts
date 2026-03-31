@@ -105,6 +105,11 @@ export const routes: Routes = [
         path: 'creatBlog',
         loadComponent: () => import('./Board/creat-blog/creat-blog').then(m => m.CreatBlog),
       },
+      //創建手帳簿
+      {
+        path: 'creatJournal',
+        loadComponent: () => import('./Board/creat-journal/creat-journal').then(m => m.CreatJournal),
+      },
       {
         path: 'detail/:id',
         loadComponent: () => import('./Board/post-detail/post-detail').then(m => m.PostDetail),
@@ -141,7 +146,7 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./Member/register/register.component').then(m => m.RegisterComponent)
   },
-   { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   {
     path: 'profile',
     component: ProfileComponent, // 這是你目前顯示頭像和 Sidebar 的元件

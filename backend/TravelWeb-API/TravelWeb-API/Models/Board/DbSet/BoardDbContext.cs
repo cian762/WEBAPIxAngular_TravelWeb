@@ -269,36 +269,35 @@ public partial class BoardDbContext : DbContext
 
         modelBuilder.Entity<Journal>(entity =>
         {
-            entity.HasKey(e => e.ArticleId);
+            entity.HasKey(e => new { e.ArticleId, e.Page });
 
             entity.ToTable("Journal", "Board");
 
-            entity.Property(e => e.ArticleId)
-                .ValueGeneratedNever()
+            entity.Property(e => e.ArticleId)                
                 .HasColumnName("ArticleID");
             entity.Property(e => e.CoverId).HasColumnName("CoverID");
             entity.Property(e => e.TemplateId).HasColumnName("TemplateID");
 
-            entity.HasOne(d => d.Article).WithOne(p => p.Journal)
-                .HasForeignKey<Journal>(d => d.ArticleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Journal_Article");
+            entity.HasOne(d => d.Article).WithMany(p => p.Journals)
+        .HasForeignKey(d => d.ArticleId)
+        .OnDelete(DeleteBehavior.ClientSetNull)
+        .HasConstraintName("FK_Journal_Article");
         });
 
         modelBuilder.Entity<JournalElement>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("JournalElements", "Board");
+            
+                entity.HasKey(e => e.ElementId);
+                entity.ToTable("JournalElements", "Board");
 
             entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
             entity.Property(e => e.ElementId).HasColumnName("ElementID");
             entity.Property(e => e.Zindex).HasColumnName("ZIndex");
 
-            entity.HasOne(d => d.Element).WithMany()
-                .HasForeignKey(d => d.ElementId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_JournalElements_Article");
+            entity.HasOne(d => d.Journal).WithMany(p => p.JournalElements)
+       .HasForeignKey(d => new { d.ArticleId, d.Page })
+       .OnDelete(DeleteBehavior.ClientSetNull)
+       .HasConstraintName("FK_JournalElements_Journal");
         });
 
         modelBuilder.Entity<JournalPage>(entity =>
