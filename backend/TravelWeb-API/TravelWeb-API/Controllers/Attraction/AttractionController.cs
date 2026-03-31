@@ -413,6 +413,88 @@ namespace TravelWeb_API.Controllers.Attraction
 
             return Ok(attractions);
         }
+
+        // ────────────────────────────────────────────
+        // GET /api/attraction/{id}/related-tickets?top=10
+        // 票券推薦：依標籤重疊數 → viewCount → 隨機
+        // ────────────────────────────────────────────
+        [HttpGet("{id}/related-tickets")]
+        public async Task<IActionResult> GetRelatedTickets(int id, [FromQuery] int top = 10)
+        {
+            // 1. 取得當前景點的標籤
+            var currentTags = await _dbContext.AttractionTypeMappings
+                .Where(m => m.AttractionId == id)
+                .Select(m => m.AttractionTypeId)
+                .ToListAsync();
+
+            if (!currentTags.Any())
+                return Ok(new List<object>());
+
+            // 2. 找有相同標籤且有上架票券的其他景點
+            var candidateAttractionIds = await _dbContext.AttractionTypeMappings
+                .Where(m => currentTags.Contains(m.AttractionTypeId)
+                         && m.AttractionId != id)
+                .Select(m => m.AttractionId)
+                .Distinct()
+                .ToListAsync();
+
+            if (!candidateAttractionIds.Any())
+                return Ok(new List<object>());
+
+            // 3. 撈候選景點（有上架票券）+ 圖片 + 票券
+            var candidates = await _dbContext.Attractions
+                .Where(a => candidateAttractionIds.Contains(a.AttractionId)
+                         && !a.IsDeleted
+                         && a.ApprovalStatus == 1
+                         && a.RegionId != 1000
+                         && a.AttractionProducts.Any(p => !p.IsDeleted && p.Status == "ACTIVE"))
+                .Include(a => a.Images)
+                .Include(a => a.AttractionProducts.Where(p => !p.IsDeleted && p.Status == "ACTIVE"))
+                    .ThenInclude(p => p.TicketTypeCodeNavigation)
+                .ToListAsync();
+
+            if (!candidates.Any())
+                return Ok(new List<object>());
+
+            // 4. 取每個景點的標籤，計算重疊數
+            var candidateIds = candidates.Select(a => a.AttractionId).ToList();
+            var tagMap = await _dbContext.AttractionTypeMappings
+                .Where(m => candidateIds.Contains(m.AttractionId))
+                .GroupBy(m => m.AttractionId)
+                .ToDictionaryAsync(g => g.Key, g => g.Select(m => m.AttractionTypeId).ToList());
+
+            var rng = new Random();
+
+            var result = candidates
+                .Select(a =>
+                {
+                    var tags = tagMap.ContainsKey(a.AttractionId) ? tagMap[a.AttractionId] : new List<int>();
+                    int overlap = tags.Count(t => currentTags.Contains(t));
+                    var cheapestProduct = a.AttractionProducts
+                        .OrderBy(p => p.Price)
+                        .FirstOrDefault();
+                    return new
+                    {
+                        a.AttractionId,
+                        a.Name,
+                        a.ViewCount,
+                        MainImage = a.Images.Select(i => i.ImagePath).FirstOrDefault(),
+                        TicketTitle = cheapestProduct?.Title,
+                        TicketPrice = cheapestProduct?.Price,
+                        OriginalPrice = cheapestProduct?.OriginalPrice,
+                        TicketTypeName = cheapestProduct?.TicketTypeCodeNavigation?.TicketTypeName,
+                        OverlapCount = overlap,
+                        SortRandom = rng.Next()
+                    };
+                })
+                .OrderByDescending(x => x.OverlapCount)
+                .ThenByDescending(x => x.ViewCount)
+                .ThenBy(x => x.SortRandom)
+                .Take(top)
+                .ToList();
+
+            return Ok(result);
+        }
     }
     // ────────────────────────────────────────────
     // DTO：POST /like 的 Body 格式

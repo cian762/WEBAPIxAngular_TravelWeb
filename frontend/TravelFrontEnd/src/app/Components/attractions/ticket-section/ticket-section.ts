@@ -18,6 +18,16 @@ export class TicketSectionComponent implements OnInit {
 
   loading = true;
   products: AttractionProduct[] = [];
+  relatedTickets: {
+    attractionId: number;
+    name: string;
+    mainImage: string | null;
+    ticketTitle: string | null;
+    ticketPrice: number | null;
+    originalPrice: number | null;
+    ticketTypeName: string | null;
+    overlapCount: number;
+  }[] = [];
 
   // productCode → 剩餘庫存
   stockMap: Record<string, number> = {};
@@ -52,6 +62,11 @@ export class TicketSectionComponent implements OnInit {
           this.stockLoaded[p.productCode] = true;
         });
       });
+    });
+
+    // 載入相關票券推薦
+    this.svc.getRelatedTickets(this.attractionId).subscribe(list => {
+      this.relatedTickets = list;
     });
   }
 
@@ -110,14 +125,14 @@ export class TicketSectionComponent implements OnInit {
 
   /** 將換行分隔的字串轉成陣列（用於 includes/excludes/eligibility） */
   toLines(text: string | null | undefined): string[] {
-  if (!text) return [];
-  // 同時處理真實換行 \n 和字面上的 \n 字串
-  return text
-    .replace(/\\n/g, '\n')
-    .split('\n')
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
-}
+    if (!text) return [];
+    // 同時處理真實換行 \n 和字面上的 \n 字串
+    return text
+      .replace(/\\n/g, '\n')
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+  }
 
   /** 計算小計 */
   getSubtotal(p: AttractionProduct): number {
@@ -127,15 +142,15 @@ export class TicketSectionComponent implements OnInit {
   addToCart(p: AttractionProduct): void {
     const qty = this.qtyMap[p.productId] ?? 1;
     const dto = {
-      productCode:      p.productCode,
-      productName:      p.title,
-      price:            p.price ?? 0,
-      quantity:         qty,
-      coverImage:       this.coverImage,
+      productCode: p.productCode,
+      productName: p.title,
+      price: p.price ?? 0,
+      quantity: qty,
+      coverImage: this.coverImage,
       ticketCategoryId: p.ticketTypeCode ?? 0,
-      attractionId:     this.attractionId,
-      attractionName:   this.attractionName,
-      tags:             p.tags?.map(t => t.tagName) ?? [],
+      attractionId: this.attractionId,
+      attractionName: this.attractionName,
+      tags: p.tags?.map(t => t.tagName) ?? [],
     };
     console.log('加入購物車 dto:', JSON.stringify(dto));
     this.cartService.addToCart(dto).subscribe({
@@ -148,11 +163,15 @@ export class TicketSectionComponent implements OnInit {
     const qty = this.qtyMap[p.productId] ?? 1;
     const orderDetail = {
       directBuyItems: [{
-        productCode:      p.productCode,
-        quantity:         qty,
+        productCode: p.productCode,
+        quantity: qty,
         ticketCategoryId: p.ticketTypeCode ?? 0,
       }]
     };
     this.router.navigate(['/order'], { state: { data: orderDetail } });
+  }
+
+  goToRelated(attractionId: number): void {
+    this.router.navigate(['/attractions/detail', attractionId]);
   }
 }

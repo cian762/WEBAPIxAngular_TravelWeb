@@ -114,6 +114,24 @@ export class AttractionService {
     ).pipe(catchError(() => of({ productCode, remainingStock: 0 })));
   }
 
+  // 取得相關票券推薦（售票區下方，依標籤相似度）
+  getRelatedTickets(attractionId: number, top = 10): Observable<{
+    attractionId: number;
+    name: string;
+    mainImage: string | null;
+    ticketTitle: string | null;
+    ticketPrice: number | null;
+    originalPrice: number | null;
+    ticketTypeName: string | null;
+    overlapCount: number;
+  }[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/Attraction/${attractionId}/related-tickets?top=${top}`
+    ).pipe(catchError(() => of([])));
+  }
+
+
+
   // 用 productCode 查詢景點ID、景點名稱、Tags（供登入後購物車補資料用）
   getProductByCode(productCode: string): Observable<{
     productId: number;
