@@ -74,7 +74,7 @@
           <!-- 天氣 -->
           <div class="weather-row">
             <div class="weather-item">
-              <span class="w-icon">⛅</span>
+              <span class="w-icon">{{ weather.weatherEmoji }}</span>
               <div>
                 <div class="w-label">今天天氣</div>
                 <div class="w-val">{{ weather.temp }} °C</div>
@@ -91,7 +91,7 @@
 
           <!-- AQI -->
           <div class="aqi-row">
-            <span class="aqi-emoji">😊</span>
+            <span class="aqi-emoji">{{ weather.aqiEmoji }}</span>
             <div>
               <div class="aqi-label">環境空氣品質指數 AQI</div>
               <div class="aqi-val">{{ weather.aqi }} {{ weather.aqiLabel }}</div>
@@ -141,8 +141,18 @@
 
       <!-- 景點特色 -->
       <div *ngIf="activeTab === 'feature'">
-        <p *ngIf="attraction.address"><strong>地址：</strong>{{ attraction.address }}</p>
-        <p *ngIf="attraction.businessHours"><strong>開放時間：</strong>{{ attraction.businessHours }}</p>
+
+        <!-- 介紹文字 -->
+        <div class="feature-desc" *ngIf="attraction.description">
+          <p *ngFor="let para of splitParagraphs(attraction.description)">{{ para }}</p>
+        </div>
+
+        <!-- 基本資訊（無介紹文字時的 fallback） -->
+        <div *ngIf="!attraction.description">
+          <p *ngIf="attraction.address"><strong>地址：</strong>{{ attraction.address }}</p>
+          <p *ngIf="attraction.businessHours"><strong>開放時間：</strong>{{ attraction.businessHours }}</p>
+        </div>
+
       </div>
 
       <!-- 如何前往 -->
@@ -161,7 +171,38 @@
 
       <!-- 售票區 -->
       <div *ngIf="activeTab === 'tickets'">
-        <app-ticket-section [attractionId]="attraction.attractionId" />
+        <app-ticket-section
+          [attractionId]="attraction.attractionId"
+          [coverImage]="mainImage"
+          [attractionName]="attraction.name" />
+
+        <!-- 活動介紹 -->
+        <div class="activity-intro"
+             *ngIf="attraction.activityIntro || attraction.productImages?.length">
+          <div class="activity-intro__header">
+            <span class="activity-intro__bar"></span>
+            <h3 class="activity-intro__title">活動介紹</h3>
+          </div>
+
+          <!-- 介紹文字 -->
+          <div class="activity-intro__text" *ngIf="attraction.activityIntro">
+            <p *ngFor="let para of splitParagraphs(attraction.activityIntro)">{{ para }}</p>
+          </div>
+
+          <!-- 圖片 + 說明 -->
+          <div class="activity-intro__images" *ngIf="attraction.productImages?.length">
+            <div class="activity-intro__img-item"
+                 *ngFor="let img of attraction.productImages">
+              <img [src]="'https://localhost:7285' + img.imagePath"
+                   [alt]="img.caption || ''"
+                   class="activity-intro__img"
+                   onerror="this.src='https://placehold.co/800x500?text=No+Image';this.onerror=null;">
+              <p class="activity-intro__caption" *ngIf="img.caption">
+                ▲ {{ img.caption }}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 周邊資訊 -->
