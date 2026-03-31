@@ -1,58 +1,110 @@
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
   <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
 
       <div class="card shadow-lg border-0 rounded-4 mt-5">
-        <div class="card-header bg-primary text-white text-center py-4 border-0 rounded-top-4">
+
+        <!-- 卡片標題 -->
+        <div class="card-header text-white text-center py-4 border-0 rounded-top-4" style="background-color: #5b73e8;">
           <h3 class="mb-0 fw-bold"><i class="bi bi-box-arrow-in-right"></i> 會員登入</h3>
         </div>
 
         <div class="card-body p-4 p-md-5">
-          <!-- 錯誤訊息提示區塊 -->
-          <div *ngIf="errorMessage" class="alert alert-danger rounded-3 fw-bold">
+
+          <!-- 錯誤訊息提示 -->
+          <div *ngIf="errorMessage" class="alert alert-danger rounded-3 fw-bold shadow-sm">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
           </div>
 
-          <!-- 使用 ngSubmit 綁定表單送出 -->
+          <!-- 登入表單 -->
           <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
 
             <!-- 帳號輸入框 -->
             <div class="mb-4">
               <label class="form-label fw-bold text-secondary">帳號 (Email 或 代碼)</label>
-              <input type="text" class="form-control form-control-lg shadow-sm" name="account"
-                [(ngModel)]="loginData.account" placeholder="請輸入帳號" required />
+              <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                <input type="text" class="form-control form-control-lg border-start-0 ps-0 bg-white" name="account"
+                  [(ngModel)]="loginData.account" placeholder="請輸入帳號" required />
+              </div>
             </div>
 
             <!-- 密碼輸入框 -->
-            <div class="mb-5">
+            <div class="mb-3">
               <label class="form-label fw-bold text-secondary">密碼</label>
-              <input type="password" class="form-control form-control-lg shadow-sm" name="password"
-                [(ngModel)]="loginData.password" placeholder="請輸入密碼" required />
+              <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                <input type="password" class="form-control form-control-lg border-start-0 ps-0 bg-white" name="password"
+                  [(ngModel)]="loginData.password" placeholder="請輸入密碼" required />
+              </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- 🔥 這裡加入分隔線與註冊按鈕 -->
-            <!-- ========================================== -->
-            <div class="text-center mt-4 pt-3 border-top">
-              <span class="text-muted d-block mb-3">還沒有 Travelista 帳號嗎？</span>
+            <!-- 忘記密碼連結 (靠右對齊) -->
+            <div class="text-end mb-4">
+              <a href="javascript:void(0)" (click)="toggleForgotModal(true)" class="text-decoration-none small fw-bold" style="color: #5b73e8;">
+                <i class="bi bi-key me-1"></i>忘記密碼？
+              </a>
+            </div>
 
-              <!-- 點擊這個按鈕會透過路由跳轉到 /register -->
-              <a routerLink="/register" class="btn btn-outline-secondary w-100 rounded-pill fw-bold"
+            <!-- 立即登入按鈕 (主要按鈕) -->
+            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm fw-bold mb-4"
+              [disabled]="isLoading || loginForm.invalid" style="background-color: #5b73e8; border-color: #5b73e8;">
+              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isLoading ? '登入中...' : '立即登入' }}
+            </button>
+
+            <!-- 分隔線與註冊按鈕 -->
+            <div class="text-center pt-3 border-top">
+              <span class="text-muted d-block mb-3 small">還沒有 Travelista 帳號嗎？</span>
+
+              <a routerLink="/register" class="btn btn-outline-primary w-100 rounded-pill fw-bold"
                 style="color: #5b73e8; border-color: #5b73e8;">
                 <i class="bi bi-person-plus-fill me-1"></i> 註冊新會員
               </a>
             </div>
 
-            <!-- 登入按鈕 (加入 Loading 狀態防連點) -->
-            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm fw-bold"
-              [disabled]="isLoading || loginForm.invalid">
-              <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading ? '登入中...' : '立即登入' }}
-            </button>
-
-
           </form>
         </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 🔥 新增：忘記密碼彈出視窗 (Modal) -->
+<!-- ========================================== -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="showForgotModal" style="background-color: rgba(0,0,0,0.6); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+
+      <!-- 視窗標題 -->
+      <div class="modal-header border-0 text-white rounded-top-4 py-3" style="background-color: #5b73e8;">
+        <h5 class="modal-title fw-bold"><i class="bi bi-envelope-check me-2"></i>重設密碼</h5>
+        <!-- 點擊叉叉關閉視窗 -->
+        <button type="button" class="btn-close btn-close-white" (click)="toggleForgotModal(false)"></button>
+      </div>
+
+      <!-- 視窗內容 -->
+      <div class="modal-body p-4">
+        <p class="text-muted small mb-4">請輸入您註冊時使用的 <strong>Email 信箱</strong> 或 <strong>會員代碼 (MemberCode)</strong>，我們將寄送一封包含「4 位數驗證碼」與「重設密碼連結」的信件給您。</p>
+
+        <div class="mb-2">
+          <label class="form-label fw-bold text-secondary">請輸入帳號</label>
+          <div class="input-group shadow-sm">
+            <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+            <input type="text" class="form-control form-control-lg" [(ngModel)]="forgotAccount" placeholder="example@email.com 或 M123456" (keyup.enter)="onForgotPassword()">
+          </div>
+        </div>
+      </div>
+
+      <!-- 視窗底部按鈕 -->
+      <div class="modal-footer border-0 pb-4 pe-4 bg-light rounded-bottom-4">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="toggleForgotModal(false)" [disabled]="isSendingEmail">取消</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="onForgotPassword()" [disabled]="isSendingEmail" style="background-color: #5b73e8; border-color: #5b73e8;">
+          <span *ngIf="isSendingEmail" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isSendingEmail ? '信件發送中...' : '發送驗證信' }}
+        </button>
       </div>
 
     </div>

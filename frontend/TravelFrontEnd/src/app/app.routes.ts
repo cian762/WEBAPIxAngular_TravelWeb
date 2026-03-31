@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { TripProductDetail } from './trip/component/trip-product-detail/trip-product-detail';
 import { aGuard } from './a-guard';
 import { ProfileComponent } from './Member/profile/profile.component';
+import { ResetPasswordComponent } from './Member/reset-password/reset-password.component';
 
 export const routes: Routes = [
   {
@@ -125,6 +126,7 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./Member/register/register.component').then(m => m.RegisterComponent)
   },
+   { path: 'reset-password', component: ResetPasswordComponent },
   {
     path: 'profile',
     component: ProfileComponent, // 這是你目前顯示頭像和 Sidebar 的元件

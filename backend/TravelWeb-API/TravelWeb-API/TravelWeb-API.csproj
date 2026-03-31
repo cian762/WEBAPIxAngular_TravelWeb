@@ -39,8 +39,6 @@
   </ItemGroup>
 
   <ItemGroup>
-
-    <Folder Include="Models\MemberSystem\" />
     <Folder Include="Models\ActivityModel\" />
     <Folder Include="Repositories\" />
   </ItemGroup>
