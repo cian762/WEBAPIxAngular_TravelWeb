@@ -93,7 +93,11 @@
           <span>{{ isExporting ? '⏳' : '📄' }}</span>
           {{ isExporting ? '產生中...' : '匯出 PDF' }}
         </button>
-        <button class="btn-danger" (click)="deleteItinerary()"><span>🗑</span> 刪除行程</button>
+
+        <div class="action-group-bottom">
+          <button class="btn-warning" (click)="openErrorReport()">⚠️ 回報錯誤</button>
+          <button class="btn-danger" (click)="deleteItinerary()">🗑️ 刪除行程</button>
+        </div>
       </div>
 
     </aside>
@@ -226,4 +230,41 @@
 @if (showCompareDialog) {
 <app-version-compare-dialog [itineraryId]="itineraryId" (close)="showCompareDialog = false">
 </app-version-compare-dialog>
+}
+@if (isReporting) {
+<div class="report-overlay" (click)="closeErrorReport()">
+  <div class="report-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>回報 AI 生成錯誤</h3>
+      <button class="modal-close" (click)="closeErrorReport()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>錯誤類型</label>
+        <select [(ngModel)]="reportForm.errorType" class="form-control">
+          <option value="地點不存在">地點不存在</option>
+          <option value="路線不合理">路線不合理</option>
+          <option value="時間衝突">時間衝突</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>嚴重程度</label>
+        <select [(ngModel)]="reportForm.severityLevel" class="form-control">
+          <option value="Low">低 (資訊微調)</option>
+          <option value="Medium">中 (內容錯誤)</option>
+          <option value="High">高 (行程無法執行)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>問題描述</label>
+        <textarea [(ngModel)]="reportForm.errorMessage" rows="4" placeholder="請描述您遇到的問題..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeErrorReport()">取消</button>
+      <button class="btn-submit" (click)="submitErrorReport()" [disabled]="!reportForm.errorMessage">提交回報</button>
+    </div>
+  </div>
+</div>
 }

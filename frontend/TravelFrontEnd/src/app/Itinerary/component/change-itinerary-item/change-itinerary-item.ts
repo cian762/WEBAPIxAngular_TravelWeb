@@ -53,6 +53,13 @@ export class ItineraryDetailComponent implements OnInit {
   currentVersionId = 0;
   isEditingDescription = false;
   editingDescription = '';
+  isReporting = false;
+  reportForm = {
+    errorType: '地點不存在',
+    severityLevel: 'Medium',
+    errorMessage: '',
+    errorReason: ''
+  };
   /** 所有行程總數（地圖圖例用） */
   get totalItems(): number {
     return this.days.reduce((sum, d) => sum + d.items.length, 0);
@@ -68,16 +75,53 @@ export class ItineraryDetailComponent implements OnInit {
       this.loadData();
     }
   }
-  /** 編輯行程描述 */
+  /**開啟報錯視窗 */
+  openErrorReport(): void {
+    this.isReporting = true;
+  }
+  /**關閉報錯視窗 */
+  closeErrorReport(): void {
+    this.isReporting = false;
+    this.reportForm = {
+      errorType: '地點不存在',
+      severityLevel: 'Medium',
+      errorMessage: '',
+      errorReason: ''
+    };
+  }
+  /**提交報錯到後端 */
+  submitErrorReport() {
+    const payload = {
+      ItineraryID: this.itineraryId,
+      VersionID: this.currentVersionId,
+      ErrorType: this.reportForm.errorType,
+      SeverityLevel: this.reportForm.severityLevel,
+      ErrorMessage: this.reportForm.errorMessage,
+      ErrorReason: "User Reported", // 或者是您想從前端帶入的其他欄位
+      IsConfirmed: false
+    };
+
+    this.http.post(`${this.baseUrl}/Itinerary/report`, payload).subscribe({
+      next: () => {
+        this.toast.success('感謝您的回報，我們會盡快處理！');
+        this.closeErrorReport();
+      },
+      error: (err) => {
+        console.error('回報失敗', err);
+        this.toast.error('回報失敗，請稍後再試');
+      }
+    });
+  }
+  /** 開啟編輯行程描述 */
   openDescriptionEdit(): void {
     this.editingDescription = this.introduction || '';
     this.isEditingDescription = true;
   }
-
+  /**取消行程描述編輯視窗 */
   cancelDescriptionEdit(): void {
     this.isEditingDescription = false;
   }
-
+  /**確認並關閉行程描述編輯視窗 */
   confirmDescriptionEdit(): void {
     if (this.editingDescription === this.introduction) {
       this.isEditingDescription = false;

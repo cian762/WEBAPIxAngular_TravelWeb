@@ -33,6 +33,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                             .Where(v => v.ItineraryId == itineraryId
                                      && v.VersionId == versionId)
                             .Include(v => v.ItineraryItems)
+                           .ThenInclude(i => i.Attraction)
                             .Include(v => v.Aianalyses)
                             .FirstOrDefaultAsync()
                    ?? throw new KeyNotFoundException($"Version {versionId} not found");

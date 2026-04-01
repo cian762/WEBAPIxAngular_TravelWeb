@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Component, HostListener, Input, OnInit, SimpleChanges, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { AnalysisMetrics } from '../../interface/analysis-metrics';
 import { ItineraryAnalysis } from '../../service/itinerary-analysis';
@@ -26,16 +26,26 @@ export class ItineraryMetricscomponent implements OnInit {
   isLoading = true;
   _analysis?: AnalysisMetrics;
   rings: RingConfig[] = [];
-
+  tooltipOpen = false;
   readonly R = 48;
   readonly C = +(2 * Math.PI * 48).toFixed(2);
-ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges): void {
     // 當 versionId 有值且不為 0 才呼叫
     if (this.itineraryId && this.versionId) {
       console.log('[Metrics] Input 變化，呼叫 API itineraryId =',
         this.itineraryId, 'versionId =', this.versionId);
       this.loadAnalysis();
     }
+  }
+  toggleTooltip(event: MouseEvent): void {
+    event.stopPropagation(); // 防止觸發下面的 document click
+    this.tooltipOpen = !this.tooltipOpen;
+  }
+
+  // 點擊頁面其他地方就關閉
+  @HostListener('document:click')
+  closeTooltip(): void {
+    this.tooltipOpen = false;
   }
   private loadAnalysis(): void {
     this.isLoading = true;

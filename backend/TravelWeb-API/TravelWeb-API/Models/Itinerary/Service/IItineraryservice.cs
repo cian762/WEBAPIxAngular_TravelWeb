@@ -18,5 +18,6 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public Task<byte[]> GetExportFileAsync(int itineraryId);
         public Task<bool> UpdateItineraryDescriptionAsync(int id, string introduction);
         public Task<DayItineraryDto> GetDayItineraryAsync(int itineraryId, int dayNumber);
+        public Task<bool> CreateErrorReportAsync(ErrorReportDto dto);
     }
 }

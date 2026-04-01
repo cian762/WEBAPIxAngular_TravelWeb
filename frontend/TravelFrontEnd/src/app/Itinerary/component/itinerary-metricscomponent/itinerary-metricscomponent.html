@@ -23,14 +23,34 @@
   }
 
   @if (_analysis.reason) {
-  <div class="reason-card">
-    <span class="robot">🤖</span>
-    <div>
-      <p class="reason-text">{{ _analysis.reason }}</p>
-      <span class="analysis-time">
-        分析時間：{{ _analysis.analysisTime | date:'yyyy/MM/dd HH:mm' }}
-      </span>
+  <div class="robot-btn">
+    <div class="robot-icon-wrap" (click)="toggleTooltip($event)" title="顯示評分理由">
+
+      <!-- 機器人 SVG -->
+      <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+        <rect x="5" y="8" width="14" height="10" rx="3" stroke="currentColor" stroke-width="1.5" />
+        <rect x="9" y="3" width="6" height="4" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+        <line x1="12" y1="7" x2="12" y2="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <circle cx="9" cy="13" r="1.5" fill="currentColor" />
+        <circle cx="15" cy="13" r="1.5" fill="currentColor" />
+        <line x1="9" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <line x1="2" y1="13" x2="5" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <line x1="19" y1="13" x2="22" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+
+      <!-- Tooltip 對話框 -->
+      <div class="robot-tooltip" [class.open]="tooltipOpen" (click)="$event.stopPropagation()">
+        <div class="tooltip-header">
+          <span class="tooltip-title">AI 評分理由</span>
+        </div>
+        <p class="tooltip-reason">{{ _analysis.reason }}</p>
+        <span class="tooltip-time">
+          分析時間：{{ _analysis.analysisTime | date:'yyyy/MM/dd HH:mm' }}
+        </span>
+      </div>
+
     </div>
+    <span class="robot-label">評分理由</span>
   </div>
   }
 

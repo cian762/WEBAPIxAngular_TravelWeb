@@ -34,7 +34,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
     {
         dayNumber = i.DayNumber,
         sortOrder = i.SortOrder,
-        attractionName = i.AttractionName ?? string.Empty,
+        attractionName = i.Attraction.Name ?? i.ContentDescription
+                      ?? string.Empty,
         startTime = i.StartTime.HasValue ? i.StartTime.Value.ToString("HH:mm") : string.Empty,
         endTime = i.EndTime.HasValue ? i.EndTime.Value.ToString("HH:mm") : string.Empty,
     })
@@ -53,7 +54,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 FeasibilityScore = (decimal)aiOutput.OverallAnalysis.Feasibility,
                 PaceBalanceScore = (decimal)pace,
                 FatigueIndex = (decimal)aiOutput.OverallAnalysis.Fatigue,
-                AnalysisTime = DateTime.UtcNow
+                AnalysisTime = DateTime.UtcNow,
+                Reason = aiOutput.OverallAnalysis.Reason
             });
 
             return MapToDto(entity, reason: aiOutput.OverallAnalysis.Reason);
@@ -105,7 +107,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
             FeasibilityScore = (double)a.FeasibilityScore,
             PaceBalanceScore = (double)a.PaceBalanceScore,
             FatigueIndex = (double)a.FatigueIndex,
-            Reason = reason ?? string.Empty,
+            Reason = a.Reason ?? reason ?? string.Empty,
             AnalysisTime = (DateTime)a.AnalysisTime
         };
 

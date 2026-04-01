@@ -17,6 +17,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         static bool isfontexist = false;
         private static readonly object _fontLock = new object();
         private readonly GooglePlaceService _placesService;
+        #region 查看行程相關
         public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService, IConfiguration config, GooglePlaceService placesService)
         {
             _imageUploadService = cloudinaryService;
@@ -420,13 +421,14 @@ namespace TravelWeb_API.Models.Itinerary.Service
             await _context.SaveChangesAsync();
             return itinerary.EndTime.Value;
         }
+        #endregion
         #region GOOGLE地圖
         public async Task<DayItineraryDto> GetDayItineraryAsync(int itineraryId, int dayNumber)
         {
             var items = await _context.ItineraryItems
                 .Include(x => x.Attraction)          // ← 必加
     .Include(x => x.Version) // ← Where 用到 Version 也要 Include
-            .Where(x => x.Version.ItineraryId == itineraryId && x.DayNumber == dayNumber)
+            .Where(x => x.Version.ItineraryId == itineraryId && x.Version.CurrentUsageStatus == "Y" && x.DayNumber == dayNumber)
             .OrderBy(x => x.SortOrder)
             .ToListAsync();
 
@@ -606,6 +608,25 @@ namespace TravelWeb_API.Models.Itinerary.Service
             }
         }
 
+        #endregion
+        #region 報錯相關
+        public async Task<bool> CreateErrorReportAsync(ErrorReportDto dto)
+        {
+            var errorEntity = new AigenerationError
+            {
+                ItineraryId = dto.ItineraryId,
+                VersionId = dto.VersionId,
+                ErrorType = dto.ErrorType,
+                SeverityLevel = dto.SeverityLevel,
+                ErrorMessage = dto.ErrorMessage,
+                ErrorReason = dto.ErrorReason,
+                RelatedItemId = dto.RelatedItemId,
+                IsConfirmed = dto.IsConfirmed,
+                CreateTime = DateTime.Now
+            };
+            _context.AigenerationErrors.Add(errorEntity);
+            return await _context.SaveChangesAsync() > 0;
+        }
         #endregion
     }
 }

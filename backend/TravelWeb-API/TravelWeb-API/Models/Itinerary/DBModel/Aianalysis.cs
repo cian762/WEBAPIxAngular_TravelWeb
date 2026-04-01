@@ -18,6 +18,7 @@ public partial class Aianalysis
     public decimal? FatigueIndex { get; set; }
 
     public DateTime? AnalysisTime { get; set; }
+    public string? Reason { get; set; }
 
     public virtual ItineraryVersion Version { get; set; }
 }

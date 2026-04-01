@@ -160,7 +160,12 @@ namespace TravelWeb_API.Controllers
             }
             return Ok(new { url = imageUrl });
         }
-
+        [HttpPost("report")]
+        public async Task<IActionResult> PostError([FromBody] ErrorReportDto dto)
+        {
+            var result = await _itineraryService.CreateErrorReportAsync(dto);
+            return result ? Ok() : BadRequest("提交失敗");
+        }
         // GET 基於版本找該版本的所有ITEM
         [HttpGet("{VerId}/item")]
         public async Task<IActionResult> GetitembyVer(int VerId)
