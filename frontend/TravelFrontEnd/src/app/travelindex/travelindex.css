@@ -427,9 +427,133 @@ a {
   font-size: 1rem;
 }
 
-.service-card p {
+/* 🔍 搜尋區（一定要在 media 外） */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  z-index: 1000;
+}
+
+.hero-search {
+  display: flex;
+  gap: 12px;
+  background: #ffffff;
+  border-radius: 28px;
+  /* 預設全圓角 */
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1001;
+  /* 確保在建議選單之上 */
+}
+
+/* 當有建議字時，搜尋框下方變直角 */
+.hero-search.has-suggestions {
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.hero-search input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  height: 52px;
+  padding: 0 14px;
+  font-size: 1rem;
+}
+
+.hero-search button {
+  min-width: 120px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 搜尋建議選單 */
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  /* 接在搜尋框底部 */
+  left: 0;
+  right: 0;
+  background: #ffffff !important;
+  /* 強制白色背景防止透視 */
+  border-radius: 0 0 28px 28px;
+  /* 上直下圓 */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
   margin: 0;
-  color: var(--text-soft);
+  padding: 10px 0;
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 999;
+  border-top: 1px solid #f1f1f1;
+}
+
+.search-suggestions li {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  color: #1f2937 !important;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.search-suggestions li:hover {
+  background-color: #f1f5f9;
+  color: var(--primary) !important;
+}
+
+.search-suggestions li i {
+  color: #9ca3af;
+  margin-right: 12px;
+  font-size: 14px;
+}
+
+.suggestion-type {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-right: 10px;
+  min-width: 50px;
+  text-align: center;
+  background: #eee;
+  /* 預設顏色 */
+}
+
+/* 根據分類名稱上色 (需對應後端傳回的 type 字串) */
+.type-Attraction {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.type-Product {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.type-Article {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.type-Activity {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.suggestion-title {
+  color: #333;
+  font-size: 15px;
 }
 
 /* responsive */
@@ -446,195 +570,37 @@ a {
   }
 }
 
+/* =========================
+   📱 RWD（手機優化）
+========================= */
 @media (max-width: 768px) {
-  .section-heading {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 
-  .hero {
-    min-height: 520px;
+  .search-wrapper {
+    max-width: 100%;
   }
 
   .hero-search {
-    position: relative;
-    /* 關鍵：讓子選單以此為準 */
-    display: flex;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.96);
-    border-radius: 20px;
-    padding: 10px;
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
-    margin-bottom: 18px;
-  }
-
-  .card-scroll,
-  .embed-grid,
-  .product-grid,
-  .destination-grid,
-  .package-grid,
-  .service-grid,
-  .article-grid {
-    grid-template-columns: 1fr;
-  }
-
-  /* 這裡是新加的樣式 */
-  .search-suggestions {
-    position: absolute;
-    top: 100%;
-    /* 剛好在輸入框下面 */
-    left: 0;
-    width: 100%;
-    /* 跟搜尋框一樣寬 */
-    background: white;
-    border-radius: 0 0 15px 15px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    z-index: 999;
-    /* 確保浮在最上面 */
-    padding: 10px 0;
-    margin-top: 5px;
-    list-style: none;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
-  .search-suggestions li {
-    padding: 12px 20px;
-    color: #333;
-    cursor: pointer;
-    text-align: left;
-    font-size: 16px;
-    transition: all 0.2s;
-  }
-
-  .search-suggestions li:hover {
-    background-color: #f1f1f1;
-    color: #00b2a0;
-    /* 換成你的主題綠色 */
-  }
-
-  /* 2. 提示詞選單：移出 @media，讓電腦版也能用 */
-  .search-suggestions {
-    position: absolute;
-    top: 100%;
-    /* 貼在搜尋框底部 */
-    left: 0;
-    width: 100%;
-    /* 跟搜尋框一樣寬 */
-
-    /* 關鍵修正：強制背景與字體顏色 */
-    background-color: #ffffff !important;
-    color: #1f2937 !important;
-    /* 深灰色字體 */
-
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    z-index: 9999;
-    /* 確保在最上面 */
-
-    padding: 10px 0;
-    margin-top: 8px;
-    /* 跟輸入框保持一點空隙 */
-    list-style: none;
-    max-height: 250px;
-    overflow-y: auto;
-    border: 1px solid #e5e7eb;
-  }
-
-  /* 確保裡面的每一個項目也是深色字 */
-  .search-suggestions li {
-    padding: 12px 20px;
-    color: #1f2937 !important;
-    cursor: pointer;
-    text-align: left;
-    border-bottom: 1px solid #f3f4f6;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-  }
-
-  /* 滑過去的效果 */
-  .search-suggestions li:hover {
-    background-color: #f1f5f9;
-    color: var(--primary) !important;
-  }
-
-  /* 圖示顏色 */
-  .search-suggestions li i {
-    color: #9ca3af;
-    margin-right: 12px;
-  }
-
-  /* RWD 調整 */
-  @media (max-width: 768px) {
-    .hero-search {
-      flex-direction: row;
-      /* 手機版建議維持 row 或是調整 gap */
-    }
-
-    /* 如果手機版搜尋框變直列，選單寬度要重新校對 */
-    .search-suggestions {
-      width: 100%;
-    }
-  }
-
-  /* 1. 搜尋框容器 */
-  .hero-search {
-    position: relative;
-    display: flex;
-    background: #ffffff;
-    /* 預設全圓角 */
-    border-radius: 28px;
+    gap: 8px;
     padding: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-    z-index: 1001;
-    /* 確保在最前 */
   }
 
-  /* 2. 當選單出現時，搜尋框下方圓角變平 */
-  .hero-search.has-suggestions {
-    border-radius: 28px 28px 0 0;
-    /* 左上、右上圓，左下、右下平 */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  .hero-search input {
+    height: 46px;
+    font-size: 0.95rem;
   }
 
-  /* 3. 下拉選單 */
+  .hero-search button {
+    min-width: 90px;
+    font-size: 0.9rem;
+  }
+
   .search-suggestions {
-    position: absolute;
-    top: 100%;
-    /* 接在搜尋框正下方 */
-    left: 0;
-    width: 100%;
-    background: #ffffff;
-    /* 只有下方圓角 */
-    border-radius: 0 0 28px 28px;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-    margin: 0;
-    padding: 10px 0;
-    list-style: none;
-    z-index: 1000;
-    /* 移除上邊框，讓兩者無縫銜接 */
-    border-top: 1px solid #f1f1f1;
+    border-radius: 0 0 20px 20px;
+    max-height: 220px;
   }
 
-  /* 4. 內文字體與圖示 (比照 Google 樣式) */
   .search-suggestions li {
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    color: #202124;
-    cursor: pointer;
-    font-size: 16px;
-  }
-
-  .search-suggestions li:hover {
-    background-color: #f1f3f4;
-  }
-
-  .search-suggestions li i {
-    color: #70757a;
-    margin-right: 15px;
-    font-size: 14px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
   }
 }

@@ -19,7 +19,7 @@ import { ActivityIndexCard } from "../Activity/Component/activity-index-card/act
 })
 export class Travelindex implements OnInit {
   searchControl = new FormControl('');
-  suggestions: string[] = []; // 存放純文字建議
+  suggestions: any[] = []; // any才可以裝物件
   showSuggestions = false;    // 控制下拉選單顯示
   constructor(
     private searchService: GlobalSearchService, // 負責去後端搬貨
@@ -46,10 +46,10 @@ export class Travelindex implements OnInit {
   }
 
   // 當使用者點擊提示詞時
-  selectSuggestion(word: string) {
-    this.searchControl.setValue(word); // 把字填入框框
-    this.showSuggestions = false;     // 關閉選單
-    this.onSearch();                  // 直接執行搜尋
+  selectSuggestion(s: any) {
+    this.searchControl.setValue(s.title); // 直接取 title
+    this.showSuggestions = false;
+    this.onSearch();
   }
   onSearch() {
     const term = this.searchControl.value;

@@ -12,14 +12,18 @@
           一站式規劃你的旅遊體驗。
         </p>
 
-        <div class="hero-search">
-          <input type="text" [formControl]="searchControl" (keyup.enter)="onSearch()" placeholder="搜尋景點、活動、文章、套裝行程">
-          <button (click)="onSearch()">搜尋</button>
-        </div>
-        <div>
+        <div class="search-wrapper">
+          <div class="hero-search" [class.has-suggestions]="showSuggestions && suggestions.length > 0">
+            <input type="text" [formControl]="searchControl" placeholder="搜尋景點...">
+            <button (click)="onSearch()">搜尋</button>
+          </div>
+
           <ul class="search-suggestions" *ngIf="showSuggestions && suggestions.length > 0">
             <li *ngFor="let s of suggestions" (click)="selectSuggestion(s)">
-              <i class="bi bi-clock-history"></i> {{ s }}
+              <span class="suggestion-type" [ngClass]="'type-' + s.type">
+                {{ s.type }}
+              </span>
+              <span class="suggestion-title">{{ s.title }}</span>
             </li>
           </ul>
         </div>
