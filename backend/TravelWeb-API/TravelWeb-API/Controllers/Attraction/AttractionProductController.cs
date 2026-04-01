@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.attraction;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 //沒有更新
 namespace TravelWeb_API.Controllers.Attraction
 {
@@ -187,5 +189,66 @@ namespace TravelWeb_API.Controllers.Attraction
 
             return Ok(product);
         }
+
+        // ────────────────────────────────────────────
+        // POST /api/attractionproduct/{productId}/favorite
+        // 切換票券收藏（需登入）
+        // ────────────────────────────────────────────
+        [Authorize]
+        [HttpPost("{productId}/favorite")]
+        public async Task<IActionResult> ToggleFavorite(int productId)
+        {
+            var memberId = User.FindFirst("MemberId")?.Value
+                           ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(memberId))
+                return Unauthorized(new { message = "請先登入" });
+
+            var productExists = await _dbContext.AttractionProducts
+                .AnyAsync(p => p.ProductId == productId && !p.IsDeleted);
+            if (!productExists)
+                return NotFound(new { message = "找不到此票券" });
+
+            var existing = await _dbContext.AttractionProductFavorites
+                .FirstOrDefaultAsync(f => f.ProductId == productId && f.UserId == memberId);
+
+            if (existing != null)
+            {
+                _dbContext.AttractionProductFavorites.Remove(existing);
+                await _dbContext.SaveChangesAsync();
+                return Ok(new { isFavorited = false, message = "已取消收藏" });
+            }
+
+            _dbContext.AttractionProductFavorites.Add(new AttractionProductFavorite
+            {
+                ProductId = productId,
+                UserId = memberId,
+                CreatedAt = DateTime.Now
+            });
+            await _dbContext.SaveChangesAsync();
+            return Ok(new { isFavorited = true, message = "已加入收藏" });
+        }
+
+        // ────────────────────────────────────────────
+        // GET /api/attractionproduct/my-favorites
+        // 取得當前登入會員收藏的票券 ID 清單
+        // ────────────────────────────────────────────
+        [Authorize]
+        [HttpGet("my-favorites")]
+        public async Task<IActionResult> GetMyFavorites()
+        {
+            var memberId = User.FindFirst("MemberId")?.Value
+                           ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(memberId))
+                return Unauthorized();
+
+            var ids = await _dbContext.AttractionProductFavorites
+                .Where(f => f.UserId == memberId)
+                .Select(f => f.ProductId)
+                .ToListAsync();
+
+            return Ok(ids);
+        }
+
+
     }
 }

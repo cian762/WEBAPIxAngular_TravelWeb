@@ -10,6 +10,7 @@ public partial class AttractionLike
     public int AttractionId { get; set; }
 
     public string? IpAddress { get; set; }
+    public string? MemberId { get; set; }    // ← 新增
 
     public DateTime? CreatedAt { get; set; }
 
