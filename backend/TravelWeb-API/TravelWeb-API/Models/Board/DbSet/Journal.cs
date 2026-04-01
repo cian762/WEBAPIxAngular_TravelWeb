@@ -9,9 +9,10 @@ public partial class Journal
 
     public byte? CoverId { get; set; }
 
-    public DateOnly? ScheduledDate { get; set; }
+    public byte Page { get; set; }
 
     public int? TemplateId { get; set; }
 
     public virtual Article Article { get; set; } = null!;
+    public ICollection<JournalElement>? JournalElements { get; set; }
 }

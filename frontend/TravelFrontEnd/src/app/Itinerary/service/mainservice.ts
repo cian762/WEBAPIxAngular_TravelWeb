@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { DayItineraryDto } from '../interface/itinerarymainmodel';
 
 
@@ -8,9 +9,11 @@ import { DayItineraryDto } from '../interface/itinerarymainmodel';
   providedIn: 'root',
 })
 export class Mainservice {
-  private CreateItineraryapiUrl = 'https://localhost:7276/api/Itinerary';
-  private CreateAIItineraryAPI = 'https://localhost:7276/api/AiItinerary/generate-ai';
-  private GetDayItineraryAPI = '/Itinerary/{itineraryId}/day/{day}';
+  baseUrl: string = environment.apiBaseUrl;
+
+  private CreateItineraryapiUrl = `${this.baseUrl}/Itinerary`;
+  private CreateAIItineraryAPI = `${this.baseUrl}/AiItinerary/generate-ai`;
+  private GetDayItineraryAPI = `${this.baseUrl}/Itinerary/{itineraryId}/day/{day}`;
   constructor(private http: HttpClient) { }
 
   createItinerary(data: any): Observable<any> {

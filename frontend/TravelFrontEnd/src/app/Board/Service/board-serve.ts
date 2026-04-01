@@ -4,6 +4,7 @@ import { ArticleData, ArticleResponse, TagDTO } from '../interface/ArticleData';
 import { PostDetailDto } from '../interface/PostDetailDto';
 import { switchMap } from 'rxjs/operators';
 import { CommentsDTO } from '../interface/CommentsDTO';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +13,10 @@ export class BoardServe {
   constructor(private http: HttpClient) {
 
   }
-  private apiUrl = 'https://localhost:7276/api';
+
+  baseUrl: string = environment.apiBaseUrl;
+  private apiUrl = this.baseUrl;
+
   getArticleAPI(para: number) {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
   }

@@ -9,6 +9,8 @@ public partial class QrcodeInfo
 
     public int OrderId { get; set; }
 
+    public int OrderItemId { get; set; }
+
     public string Qrtoken { get; set; } = null!;
 
     public string Status { get; set; } = null!;

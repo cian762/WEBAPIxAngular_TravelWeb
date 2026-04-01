@@ -44,18 +44,5 @@ export class ArticleList {
   seachTag(tag: number) {
     console.log('seachTag emit', tag);
     this.tagSelected.emit(tag);
-    // console.log(tag)
-    // const para: string[] = [];
-    // para.push(`TagsId=${tag}`);
-    // window.location.href = `/Board?TagsId=${tag}`;
-    // this.router.navigate(['Board'], {  // 或你的目標路由
-    //   queryParams: { TagsId: tag }
-    // });
-    // this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
-    //   this.router.navigate([''], {
-    //     queryParams: { TagsId: tag }
-    //   });
-    // }
-    // )
   }
 }

@@ -1,8 +1,8 @@
 /* 確保 Hero Container 真正橫跨全螢幕 */
 .hero-container {
-  width: 100vw;
+  width: 60vw;
   /* 使用 vw 確保佔滿視窗寬度 */
-  margin-left: calc(-50vw + 50%);
+  margin: auto;
   /* 如果父層有 padding，這行可以強行拉開到全寬 */
   height: 600px;
   background: url('/assets/images/ai-hero-bg.jpg') no-repeat center center;
@@ -14,6 +14,7 @@
   justify-content: center;
   /* 置中內容 */
   overflow: hidden;
+  border-radius: 5%;
 }
 
 .hero-overlay {

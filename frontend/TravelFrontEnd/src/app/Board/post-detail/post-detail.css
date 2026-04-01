@@ -18,10 +18,6 @@
   transition: 0.2s;
 }
 
-.user-details :hover {
-  color: #f8b600;
-  cursor: pointer;
-}
 
 .user-details a i {
   margin-left: 10px;
@@ -134,3 +130,20 @@
 }
 
 /* ===========以上為圖片輪播之樣式=========== */
+
+
+/* 點讚與收藏變色 */
+.like-item:hover,
+.like-item.liked {
+  color: #e8a838 !important;
+}
+
+.collect-item:hover,
+.collect-item.collect {
+  color: #4cd3e3 !important;
+}
+
+.other-item:hover {
+  color: #e8a838 !important;
+  cursor: pointer;
+}

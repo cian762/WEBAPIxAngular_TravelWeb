@@ -6,6 +6,8 @@
 
         public string MemberId { get; set; } = null!;
 
+        public string MemberAvatar { get; set; } = string.Empty;
+
         public string Title { get; set; } = null!;
 
         public string? Comment { get; set; }

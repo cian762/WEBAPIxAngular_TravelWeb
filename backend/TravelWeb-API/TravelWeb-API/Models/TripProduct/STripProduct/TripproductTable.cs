@@ -99,6 +99,25 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             return new PagedResult<TripProductDTO> { TotalCount = totalCount, Data = pagedData };
 
         }
+        // 取得熱門行程 (依點擊次數排序，取前 8 筆)
+        public async Task<IEnumerable<TripProductDTO>> GetHotProductsAsync(int take = 8)
+        {
+            return await _trip.TripProducts
+                .OrderByDescending(p => p.ClickTimes) // 依熱門程度排序
+                .Take(take)
+                .Select(p => new TripProductDTO
+                {
+                    TripProductId = p.TripProductId,
+                    ProductName = p.ProductName,
+                    CoverImage = _mvcBaseUrl + "/PImages/" + p.CoverImage,
+                    DisplayPrice = p.DisplayPrice,
+                    RegionName = p.Region != null ? p.Region.RegionName : "",
+                    DurationDays = p.DurationDays,
+                    // 如果需要標籤，記得在這裡 Select
+                    CategoryTags = p.TravelTags.Select(t => t.TravelTagName!).ToList()
+                })
+                .ToListAsync();
+        }
         //=====================================================================================
         //這裡是商品詳細頁
         //細項標頭

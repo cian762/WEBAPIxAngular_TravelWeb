@@ -3,12 +3,15 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, lastValueFrom, Observable, of, tap } from 'rxjs';
 import { CartItem } from '../models/creatshopping.model';
 import { AuthService } from '../../Member/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CreateShoppingCart {
-  private readonly apiUrl = 'https://localhost:7276/api/ShoppingCart';
+
+  baseUrl: string = environment.apiBaseUrl;
+  private readonly apiUrl = `${this.baseUrl}/ShoppingCart`;
   private authService = inject(AuthService); // 用來判斷登入狀態
   private readonly LOCAL_STORAGE_KEY = 'cart';
   private cartCountSubject = new BehaviorSubject<number>(0);

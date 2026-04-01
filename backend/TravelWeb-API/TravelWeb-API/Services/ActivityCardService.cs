@@ -62,7 +62,8 @@ namespace TravelWeb_API.Services
                 query = query.OrderBy(a => Math.Abs(EF.Functions.DateDiffDay(today, a.StartTime)!.Value));
             }
 
-            
+
+            var totalRecords = query.Where(a => a.EndTime >= today).Count();
 
             var ans = await query
                 .Where(a => a.EndTime >= today)
@@ -89,8 +90,6 @@ namespace TravelWeb_API.Services
                     .FirstOrDefault() ?? 0,
                 })
                 .ToListAsync();
-
-            var totalRecords = ans.Count();
 
             return new PagedResponseDTO<ActivityCardReponseDTO>(ans, q.PageNumber, totalRecords, q.PageSize);
 

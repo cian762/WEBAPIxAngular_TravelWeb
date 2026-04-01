@@ -23,12 +23,19 @@ export class CreateArticleButton implements OnInit {
       window.open(`/app/Board/creat/${p}`, '_blank');
       // this.router.navigate(['Board', 'creat', p]);
     });
-
-
   }
+  goToCreateJournal(): void {
+    window.open(`/app/Board/creatJournal`, '_blank');
+    // this.Serve.postPostAPI().subscribe(p => {
+    //   // this.router.navigate(['Board', 'creat', p]);
+    // });
+  }
+
+
   goToCreateBlog(): void {
-    this.Serve.postPostAPI().subscribe(p => {
-      window.open('/app/Board/creatBlog', '_blank');
-    });
+    window.open('/app/Board/creatBlog', '_blank');
+    // this.Serve.postPostAPI().subscribe(p => {
+    //   window.open('/app/Board/creatBlog', '_blank');
+    // });
   }
 }

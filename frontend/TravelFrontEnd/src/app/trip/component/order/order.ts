@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { OrderService } from '../../services/OrderService';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
+import Swal from 'sweetalert2';
 
 
 
@@ -28,12 +29,40 @@ export class Order implements OnInit {
 
 
   ngOnInit(): void {
-    this.initForm();
-    if (!this.checkoutInfo && this.router.navigated) {
+    // 1. 嘗試從 history.state 抓取資料 (包含商品資料與來源網址)
+    const stateData = history.state.data;
+    this.checkoutInfo = stateData; // 假設你原本的變數叫 checkoutInfo
+
+    // 2. 檢查資料是否存在
+    if (!this.checkoutInfo || !this.checkoutInfo.directBuyItems || this.checkoutInfo.directBuyItems.length === 0) {
       console.warn('遺失結帳資訊，準備導回...');
-      // 這裡可以選擇導回購物車或首頁
+      this.handleMissingData(stateData?.fromUrl);
+      return; // 阻斷後續的 loadOrderPreview，避免報錯
     }
+
+    // 3. 資料正常，執行初始化
+    this.initForm();
     this.loadOrderPreview();
+  }
+
+  // 提取出來的錯誤處理方法
+  private handleMissingData(fromUrl?: string) {
+    // 如果有來源網址就回來源，沒有就回首頁
+    const fallbackUrl = fromUrl || '/';
+
+    Swal.fire({
+      title: '結帳資訊逾時',
+      text: '抱歉，系統無法取得您的行程資料，請回到商品頁重新選擇。',
+      icon: 'warning',
+      confirmButtonText: '回到商品頁',
+      confirmButtonColor: '#0d6efd',
+      allowOutsideClick: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 使用 navigateByUrl 導回精確的商品詳情頁
+        this.router.navigateByUrl(fallbackUrl);
+      }
+    });
   }
 
 
@@ -42,10 +71,11 @@ export class Order implements OnInit {
       contactName: ['', Validators.required],
       contactEmail: ['', [Validators.required, Validators.email]],
       contactPhone: ['', [Validators.required, Validators.pattern('^09[0-9]{8}$')]],
-      customerNote: ['']
+      customerNote: [''],
+      agreeTerms: [false, Validators.requiredTrue]
     });
   }
-  /** 2. 載入訂單預覽 (RxJS 呼叫) */
+
   /** 2. 載入訂單預覽 (RxJS 呼叫) */
   loadOrderPreview() {
     this.isLoading = true;
@@ -76,7 +106,7 @@ export class Order implements OnInit {
     });
   }
 
-  /** 3. 正式結帳並跳轉金流 */
+  /** 3. 正式結帳並詢問是否支付 */
   onCheckout() {
     if (this.orderForm.invalid || this.isLoading) return;
 
@@ -92,35 +122,51 @@ export class Order implements OnInit {
 
     this.orderService.createOrder(finalDto).subscribe({
       next: (res) => {
-        // --- 關鍵清理邏輯開始 ---
+        // 訂單已經在資料庫成立了！停止 Loading 狀態以顯示彈窗
+        this.isLoading = false;
 
-        // 從商品清單中找出哪些是有 cartId 的（大於 0 代表來自購物車）
+        // --- 1. 處理購物車清理 (非同步，不需要等它完成才彈窗) ---
         const cartIdsToRemove = items
           .map((i: any) => i.cartId)
           .filter((id: number) => id > 0);
 
         if (cartIdsToRemove.length > 0) {
-          // 情況 A：來自購物車，先呼叫 removeItems 刪除，成功後再跳轉金流
           this.cartService.removeItems(cartIdsToRemove, []).subscribe({
-            next: () => {
-              console.log('購物車項目已清理');
-              this.handlePaymentRedirect(res);
-            },
-            error: (err) => {
-              console.error('清理失敗，但仍繼續支付流程', err);
-              this.handlePaymentRedirect(res);
-            }
+            next: () => console.log('購物車項目已清理'),
+            error: (err) => console.error('購物車清理失敗', err)
           });
-        } else {
-          // 情況 B：立即購買 (cartId 都是 0)，直接跳轉金流
-          this.handlePaymentRedirect(res);
         }
 
-        // --- 關鍵清理邏輯結束 ---
+        // --- 2. 彈出 Swal 詢問視窗 ---
+        Swal.fire({
+          title: '訂單成立成功！',
+          html: `訂單編號：<b>${res.orderId}</b><br>是否立即前往綠界進行支付？`,
+          icon: 'success',
+          showConfirmButton: true, // 顯示「立即付款」
+          showDenyButton: true,    // 顯示「稍後付款」
+          confirmButtonText: '立即付款',
+          denyButtonText: '稍後再付',
+          confirmButtonColor: '#0d6efd',
+          denyButtonColor: '#6c757d',
+          allowOutsideClick: false // 防止點擊外面關閉，確保流程明確
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // 選「立即付款」：執行原本的跳轉綠界表單邏輯
+            this.handlePaymentRedirect(res);
+          } else if (result.isDenied) {
+            // 選「稍後再付」：導航回首頁或訂單列表
+            // 因為訂單已成立，使用者之後可以去「我的訂單」點選您後端寫好的 repay API
+            this.router.navigate(['/']);
+          }
+        });
       },
       error: (err) => {
         this.isLoading = false;
-        alert('建立訂單失敗：' + (err.error?.message || '伺服器錯誤'));
+        Swal.fire({
+          title: '建立訂單失敗',
+          text: err.error?.message || '伺服器發生錯誤，請稍後再試',
+          icon: 'error'
+        });
       }
     });
   }

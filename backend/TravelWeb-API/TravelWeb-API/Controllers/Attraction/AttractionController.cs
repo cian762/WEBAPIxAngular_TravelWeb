@@ -5,7 +5,7 @@ using TravelWeb_API.Models.attraction;
 
 namespace TravelWeb_API.Controllers.Attraction
 {
-    
+
     [Route("api/[controller]")]
     [ApiController]
     //[ApiExplorerSettings(GroupName = "Attraction")] // ← 加這行
@@ -92,7 +92,7 @@ namespace TravelWeb_API.Controllers.Attraction
             [FromQuery] string? keyword)
         {
             var query = _dbContext.Attractions
-                .Where(a => !a.IsDeleted && a.ApprovalStatus == 1)
+                .Where(a => !a.IsDeleted && a.ApprovalStatus == 1 && a.RegionId != 1000)
                 .AsQueryable();
 
             // 地區篩選（遞迴取所有子地區）
@@ -180,7 +180,7 @@ namespace TravelWeb_API.Controllers.Attraction
         public async Task<IActionResult> GetAttractionDetail(int id)
         {
             var attraction = await _dbContext.Attractions
-                .Where(a => a.AttractionId == id && !a.IsDeleted && a.ApprovalStatus == 1)
+                .Where(a => a.AttractionId == id && !a.IsDeleted && a.ApprovalStatus == 1 && a.RegionId != 1000)
                 .Include(a => a.Images)
                 .Include(a => a.Region)
                 .Include(a => a.AttractionProducts.Where(p => !p.IsDeleted && p.Status == "ACTIVE"))
@@ -207,6 +207,19 @@ namespace TravelWeb_API.Controllers.Attraction
             var likeCount = await _dbContext.AttractionLikes
                 .CountAsync(l => l.AttractionId == id);
 
+            // ✅ 聚合該景點所有上架票券的圖片（供活動介紹區塊使用）
+            var productImages = await _dbContext.AttractionProducts
+                .Where(p => p.AttractionId == id && !p.IsDeleted && p.Status == "ACTIVE")
+                .SelectMany(p => p.AttractionProductImages)
+                .OrderBy(img => img.SortOrder)
+                .Select(img => new
+                {
+                    img.ImageId,
+                    img.ImagePath,
+                    img.Caption
+                })
+                .ToListAsync();
+
             var result = new
             {
                 attraction.AttractionId,
@@ -217,13 +230,16 @@ namespace TravelWeb_API.Controllers.Attraction
                 attraction.BusinessHours,
                 attraction.ClosedDaysNote,
                 attraction.TransportInfo,
+                attraction.Description,
+                attraction.ActivityIntro,
                 attraction.Latitude,
                 attraction.Longitude,
                 attraction.ViewCount,
-                LikeCount = likeCount,              // 詳細頁右上角 278 👍
+                LikeCount = likeCount,
                 attraction.RegionId,
                 attraction.Region.RegionName,
                 Images = attraction.Images.Select(i => i.ImagePath).ToList(),
+                ProductImages = productImages,
                 Types = types,
                 Products = attraction.AttractionProducts.Select(p => new
                 {
@@ -300,7 +316,7 @@ namespace TravelWeb_API.Controllers.Attraction
                 .ToListAsync();
 
             var attractionList = await _dbContext.Attractions
-                .Where(a => matchedIds.Contains(a.AttractionId) && !a.IsDeleted && a.ApprovalStatus == 1)
+                .Where(a => matchedIds.Contains(a.AttractionId) && !a.IsDeleted && a.ApprovalStatus == 1 && a.RegionId != 1000)
                 .Include(a => a.Images)
                 .Include(a => a.Region)
                 .OrderByDescending(a => a.ViewCount)
@@ -346,5 +362,3 @@ namespace TravelWeb_API.Controllers.Attraction
         public string? IpAddress { get; set; }
     }
 }
-    
-

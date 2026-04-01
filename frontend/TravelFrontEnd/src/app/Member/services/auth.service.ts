@@ -3,13 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { CreateShoppingCart } from '../../trip/services/create-shopping-cart';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  baseUrl: string = environment.apiBaseUrl;
   private http = inject(HttpClient);
-  private apiUrl = 'https://localhost:7276/api';
+  private apiUrl = this.baseUrl;
   public authState$ = new BehaviorSubject<boolean>(this.isLoggedIn());
 
 
@@ -39,7 +41,8 @@ export class AuthService {
 
 
   updateProfile(formData: FormData) {
-    const apiUrl = 'https://localhost:7276/api/MemberProfile/me';
+    // 記得換成你真正的後端網址
+    const apiUrl = `${this.baseUrl}/MemberProfile/me`;
     return this.http.put(apiUrl, formData, { withCredentials: true });
   }
 
@@ -64,9 +67,19 @@ export class AuthService {
     return localStorage.getItem('isLoggedIn') === 'true';
   }
   //20260325李皇毅路由守門員用的方法
+  // 2. 強化 API 檢查方法，增加 tap 來同步狀態
   checkAuthStatus(): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiUrl}/Auth/check-status`).pipe(
-      catchError(() => of(false)) // 如果報錯或沒登入，就回傳 false
+    return this.http.get<boolean>(`${this.apiUrl}/Auth/check-status`, { withCredentials: true }).pipe(
+      tap(isLogged => {
+        // 關鍵：如果 API 說有登入，就幫 localStorage 補上狀態，防止下次再跳彈窗
+        localStorage.setItem('isLoggedIn', isLogged ? 'true' : 'false');
+        this.authState$.next(isLogged);
+      }),
+      catchError(() => {
+        localStorage.setItem('isLoggedIn', 'false');
+        this.authState$.next(false);
+        return of(false);
+      })
     );
   }
 

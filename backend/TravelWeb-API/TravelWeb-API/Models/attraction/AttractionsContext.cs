@@ -94,6 +94,8 @@ public partial class AttractionsContext : DbContext
                 .HasColumnName("phone");
             entity.Property(e => e.RegionId).HasColumnName("RegionID");
             entity.Property(e => e.TransportInfo).HasColumnName("transport_info");
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.ActivityIntro).HasColumnName("activity_intro");
             entity.Property(e => e.Website)
                 .HasMaxLength(500)
                 .HasColumnName("website");
