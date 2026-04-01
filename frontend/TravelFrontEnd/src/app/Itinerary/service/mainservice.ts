@@ -24,7 +24,7 @@ export class Mainservice {
   }
   getDayItinerary(itineraryId: number, day: number): Observable<DayItineraryDto> {
     return this.http.get<DayItineraryDto>(
-      `https://localhost:7276/api/itinerary/${itineraryId}/day/${day}`
+      `${this.baseUrl}/itinerary/${itineraryId}/day/${day}`
     );
   }
 }

@@ -297,8 +297,68 @@ namespace TravelWeb_API.Controllers.Attraction
         }
 
         // ────────────────────────────────────────────
-        // GET /api/attraction/bytype/{typeId}
-        // 對應畫面：點景點分類 Tag 篩選全台該類型景點
+        // GET /api/attraction/{id}/nearby?radius=5&top=8
+        // 取得附近景點（依距離排序）
+        // ────────────────────────────────────────────
+        [HttpGet("{id}/nearby")]
+        public async Task<IActionResult> GetNearbyAttractions(
+            int id,
+            [FromQuery] double radius = 10,
+            [FromQuery] int top = 8)
+        {
+            var current = await _dbContext.Attractions
+                .Where(a => a.AttractionId == id && !a.IsDeleted)
+                .Select(a => new { a.Latitude, a.Longitude })
+                .FirstOrDefaultAsync();
+
+            if (current == null || current.Latitude == null || current.Longitude == null)
+                return NotFound(new { message = "找不到此景點或座標未設定" });
+
+            double lat = (double)current.Latitude;
+            double lng = (double)current.Longitude;
+
+            // Haversine 公式常數
+            const double R = 6371; // 地球半徑 km
+
+            var allAttractions = await _dbContext.Attractions
+                .Where(a => a.AttractionId != id
+                         && !a.IsDeleted
+                         && a.ApprovalStatus == 1
+                         && a.RegionId != 1000
+                         && a.Latitude != null
+                         && a.Longitude != null)
+                .Include(a => a.Images)
+                .ToListAsync();
+
+            var nearby = allAttractions
+                .Select(a =>
+                {
+                    double aLat = (double)a.Latitude!;
+                    double aLng = (double)a.Longitude!;
+                    double dLat = (aLat - lat) * Math.PI / 180;
+                    double dLng = (aLng - lng) * Math.PI / 180;
+                    double hav = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+                               + Math.Cos(lat * Math.PI / 180)
+                               * Math.Cos(aLat * Math.PI / 180)
+                               * Math.Sin(dLng / 2) * Math.Sin(dLng / 2);
+                    double dist = R * 2 * Math.Atan2(Math.Sqrt(hav), Math.Sqrt(1 - hav));
+                    return new { Attraction = a, Distance = dist };
+                })
+                .Where(x => x.Distance <= radius)
+                .OrderBy(x => x.Distance)
+                .Take(top)
+                .Select(x => new
+                {
+                    x.Attraction.AttractionId,
+                    x.Attraction.Name,
+                    x.Attraction.Address,
+                    MainImage = x.Attraction.Images.Select(i => i.ImagePath).FirstOrDefault(),
+                    DistanceKm = Math.Round(x.Distance, 2)
+                })
+                .ToList();
+
+            return Ok(nearby);
+        }
         // 例如點「#歷史古蹟」→ 顯示全台古蹟景點
         // ────────────────────────────────────────────
         [HttpGet("bytype/{typeId}")]
@@ -352,6 +412,92 @@ namespace TravelWeb_API.Controllers.Attraction
             }).ToList();
 
             return Ok(attractions);
+        }
+
+        // ────────────────────────────────────────────
+        // GET /api/attraction/{id}/related-tickets?top=10
+        // 票券推薦：依標籤重疊數 → viewCount → 隨機
+        // ────────────────────────────────────────────
+        [HttpGet("{id}/related-tickets")]
+        public async Task<IActionResult> GetRelatedTickets(int id, [FromQuery] int top = 10)
+        {
+            // 1. 取得當前景點的標籤
+            var currentTags = await _dbContext.AttractionTypeMappings
+                .Where(m => m.AttractionId == id)
+                .Select(m => m.AttractionTypeId)
+                .ToListAsync();
+
+            if (!currentTags.Any())
+                return Ok(new List<object>());
+
+            // 2. 找有相同標籤且有上架票券的其他景點
+            var candidateAttractionIds = await _dbContext.AttractionTypeMappings
+                .Where(m => currentTags.Contains(m.AttractionTypeId)
+                         && m.AttractionId != id)
+                .Select(m => m.AttractionId)
+                .Distinct()
+                .ToListAsync();
+
+            if (!candidateAttractionIds.Any())
+                return Ok(new List<object>());
+
+            // 3. 撈候選景點（有上架票券）+ 圖片 + 票券
+            var candidates = await _dbContext.Attractions
+                .Where(a => candidateAttractionIds.Contains(a.AttractionId)
+                         && !a.IsDeleted
+                         && a.ApprovalStatus == 1
+                         && a.RegionId != 1000
+                         && a.AttractionProducts.Any(p => !p.IsDeleted && p.Status == "ACTIVE"))
+                .Include(a => a.Images)
+                .Include(a => a.AttractionProducts.Where(p => !p.IsDeleted && p.Status == "ACTIVE"))
+                    .ThenInclude(p => p.TicketTypeCodeNavigation)
+                .ToListAsync();
+
+            if (!candidates.Any())
+                return Ok(new List<object>());
+
+            // 4. 取每個景點的標籤，計算重疊數（先撈回記憶體再分組）
+            var candidateIds = candidates.Select(a => a.AttractionId).ToList();
+            var tagData = await _dbContext.AttractionTypeMappings
+                .Where(m => candidateIds.Contains(m.AttractionId))
+                .Select(m => new { m.AttractionId, m.AttractionTypeId })
+                .ToListAsync();
+
+            var tagMap = tagData
+                .GroupBy(m => m.AttractionId)
+                .ToDictionary(g => g.Key, g => g.Select(m => m.AttractionTypeId).ToList());
+
+            var rng = new Random();
+
+            var result = candidates
+                .Select(a =>
+                {
+                    var tags = tagMap.ContainsKey(a.AttractionId) ? tagMap[a.AttractionId] : new List<int>();
+                    int overlap = tags.Count(t => currentTags.Contains(t));
+                    var cheapestProduct = a.AttractionProducts
+                        .OrderBy(p => p.Price)
+                        .FirstOrDefault();
+                    return new
+                    {
+                        a.AttractionId,
+                        a.Name,
+                        a.ViewCount,
+                        MainImage = a.Images.Select(i => i.ImagePath).FirstOrDefault(),
+                        TicketTitle = cheapestProduct?.Title,
+                        TicketPrice = cheapestProduct?.Price,
+                        OriginalPrice = cheapestProduct?.OriginalPrice,
+                        TicketTypeName = cheapestProduct?.TicketTypeCodeNavigation?.TicketTypeName,
+                        OverlapCount = overlap,
+                        SortRandom = rng.Next()
+                    };
+                })
+                .OrderByDescending(x => x.OverlapCount)
+                .ThenByDescending(x => x.ViewCount)
+                .ThenBy(x => x.SortRandom)
+                .Take(top)
+                .ToList();
+
+            return Ok(result);
         }
     }
     // ────────────────────────────────────────────

@@ -42,6 +42,7 @@
         </div>
 
         <!-- 右：票種 badge + 價格 + 展開按鈕 -->
+        <!-- 右側：把這整段 ts-card__right 換掉 -->
         <div class="ts-card__right">
           <span class="ts-type-badge">{{ p.ticketTypeName || '一般票' }}</span>
           <div class="ts-card__price-wrap">
@@ -50,6 +51,15 @@
               NT$ {{ p.originalPrice | number }}
             </span>
           </div>
+          <!-- ❤️ 愛心收藏按鈕 -->
+          <button class="ts-fav-btn" [class.ts-fav-btn--active]="isFavorited(p.productId)"
+            [class.ts-fav-btn--anim-add]="getFavAnim(p.productId) === 'add'"
+            [class.ts-fav-btn--anim-remove]="getFavAnim(p.productId) === 'remove'" (click)="toggleFavorite(p, $event)"
+            [title]="isFavorited(p.productId) ? '取消收藏' : '加入收藏'">
+            <i class="fa" [class.fa-heart]="isFavorited(p.productId)"
+              [class.fa-heart-broken]="getFavAnim(p.productId) === 'remove'"
+              [class.fa-heart-o]="!isFavorited(p.productId) && getFavAnim(p.productId) !== 'remove'"></i>
+          </button>
           <button class="ts-expand-btn" [class.ts-expand-btn--open]="isExpanded(p.productId)">
             {{ isExpanded(p.productId) ? '∧' : '∨' }}
           </button>
@@ -71,7 +81,7 @@
           此票種已售完
         </div>
 
-       <!-- 數量選擇 -->
+        <!-- 數量選擇 -->
         <div class="ts-qty-section" *ngIf="!isSoldOut(p.productCode)">
           <div class="ts-sub-title">選擇數量</div>
           <div class="ts-qty-row">
@@ -101,6 +111,7 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ -->
 <!-- ══════════════════════════════════════════════════ -->
 <!-- 方案詳情側邊面板 Drawer -->
 <!-- ══════════════════════════════════════════════════ -->
@@ -160,6 +171,12 @@
     </div>
     <hr class="ts-divider"
       *ngIf="drawerDetail.detail?.includes || drawerDetail.detail?.excludes || drawerDetail.detail?.eligibility">
+
+    <!-- 活動亮點 -->
+    <div class="ts-drawer__section" *ngIf="drawerDetail.detail?.contentDetails">
+      <h5 class="ts-drawer__section-title">活動亮點</h5>
+      <p class="ts-drawer__text">{{ drawerDetail.detail?.contentDetails }}</p>
+    </div>
 
     <!-- 方案詳情 -->
     <div class="ts-drawer__section"

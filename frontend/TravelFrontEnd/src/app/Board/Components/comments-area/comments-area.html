@@ -1,9 +1,9 @@
 <!-- 留言區在這 -->
 <div class="comments-area">
-  <h4>{{commentList.length}}條留言</h4>
+  <h4>{{commentCount}}條留言</h4>
   @for (comment of commentList; track $index) {
   <div class="comment-list">
-    <div class="single-comment justify-content-between d-flex">
+    <div class="single-comment justify-content-between d-flex" style="position: relative;">
       <div class="user justify-content-between d-flex">
         <div class="thumb">
           <img [src]="comment.avatarUrl" class="avatar">
@@ -19,14 +19,29 @@
           }
         </div>
       </div>
-      <div class="reply-btn">
-        <a (click)="setParent(comment.commentId,comment.authorName,comment.contents)"
-          class="btn-reply text-uppercase">回覆</a>
+      <div class="btn-comment-group">
+        <button data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-fill"></i></button>
+        <button (click)="setParent(comment.commentId,comment.authorName,comment.contents)"><i
+            class="ri-reply-line"></i></button>
+        <button><i class="bi bi-hand-thumbs-up"></i></button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="#">分享留言</a></li>
+          <li><a class="dropdown-item" href="#">複製留言</a></li>
+          @if(true){
+          <li><a class="dropdown-item" (click)="deleteComment(comment.commentId)">刪除</a></li>
+          }
+          @else {
+          <li><a class="dropdown-item">檢舉</a></li>
+          }
+        </ul>
       </div>
     </div>
   </div>
+
+
+  <!-- 子留言 -->
   @for (reply of comment.replyComments; track $index) {
-  <div class="comment-list left-padding">
+  <div class="comment-list left-padding" style="position: relative;">
     <div class="single-comment justify-content-between d-flex">
       <div class="user justify-content-between d-flex">
         <div class="thumb">
@@ -40,8 +55,9 @@
           </p>
         </div>
       </div>
-      <div class="reply-btn">
-        <!-- <a href="" class="btn-reply text-uppercase">reply</a> -->
+      <div class="btn-comment-group">
+        <button><i class="ri-more-2-fill"></i></button>
+        <button><i class="bi bi-hand-thumbs-up"></i></button>
       </div>
     </div>
   </div>

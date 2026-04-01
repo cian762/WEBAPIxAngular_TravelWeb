@@ -466,3 +466,248 @@
   margin-top: 8px;
   padding-left: 2px;
 }
+
+/* 周邊資訊 */
+.nearby-empty {
+  padding: 40px 0;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.nearby-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+@media (max-width: 992px) {
+  .nearby-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .nearby-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.nearby-card {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+}
+
+.nearby-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
+.nearby-card__img-wrap {
+  position: relative;
+  padding-top: 65%;
+  overflow: hidden;
+  background: #eee;
+}
+
+.nearby-card__img-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.nearby-card:hover .nearby-card__img-wrap img {
+  transform: scale(1.06);
+}
+
+.nearby-card__body {
+  padding: 10px 12px 12px;
+}
+
+.nearby-card__name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-card__addr {
+  font-size: 0.75rem;
+  color: #999;
+  margin: 0 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-card__dist {
+  font-size: 0.78rem;
+  color: #e84611;
+  font-weight: 600;
+}
+
+/* ══ 相關票券推薦 ══════════════════════════════════════ */
+.ts-related {
+  margin-top: 56px;
+  padding-top: 36px;
+  border-top: 1px solid #eee;
+}
+
+.ts-related__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.ts-section-bar {
+  width: 4px;
+  height: 22px;
+  background: #e84611;
+  border-radius: 2px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.ts-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* 橫向滾動容器 */
+.ts-related__scroll-wrap {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #ddd transparent;
+  padding-bottom: 8px;
+}
+
+.ts-related__scroll-wrap::-webkit-scrollbar {
+  height: 4px;
+}
+
+.ts-related__scroll-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ts-related__scroll-wrap::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 2px;
+}
+
+/* 卡片排成一列 */
+.ts-related__track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+}
+
+/* 單張卡片 */
+.ts-related__card {
+  width: 220px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  background: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ts-related__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+/* 圖片區 */
+.ts-related__img-wrap {
+  position: relative;
+  padding-top: 65%;
+  background: #eee;
+  overflow: hidden;
+}
+
+.ts-related__img-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.ts-related__card:hover .ts-related__img-wrap img {
+  transform: scale(1.06);
+}
+
+/* 票種 badge */
+.ts-related__type-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(30, 30, 30, 0.72);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+/* 文字區 */
+.ts-related__body {
+  padding: 10px 12px 14px;
+}
+
+.ts-related__attraction {
+  font-size: 0.75rem;
+  color: #999;
+  margin: 0 0 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-related__ticket {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  min-height: 2.5em;
+}
+
+.ts-related__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.ts-related__price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e84611;
+}
+
+.ts-related__original {
+  font-size: 0.78rem;
+  color: #bbb;
+  text-decoration: line-through;
+}

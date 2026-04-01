@@ -1,0 +1,119 @@
+/* reusable cards */
+.card-scroll {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.travel-card,
+.article-card,
+.product-card,
+.package-card,
+.service-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.travel-card__image,
+.article-card__image,
+.product-card__image,
+.package-card__image {
+  position: relative;
+}
+
+.travel-card__image img,
+.article-card__image img,
+.product-card__image img,
+.package-card__image img {
+  height: 220px;
+  width: 100%;
+  object-fit: fill;
+}
+
+.badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.badge--favorite {
+  background: rgba(255, 255, 255, 0.92);
+  color: #ef4444;
+}
+
+.badge--hot {
+  background: #fff4e6;
+  color: #ea580c;
+}
+
+.travel-card__body,
+.article-card__body,
+.product-card__body,
+.package-card__body {
+  padding: 20px;
+}
+
+.travel-card__meta,
+.product-card__location,
+.package-card__days,
+.article-card__tag {
+  margin-bottom: 8px;
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.travel-card h3,
+.article-card h3,
+.product-card h3,
+.package-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.travel-card p,
+.article-card p,
+.product-card p,
+.package-card p {
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+.article-card__footer,
+.product-card__footer,
+.package-card__footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.score {
+  font-weight: 800;
+  color: #f59e0b;
+}
+
+.price {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.pointer {
+  cursor: pointer;
+}

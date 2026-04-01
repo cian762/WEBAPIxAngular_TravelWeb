@@ -24,7 +24,8 @@ namespace TravelWeb_API.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            string myMemberCode = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? myMemberCode = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (myMemberCode == null) return Unauthorized(new { message = "登入狀態異常" });
 
             var myInfo = await _context.MemberInformations
                 .Include(m => m.Followeds)

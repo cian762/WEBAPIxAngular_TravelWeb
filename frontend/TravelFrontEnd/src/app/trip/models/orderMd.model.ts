@@ -12,6 +12,7 @@ export interface AddToCartDto {
   productCode: string;
   quantity: number;
   ticketCategoryId: number;
+  targetId?: number;
 }
 /** 預覽訂單時後端回傳的格式 (OrderDetailDto) */
 export interface OrderDetailDto {

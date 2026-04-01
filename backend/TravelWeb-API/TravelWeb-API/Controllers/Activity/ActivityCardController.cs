@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq;
@@ -16,10 +17,13 @@ namespace TravelWeb_API.Controllers.Activity
     public class ActivityCardController : ControllerBase
     {
         private readonly ActivityCardService _infoService;
+        private readonly ActivityCardForIndexService _indexService;
+        
 
-        public ActivityCardController(ActivityCardService infoService)
+        public ActivityCardController(ActivityCardService infoService, ActivityCardForIndexService indexService)
         {
             _infoService = infoService;
+            _indexService = indexService;
         }
 
 
@@ -43,6 +47,15 @@ namespace TravelWeb_API.Controllers.Activity
             return Ok(result);
         }
 
+
+        [HttpGet("ShowIndex")]
+        //拉取要送去首頁的推薦
+        public async Task<ActionResult> SendCardToIndex() 
+        {
+            var result = await _indexService.SendActivityToIndex();
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
 
 
 

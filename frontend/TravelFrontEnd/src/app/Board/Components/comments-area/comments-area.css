@@ -30,6 +30,51 @@
 }
 
 
+/* ===留言回復操作按鈕樣式=== */
+.btn-comment-group {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  margin: 20px auto;
+  width: fit-content;
+  height: 40px;
+}
+
+.btn-comment-group button {
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  text-decoration: none;
+  background-color: #ffffff;
+  color: #f8b600;
+  padding: 8px 10px;
+}
+
+.btn-comment-group button:first-of-type {
+  border-radius: 3px 0 0 3px;
+  margin-right: -1px !important;
+  border: 0.8px solid #f8b600;
+  border-right: none;
+}
+
+.btn-comment-group button:not(:first-of-type):not(:last-of-type) {
+  border-radius: 0;
+  border: 0.8px solid #f8b600;
+}
+
+.btn-comment-group button:last-of-type {
+  border-radius: 0 3px 3px 0;
+  border: 0.8px solid #f8b600;
+  border-left: none;
+}
+
+.btn-comment-group button:hover {
+  border: 0.8px solid #f8b600;
+  background-color: #f8b600;
+  color: #ffffff;
+}
 
 /* === 留言附圖漂浮框 === */
 .preview-wrapper {

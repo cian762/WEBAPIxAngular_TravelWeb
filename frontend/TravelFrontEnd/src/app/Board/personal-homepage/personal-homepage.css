@@ -1,6 +1,36 @@
+.my-container {
+  width: 100%;
+  max-width: 800px;
+  /* 最大寬度，可自訂 */
+  margin: 0 auto;
+  /* 左右自動，置中 */
+  padding: 0 16px;
+  /* 左右留點內距，避免貼邊 */
+}
+
+/* ===========以下為more按鈕之樣式=========== */
+.btn-more {
+  background-color: transparent;
+  border: 0.8px solid transparent;
+  /* border-radius: 6px; */
+}
+
+.btn-more:hover {
+  color: #f8b600;
+  border-color: #f8b600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+
+
+
+
+
 .host-body {
-  background-color: #f9f9ff;
+  background-color: #ffffff;
   padding-top: 50px;
+  padding-bottom: 0px;
 }
 
 .user-avatar {
@@ -127,4 +157,76 @@
 .reaction-item:hover,
 .reaction-item.liked {
   color: #e8a838;
+}
+
+
+
+/* ====== 導覽籤 ====== */
+.nav-tabs {
+  border-bottom: none;
+  overflow: hidden;
+  padding-top: 6px;
+  padding-left: 4px;
+}
+
+.nav-tabs .nav-link {
+  background-color: transparent !important;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  font-size: 14px;
+  font-weight: 300;
+  padding: 12px 32px;
+  margin-right: 4px;
+  color: #888;
+  transition: all 0.2s;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #f9f9ff !important;
+  color: #38a4ff;
+  font-weight: 350;
+  box-shadow: 2px -2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+  box-shadow: 2px -2px 6px rgba(0, 0, 0, 0.1);
+  color: #555;
+}
+
+.tab-content {
+  background-color: #f9f9ff;
+  border-radius: 0 8px 8px 8px;
+  padding: 20px;
+}
+
+
+
+/* ===========以下為Tag按鈕之樣式=========== */
+.tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.tag-btn {
+  display: inline-block;
+  background-color: white;
+  color: #4cd3e3;
+  border: 0.8px solid #4cd3e3;
+  border-radius: 20px;
+  padding: 2px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.tag-btn:hover {
+  background-color: #4cd3e3;
+  color: #fff;
+  border-color: #4cd3e3;
 }

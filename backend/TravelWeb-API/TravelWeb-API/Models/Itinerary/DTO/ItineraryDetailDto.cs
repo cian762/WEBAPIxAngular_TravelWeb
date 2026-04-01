@@ -9,6 +9,7 @@
         public DateTime? EndTime { get; set; }
         public string? Introduction { get; set; }
         public string MemberId { get; set; }
+        public int VersionId { get; set; }
 
         // 核心：包含當前使用的版本資訊
         public VersionDto? CurrentVersion { get; set; }
@@ -26,6 +27,7 @@
     public class ItemDetailDto
     {
         public int ItemId { get; set; }
+
         public int SortOrder { get; set; }
         public int DayNumber { get; set; }
         public string? ContentDescription { get; set; }

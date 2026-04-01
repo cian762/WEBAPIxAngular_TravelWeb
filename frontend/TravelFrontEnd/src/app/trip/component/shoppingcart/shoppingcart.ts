@@ -6,6 +6,7 @@ import { CreateShoppingCart } from '../../services/create-shopping-cart';
 import { CartItem } from '../../models/creatshopping.model';
 import { AttractionService } from '../../../Components/attractions/attraction.service';
 import { forkJoin } from 'rxjs';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-shoppingcart',
@@ -33,64 +34,90 @@ export class Shoppingcart implements OnInit {
   fetchCartData() {
     this.isLoading = true;
 
-    // 直接呼叫 Service，它會自動回傳「會員 API 資料」或「遊客 Local 資料」
+    // 💡 直接呼叫 Service，後端已經把所有 ID (TargetId) 準備好了
     this.cartService.getCart().subscribe({
       next: (data: CartItem[]) => {
-        // 找出缺少 attractionId 的項目（登入後從 API 來的資料）
-        const needsEnrich = data.filter((item: CartItem) => !item.attractionId);
-
-        if (needsEnrich.length === 0) {
-          // 全部資料都齊全（遊客模式），直接顯示
-          this.cartItems = data;
-          this.calculateTotal();
-          this.isLoading = false;
-        } else {
-          // 批次補查缺少的欄位（平行發出，不會一個等一個）
-          const queries = needsEnrich.map((item: CartItem) =>
-            this.attractionSvc.getProductByCode(item.productCode)
-          );
-          forkJoin(queries).subscribe((results: any[]) => {
-            results.forEach((res: any, idx: number) => {
-              if (res) {
-                needsEnrich[idx].attractionId   = res.attractionId;
-                needsEnrich[idx].attractionName = res.attractionName ?? '';
-                needsEnrich[idx].tags           = res.tags ?? [];
-              }
-            });
-            this.cartItems = data;
-            this.calculateTotal();
-            this.isLoading = false;
-          });
-        }
+        this.cartItems = data;
+        this.calculateTotal();
+        this.isLoading = false;
       },
       error: (err: any) => {
         console.error('讀取購物車失敗', err);
         this.isLoading = false;
+        Swal.fire('錯誤', '無法取得購物車資料', 'error');
       }
     });
   }
 
   // 2. 刪除購物車項目
-  delectCart(cartId: number, productCode: string) {
-    if (!confirm('確定要刪除此商品嗎？')) return;
+  delectCart(cartIds: number, productCode: string) {
+    Swal.fire({
+      title: '確定要刪除嗎？',
+      text: "刪除後將無法恢復此商品！",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '是的，刪除它！',
+      cancelButtonText: '取消'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 顯示載入中
+        Swal.showLoading();
 
-    // 同樣交給 Service 處理判斷邏輯
-    // 傳入 cartId (後端用) 和 productCode (遊客模式用)
-    this.cartService.removeItems([cartId], [productCode]).subscribe({
+        this.cartService.removeItems([cartIds], [productCode]).subscribe({
+          next: () => {
+            this.fetchCartData();
+            Swal.fire('已刪除！', '商品已從購物車移除。', 'success');
+          },
+          error: (err: any) => {
+            Swal.fire('錯誤', '刪除失敗: ' + err.message, 'error');
+          }
+        });
+      }
+    });
+  }
+  // 3. 更換票種直接先刪除
+  // 3. 更換票種 (優化版：合併處理邏輯)
+  ItemSwitch(cartIds: number, productCode: string) {
+    // 這裡建議不要用 confirm，因為 goEdit 已經點擊了，通常代表 user 確定要改
+    // 如果一定要提示，建議用輕量一點的提示
+    this.cartService.removeItems([cartIds], [productCode]).subscribe({
       next: () => {
-        // 刪除成功後，畫面直接重新拉取一次資料即可 (或者手動 filter)
         this.fetchCartData();
       },
-      error: (err: any) => alert('刪除失敗: ' + err.message)
+      error: (err: any) => console.error('更換票種時移除舊項目失敗', err)
     });
   }
 
   // 3. 更新數量 (如果你畫面上有 + / - 按鈕)
+  // 3. 更新數量 (增加錯誤處理的彈窗)
   changeQuantity(item: CartItem, newQty: number) {
     if (newQty < 1) return;
 
+    const oldQty = item.quantity;
+    item.quantity = newQty;
+    this.calculateTotal();
+
     this.cartService.updateQuantity(item.cartId, newQty, item.productCode).subscribe({
-      next: () => this.fetchCartData()
+      next: (res: any) => {
+        if (res && res.confirmedQuantity) {
+          item.quantity = res.confirmedQuantity;
+          this.calculateTotal();
+        }
+      },
+      error: (err) => {
+        // 回滾數量
+        item.quantity = oldQty;
+        this.calculateTotal();
+        Swal.fire({
+          icon: 'error',
+          title: '更新失敗',
+          text: err.error?.message || '庫存不足或系統錯誤',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
     });
   }
   //購物車打包給訂單用
@@ -105,7 +132,8 @@ export class Shoppingcart implements OnInit {
         ticketCategoryId: item.ticketCategoryId,
         price: item.price,
         cartId: item.cartId, // 這是為了之後刪除用的
-        coverImage: item.coverImage // 讓訂單頁能顯示圖片
+        coverImage: item.coverImage, // 讓訂單頁能顯示圖片
+        targetId: item.targetId
       }))
     };
     console.log('準備帶走的資料:', checkoutPayload);
@@ -115,16 +143,33 @@ export class Shoppingcart implements OnInit {
 
   // 編輯：導回景點詳情頁售票區
   goEdit(item: CartItem) {
-    if (item.attractionId) {
-      this.router.navigate(
-        ['/attractions/detail', item.attractionId],
-        { queryParams: { tab: 'tickets' } }
-      );
-    } else {
-      this.router.navigate(['/attractions']);
-    }
-  }
+    Swal.fire({
+      title: '重新選擇',
+      text: '將為您跳轉至頁面，原選擇將先移除',
+      icon: 'info',
+      showCancelButton: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.cartService.removeItems([item.cartId], [item.productCode]).subscribe({
+          next: () => {
+            // 刪除成功後再導航
+            const id = item.targetId;
+            const code = item.productCode || '';
 
+            if (code.startsWith('TKT-')) {
+              this.router.navigate(['/attractions/detail', id], { queryParams: { tab: 'tickets' } });
+            } else if (code.startsWith('TP')) {
+              this.router.navigate(['/trip-detail', id]);
+            } else if (code.startsWith('ACT-')) {
+              this.router.navigate(['/ActivityInfo', id]);
+            } else {
+              this.router.navigate(['/attractions']);
+            }
+          }
+        });
+      }
+    });
+  }
   // 4. 計算總價
   calculateTotal() {
     this.totalAmount = this.cartItems.reduce(

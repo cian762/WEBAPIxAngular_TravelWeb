@@ -9,10 +9,12 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
     {
         private readonly TripDbContext _trip;
         private readonly string _mvcBaseUrl;
-        public TripproductTable(TripDbContext trip, IConfiguration config)
+        private readonly string _mvchung;
+        public TripproductTable(TripDbContext trip, IConfiguration config, IConfiguration config2)
         {
             _trip = trip;
             _mvcBaseUrl = config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
+            _mvchung = config2["AppSettings:Mvchung"]?? "";
 
         }
 
@@ -90,7 +92,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     TripProductId = x.p.TripProductId,
                     ProductName = x.p.ProductName,
-                    CoverImage = _mvcBaseUrl + "/PImages/" + x.p.CoverImage,
+                    CoverImage = _mvchung+x.p.CoverImage,
                     DisplayPrice = x.p.DisplayPrice,
                     RegionName = x.r.RegionName, // 這裡從 Join 的 r 拿名稱
                     DurationDays = x.p.DurationDays
@@ -109,7 +111,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     TripProductId = p.TripProductId,
                     ProductName = p.ProductName,
-                    CoverImage = _mvcBaseUrl + "/PImages/" + p.CoverImage,
+                    CoverImage = _mvchung + p.CoverImage,
                     DisplayPrice = p.DisplayPrice,
                     RegionName = p.Region != null ? p.Region.RegionName : "",
                     DurationDays = p.DurationDays,
@@ -127,7 +129,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
             {
                 TripProductId = s.TripProductId,
                 ProductName = s.ProductName!,
-                CoverImage = _mvcBaseUrl + "/PImages/" + s.CoverImage,
+                CoverImage = _mvchung + s.CoverImage,
                 Description = s.Description,
                 RegionName = s.Region != null ? s.Region.RegionName : "未分類",
                 Tags = s.TravelTags!
@@ -158,7 +160,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
              // 核心邏輯：去 ResourcesImage 表抓出所有屬於該 ResourceId 的圖片
              ResourceUrls = i.Resource != null
                 ? i.Resource.ResourcesImages
-                    .Select(img => _mvcBaseUrl+ img.MainImage)
+                    .Select(img => _mvcBaseUrl + img.MainImage)
                     .ToList()
                 : new List<string>()
          })

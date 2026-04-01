@@ -1,3 +1,76 @@
+.host-body {
+  background-color: #f9f9ff;
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+/* ===追蹤按鈕樣式=== */
+.btn-user-group {
+  display: flex;
+  margin: 20px auto;
+  width: fit-content;
+}
+
+.btn-user-group button {
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 16px;
+}
+
+.btn-user-group button:first-child {
+  border-radius: 3px 0 0 3px;
+}
+
+.btn-user-group button:last-child {
+  border-radius: 0 3px 3px 0;
+}
+
+.btn-follow {
+  display: block;
+  padding: 8px 35px;
+  text-decoration: none;
+  border-right: none !important;
+  margin-right: -1px !important;
+  border: 0.8px solid #f8b600;
+}
+
+.btn-following {
+  background-color: #ffffff;
+  color: #f8b600;
+
+}
+
+.btn-unfollow {
+  background-color: #f8b600;
+  color: #ffffff;
+
+}
+
+.btn-following:hover {
+  background-color: #f8b600;
+  color: #ffffff;
+  border: 0.8px solid #ffffff;
+}
+
+.btn-unfollow:hover {
+  background-color: #ffffff;
+  color: #f8b600;
+  border: 0.8px solid #f8b600;
+}
+
+.btn-user-more {
+  padding: 8px 10px;
+  background-color: #ffffff;
+  color: #f8b600;
+  border: 0.8px solid #f8b600;
+
+}
+
+
+
+
+/* ===實驗BLOG=== */
 .img-wrapper-full {
   display: block;
   width: 100%;

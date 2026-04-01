@@ -45,6 +45,10 @@ export class BoardServe {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByAll?page=${page}&Keyword=10000006&StartTime=2026-02-21&EndTime=2026-02-28&AuthorId=${authorId}&TagIds=6`)
   }
 
+  getArticleByCollect(page: number, authorId?: string) {
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/articlesByCollect?page=1`)
+  }
+
   getArticleDetailAPI(para: number) {
     return this.http.get<PostDetailDto>(`${this.apiUrl}/Post/${para}`);
   }
@@ -83,6 +87,11 @@ export class BoardServe {
       `${this.apiUrl}/Board/Articles/Like?articleID=${articleId}`, null)
   }
 
+  postArticleCollect(articleId: number) {
+    return this.http.post(
+      `${this.apiUrl}/Board/Articles/Collect?articleID=${articleId}`, null)
+  }
+
   putPostAPI(id: number, para: any) {
     return this.http.put(
       `${this.apiUrl}/Post/${id}`, para);
@@ -99,8 +108,31 @@ export class BoardServe {
     return this.http.get(`${this.apiUrl}/Board/Articles/authorUser?userId=${para}`)
   }
 
+  deleteArticle(id: number) {
+    return this.http.delete(`${this.apiUrl}/Board/Articles/${id}`)
+  }
 
+  postFollow(id: string) {
+    return this.http.post(`${this.apiUrl}/Follow/toggle`, {
+      "followedId": id
+    })
+  }
 
+  getIsFollowing(id: string) {
+    return this.http.get<boolean>(`${this.apiUrl}/Board/ArticlePermissions/isFollowing?followedId=${id}`
+    )
+  }
+
+  postBlock(id: string) {
+    return this.http.post(`${this.apiUrl}/Block/toggle`, {
+      "blockedId": id,
+      "reason": null
+    })
+  }
+
+  deleteComment(id: number) {
+    return this.http.delete(`${this.apiUrl}/Board/Comments/DeleteComment?commentID=${id}`)
+  }
 }
 
 

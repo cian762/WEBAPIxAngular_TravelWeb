@@ -13,11 +13,12 @@ namespace TravelWeb_API.Controllers
     public class ItineraryController : ControllerBase
     {
         private readonly IItineraryservice _itineraryService;
+        private readonly IItineraryAnalysisService _analysisService;
 
-        public ItineraryController(IItineraryservice itineraryService)
+        public ItineraryController(IItineraryservice itineraryService, IItineraryAnalysisService itineraryAnalysisService)
         {
             _itineraryService = itineraryService;
-
+            _analysisService = itineraryAnalysisService;
         }
         //GET透過行程ID取得行程資訊
         [HttpGet("{id}")]
@@ -102,6 +103,18 @@ namespace TravelWeb_API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        //PATCH修改行程介紹
+        [HttpPatch("{id}/description")]
+        public async Task<IActionResult> UpdateDescription(int id, [FromBody] UpdateDescriptionDto dto)
+        {
+            if (id <= 0) return BadRequest("無效的行程識別碼");
+
+            var result = await _itineraryService.UpdateItineraryDescriptionAsync(id, dto.Introduction);
+
+            if (!result) return NotFound("找不到該行程或更新失敗");
+
+            return Ok(new { message = "更新成功" });
+        }
         //POST修改行程，基於版本表與多個行程細項清單
         [HttpPost("{id}/save-snapshot")]
         public async Task<IActionResult> SaveItinerarySnapshot([FromBody] ItinerarySnapshotDto dto)
@@ -147,7 +160,12 @@ namespace TravelWeb_API.Controllers
             }
             return Ok(new { url = imageUrl });
         }
-
+        [HttpPost("report")]
+        public async Task<IActionResult> PostError([FromBody] ErrorReportDto dto)
+        {
+            var result = await _itineraryService.CreateErrorReportAsync(dto);
+            return result ? Ok() : BadRequest("提交失敗");
+        }
         // GET 基於版本找該版本的所有ITEM
         [HttpGet("{VerId}/item")]
         public async Task<IActionResult> GetitembyVer(int VerId)
@@ -175,7 +193,6 @@ namespace TravelWeb_API.Controllers
                 return NotFound(new { message = $"找不到編號為 {id} 的行程" });
             }
 
-            // 刪除成功，RESTful 慣例回傳 204
             return NoContent();
         }
         //輸出PDF
@@ -193,5 +210,42 @@ namespace TravelWeb_API.Controllers
             if (result == null) return NotFound();
             return Ok(result);
         }
+        #region 分析相關
+        // GET api/itineraries/5/versions
+        [HttpGet("{itineraryId}/versions")]
+        public async Task<ActionResult<List<VersionSummaryDto>>> GetVersionList(int itineraryId)
+            => Ok(await _analysisService.GetVersionListAsync(itineraryId));
+
+        // GET api/itineraries/5/versions/3/analysis
+        [HttpGet("{itineraryId}/versions/{versionId:int}/analysis")]
+        public async Task<ActionResult<AnalysisMetricsDto>> GetAnalysis(
+            int itineraryId, int versionId)
+        {
+            if (versionId <= 0)
+                return BadRequest(new { message = "versionId 無效" });
+
+            var result = await _analysisService.GetOrCreateAnalysisAsync(itineraryId, versionId);
+            return Ok(result);
+        }
+
+        // GET api/itineraries/5/versions/compare?versionA=2&versionB=4
+        [HttpGet("{itineraryId}/versions/compare")]
+        public async Task<ActionResult<VersionCompareResponseDto>> Compare(
+            int itineraryId,
+            [FromQuery] int versionA,
+            [FromQuery] int versionB)
+        {
+            try
+            {
+                if (versionA == versionB)
+                    return BadRequest(new { message = "請選擇不同的兩個版本" });
+                return Ok(await _analysisService.CompareVersionsAsync(itineraryId, versionA, versionB));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message, inner = ex.InnerException?.Message });
+            }
+        }
+        #endregion
     }
 }
