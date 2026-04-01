@@ -4,22 +4,18 @@
 
       <div class="card shadow-lg border-0 rounded-4 mt-5">
 
-        <!-- 卡片標題 -->
         <div class="card-header text-white text-center py-4 border-0 rounded-top-4" style="background-color: #5b73e8;">
           <h3 class="mb-0 fw-bold"><i class="bi bi-box-arrow-in-right"></i> 會員登入</h3>
         </div>
 
         <div class="card-body p-4 p-md-5">
 
-          <!-- 錯誤訊息提示 -->
           <div *ngIf="errorMessage" class="alert alert-danger rounded-3 fw-bold shadow-sm">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
           </div>
 
-          <!-- 登入表單 -->
           <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
 
-            <!-- 帳號輸入框 -->
             <div class="mb-4">
               <label class="form-label fw-bold text-secondary">帳號 (Email 或 代碼)</label>
               <div class="input-group shadow-sm">
@@ -29,7 +25,6 @@
               </div>
             </div>
 
-            <!-- 密碼輸入框 -->
             <div class="mb-3">
               <label class="form-label fw-bold text-secondary">密碼</label>
               <div class="input-group shadow-sm">
@@ -39,21 +34,18 @@
               </div>
             </div>
 
-            <!-- 忘記密碼連結 (靠右對齊) -->
             <div class="text-end mb-4">
               <a href="javascript:void(0)" (click)="toggleForgotModal(true)" class="text-decoration-none small fw-bold" style="color: #5b73e8;">
                 <i class="bi bi-key me-1"></i>忘記密碼？
               </a>
             </div>
 
-            <!-- 立即登入按鈕 (主要按鈕) -->
             <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm fw-bold mb-4"
               [disabled]="isLoading || loginForm.invalid" style="background-color: #5b73e8; border-color: #5b73e8;">
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
               {{ isLoading ? '登入中...' : '立即登入' }}
             </button>
 
-            <!-- 分隔線與註冊按鈕 -->
             <div class="text-center pt-3 border-top">
               <span class="text-muted d-block mb-3 small">還沒有 Travelista 帳號嗎？</span>
 
@@ -71,21 +63,15 @@
   </div>
 </div>
 
-<!-- ========================================== -->
-<!-- 🔥 新增：忘記密碼彈出視窗 (Modal) -->
-<!-- ========================================== -->
 <div class="modal fade show d-block" tabindex="-1" *ngIf="showForgotModal" style="background-color: rgba(0,0,0,0.6); z-index: 1050;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4">
 
-      <!-- 視窗標題 -->
       <div class="modal-header border-0 text-white rounded-top-4 py-3" style="background-color: #5b73e8;">
         <h5 class="modal-title fw-bold"><i class="bi bi-envelope-check me-2"></i>重設密碼</h5>
-        <!-- 點擊叉叉關閉視窗 -->
         <button type="button" class="btn-close btn-close-white" (click)="toggleForgotModal(false)"></button>
       </div>
 
-      <!-- 視窗內容 -->
       <div class="modal-body p-4">
         <p class="text-muted small mb-4">請輸入您註冊時使用的 <strong>Email 信箱</strong> 或 <strong>會員代碼 (MemberCode)</strong>，我們將寄送一封包含「4 位數驗證碼」與「重設密碼連結」的信件給您。</p>
 
@@ -98,12 +84,25 @@
         </div>
       </div>
 
-      <!-- 視窗底部按鈕 -->
       <div class="modal-footer border-0 pb-4 pe-4 bg-light rounded-bottom-4">
-        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="toggleForgotModal(false)" [disabled]="isSendingEmail">取消</button>
-        <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="onForgotPassword()" [disabled]="isSendingEmail" style="background-color: #5b73e8; border-color: #5b73e8;">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
+                (click)="toggleForgotModal(false)">取消</button>
+
+        <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+                (click)="onForgotPassword()"
+                [disabled]="isSendingEmail || countdownTime > 0"
+                style="background-color: #5b73e8; border-color: #5b73e8;">
+
           <span *ngIf="isSendingEmail" class="spinner-border spinner-border-sm me-2"></span>
-          {{ isSendingEmail ? '信件發送中...' : '發送驗證信' }}
+
+          <ng-container *ngIf="countdownTime > 0">
+            請等待 {{ countdownTime }} 秒後重試
+          </ng-container>
+
+          <ng-container *ngIf="countdownTime <= 0">
+            {{ isSendingEmail ? '信件發送中...' : '發送驗證信' }}
+          </ng-container>
+
         </button>
       </div>
 
