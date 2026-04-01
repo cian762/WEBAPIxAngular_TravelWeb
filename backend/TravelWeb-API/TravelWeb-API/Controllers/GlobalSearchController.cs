@@ -30,7 +30,7 @@ namespace TravelWeb_API.Controllers
                 .ToListAsync();
 
             // 從 appsettings.json 讀取路徑
-            string mvcDomain = _config["AppSettings:MvcDomain"]!; 
+            string mvcDomain = _config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
             string mvchung = _config["AppSettings:Mvchung"]!;     
 
             foreach (var item in results)
