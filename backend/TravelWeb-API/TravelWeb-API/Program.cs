@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using QuestPDF.Infrastructure;
 using System.Text;
+using TravelWeb_API.Models;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
@@ -141,6 +142,9 @@ builder.Services.AddSwaggerGen(
         });
     }
     );
+//首頁用連線
+builder.Services.AddDbContext<GlobalSearchContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 builder.Services.AddDbContext<AttractionsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
