@@ -31,7 +31,7 @@
                        [ngClass]="{ 'is-invalid': f['email'].touched && f['email'].invalid }">
 
                 <!-- 發送按鈕 (倒數計時中或已驗證時停用) -->
-                <button type="button" class="btn btn-outline-primary fw-bold px-4"
+              <button type="button" class="btn btn-outline-primary fw-bold px-4"
                         (click)="sendCode()"
                         [disabled]="isSendingCode || countdown > 0 || isEmailVerified || f['email'].invalid">
 
@@ -40,8 +40,10 @@
 
                   <!-- 顯示文字邏輯 -->
                   <ng-container *ngIf="!isEmailVerified">
+                    <!-- 如果還在倒數，就顯示秒數；否則看是不是正在發送 -->
                     {{ countdown > 0 ? countdown + 's 後重試' : (isSendingCode ? '發送中...' : '發送驗證碼') }}
                   </ng-container>
+
                   <ng-container *ngIf="isEmailVerified">已驗證</ng-container>
 
                 </button>

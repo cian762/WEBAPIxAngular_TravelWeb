@@ -22,7 +22,6 @@ export class RegisterComponent implements OnInit {
   isVerifyingCode: boolean = false;
   countdown: number = 0;
   verificationCodeInput: string = '';
-  // ==========================================
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -65,36 +64,69 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  // ==========================================
+  // 🔥 新增：發送驗證碼邏輯 (含防連點防護)
+  // ==========================================
   sendCode(): void {
     const emailControl = this.registerForm.get('email');
+
+    // 1. 防呆：信箱格式不對，不給寄
     if (!emailControl || emailControl.invalid) {
       alert('請先輸入正確格式的 Email！');
       emailControl?.markAsTouched();
       return;
     }
 
+    // 🚨 2. 終極防護：如果還在倒數 60 秒內，或是正在寄信中，絕對不允許執行！
+    if (this.countdown > 0 || this.isSendingCode) {
+      return;
+    }
+
     this.isSendingCode = true;
     this.errorMessage = '';
 
+    // 3. 呼叫後端 API 寄信
     this.authService.sendVerificationCode(emailControl.value).subscribe({
       next: (res) => {
         this.isSendingCode = false;
+
+        // 🔥 寄信成功！立刻啟動 60 秒倒數計時防連點
+        this.startCountdown(60);
+
         alert(res.message || '驗證碼已寄出，請前往信箱查看！');
-        this.startCountdown();
       },
       error: (err) => {
         this.isSendingCode = false;
         this.errorMessage = err.error?.message || '寄信失敗，請稍後再試';
+
+        // 💡 實務技巧：如果寄信失敗 (例如信箱重複)，不要鎖死按鈕，讓他改完可以立刻重試
+        this.countdown = 0;
       }
     });
   }
 
-  private startCountdown(): void {
-    this.countdown = 60;
-    const interval = setInterval(() => {
-      this.countdown--;
+  // ==========================================
+  // ⏱️ 倒數計時器核心邏輯
+  // ==========================================
+  // 宣告一個變數來裝計時器，方便隨時清除
+  private countdownInterval: any;
+
+  private startCountdown(seconds: number): void {
+    this.countdown = seconds;
+
+    // 如果之前有殘留的計時器在跑，先清掉避免秒數狂跳錯亂
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+
+    // 每 1000 毫秒 (1秒) 執行一次
+    this.countdownInterval = setInterval(() => {
+      this.countdown--; // 秒數 -1
+
+      // 當倒數歸零時，停止計時器，釋放按鈕
       if (this.countdown <= 0) {
-        clearInterval(interval);
+        clearInterval(this.countdownInterval);
+        this.countdown = 0;
       }
     }, 1000);
   }

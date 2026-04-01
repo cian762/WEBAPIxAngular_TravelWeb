@@ -185,46 +185,62 @@ namespace TravelWebApi.Controllers
             }
         }
 
-        //[HttpGet("public/{memberId}")]
-        //[AllowAnonymous] 
-        //public async Task<IActionResult> GetPublicProfile(string memberId)
-        //{
-        //    var targetMember = await _context.MemberInformations
-        //        .Include(m => m.Followers)
-        //        .FirstOrDefaultAsync(m => m.MemberId == memberId);
+        [HttpGet("public/{memberId}")]
+        [AllowAnonymous] 
+        public async Task<IActionResult> GetPublicProfile(string memberId)
+        {
+            var myMemberCode = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? myMemberId = null;
 
-        //    if (targetMember == null)
-        //    {
-        //        return NotFound(new { message = "找不到該名會員" });
-        //    }
+            if (!string.IsNullOrEmpty(myMemberCode))
+            {
+                var myInfo = await _context.MemberInformations.FirstOrDefaultAsync(m => m.MemberCode == myMemberCode);
+                if (myInfo != null)
+                {
+                    myMemberId = myInfo.MemberId;
 
-        //    // 2. 準備要回傳的公開資料 
-        //    var publicData = new
-        //    {
-        //        memberId = targetMember.MemberId,
-        //        name = targetMember.Name,
-        //        avatarUrl = targetMember.AvatarUrl ?? "assets/default-avatar.png",
-        //        coverUrl = targetMember.BackgroundUrl ?? "", 
-        //        followersCount = targetMember.Followers.Count, 
-        //    };
+                    bool isBlockedByMe = await _context.Blockeds
+                        .AnyAsync(b => b.MemberId == myMemberId && b.BlockedId == memberId); // 我封鎖他
 
-        //    bool isFollowing = false;
+                    bool isBlockingMe = await _context.Blockeds
+                        .AnyAsync(b => b.MemberId == memberId && b.BlockedId == myMemberId); // 他封鎖我
 
-        //    var myMemberCode = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //    if (!string.IsNullOrEmpty(myMemberCode))
-        //    {
-        //        var myInfo = await _context.MemberInformations.FirstOrDefaultAsync(m => m.MemberCode == myMemberCode);
-        //        if (myInfo != null)
-        //        {
-        //            isFollowing = targetMember.Followers.Any(f => f.MemberId == myInfo.MemberId);
-        //        }
-        //    }
+                    if (isBlockedByMe || isBlockingMe)
+                    {
+                        return NotFound(new { message = "找不到該名會員或您無權查看此頁面" });
+                    }
+                }
+            }
 
-        //    return Ok(new
-        //    {
-        //        profile = publicData,
-        //        isFollowing = isFollowing
-        //    });
-        //}
+            var targetMember = await _context.MemberInformations
+                .Include(m => m.Followers)
+                .FirstOrDefaultAsync(m => m.MemberId == memberId);
+
+            if (targetMember == null)
+            {
+                return NotFound(new { message = "找不到該名會員" });
+            }
+
+            var publicData = new
+            {
+                memberId = targetMember.MemberId,
+                name = targetMember.Name,
+                avatarUrl = targetMember.AvatarUrl ?? "assets/default-avatar.png",
+                backgroundUrl = targetMember.BackgroundUrl ?? "",
+                followersCount = targetMember.Followers.Count
+            };
+
+            bool isFollowing = false;
+            if (myMemberId != null)
+            {
+                isFollowing = targetMember.Followers.Any(f => f.MemberId == myMemberId);
+            }
+
+            return Ok(new
+            {
+                profile = publicData,
+                isFollowing = isFollowing
+            });
+        }
     }
 }

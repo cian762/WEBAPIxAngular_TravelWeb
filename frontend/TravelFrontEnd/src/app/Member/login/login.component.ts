@@ -21,18 +21,17 @@ export class LoginComponent {
   errorMessage: string = '';
   isLoading: boolean = false;
 
-  // ==========================================
-  // 🔥 新增：忘記密碼 Modal 相關變數
-  // ==========================================
   showForgotModal: boolean = false;
   forgotAccount: string = '';
   isSendingEmail: boolean = false;
+
+  countdownTime: number = 0;
+  private countdownInterval: any;
 
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  // 1. 一般登入邏輯 (維持您原本的優良設計)
   onSubmit(): void {
     if (!this.loginData.account || !this.loginData.password) {
       this.errorMessage = '請輸入帳號與密碼';
@@ -50,12 +49,10 @@ export class LoginComponent {
         if (res.userCode) localStorage.setItem('userCode', res.userCode);
         if (res.role) localStorage.setItem('role', res.role);
 
-        // 發送廣播告訴 Header 狀態改變 (確保您 auth.service.ts 裡有這行)
         this.authService.authState$.next(true);
 
         alert('登入成功！歡迎回來');
 
-        // 登入成功後，跳轉回原本想去的頁面，或是預設的 /profile
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/profile';
         this.router.navigateByUrl(returnUrl);
       },
@@ -67,20 +64,18 @@ export class LoginComponent {
     });
   }
 
-  // ==========================================
-  // 🔥 新增：忘記密碼邏輯
-  // ==========================================
-
-  // 控制開啟或關閉 Modal 視窗
   toggleForgotModal(show: boolean): void {
     this.showForgotModal = show;
     if (!show) {
-      this.forgotAccount = ''; // 關閉時清空輸入框
+      this.forgotAccount = '';
     }
   }
 
-  // 點擊「發送驗證信」按鈕
   onForgotPassword(): void {
+    if (this.countdownTime > 0 || this.isSendingEmail) {
+      return;
+    }
+
     if (!this.forgotAccount) {
       alert('請輸入您註冊時的信箱或帳號');
       return;
@@ -88,12 +83,14 @@ export class LoginComponent {
 
     this.isSendingEmail = true;
 
-    // 呼叫 Service 送出重設密碼信件
     this.authService.forgotPassword(this.forgotAccount).subscribe({
       next: (res: any) => {
         this.isSendingEmail = false;
+
+        this.startCountdown(30);
+
         alert(res.message || '重設密碼驗證信已寄出，請前往信箱查收！');
-        this.toggleForgotModal(false); // 寄送成功後自動關閉 Modal
+
       },
       error: (err: any) => {
         this.isSendingEmail = false;
@@ -101,5 +98,22 @@ export class LoginComponent {
         console.error('發送忘記密碼信件錯誤:', err);
       }
     });
+  }
+
+  private startCountdown(seconds: number): void {
+    this.countdownTime = seconds;
+
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+
+    this.countdownInterval = setInterval(() => {
+      this.countdownTime--;
+
+      if (this.countdownTime <= 0) {
+        clearInterval(this.countdownInterval);
+        this.countdownTime = 0;
+      }
+    }, 1000);
   }
 }
