@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { paginationInterface } from '../Interface/paginationInterface';
 import { queryParameters } from '../Component/info-card/info-card';
 import { environment } from '../../../environments/environment';
+import { cardInfoForIndex } from '../Interface/cardInfoForIndex';
 
 @Injectable({
   providedIn: 'root',
@@ -33,4 +34,11 @@ export class CardInfoService {
     params = params.set('searchtext', keyword);
     return this.http.get<string[]>(`${this.baseUrl}/ActivityCard/Keyword`, { params });
   }
+
+
+  CardInfoForIndex() {
+    return this.http.get<cardInfoForIndex[]>(`${this.baseUrl}/ActivityCard/ShowIndex`);
+  }
+
+
 }

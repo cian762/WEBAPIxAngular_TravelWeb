@@ -1,0 +1,20 @@
+<div class="product-grid">
+  @for (item of result; track $index) {
+  <div class="pointer" (click)="onClick(item.activityId)">
+    <article class="product-card">
+      <div class="product-card__image">
+        <img [src]="item.coverImageUrl" [alt]="item.title">
+        <span class="badge badge--hot">熱門</span>
+      </div>
+      <div class="product-card__body">
+        <div class="product-card__location">{{item.region}}</div>
+        <h3>{{ item.title | slice:5:item.title.length }}</h3>
+        <div class="product-card__footer">
+          <span class="score">★ {{ item.averageRating }}</span>
+          <span class="price"><i class="bi bi-eye-fill me-1"></i> {{ item.viewCount }}</span>
+        </div>
+      </div>
+    </article>
+  </div>
+  }
+</div>

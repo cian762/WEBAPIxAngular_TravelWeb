@@ -169,6 +169,10 @@ builder.Services.AddScoped<EmailService>();
 
 //Ticket 相關服務註冊
 builder.Services.AddScoped<TicketService>();
+
+//ActivityIndex 上提供相關資訊
+builder.Services.AddScoped<ActivityCardForIndexService>();
+
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>

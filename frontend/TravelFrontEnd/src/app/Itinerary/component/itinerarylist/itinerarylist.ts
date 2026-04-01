@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 export interface ItineraryCard {
   itineraryId: number;
   itineraryName: string;
@@ -21,8 +22,9 @@ export class Itinerarylist implements OnInit {
   itineraries = signal<ItineraryCard[]>([]);
   isLoading = signal(true);
   errorMsg = signal('');
+  baseUrl: string = environment.apiBaseUrl;
 
-  private apiUrl = 'https://localhost:7276/api/Itinerary/list';
+  private apiUrl = `${this.baseUrl}/Itinerary/list`;
 
   constructor(private http: HttpClient, private router: Router) { }
 

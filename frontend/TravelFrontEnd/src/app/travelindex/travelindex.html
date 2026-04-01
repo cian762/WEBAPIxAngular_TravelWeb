@@ -118,28 +118,9 @@
           <p class="eyebrow">Popular Events</p>
           <h2>熱門活動</h2>
         </div>
-        <a href="#" class="section-link">更多活動</a>
+        <a href="#" class="section-link" [routerLink]="['/ActivityInfo']">更多活動</a>
       </div>
-
-      <div class="product-grid">
-        @for (event of eventList; track event.id) {
-        <article class="product-card">
-          <div class="product-card__image">
-            <img [src]="event.imageUrl" [alt]="event.title">
-            <span class="badge badge--hot">熱門</span>
-          </div>
-          <div class="product-card__body">
-            <div class="product-card__location">{{ event.location }}</div>
-            <h3>{{ event.title }}</h3>
-            <p>{{ event.description }}</p>
-            <div class="product-card__footer">
-              <span class="score">★ {{ event.score }}</span>
-              <span class="price">NT$ {{ event.price }}</span>
-            </div>
-          </div>
-        </article>
-        }
-      </div>
+      <app-activity-index-card></app-activity-index-card>
     </div>
   </section>
 
@@ -155,6 +136,7 @@
       </div>
 
       <div class="destination-grid">
+
         @for (spot of attractionList; track spot.id) {
         <article class="destination-card">
           <img [src]="spot.imageUrl" [alt]="spot.title">
@@ -164,6 +146,8 @@
           </div>
         </article>
         }
+
+
       </div>
     </div>
   </section>
