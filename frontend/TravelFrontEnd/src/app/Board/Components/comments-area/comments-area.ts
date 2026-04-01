@@ -23,6 +23,7 @@ export class CommentsArea implements OnInit {
   cloudName = "daobwcaga"; // replace with your own cloud name
   uploadPreset = "ml_default"; // replace with your own upload preset
   @Input() id = 0;
+  @Input() commentCount = 0;
   commentList: CommentsDTO[] = [];
   contents = "";
   parent?: number;
@@ -91,6 +92,11 @@ export class CommentsArea implements OnInit {
   removeImage() {
     this.selectedImage = "";
     this.showPreview = false;
+  }
+
+  deleteComment(id: number) {
+
+    this.Serve.deleteComment(id).subscribe();
   }
 
 }

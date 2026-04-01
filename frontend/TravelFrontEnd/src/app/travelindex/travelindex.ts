@@ -8,11 +8,11 @@ import { SearchBridge } from '../Services/search-bridge';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { GlobalSearch } from "../global-search/global-search";
-
+import { ActivityIndexCard } from "../Activity/Component/activity-index-card/activity-index-card";
 
 @Component({
   selector: 'app-travelindex',
-  imports: [TripIndex, RouterLink, HeroSection, ReactiveFormsModule, CommonModule, GlobalSearch],
+  imports: [TripIndex, RouterLink, HeroSection, ReactiveFormsModule, CommonModule, GlobalSearch, ActivityIndexCard],
   templateUrl: './travelindex.html',
   styleUrl: './travelindex.css',
   template: `<input [formControl]="searchControl" placeholder="搜景點、活動...">`

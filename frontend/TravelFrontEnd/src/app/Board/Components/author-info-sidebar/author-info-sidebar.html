@@ -1,15 +1,23 @@
 <div class="single-sidebar-widget user-info-widget">
-  <img [src]="post?.avatarUrl" class="user-info rounded-circle" alt="">
-  <a href="#">
+  <img [src]="post?.avatarUrl" class="user-info rounded-circle" (click)="goToMemderPage(authorID)">
+  <a (click)="goToMemderPage(authorID)">
     <h4>{{post?.authorName}}</h4>
   </a>
   <p>&nbsp;</p>
-  @if(1==1){
-  <a class="genric-btn primary radius">已追蹤</a>
-  }
-  @else{
-  <a href="#" class="genric-btn primary-border radius">追蹤</a>
-  }
+
+  <div class="btn-user-group dropup">
+    <button class="btn-follow" [class.btn-following]="isFollowing" [class.btn-unfollow]="!isFollowing"
+      (click)="ToFollow()">
+      {{ isFollowing ? '已追蹤' : '追蹤' }}
+    </button>
+    <button class="btn-user-more" data-bs-toggle="dropdown" aria-expanded="false"><i
+        class="ri-more-2-fill"></i></button>
+    <ul class="dropdown-menu">
+      <li><a class="dropdown-item" (click)="toBlock(post?.authorName)">封鎖</a></li>
+      <li><a class="dropdown-item" href="#">分享用戶主頁</a></li>
+      <li><a class="dropdown-item" href="#">複製用戶主頁連結</a></li>
+    </ul>
+  </div>
 
   <!-- <p>
     Senior blog writer

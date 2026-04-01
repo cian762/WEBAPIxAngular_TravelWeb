@@ -1,4 +1,4 @@
-import { Component, Input, input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, input, OnInit } from '@angular/core';
 import { ArticleData, ArticleResponse } from '../interface/ArticleData';
 import { BoardServe } from '../Service/board-serve';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -20,7 +20,8 @@ import { PageNumberList } from "../Components/page-number-list/page-number-list"
   styleUrl: './blog-home.css',
 })
 export class BlogHome implements OnInit {
-  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
 
   }
@@ -28,15 +29,20 @@ export class BlogHome implements OnInit {
   totalCount = 0;
   currentPage: number = 1;
   Keyword = "";
+  isSearch = false;
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      if (params['TagsId']) {
+      console.log('queryParams triggered', params);
+      const tagId = params['TagsId'];
+      if (tagId) {
+        this.isSearch = true;
         const para: string[] = [];
-        para.push(`TagsId=${params['TagsId']}`);
+        para.push(`TagsId=${tagId}`);
         this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
           this.articleList = d.articleList;
           this.totalCount = d.totalCount;
+          this.cdr.markForCheck();
         });
       } else {
         this.ReflashArticles(this.currentPage);
@@ -48,6 +54,7 @@ export class BlogHome implements OnInit {
     this.Serve.getArticleAPI(currentPage).subscribe((d: ArticleResponse) => {
       this.articleList = d.articleList;
       this.totalCount = d.totalCount;
+      this.isSearch = false;
       console.log("totalCount", this.totalCount);
     });
   }
@@ -85,6 +92,15 @@ export class BlogHome implements OnInit {
     setTimeout(() => {
       event.target.closest('.search-box').classList.remove('focused');
     }, 200);
+  }
+
+  onTagSelected(tag: any) {
+    const para = [`TagsId=${tag}`];
+    this.Serve.getArticleByTags(1, false, para).subscribe((d: any) => {
+      this.articleList = [...d.articleList];
+      this.totalCount = d.totalCount;
+      this.isSearch = true;
+    });
   }
 
 }

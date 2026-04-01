@@ -365,7 +365,7 @@ export class ItineraryDetailComponent implements OnInit {
     this.isExporting = true;
 
     this.http.get(
-      `https://localhost:7276/api/Itinerary/${this.itineraryId}/export`,
+      `${this.baseUrl}/Itinerary/${this.itineraryId}/export`,
       { responseType: 'blob' }   // ✅ 關鍵：告訴 HttpClient 回傳的是二進位檔
     ).subscribe({
       next: (blob) => {

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
@@ -45,9 +46,8 @@ namespace TravelWeb_API.Controllers.Board
         public async Task<ActionResult<Comment>> PostComment([FromBody] PostCommentDto dto)
         {
             // 從 Cookie 取出 Token  
-            string? token = Request.Cookies["AuthToken"];
-            string? userId = GetUser.Id(token);
-            Comment comment = _commentsService.AddComment(dto, userId);
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            Comment comment = _commentsService.AddComment(dto, currentUserId);
 
             return NoContent();
         }
@@ -58,13 +58,31 @@ namespace TravelWeb_API.Controllers.Board
 
         // Put:點讚機制
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCommentLike(int commentID, string UserId)
+        public async Task<IActionResult> PutCommentLike(int commentID)
         {
-            bool isUserExist = _commentsService.CommentLike(commentID, UserId);
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return NotFound();
+            bool isUserExist = _commentsService.CommentLike(commentID, currentUserId);
             if (isUserExist) return NoContent();//只要有成功就改UI，或者再看看
             return NotFound();
         }
 
-
+        // POST:刪除留言
+        [HttpDelete("DeleteComment")]
+        public async Task<IActionResult> DeleteComment(int commentID)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if(currentUserId==null) return NotFound();
+            try
+            {
+                await _commentsService.DeleteComment(commentID, currentUserId);
+                return NoContent();
+            }
+            catch
+            {
+                return NotFound();
+            }
+        }
     }
 }

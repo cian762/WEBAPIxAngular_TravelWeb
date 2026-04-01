@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 declare var Swiper: any;
 
@@ -15,7 +16,8 @@ declare var Swiper: any;
 export class TripIndex implements OnInit, OnDestroy, AfterViewInit {
   hotTrips: any[] = [];
   swiperInstance: any;
-  private apiUrl = 'https://localhost:7276/api/Trip';
+  baseUrl: string = environment.apiBaseUrl;
+  private apiUrl = `${this.baseUrl}/Trip`;
 
   constructor(private http: HttpClient) { }
 
