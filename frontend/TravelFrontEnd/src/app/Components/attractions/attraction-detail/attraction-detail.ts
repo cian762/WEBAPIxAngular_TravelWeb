@@ -221,9 +221,7 @@ export class AttractionDetailComponent implements OnInit {
     });
   }
 
-  // addToFavorite(): void {
-  //   alert('請先登入會員');
-  // }
+
 
   goToNearby(attractionId: number): void {
     this.router.navigate(['/attractions/detail', attractionId]);
