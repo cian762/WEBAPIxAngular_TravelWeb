@@ -5,7 +5,7 @@
   margin: auto;
   /* 如果父層有 padding，這行可以強行拉開到全寬 */
   height: 600px;
-  background: url('/assets/images/ai-hero-bg.jpg') no-repeat center center;
+  background: url('https://res.cloudinary.com/dcyrbbv4w/image/upload/v1775030712/ai-hero-bg_c1yy3e.png') no-repeat center center;
   background-size: cover;
   /* 關鍵：確保圖片覆蓋整個容器 */
   position: relative;
