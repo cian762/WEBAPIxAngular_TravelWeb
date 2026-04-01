@@ -76,7 +76,7 @@ namespace TravelWeb_API.Controllers
 
                 return Ok(new { message = $"成功封鎖了 {targetMember.Name}！並且已自動取消追蹤。" });
             }
-        }
+        } 
 
         // ==========================================
         [HttpGet("my-blacklist")]
