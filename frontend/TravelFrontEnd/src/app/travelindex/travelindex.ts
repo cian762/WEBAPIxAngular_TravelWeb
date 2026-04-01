@@ -1,17 +1,99 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TripIndex } from "../trip/component/trip-index/trip-index";
 import { RouterLink } from '@angular/router';
 import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { GlobalSearchService } from '../Services/global-search-service';
+import { SearchBridge } from '../Services/search-bridge';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { GlobalSearch } from "../global-search/global-search";
 import { ActivityIndexCard } from "../Activity/Component/activity-index-card/activity-index-card";
 
 @Component({
   selector: 'app-travelindex',
-  imports: [TripIndex, RouterLink, HeroSection, ActivityIndexCard],
-
+  imports: [TripIndex, RouterLink, HeroSection, ReactiveFormsModule, CommonModule, GlobalSearch, ActivityIndexCard],
   templateUrl: './travelindex.html',
   styleUrl: './travelindex.css',
+  template: `<input [formControl]="searchControl" placeholder="搜景點、活動...">`
 })
-export class Travelindex {
+export class Travelindex implements OnInit {
+  searchControl = new FormControl('');
+  suggestions: string[] = []; // 存放純文字建議
+  showSuggestions = false;    // 控制下拉選單顯示
+  constructor(
+    private searchService: GlobalSearchService, // 負責去後端搬貨
+    private searchBridge: SearchBridge           // 負責把貨傳給子元件
+  ) { }
+  ngOnInit() {
+    // 監聽打字：專門用來抓「提示詞」
+    this.searchControl.valueChanges.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (!term || term.trim().length < 1) {
+          this.suggestions = [];
+          this.showSuggestions = false;
+          return [];
+        }
+        // 呼叫那支「純文字建議」的 API
+        return this.searchService.getSuggestions(term);
+      })
+    ).subscribe(data => {
+      this.suggestions = data;
+      this.showSuggestions = data.length > 0;
+    });
+  }
+
+  // 當使用者點擊提示詞時
+  selectSuggestion(word: string) {
+    this.searchControl.setValue(word); // 把字填入框框
+    this.showSuggestions = false;     // 關閉選單
+    this.onSearch();                  // 直接執行搜尋
+  }
+  onSearch() {
+    const term = this.searchControl.value;
+
+    // 1. 基本檢查：如果沒打字就不執行
+    if (!term || term.trim() === '') {
+      this.searchBridge.pushData([]); // 清空搜尋結果
+      this.showSuggestions = false;   // 關閉提示選單
+      return;
+    }
+
+    // 2. 呼叫抓取「完整資料 (含圖片)」的 API
+    this.searchService.getSearchResults(term).subscribe({
+      next: (results) => {
+        // 3. 把貨推給橋樑，讓子元件 <app-global-search> 收到並顯示
+        this.searchBridge.pushData(results);
+
+        // 4. 關閉提示詞選單（因為已經搜尋了）
+        this.showSuggestions = false;
+
+        // 5. 定格跳轉：如果搜得到東西，就捲動到結果區
+        if (results.length > 0) {
+          this.scrollToResults();
+        }
+      },
+      error: (err) => {
+        console.error('搜尋失敗：', err);
+        // 這裡可以加個通知說「伺服器斷線中」之類的
+      }
+    });
+  }
+
+  // 輔助方法：捲動到結果區塊
+  private scrollToResults() {
+    setTimeout(() => {
+      // 這裡的 650 是預估 Hero 區的高度，你可以根據畫面調整
+      // 或者使用 element.scrollIntoView 更加精準
+      window.scrollTo({
+        top: 650,
+        behavior: 'smooth'
+      });
+    }, 200);
+  }
+
   favoriteList = [
     {
       id: 1,

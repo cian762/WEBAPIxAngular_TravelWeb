@@ -2,7 +2,7 @@ import { OrderDetailDto } from './../../../trip/models/orderMd.model';
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
 import { CreateShoppingCart } from '../../../trip/services/create-shopping-cart';
-import { Router, RouterLink } from "@angular/router";//連結購物車用
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";//連結購物車用
 import { AddToCartDto } from '../../../trip/models/orderMd.model';
 
 @Component({
@@ -20,6 +20,10 @@ export class TicketPlanDrawer {
   private router = inject(Router);
 
   cartService = inject(CreateShoppingCart);
+  activateRouteId = inject(ActivatedRoute);
+
+  labelId: number = 0;
+  RouteId = this.activateRouteId.params.subscribe((params) => { this.labelId = params['id']; });
 
 
   quantity: number = 1;
@@ -49,7 +53,8 @@ export class TicketPlanDrawer {
       ticketCategoryId: this.plan?.ticketCategoryId,
       mainImage: this.plan?.coverImageUrl,
       cartId: 0,
-      coverImage: this.plan?.coverImageUrl
+      coverImage: this.plan?.coverImageUrl,
+      targetId: this.labelId,
     };
     console.log(purchase);
     this.cartService.addToCart(purchase).subscribe((data) => {

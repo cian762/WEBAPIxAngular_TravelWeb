@@ -5,9 +5,10 @@ import { ProductDetailPage } from '../../services/product-detail-page';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
-import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../../Member/services/auth.service';
+import { concat, from } from 'rxjs';
+import { concatMap, toArray } from 'rxjs/operators';
 
 
 @Component({
@@ -27,10 +28,11 @@ export class TripProductDetail implements OnInit {
   schedules: ProductSchedule[] = [];
   itineraries: ProductItinerary[] = [];
   constructor(private route: ActivatedRoute, private tripService: ProductDetailPage, private cartService: CreateShoppingCart, private router: Router, private authService: AuthService) { }
+  labelId: number = 0;
   ngOnInit(): void {
     // 1. 從路由取得 ID (假設路由定義為 product/:id)
     const id = Number(this.route.snapshot.paramMap.get('id'));
-
+    this.labelId = id;
     if (id) {
       this.loadProductData(id);
     }
@@ -107,34 +109,28 @@ export class TripProductDetail implements OnInit {
   // 加入購物車
   addToCart(): void {
     const data = this.getBookingData();
-    if (!data) { alert('請選擇日期與人數'); return; }
+    if (!data) return;
 
     const itemsToProcess = data.items.filter(item => item.qty > 0);
 
-    // 建立 Observable 陣列
-    const requests = itemsToProcess.map(item => {
-      const cartItem = {
-        productCode: data.scheduleId,
-        productName: data.productName,
-        price: item.price,
-        quantity: item.qty,
-        ticketCategoryId: item.ticketType,
-        mainImage: this.basicInfo?.coverImage
-      };
-      console.log('有抓到票種addtocart', cartItem.ticketCategoryId);
-      return this.cartService.addToCart(cartItem);
-    });
-
-    // 使用 forkJoin 等待所有 API 完成
-    forkJoin(requests).subscribe({
-      next: () => {
-        Swal.fire(`成功加入購物車！`);
-        // 可以在這裡跳轉或更新購物車圖示數量
-      },
-      error: (err) => {
-        console.error('加入失敗', err);
-        alert('加入購物車失敗，請稍後再試');
-      }
+    // 💡 改用 from + concatMap，確保第一筆送完才送第二筆，避免資料庫競爭
+    from(itemsToProcess).pipe(
+      concatMap(item => {
+        const cartItem = {
+          productCode: data.scheduleId,
+          productName: data.productName,
+          price: item.price,
+          quantity: item.qty,
+          ticketCategoryId: item.ticketType,
+          coverImage: this.basicInfo?.coverImage,
+          targetId: this.basicInfo?.tripProductId || data.productId
+        };
+        return this.cartService.addToCart(cartItem);
+      }),
+      toArray() // 等全部做完
+    ).subscribe({
+      next: () => Swal.fire(`成功加入購物車！`),
+      error: (err) => console.error('加入失敗', err)
     });
   }
   nowBuy(): void {

@@ -43,6 +43,7 @@ export class CreateShoppingCart {
       );
     } else {
       // 遊客：存 LocalStorage
+      console.log('從私有方法帶出的dto:', dto);
       this.addToLocalCart(dto);
       return of({ message: '已加入本地購物車' });
     }
@@ -52,13 +53,16 @@ export class CreateShoppingCart {
   removeItems(cartIds: number[], productCodes: string[]): Observable<any> {
     if (this.authService.isLoggedIn()) {
       // 會員：打 API (後端只收 cartIds)
+      console.log('會員登入');
       return this.http.post(`${this.apiUrl}/remove-items`, { cartIds }, { withCredentials: true }).pipe(
         tap(() => this.refreshCount())
       );
     } else {
+      console.log('遊客狀態');
       // 遊客：用 productCode 過濾本地資料
       let cart = this.getLocalCartItems();
-      cart = cart.filter(item => !productCodes.includes(item.productCode));
+      cart = cart.filter(item => !cartIds.includes(item.cartId));
+      console.log('有進來這裡', cart);
       this.setLocalCartItems(cart);
       return of({ message: '本地項目已移除' });
     }
@@ -107,15 +111,35 @@ export class CreateShoppingCart {
 
   private addToLocalCart(item: any) {
     const cart = this.getLocalCartItems();
-    const existing = cart.find(i => i.productCode === item.productCode);
+
+    // 1. 檢查「同產品且同票種」是否已存在
+    const existing = cart.find(i =>
+      i.productCode === item.productCode &&
+      i.ticketCategoryId === item.ticketCategoryId
+    );
+
     if (existing) {
+      // 💡 情況 A：完全一樣，直接累加數量
       existing.quantity += item.quantity;
+      console.log('更新現有項目數量', existing);
     } else {
-      cart.push({
-        ...item, cartId: Date.now(),
-        coverImage: item.coverImage || item.mainImage
-      });
+      // 💡 情況 B：新產品，或是「同產品但不同票種」
+      // 使用當前時間戳記當 ID，保證絕對不會跟別人重複
+      const newCartId = Date.now() + Math.floor(Math.random() * 100);
+
+      const newItem = {
+        ...item,
+        cartId: newCartId, // ✨ 給予區分用的 ID
+        coverImage: item.coverImage || item.mainImage,
+        // 確保傳進來的資料包含 targetId，否則編輯會噴錯
+        targetId: item.targetId
+      };
+
+      cart.push(newItem);
+      console.log('加入新的購物車項目', newItem);
     }
+
+    // 儲存回 LocalStorage
     this.setLocalCartItems(cart);
   }
 

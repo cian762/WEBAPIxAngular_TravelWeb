@@ -192,8 +192,14 @@ export class TicketSectionComponent implements OnInit, OnChanges {
 
   toLines(text: string | null | undefined): string[] {
     if (!text) return [];
-    return text.replace(/\\n/g, '\n').split('\n')
-      .map(s => s.trim()).filter(s => s.length > 0);
+    // 同時處理真實換行 \n 和字面上的 \n 字串
+    return text
+      .replace(/\\n/g, '\n')
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+//     return text.replace(/\\n/g, '\n').split('\n')
+//       .map(s => s.trim()).filter(s => s.length > 0);
   }
 
   getSubtotal(p: AttractionProduct): number {
@@ -209,7 +215,7 @@ export class TicketSectionComponent implements OnInit, OnChanges {
       quantity: qty,
       coverImage: this.coverImage,
       ticketCategoryId: p.ticketTypeCode ?? 0,
-      attractionId: this.attractionId,
+      targetId: this.attractionId,
       attractionName: this.attractionName,
       tags: p.tags?.map(t => t.tagName) ?? [],
     };

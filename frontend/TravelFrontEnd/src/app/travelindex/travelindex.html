@@ -13,8 +13,15 @@
         </p>
 
         <div class="hero-search">
-          <input type="text" placeholder="搜尋景點、活動、文章、套裝行程">
-          <button>搜尋</button>
+          <input type="text" [formControl]="searchControl" (keyup.enter)="onSearch()" placeholder="搜尋景點、活動、文章、套裝行程">
+          <button (click)="onSearch()">搜尋</button>
+        </div>
+        <div>
+          <ul class="search-suggestions" *ngIf="showSuggestions && suggestions.length > 0">
+            <li *ngFor="let s of suggestions" (click)="selectSuggestion(s)">
+              <i class="bi bi-clock-history"></i> {{ s }}
+            </li>
+          </ul>
         </div>
 
         <div class="hero-tags">
@@ -27,7 +34,12 @@
       </div>
     </div>
   </section>
-
+  <!--首頁搜尋結果-->
+  <section class="section">
+    <div class="container">
+      <app-global-search></app-global-search>
+    </div>
+  </section>
   <!-- 會員收藏 -->
   <section class="section">
     <div class="container">
