@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common'; // 🔥 必須引入才能在 HTML 用 *ngIf
-import { RouterModule, RouterLink } from '@angular/router';
+import { RouterModule, RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../Member/services/auth.service'; // 引入服務
 import { CreateShoppingCart } from '../trip/services/create-shopping-cart';
+import Swal from 'sweetalert2';
 
 
 @Component({
@@ -15,12 +16,37 @@ import { CreateShoppingCart } from '../trip/services/create-shopping-cart';
 export class Header implements OnInit {
   public cartService = inject(CreateShoppingCart);
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   // 綁定到畫面的變數
   isLoggedIn: boolean = false;
   userName: string = '';
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      const payStatus = params.get('paySuccess');
+
+      if (payStatus === 'true') {
+        // 顯示成功彈窗
+        Swal.fire({
+          title: '付款成功！',
+          text: '感謝您的購買，祝您旅途愉快！',
+          icon: 'success',
+          confirmButtonColor: '#0d6efd'
+        }).then(() => this.clearUrl());
+
+      } else if (payStatus === 'false') {
+        // 顯示失敗彈窗
+        Swal.fire({
+          title: '付款未成功',
+          text: '支付程序似乎出了點問題，請檢查您的信用卡資訊或稍後再試。',
+          icon: 'error',
+          confirmButtonColor: '#dc3545'
+        }).then(() => this.clearUrl());
+      }
+    });
+
     // 🔥 訂閱(收聽)登入狀態廣播
     this.authService.authState$.subscribe(status => {
       this.isLoggedIn = status;
@@ -56,6 +82,15 @@ export class Header implements OnInit {
     }
   }
 
+  private clearUrl() {
+    // 將網址後的 ?paySuccess=true... 移除，變成乾淨的 /
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { paySuccess: null, orderId: null },
+      queryParamsHandling: 'merge', // 移除指定參數
+      replaceUrl: true // 不會在瀏覽器留下這一頁的歷史紀錄
+    });
+  }
 
 
 

@@ -43,13 +43,27 @@ namespace TravelWeb_API.Controllers
             return Content(htmlForm, "text/html", System.Text.Encoding.UTF8);
         }
         [HttpPost("PaymentCallback")]
-        public IActionResult PaymentCallback()
+        public IActionResult PaymentCallback([FromForm] IFormCollection collection)
         {
+            //1.取得綠界回傳的狀態碼
+            string rtnCode = collection["RtnCode"]!;
+
+            //2.判斷成功與否並導回不同的參數
+            if (rtnCode == "1")
+            {
+                // 成功就帶 paySuccess=true
+                return Redirect("http://localhost:4200/app/?paySuccess=true");
+            }
+            else
+            {
+                // 失敗就帶 paySuccess=false
+                return Redirect("http://localhost:4200/app/?paySuccess=false");
+            }
             //這裡不做邏輯處理，單純把使用者轉回前端
-            return Redirect("http://localhost:4200/");
+            //return Redirect("http://localhost:4200/app/?paySuccess=true");
 
             //部屬時要改成下面這個
-            //return Redirect("https://taiwanstory.site/app/");
+            //return Redirect("https://taiwanstory.site/app/?paySuccess=true");
         }
         //綠界回傳
         [HttpPost("EcpayReturn")]

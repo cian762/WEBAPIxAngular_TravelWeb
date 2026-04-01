@@ -12,12 +12,15 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
      private readonly ActivityDbContext _acts;
 
      private readonly string _mvcBaseUrl;
+     private readonly string _mvcurlhung;
 
-        public SShoppingCart(TripDbContext context,IConfiguration config, ActivityDbContext acts)
+        public SShoppingCart(TripDbContext context,IConfiguration config, ActivityDbContext acts, IConfiguration config2)
         {
             _context = context;
              _acts = acts;
             _mvcBaseUrl = config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
+            _mvcurlhung = config2["AppSettings:Mvchung"]?? "";
+            
         }
         //加入購物車的方法
         public async Task AddToCartAsync(AddToCartDTO dto)
@@ -97,8 +100,8 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                 {
                     dto.ProductName = $"{trip.ProductName} ({trip.StartDate:yyyy/MM/dd} ~ {trip.EndDate:MM/dd})";
                     dto.Price = trip.Price ?? 0;
-                    string url ="/PImages/" + trip.CoverImage!;
-                    dto.CoverImage = CartItemDTO.GetFullUrl(url,_mvcBaseUrl);
+                    string url =trip.CoverImage!;
+                    dto.CoverImage = CartItemDTO.GetFullUrl(url,_mvcurlhung);
                     dto.TargetId = trip.TripProductId;
                     resultList.Add(dto);
                     continue;

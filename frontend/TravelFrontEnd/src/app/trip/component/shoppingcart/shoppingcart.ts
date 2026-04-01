@@ -51,34 +51,47 @@ export class Shoppingcart implements OnInit {
 
   // 2. 刪除購物車項目
   delectCart(cartIds: number, productCode: string) {
-    if (!confirm('確定要刪除此商品嗎？')) return;
+    Swal.fire({
+      title: '確定要刪除嗎？',
+      text: "刪除後將無法恢復此商品！",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '是的，刪除它！',
+      cancelButtonText: '取消'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 顯示載入中
+        Swal.showLoading();
 
-    // 同樣交給 Service 處理判斷邏輯
-    // 傳入 cartId (後端用) 和 productCode (遊客模式用)
-    this.cartService.removeItems([cartIds], [productCode]).subscribe({
-      next: () => {
-        // 刪除成功後，畫面直接重新拉取一次資料即可 (或者手動 filter)
-        this.fetchCartData();
-      },
-      error: (err: any) => Swal.fire('刪除失敗: ' + err.message)
+        this.cartService.removeItems([cartIds], [productCode]).subscribe({
+          next: () => {
+            this.fetchCartData();
+            Swal.fire('已刪除！', '商品已從購物車移除。', 'success');
+          },
+          error: (err: any) => {
+            Swal.fire('錯誤', '刪除失敗: ' + err.message, 'error');
+          }
+        });
+      }
     });
   }
   // 3. 更換票種直接先刪除
+  // 3. 更換票種 (優化版：合併處理邏輯)
   ItemSwitch(cartIds: number, productCode: string) {
-    if (!confirm('確定要更換此商品票種嗎？')) return;
-
-    // 同樣交給 Service 處理判斷邏輯
-    // 傳入 cartId (後端用) 和 productCode (遊客模式用)
+    // 這裡建議不要用 confirm，因為 goEdit 已經點擊了，通常代表 user 確定要改
+    // 如果一定要提示，建議用輕量一點的提示
     this.cartService.removeItems([cartIds], [productCode]).subscribe({
       next: () => {
-        // 刪除成功後，畫面直接重新拉取一次資料即可 (或者手動 filter)
         this.fetchCartData();
       },
-      error: (err: any) => Swal.fire('刪除失敗: ' + err.message)
+      error: (err: any) => console.error('更換票種時移除舊項目失敗', err)
     });
   }
 
   // 3. 更新數量 (如果你畫面上有 + / - 按鈕)
+  // 3. 更新數量 (增加錯誤處理的彈窗)
   changeQuantity(item: CartItem, newQty: number) {
     if (newQty < 1) return;
 
@@ -88,17 +101,22 @@ export class Shoppingcart implements OnInit {
 
     this.cartService.updateQuantity(item.cartId, newQty, item.productCode).subscribe({
       next: (res: any) => {
-        // 💡 這裡很關鍵：如果後端有回傳「最終確定的數量」或「更新後的價格」
-        // 我們更新該 item，確保萬一庫存不足時，數字會跳回正確的值
         if (res && res.confirmedQuantity) {
           item.quantity = res.confirmedQuantity;
           this.calculateTotal();
         }
       },
       error: (err) => {
+        // 回滾數量
         item.quantity = oldQty;
         this.calculateTotal();
-        Swal.fire('更新失敗', '庫存不足或系統錯誤', 'error');
+        Swal.fire({
+          icon: 'error',
+          title: '更新失敗',
+          text: err.error?.message || '庫存不足或系統錯誤',
+          timer: 2000,
+          showConfirmButton: false
+        });
       }
     });
   }
@@ -125,32 +143,33 @@ export class Shoppingcart implements OnInit {
 
   // 編輯：導回景點詳情頁售票區
   goEdit(item: CartItem) {
-    const id = item.targetId;
-    const code = item.productCode || '';
-    this.ItemSwitch(item.cartId, item.productCode);
-    // 1. 景點票券 (TKT-)
-    if (code.startsWith('TKT-')) {
-      console.log('有進來了', id);
-      this.router.navigate(
-        ['/attractions/detail', id],
-        { queryParams: { tab: 'tickets' } }
-      );
-    }
-    // 2. 套裝行程 (TP)
-    else if (code.startsWith('TP')) {
-      this.router.navigate(['/trip-detail', id]);
-    }
-    // 3. 活動體驗 (ACT-)
-    else if (code.startsWith('ACT-')) {
-      // 💡 這裡路徑請對應你 AppRouting 裡的設定
-      this.router.navigate(['/ActivityInfo', id]);
-    }
-    else {
-      // 防呆：如果代碼不匹配，回景點列表
-      this.router.navigate(['/attractions']);
-    }
-  }
+    Swal.fire({
+      title: '重新選擇',
+      text: '將為您跳轉至頁面，原選擇將先移除',
+      icon: 'info',
+      showCancelButton: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.cartService.removeItems([item.cartId], [item.productCode]).subscribe({
+          next: () => {
+            // 刪除成功後再導航
+            const id = item.targetId;
+            const code = item.productCode || '';
 
+            if (code.startsWith('TKT-')) {
+              this.router.navigate(['/attractions/detail', id], { queryParams: { tab: 'tickets' } });
+            } else if (code.startsWith('TP')) {
+              this.router.navigate(['/trip-detail', id]);
+            } else if (code.startsWith('ACT-')) {
+              this.router.navigate(['/ActivityInfo', id]);
+            } else {
+              this.router.navigate(['/attractions']);
+            }
+          }
+        });
+      }
+    });
+  }
   // 4. 計算總價
   calculateTotal() {
     this.totalAmount = this.cartItems.reduce(
