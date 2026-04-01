@@ -17,6 +17,7 @@ export class BoardServe {
   baseUrl: string = environment.apiBaseUrl;
   private apiUrl = this.baseUrl;
 
+
   getArticleAPI(para: number) {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
   }
@@ -118,6 +119,12 @@ export class BoardServe {
     })
   }
 
+  postReport(para: any) {
+    return this.http.post(`${this.apiUrl}/Board/ReportLogs`, para)
+  }
+
+
+
   getIsFollowing(id: string) {
     return this.http.get<boolean>(`${this.apiUrl}/Board/ArticlePermissions/isFollowing?followedId=${id}`
     )
@@ -133,6 +140,8 @@ export class BoardServe {
   deleteComment(id: number) {
     return this.http.delete(`${this.apiUrl}/Board/Comments/DeleteComment?commentID=${id}`)
   }
+
+
 }
 
 

@@ -99,6 +99,7 @@ export class CommentsArea implements OnInit {
     this.Serve.deleteComment(id).subscribe();
   }
 
+
 }
 
 

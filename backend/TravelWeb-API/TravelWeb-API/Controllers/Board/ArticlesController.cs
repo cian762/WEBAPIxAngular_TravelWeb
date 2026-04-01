@@ -119,11 +119,10 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByTags([FromQuery]int page, [FromQuery] SearchByTagsDTO searchByTags)
         {
             // 從 Cookie 取出 Token  
-            string? token = Request.Cookies["AuthToken"];
-            string? userId = GetUser.Id(token);
-            if (string.IsNullOrEmpty(userId))
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized("無效的 Token");
-            var result = _ArticleService.ArticlesByTags(page, searchByTags, userId);
+            var result = _ArticleService.ArticlesByTags(page, searchByTags, currentUserId);
             return Ok(new
             {
                 totalCount = result.TotalCount,
