@@ -3,7 +3,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Attraction, AttractionType } from './attraction.models';
-import { environment } from '../../../environments/environment';
 
 export interface AttractionProduct {
   productId: number;
@@ -54,8 +53,7 @@ export interface StockResult {
 
 @Injectable({ providedIn: 'root' })
 export class AttractionService {
-  baseUrl: string = environment.apiBaseUrl;
-  private apiUrl = this.baseUrl;
+  private apiUrl = 'https://localhost:7276/api';
 
   constructor(private http: HttpClient) { }
 
@@ -130,8 +128,6 @@ export class AttractionService {
     ).pipe(catchError(() => of([])));
   }
 
-
-
   // 用 productCode 查詢景點ID、景點名稱、Tags（供登入後購物車補資料用）
   getProductByCode(productCode: string): Observable<{
     productId: number;
@@ -144,7 +140,6 @@ export class AttractionService {
       `${this.apiUrl}/AttractionProduct/bycode/${productCode}`
     ).pipe(catchError(() => of(null)));
   }
-
 
   // 取得附近景點（周邊資訊 Tab 用）
   getNearbyAttractions(attractionId: number, radius = 10, top = 8): Observable<{

@@ -456,12 +456,16 @@ namespace TravelWeb_API.Controllers.Attraction
             if (!candidates.Any())
                 return Ok(new List<object>());
 
-            // 4. 取每個景點的標籤，計算重疊數
+            // 4. 取每個景點的標籤，計算重疊數（先撈回記憶體再分組）
             var candidateIds = candidates.Select(a => a.AttractionId).ToList();
-            var tagMap = await _dbContext.AttractionTypeMappings
+            var tagData = await _dbContext.AttractionTypeMappings
                 .Where(m => candidateIds.Contains(m.AttractionId))
+                .Select(m => new { m.AttractionId, m.AttractionTypeId })
+                .ToListAsync();
+
+            var tagMap = tagData
                 .GroupBy(m => m.AttractionId)
-                .ToDictionaryAsync(g => g.Key, g => g.Select(m => m.AttractionTypeId).ToList());
+                .ToDictionary(g => g.Key, g => g.Select(m => m.AttractionTypeId).ToList());
 
             var rng = new Random();
 

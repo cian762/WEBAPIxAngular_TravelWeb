@@ -103,40 +103,6 @@
 
 <!-- ══════════════════════════════════════════════════ -->
 <!-- ══════════════════════════════════════════════════ -->
-<!-- 相關票券推薦                                        -->
-<!-- ══════════════════════════════════════════════════ -->
-<div class="ts-related" *ngIf="relatedTickets.length > 0">
-  <div class="ts-related__header">
-    <span class="ts-section-bar"></span>
-    <h3 class="ts-section-title">你可能也喜歡</h3>
-  </div>
-
-  <div class="ts-related__scroll-wrap">
-    <div class="ts-related__track">
-      <div class="ts-related__card" *ngFor="let t of relatedTickets" (click)="goToRelated(t.attractionId)">
-        <div class="ts-related__img-wrap">
-          <img [src]="'https://localhost:7285' + t.mainImage" [alt]="t.name"
-            onerror="this.src='https://placehold.co/280x180?text=No+Image';this.onerror=null;">
-          <span class="ts-related__type-badge" *ngIf="t.ticketTypeName">
-            {{ t.ticketTypeName }}
-          </span>
-        </div>
-        <div class="ts-related__body">
-          <p class="ts-related__attraction">{{ t.name }}</p>
-          <p class="ts-related__ticket">{{ t.ticketTitle }}</p>
-          <div class="ts-related__price-row">
-            <span class="ts-related__price">NT$ {{ t.ticketPrice | number }}</span>
-            <span class="ts-related__original" *ngIf="t.originalPrice && t.originalPrice > (t.ticketPrice ?? 0)">
-              NT$ {{ t.originalPrice | number }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════ -->
 <!-- 方案詳情側邊面板 Drawer -->
 <!-- ══════════════════════════════════════════════════ -->
 

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AttractionService, AttractionProduct, ProductDetailInfo } from '../attraction.service';
@@ -18,16 +18,6 @@ export class TicketSectionComponent implements OnInit {
 
   loading = true;
   products: AttractionProduct[] = [];
-  relatedTickets: {
-    attractionId: number;
-    name: string;
-    mainImage: string | null;
-    ticketTitle: string | null;
-    ticketPrice: number | null;
-    originalPrice: number | null;
-    ticketTypeName: string | null;
-    overlapCount: number;
-  }[] = [];
 
   // productCode → 剩餘庫存
   stockMap: Record<string, number> = {};
@@ -51,6 +41,26 @@ export class TicketSectionComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadProducts();
+  }
+
+  // 當父元件傳入新的 attractionId（從「你可能也喜歡」切換景點時）重新載入
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['attractionId'] && !changes['attractionId'].firstChange) {
+      this.loadProducts();
+    }
+  }
+  private loadProducts(): void {
+    // 重置所有狀態，避免顯示舊景點的票券
+    this.loading = true;
+    this.products = [];
+    this.stockMap = {};
+    this.stockLoaded = {};
+    this.qtyMap = {};
+    this.expandedId = null;
+    this.drawerOpen = false;
+    this.drawerDetail = null;
+
     this.svc.getProductsByAttraction(this.attractionId).subscribe(list => {
       this.products = list;
       this.loading = false;
@@ -62,11 +72,6 @@ export class TicketSectionComponent implements OnInit {
           this.stockLoaded[p.productCode] = true;
         });
       });
-    });
-
-    // 載入相關票券推薦
-    this.svc.getRelatedTickets(this.attractionId).subscribe(list => {
-      this.relatedTickets = list;
     });
   }
 
@@ -169,9 +174,5 @@ export class TicketSectionComponent implements OnInit {
       }]
     };
     this.router.navigate(['/order'], { state: { data: orderDetail } });
-  }
-
-  goToRelated(attractionId: number): void {
-    this.router.navigate(['/attractions/detail', attractionId]);
   }
 }

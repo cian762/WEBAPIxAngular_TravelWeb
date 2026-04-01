@@ -27,6 +27,17 @@ export class AttractionDetailComponent implements OnInit {
     distanceKm: number;
   }[] = [];
 
+  relatedTickets: {
+    attractionId: number;
+    name: string;
+    mainImage: string | null;
+    ticketTitle: string | null;
+    ticketPrice: number | null;
+    originalPrice: number | null;
+    ticketTypeName: string | null;
+    overlapCount: number;
+  }[] = [];
+
   tabs = [
     { key: 'feature', label: '景點特色', icon: '🏞️' },
     { key: 'transport', label: '如何前往', icon: '🚌' },
@@ -94,6 +105,9 @@ export class AttractionDetailComponent implements OnInit {
             this.loadWeather(data);
             this.svc.getNearbyAttractions(id).subscribe(list => {
               this.nearbyAttractions = list;
+            });
+            this.svc.getRelatedTickets(id).subscribe(list => {
+              this.relatedTickets = list;
             });
           }
         });
@@ -212,6 +226,10 @@ export class AttractionDetailComponent implements OnInit {
   }
 
   goToNearby(attractionId: number): void {
+    this.router.navigate(['/attractions/detail', attractionId]);
+  }
+
+  goToRelated(attractionId: number): void {
     this.router.navigate(['/attractions/detail', attractionId]);
   }
 
