@@ -10,11 +10,13 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
     {
         private readonly TripDbContext _context;
         private readonly string _mvcBaseUrl;
+        private readonly string _mvchung;
 
-        public SOrder(TripDbContext context, IConfiguration config)
+        public SOrder(TripDbContext context, IConfiguration config, IConfiguration config2)
         {
             _context = context;
             _mvcBaseUrl = config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
+            _mvchung = config2["AppSettings:Mvchung"] ?? "";
         }
         // 5. 取消訂單：僅限未付款且 Pending 狀態，更新狀態為 Cancelled
         public async Task<bool> CancelOrderAsync(int orderId, string memberId)
@@ -281,7 +283,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
                 if (trip != null)
                 {
-                    itemDto.ProductImage = CartItemDTO.GetFullUrl("/PImages/" + trip.CoverImage, _mvcBaseUrl);
+                    itemDto.ProductImage = CartItemDTO.GetFullUrl(trip.CoverImage!, _mvchung);
                     itemDto.TripStartDate = trip.StartDate;
                     itemDto.TripEndDate = trip.EndDate;
                 }
@@ -360,7 +362,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     if (trip != null)
                     {
                         // 處理路徑：/PImages + 檔名
-                        imageUrl = CartItemDTO.GetFullUrl("/PImages/" + trip, _mvcBaseUrl);
+                        imageUrl = CartItemDTO.GetFullUrl(trip, _mvchung);
                     }
                     else
                     {
@@ -445,7 +447,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
                 // --- 3. 圖片抓取邏輯 (跟列表一致) ---
                 var trip = await _context.TripSchedules.Where(s => s.ProductCode == item.ProductCode).Select(s => s.TripProduct.CoverImage).FirstOrDefaultAsync();
-                if (trip != null) itemDto.ProductImage = CartItemDTO.GetFullUrl("/PImages/" + trip, _mvcBaseUrl);
+                if (trip != null) itemDto.ProductImage = CartItemDTO.GetFullUrl(trip, _mvchung);
                 else
                 {
                     var attr = await _context.AttractionProducts.Where(a => a.ProductCode == item.ProductCode).Select(a => a.Attraction.Images.Select(img => img.ImagePath).FirstOrDefault()).FirstOrDefaultAsync();

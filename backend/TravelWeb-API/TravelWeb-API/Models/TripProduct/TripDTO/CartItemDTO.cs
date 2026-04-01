@@ -2,6 +2,7 @@
 {
     public class CartItemDTO
     {
+        public int TargetId { get; set; }//導頁用
         public int CartId { get; set; }        // 購物車流水號，刪除時會用到
         public string ?ProductCode { get; set; } // 產品代碼
         public string ?ProductName { get; set; } // 產品名稱 (從產品表抓)

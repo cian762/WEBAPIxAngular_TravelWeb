@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using QuestPDF.Infrastructure;
 using System.Text;
+using TravelWeb_API.Models;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.attraction;
 using TravelWeb_API.Models.Board.DbSet;
@@ -141,6 +142,9 @@ builder.Services.AddSwaggerGen(
         });
     }
     );
+//首頁用連線
+builder.Services.AddDbContext<GlobalSearchContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
 
 builder.Services.AddDbContext<AttractionsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Travel")));
@@ -169,6 +173,10 @@ builder.Services.AddScoped<EmailService>();
 
 //Ticket 相關服務註冊
 builder.Services.AddScoped<TicketService>();
+
+//ActivityIndex 上提供相關資訊
+builder.Services.AddScoped<ActivityCardForIndexService>();
+
 #endregion
 
 builder.Services.AddDbContext<TripDbContext>(options =>
@@ -208,6 +216,7 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ICommentsService, CommentsService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<ITagsService, TagsService>();
+builder.Services.AddScoped<IJournalService, JournalService>();
 //===================================================
 
 //行程商品表連線用DI

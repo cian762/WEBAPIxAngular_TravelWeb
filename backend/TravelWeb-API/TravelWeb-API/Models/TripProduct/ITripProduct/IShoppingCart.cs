@@ -18,8 +18,6 @@ namespace TravelWeb_API.Models.TripProduct.ITripProduct
 
         // 5. 清空購物車
         Task ClearCartAsync(string memberId);
-        //遊客轉換到會員的
-        Task MigrateCartAsync(string guestId, string memberId);
         //處理「登入後將遊客本地（LocalStorage）的大量資料同步到資料庫」
         Task SyncCartAsync(List<AddToCartDTO> dtos, string memberId);
 

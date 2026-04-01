@@ -1,16 +1,38 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
-import { CdkDrag, CdkDragEnd, CdkDropList } from '@angular/cdk/drag-drop';
+import { RowType } from './../Components/center-editor/center-editor';
+import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
+import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CloudinaryServe } from '../Service/cloudinary-serve';
 import { BoardServe } from '../Service/board-serve';
 export interface ImageBox {
   id: number;
-  imageUrl: string;
+  type: number;
+  content: string;
   width: number,
   height: number,
   x: number;
   y: number;
 }
 
+export interface TextBox {
+  id: number;
+  content: string;
+  width: number,
+  height: number,
+  x: number;
+  y: number;
+}
+
+export interface ImageBox {
+  id: number;
+  content: string;
+  width: number,
+  height: number,
+  x: number;
+  y: number;
+}
+
+
+// [alt]="item.name"
 @Component({
   selector: 'app-creat-journal',
   standalone: true,
@@ -22,8 +44,11 @@ export interface ImageBox {
 export class CreatJournal {
   constructor(private Serve: BoardServe, private _Cserve: CloudinaryServe,) { }
   imageFileList: File[] = [];
-  imageboxes: ImageBox[] = [];
+  itemBox: ImageBox[] = [];
+  selectedImageId?: null;
   cdr = inject(ChangeDetectorRef);
+  @ViewChild('listFileInput') listInputRef!: ElementRef<HTMLInputElement>;
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -36,14 +61,15 @@ export class CreatJournal {
 
         img.onload = () => {
           let box: ImageBox = {
-            id: this.imageboxes.length + 1,
-            imageUrl: reader.result as string,
+            id: this.itemBox.length + 1,
+            type: 1,
+            content: reader.result as string,
             width: img.naturalWidth,
             height: img.naturalHeight,
             x: 0,
             y: 0
           };
-          this.imageboxes.push(box);
+          this.itemBox.unshift(box);// 加在陣列開頭，而不是 push
         };
 
       };
@@ -58,7 +84,7 @@ export class CreatJournal {
   startResize(e: MouseEvent, direction: string, imageid: number) {
     console.log("startResize");
     e.preventDefault();
-    const box: ImageBox = this.imageboxes.find(b => b.id === imageid)!;
+    const box: ImageBox = this.itemBox.find(b => b.id === imageid)!;
     console.log('startDrag', box.x, box.y);
     const startX = e.clientX;
     const startY = e.clientY;
@@ -96,21 +122,7 @@ export class CreatJournal {
     document.addEventListener('mouseup', onMouseUp);
   }
 
-  // onDragEnd(e: CdkDragEnd, box: ImageBox) {
-  //   box.x += e.distance.x;
-  //   box.y += e.distance.y;
-  //   e.source.reset(); // 清掉 transform，改由 left/top 定位
-  //   this.cdr.detectChanges();
-  // }
 
-  //   onClick(box: ImageBox) {
-  //     if (this.isDragging) {
-  //       this.isDragging = false;
-  //       return;
-  //     }
-  //     this.selectBox();
-  //   }
-  //   selectBox() { };
   startDrag(e: MouseEvent, box: ImageBox) {
     e.preventDefault();
 
@@ -132,7 +144,37 @@ export class CreatJournal {
     document.addEventListener('mouseup', onMouseUp);
   }
 
+  triggerListUpload(type: number) {
+    if (type === 1) {
+      this.listInputRef.nativeElement.click();
+    }
+    else if (type === 0) {
+      let box: ImageBox = {
+        id: this.itemBox.length + 1,
+        type: 0,
+        content: "請輸入文字...",
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0
+      };
+      this.itemBox.unshift(box);// 加在陣列開頭，而不是 push
+    }
 
+  }
+
+
+  removeFromList(id: number, event: Event) {
+
+  }
+
+  drop(event: CdkDragDrop<any[]>) {
+    moveItemInArray(this.itemBox, event.previousIndex, event.currentIndex);
+  }
+
+  onSave() {
+    console.log(this.itemBox);
+  }
 
 }
 

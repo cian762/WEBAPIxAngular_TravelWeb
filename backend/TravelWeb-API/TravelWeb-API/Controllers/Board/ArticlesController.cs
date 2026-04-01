@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board.DbSet;
@@ -135,11 +136,10 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByAuthor([FromQuery] int page, [FromQuery]string authorID)
         {
             // 從 Cookie 取出 Token  
-            string? token = Request.Cookies["AuthToken"];
-            string? userId = GetUser.Id(token);
-            if (string.IsNullOrEmpty(userId))
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized("無效的 Token");
-            var result = _ArticleService.ArticlesByAuthorID(page, authorID, userId);
+            var result = _ArticleService.ArticlesByAuthorID(page, authorID, currentUserId);
             return Ok(new
             {
                 totalCount = result.TotalCount,
@@ -147,8 +147,23 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
-        //GET:用戶主頁
-       [HttpGet("articlesByUser")]
+        [HttpGet("searchBySource")]
+        public IActionResult GetArticlesBySource([FromQuery] int page, [FromQuery] string productCode)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized("無效的 Token");
+            var result = _ArticleService.GetArticlesBySource(page, productCode);
+            return Ok(new
+            {
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
+            });
+        }
+
+        //GET:用戶主頁:自己發布的文章
+        [HttpGet("articlesByUser")]
         public IActionResult GetArticlesByUser([FromQuery]int page)
         {
             // 從 Cookie 取出 Token  
@@ -157,6 +172,20 @@ namespace TravelWeb_API.Controllers.Board
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("無效的 Token");
             var result = _ArticleService.ArticlesByUserID(page, userId);
+            return Ok(new
+            {
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
+            });
+        }
+
+        //GET:用戶收藏的文章
+        [HttpGet("articlesByCollect")]
+        public IActionResult GetArticlesByCollect([FromQuery] int page)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = _ArticleService.ArticlesByCollect(page, currentUserId);
             return Ok(new
             {
                 totalCount = result.TotalCount,
@@ -204,7 +233,21 @@ namespace TravelWeb_API.Controllers.Board
         }
 
 
-        //// POST: 收藏
+        //// POST:點讚
+        [HttpPost("collect")]
+        public async Task<IActionResult> ArticleCollect(int articleID)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId != null) { 
+                await _ArticleService.Collect(articleID, currentUserId);
+            }
+            
+
+            return Ok();
+        }
+
+        //// POST:點讚
         [HttpPost("Like")]
         public async Task<IActionResult> ArticleLike(int articleID)
         {
@@ -213,7 +256,7 @@ namespace TravelWeb_API.Controllers.Board
             string? userId = GetUser.Id(token);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("無效的 Token");
-            _ArticleService.Like(articleID,userId);
+            _ArticleService.Like(articleID, userId);
             return Ok();
         }
 
@@ -223,6 +266,12 @@ namespace TravelWeb_API.Controllers.Board
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            bool isSuccess = await _ArticleService.DeleteArticle(id, currentUserId);
+            if (isSuccess)
+            {
+                return NoContent();
+            }
             return NotFound();
         }
 

@@ -23,6 +23,7 @@ export class Itinerarylist implements OnInit {
   isLoading = signal(true);
   errorMsg = signal('');
   baseUrl: string = environment.apiBaseUrl;
+
   private apiUrl = `${this.baseUrl}/Itinerary/list`;
 
   constructor(private http: HttpClient, private router: Router) { }

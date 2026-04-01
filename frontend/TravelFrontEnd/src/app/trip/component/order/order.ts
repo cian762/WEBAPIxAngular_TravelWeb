@@ -154,9 +154,10 @@ export class Order implements OnInit {
             // 選「立即付款」：執行原本的跳轉綠界表單邏輯
             this.handlePaymentRedirect(res);
           } else if (result.isDenied) {
-            // 選「稍後再付」：導航回首頁或訂單列表
-            // 因為訂單已成立，使用者之後可以去「我的訂單」點選您後端寫好的 repay API
-            this.router.navigate(['/']);
+            // 雖然沒付錢，但訂單成立了，我們也可以帶一個狀態回去
+            this.router.navigate(['/'], {
+              state: { orderCreated: true, orderId: res.orderId }
+            });
           }
         });
       },
@@ -185,8 +186,10 @@ export class Order implements OnInit {
     if (res.paymentForm) {
       this.executePaymentForm(res.paymentForm);
     } else {
-      // 如果沒有金流表單（例如金額為 0），可能導向成功頁面
-      this.router.navigate(['/order-success']);
+      // 如果金額為 0 直接成功，帶上 state 跳轉
+      this.router.navigate(['/'], {
+        state: { paymentSuccess: true, orderId: res.orderId }
+      });
     }
   }
 }

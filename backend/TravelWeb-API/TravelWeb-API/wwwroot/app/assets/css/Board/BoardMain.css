@@ -1,0 +1,84 @@
+.img-wrapper-full {
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
+.img-wrapper-leftside {
+  float: left;
+  width: 50%;
+  padding-right: 14px;
+  position: relative;
+}
+
+.img-wrapper-rightside {
+  float: right;
+  width: 50%;
+  padding-left: 14px;
+  position: relative;
+}
+
+.inline-img {
+  width: 100%;
+  display: block;
+}
+
+
+.test {
+  color: #ff0000;
+}
+
+/* ── 區塊編輯器容器 */
+.block-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* ── 文字區塊：無框線、無背景、自動撐高 */
+.block-text {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.85;
+  color: #2c2c3a;
+  padding: 8px 22px;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-height: 48px;
+}
+
+.block-text::placeholder {
+  color: #c0c0d8;
+}
+
+/* ── 全寬圖片 */
+.block-image-full {
+  width: 100%;
+}
+
+.block-img {
+  width: 100%;
+  display: block;
+}
+
+/* ── 半寬列（圖 + 文 並排）*/
+.block-half {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
+
+.half-img {
+  width: 50%;
+  flex-shrink: 0;
+}
+
+.half-text {
+  width: 50%;
+  padding: 8px 14px;
+}

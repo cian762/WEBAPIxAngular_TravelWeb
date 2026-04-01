@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
@@ -127,7 +128,16 @@ namespace TravelWeb_API.Models.Board.Service
 
             return result;
         }
-       
-        
+
+        public async Task DeleteComment(int commentID, string UserId)
+        {
+            var comment = await _context.Comments
+                .FirstOrDefaultAsync(c => c.CommentId == commentID);
+            if (UserId == comment!.UserId) 
+            {
+                _context.Comments.Remove(comment);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
