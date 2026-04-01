@@ -16,7 +16,7 @@
           <div class="mb-3">
             <div class="custom-slider-container">
               <div class="main-display cover-upload-container">
-                <img [src]="photoList[selectedIndex]" class="fade-in">
+                <img [src]="photoList.find(p => p.id === selectedIndex)?.Url" class="fade-in">
                 @if (selectedIndex === coverIndex) {
                 <a class="genric-btn info radius set-cover-btn">封面</a>
                 }
@@ -27,14 +27,14 @@
               <div class="thumb-nav">
                 <!-- 封面 -->
                 <div class="thumb-item" [class.active]="coverIndex === selectedIndex" (click)="setIndex(coverIndex)">
-                  <img [src]="photoList[coverIndex]">
+                  <img [src]="photoList[coverIndex]?.Url">
                 </div>
                 <span class="border-end border-2"></span>
                 <!-- 其他圖片 -->
                 @for (img of photoList; track $index) {
                 @if($index != coverIndex){
-                <div class="thumb-item" [class.active]="$index === selectedIndex" (click)="setIndex($index)">
-                  <img [src]="img">
+                <div class="thumb-item" [class.active]="img.id === selectedIndex" (click)="setIndex(img.id)">
+                  <img [src]="img.Url">
                 </div>
                 }
                 }
@@ -61,7 +61,7 @@
         <!-- 內文編輯區 -->
         <div class="mb-3">
           <label for="exampleFormControlTextarea1" class="form-label my-title">文章內文</label>
-          <textarea class="form-control" formControlName="content" placeholder="請輸入內文..." rows="3"
+          <textarea #textarea class="form-control" formControlName="content" placeholder="請輸入內文..." rows="3"
             (input)="onInput($event)"></textarea>
         </div>
       </section>

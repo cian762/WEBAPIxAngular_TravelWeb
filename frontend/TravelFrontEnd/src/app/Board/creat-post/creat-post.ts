@@ -1,6 +1,6 @@
 import { TagListDTO } from './../../trip/models/tripproduct.model';
 import { PostDetailDto } from './../interface/PostDetailDto';
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BoardServe } from '../Service/board-serve';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +9,11 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
-
+export interface photoitem {
+  id: number;
+  Url: string;
+  needFiletoUpload?: File;
+}
 
 
 var cloudinary: any;
@@ -32,6 +36,8 @@ export class CreatPost implements OnInit, OnDestroy {
 
   constructor(private Serve: BoardServe, private route: ActivatedRoute, private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router,) { }
   private observer!: IntersectionObserver;
+  @ViewChild('textarea') textareaRef!: ElementRef;
+
 
   navItems = [
     { id: 'sec1' },
@@ -55,9 +61,9 @@ export class CreatPost implements OnInit, OnDestroy {
   coverUrl?: string;
   photoUrlList: string[] = [];
 
-  fileList: File[] = [];
+  // fileList: File[] = [];
 
-  photoList: string[] = [];
+  photoList: photoitem[] = [];
   selectedIndex: number = 0;
   coverIndex: number = 0;
 
@@ -74,8 +80,8 @@ export class CreatPost implements OnInit, OnDestroy {
   })
 
   //選取的圖片
-  setIndex(index: number) {
-    this.selectedIndex = index;
+  setIndex(id: number) {
+    this.selectedIndex = id;
   }
 
   ngOnInit(): void {
@@ -100,6 +106,12 @@ export class CreatPost implements OnInit, OnDestroy {
         this.FormReset(d);
         console.log(this.post);
         this.initRegion();//初始化地區選項
+        setTimeout(() => {
+          document.querySelectorAll('textarea').forEach(el => {
+            (el as HTMLElement).style.height = 'auto';
+            (el as HTMLElement).style.height = Math.min((el as HTMLTextAreaElement).scrollHeight, 800) + 'px';
+          });
+        }, 0);
       });
       this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
         this.tagList = d;
@@ -111,6 +123,8 @@ export class CreatPost implements OnInit, OnDestroy {
 
 
     });
+
+
   }
 
   scrollTo(id: string) {
@@ -126,6 +140,9 @@ export class CreatPost implements OnInit, OnDestroy {
 
   ngAfterViewInit() {
     this.cdr.detectChanges();
+    const el = this.textareaRef.nativeElement;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 800) + 'px';
   }
 
 
@@ -142,16 +159,24 @@ export class CreatPost implements OnInit, OnDestroy {
     }, 0);
     // 使用 ... 把 postPhoto 陣列拆開來，平鋪進去
     this.coverUrl = post.cover;
-    const photos = [];
+    const photos: photoitem[] = [];
     // 如果封面有值，塞進第一個
     if (post.cover) {
-      photos.push(post.cover);
+      photos.push({
+        id: 0,
+        Url: post.cover,
+        needFiletoUpload: undefined
+      });
     }
     // 如果其他照片有值且是陣列，展開塞進去
     if (post.postPhoto && post.postPhoto.length > 0) {
-      photos.push(...post.postPhoto);
+      photos.push(...post.postPhoto.map((url: string, index: number) => ({
+        id: photos.length + index,
+        Url: url,
+        needFiletoUpload: undefined
+      })));
     }
-    this.photoUrlList = photos;
+    //this.photoUrlList = photos;
     this.photoList = photos;
   }
 
@@ -262,12 +287,19 @@ export class CreatPost implements OnInit, OnDestroy {
     const files = Array.from(event.target.files as FileList);
     if (files.length === 0) return;
 
-    // 1. 直接同步產生所有預覽網址 (不需透過 FileReader)
-    const newPhotoUrls = files.map(file => URL.createObjectURL(file));
+    const newItems: photoitem[] = files.map((file, index) => ({
+      id: this.photoList.length + index,
+      Url: URL.createObjectURL(file),
+      needFiletoUpload: file
+    }));
 
-    // 2. 一次更新兩個陣列，保證順序跟選取時一模一樣
-    this.fileList = [...this.fileList, ...files];
-    this.photoList = [...this.photoList, ...newPhotoUrls];
+    this.photoList = [...this.photoList, ...newItems];
+
+    // 重新排序 id，確保連續
+    this.photoList = this.photoList.map((item, index) => ({
+      ...item,
+      id: index
+    }));
   }
 
   async isUploadSuccess(id: number, para: any) {
@@ -285,22 +317,35 @@ export class CreatPost implements OnInit, OnDestroy {
   }
 
   async uploadAllParallel() {
-    // 1. 建立一個任務清單 (Promises 陣列)
-    const uploadTasks = this.fileList.map((f) =>
-      this.uploadImage(f)
-    );
+    // 1. 分出需要上傳的和已有網址的
+    const toUpload = this.photoList.filter(p => p.needFiletoUpload);
+    const alreadyUploaded = this.photoList.filter(p => !p.needFiletoUpload);
 
     try {
-      // 2. 啟動所有任務，並等待「全部」完成，得到所有網址
-      const allUrls = await Promise.all(uploadTasks);
-      // 3. 過濾掉封面，剩下的就是一般圖片網址
+      // 2. 並行上傳所有需要上傳的
+      const uploadTasks = toUpload.map(p =>
+        this.uploadImage(p.needFiletoUpload!).then(url => ({
+          id: p.id,
+          url
+        }))
+      );
+      const uploadedResults = await Promise.all(uploadTasks);
 
-      this.photoUrlList = [
-        ...this.photoUrlList,
-        ...allUrls
-      ];
+      // 3. 把上傳結果塞回 photoList 對應的 item
+      uploadedResults.forEach(result => {
+        const item = this.photoList.find(p => p.id === result.id);
+        if (item) {
+          item.Url = result.url;
+          item.needFiletoUpload = undefined;
+        }
+      });
+
+      // 4. 依照 id 排序後輸出 photoUrlList，順序不亂
+      this.photoUrlList = this.photoList
+        .sort((a, b) => a.id - b.id)
+        .map(p => p.Url);
+
       console.log('所有圖片上傳完成！');
-
     } catch (err) {
       console.error('其中一張上傳失敗，整個程序停止', err);
     }

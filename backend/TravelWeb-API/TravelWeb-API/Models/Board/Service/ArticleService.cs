@@ -152,7 +152,7 @@ namespace TravelWeb_API.Models.Board.Service
                     RegionID = a.RegionID,
                     RegionName = a.Region != null
                         ? $"{a.Region.UidNavigation.RegionName},{a.Region.RegionName}"
-                        : null,
+                        : null,                    
                     LikeCount = a.ArticleLikes.Count(),
                     isLike = a.ArticleLikes.Any(l => l.UserId == userID),
                     tags = a.ArticleTags
@@ -160,6 +160,7 @@ namespace TravelWeb_API.Models.Board.Service
                         { TagId = t.TagId, TagName = t.Tag.TagName, icon = t.Tag.icon })
                         .ToList(),
                     CommentCount = a.Comments.Count(),
+                    
                 })
                 .ToList();
         }
@@ -266,7 +267,7 @@ namespace TravelWeb_API.Models.Board.Service
                 .Include(a => a.ArticleTags)
                 .Include(a => a.ArticleFolders)
                 .Include(a => a.Post)
-                .Include(a => a.PostPhotos)
+                .Include(a => a.ArticleSources)                
                 .FirstOrDefaultAsync(); ;
 
             if (article != null && article.UserId == authorID)
@@ -311,6 +312,11 @@ namespace TravelWeb_API.Models.Board.Service
                 .Where(c => c.UserId == userId)
                 .Select(c => c.Article);
             return BuildPagedResult(data, page, userId);
+        }
+
+        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) GetArticlesBySource(int page, string productCode)
+        {
+            throw new NotImplementedException();
         }
     }
     

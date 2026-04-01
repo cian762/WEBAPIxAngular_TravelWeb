@@ -136,11 +136,25 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByAuthor([FromQuery] int page, [FromQuery]string authorID)
         {
             // 從 Cookie 取出 Token  
-            string? token = Request.Cookies["AuthToken"];
-            string? userId = GetUser.Id(token);
-            if (string.IsNullOrEmpty(userId))
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized("無效的 Token");
-            var result = _ArticleService.ArticlesByAuthorID(page, authorID, userId);
+            var result = _ArticleService.ArticlesByAuthorID(page, authorID, currentUserId);
+            return Ok(new
+            {
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
+            });
+        }
+
+        [HttpGet("searchBySource")]
+        public IActionResult GetArticlesBySource([FromQuery] int page, [FromQuery] string productCode)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized("無效的 Token");
+            var result = _ArticleService.GetArticlesBySource(page, productCode);
             return Ok(new
             {
                 totalCount = result.TotalCount,
@@ -149,7 +163,7 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         //GET:用戶主頁:自己發布的文章
-       [HttpGet("articlesByUser")]
+        [HttpGet("articlesByUser")]
         public IActionResult GetArticlesByUser([FromQuery]int page)
         {
             // 從 Cookie 取出 Token  

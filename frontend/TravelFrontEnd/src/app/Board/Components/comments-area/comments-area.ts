@@ -94,6 +94,11 @@ export class CommentsArea implements OnInit {
     this.showPreview = false;
   }
 
+  deleteComment(id: number) {
+
+    this.Serve.deleteComment(id).subscribe();
+  }
+
 }
 
 

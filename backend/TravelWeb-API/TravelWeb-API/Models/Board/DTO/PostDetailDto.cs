@@ -20,5 +20,10 @@
         public bool isLike { get; set; }
         public bool isCollect { get; set; }
 
+        public string? ArticleSourceID { get; set; }
+        public string? SourceName { get; set; }
+        public string? SourceCoverUrl { get; set; }
+        public string? Sourcetype { get; set; }
+
     }
 }

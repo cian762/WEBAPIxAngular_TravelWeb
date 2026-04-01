@@ -4,12 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ArticleData, TagDTO } from '../interface/ArticleData';
 import localeZhTw from '@angular/common/locales/zh-Hant';
 import { DatePipe, registerLocaleData } from '@angular/common';
+import { ArticleList } from "../Components/article-list/article-list";
 
 registerLocaleData(localeZhTw);
 
 @Component({
   selector: 'app-user-articles-page',
-  imports: [DatePipe],
+  imports: [DatePipe, ArticleList],
   templateUrl: './user-articles-page.html',
   styleUrl: './user-articles-page.css',
 })
@@ -20,6 +21,7 @@ export class UserArticlesPage implements OnInit {
   totalCount: number = 0;
   UserId: string = "";
   curUser: any;
+  isFollowing = false;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -30,6 +32,7 @@ export class UserArticlesPage implements OnInit {
       this.articleList = p.articleList;
       this.totalCount = p.totalCount;
     });
+    this.Serve.getIsFollowing(this.UserId).subscribe(d => this.isFollowing = d);
 
   }
 
@@ -63,5 +66,25 @@ export class UserArticlesPage implements OnInit {
 
   }
 
+  ToFollow() {
+    this.Serve.postFollow(this.UserId).subscribe({
+      next: (res: any) => {
+        this.isFollowing = !this.isFollowing;
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
 
+
+
+  onTagSelected(tag: any) {
+
+  }
+
+  toBlock() {
+    if (this.UserId)
+      this.Serve.postBlock(this.UserId).subscribe();
+  }
 }

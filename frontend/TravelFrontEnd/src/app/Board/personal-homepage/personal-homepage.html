@@ -6,6 +6,11 @@
       <div class="user-info">
         <img class="user-avatar m-3" [src]="curUser.avatarUrl">
         <h3 class="text-center">{{curUser.name}}</h3>
+        <p class="text-center">&nbsp;</p>
+        <p class="text-center">N篇文章</p>
+        <p class="text-center">總獲讚數:N</p>
+        <p class="text-center">N位粉絲</p>
+        <p class="text-center">&nbsp;</p>
       </div>
     </div>
 
@@ -33,77 +38,123 @@
     <div class="tab-content" id="myTabContent">
       <!-- 文章列起點 -->
       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-        <div class="container mt-5 col-6">
-          @for (article of articleList; track $index) {<div class="single-post border-bottom">
-            <!-- 作者 + 地點 -->
-            <div class="post-author-row">
-              <div class="author-info" (click)="goToMemderPage(article.userID)">
-                <img class="userAvatar" [src]="article.userAvatar">
-                <div>
-                  <div class="author-name">{{article.userName}}</div>
-                  <div class="author-date">
-                    {{article.createdAt | date:'M月d日 y年':'zh-Hant'}}
+        <div class="container mt-5">
+          <!-- 文章列起點 -->
+          @if (articleList.length>0) {
+          @for (article of articleList; track $index) {
+          <div class="my-container col-lg-8">
+            @for (article of articleList; track $index) {<div class="single-post border-bottom">
+              <!-- 作者 + 地點 -->
+              <div class="post-author-row">
+                <div class="author-info" (click)="goToMemderPage(article.userID)">
+                  <img class="userAvatar" [src]="article.userAvatar">
+                  <div>
+                    <div class="author-name">{{article.userName}}</div>
+                    <div class="author-date">
+                      {{article.createdAt | date:'M月d日 y年':'zh-Hant'}}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="post-location">
-                <i class="ri-map-pin-line"></i>地點
-              </div>
-            </div>
-
-            <!-- 大圖，無圓角 -->
-            <div class="post-cover">
-              <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
-            </div>
-            <!-- 標題 -->
-            <a class="posts-title" (click)="goToDetail(article.articleId)">
-              <h3>
-                <span class="post-type">討論</span>
-                {{article.title}}
-              </h3>
-            </a>
-
-
-            <!-- 底列：讚 留言 -->
-            <div class="post-footer">
-              <!-- 標籤 -->
-              <div class="post-tags">
-                <span class="tags-label">相關標籤:</span>
-                @for (tag of article.tags; track tag.tagId) {
-                <button class="btn btn-danger btn-sm">
-                  {{AllTags.find(t => t.tagId === tag.tagId)?.tagName}}
-                </button>
-                }
-              </div>
-
-              <div class="post-reactions">
-                <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
-                  <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
-                  {{article.likeCount}}
-                </a>
-                <a class="reaction-item" href="#">
-                  <span class="lnr lnr-bubble"></span>
-                  N則留言
-                </a>
+                <div class="post-location">
+                  <i class="ri-map-pin-line"></i>{{article.regionName}}
+                  <button class="btn-more"><i class="ri-more-2-fill"></i></button>
+                </div>
 
               </div>
 
-            </div>
+              <!-- 大圖，無圓角 -->
+              @if (article.photoUrl) {
+              <div class="post-cover">
+                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+              </div>
+              }
+              @else {
+              <div class="post-cover">
+                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+              </div>
+              }
+
+              <!-- 標題 -->
+              <a class="posts-title" (click)="goToDetail(article.articleId)">
+                <h3>
+                  <span class="post-type">討論</span>
+                  {{article.title}}
+                </h3>
+              </a>
+              <!-- 底列：讚 留言 -->
+              <div class="post-footer">
+                <!-- 標籤 -->
+                @if(article.tags && article.tags.length > 0){
+                <div class="tags">
+                  <span>相關標籤:</span>
+                  @for (tag of article.tags; track tag.tagId) {
+                  <button class="tag-btn">
+                    <i [class]="tag.icon"></i>&nbsp;{{tag.tagName}}
+                  </button>
+                  }
+
+                </div>
+                }@else {<span></span>}
+                <!-- 讚 留言 -->
+                <div class="post-reactions">
+                  <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
+                    <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+                    {{article.likeCount}}
+                  </a>
+                  <a class="reaction-item" href="#">
+                    <span class="lnr lnr-bubble"></span>
+                    {{article.commentCount}}則留言
+                  </a>
+                </div>
+              </div>
+
+              <!-- 編輯列：文章權限 瀏覽人數 編輯 -->
+
+              <div class="d-flex align-items-center justify-content-between mt-5">
+                <div>
+                  <button type="button" class="btn btn-outline-danger btn-sm">預覽/另存為</button>
+                </div>
+                <div>
+                  <p class="mb-0">瀏覽人數</p>
+                </div>
+                <div>
+                  <button type="button" class="btn btn-outline-danger btn-sm"
+                    (click)="goToUpdate(article.articleId)">編輯貼文</button>
+                </div>
+              </div>
 
 
-            <!-- 編輯列：文章權限 瀏覽人數 編輯 -->
-            <div class="post-footer">
-              <button type="button" class="btn btn-outline-danger btn-sm"
-                (click)="goToUpdate(article.articleId)">編輯貼文</button>
-            </div>
+            </div>}
+          </div>
 
-          </div>}
+          }}
+          @else {
+          <div style="height: 100px; width: 100px; margin: 50px auto;">
+            <p>尚無文章</p>
+          </div>
+          }
+
         </div>
       </div><!-- 文章列終點 -->
-      <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
+      <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        @if (false) {}
+        @else {
+        <div style="height: 100px; width: 100px; margin: 50px auto;">
+          <p>尚無文章</p>
+        </div>
+        }
+      </div>
       <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        @if (collectList.length>0) {
         <app-article-list class="col-lg-8" [articleList]="collectList"
           (tagSelected)="onTagSelected($event)"></app-article-list>
+        }
+        @else {
+        <div style="height: 100px; width: 100px; margin: 50px auto;">
+          <p>尚無文章</p>
+        </div>
+        }
+
       </div>
     </div>
 

@@ -109,13 +109,37 @@ namespace TravelWeb_API.Models.Board.Service
                     LikeCount = a.ArticleLikes.Count,
                     isLike = a.ArticleLikes.Any(l => l.UserId == currentUserId),
                     isCollect = a.ArticleFolders.Any(c => c.UserId == currentUserId),
+                    ArticleSourceID = GetSource(a.ArticleSources.FirstOrDefault()).ArticleSourceID,
+                    SourceName = GetSource(a.ArticleSources.FirstOrDefault()).SourceName,
+                    SourceCoverUrl= GetSource(a.ArticleSources.FirstOrDefault()).SourceCoverUrl,
+                    Sourcetype = GetSource(a.ArticleSources.FirstOrDefault()).Sourcetype,
 
                 }).FirstOrDefaultAsync();
 
             return postDetail;
         }
 
-        
+        public Source? GetSource(ArticleSource? source)
+        {
+            Source s=new Source();
+            if (source.Type == 1)
+            {
+                s.ArticleSourceID = "1";
+                s.Sourcetype = "1";
+                s.SourceName = "國立中正紀念堂";
+                s.SourceCoverUrl="/ uploads / attractions / bd7508c5 - 8405 - 4bc9 - 95b0 - 58ee20f16be4.jpg";
+
+            }
+            return s;
+        }
+
+        public class Source
+        {
+            public string? ArticleSourceID { get; set; }
+            public string? SourceName { get; set; }
+            public string? SourceCoverUrl { get; set; }
+            public string? Sourcetype { get; set; }
+        }
 
         public Journal GetJournalDetailed(int id)
         {

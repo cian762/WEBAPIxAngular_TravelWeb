@@ -112,6 +112,27 @@ export class BoardServe {
     return this.http.delete(`${this.apiUrl}/Board/Articles/${id}`)
   }
 
+  postFollow(id: string) {
+    return this.http.post(`${this.apiUrl}/Follow/toggle`, {
+      "followedId": id
+    })
+  }
+
+  getIsFollowing(id: string) {
+    return this.http.get<boolean>(`${this.apiUrl}/Board/ArticlePermissions/isFollowing?followedId=${id}`
+    )
+  }
+
+  postBlock(id: string) {
+    return this.http.post(`${this.apiUrl}/Block/toggle`, {
+      "blockedId": id,
+      "reason": null
+    })
+  }
+
+  deleteComment(id: number) {
+    return this.http.delete(`${this.apiUrl}/Board/Comments/DeleteComment?commentID=${id}`)
+  }
 }
 
 
