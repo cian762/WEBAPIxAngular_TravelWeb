@@ -1,0 +1,113 @@
+.metrics-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  padding: .75rem 0;
+}
+
+
+.ring-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  min-width: 110px;
+}
+
+.ring-svg {
+  width: 110px;
+  height: 110px;
+
+  .ring-track {
+    fill: none;
+    stroke: #e5e7eb;
+    stroke-width: 9;
+  }
+
+  .ring-fill {
+    fill: none;
+    stroke-width: 9;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset .85s cubic-bezier(.4, 0, .2, 1), stroke .3s;
+  }
+
+  .ring-val {
+    font-size: 20px;
+    font-weight: 800;
+    fill: #111827;
+    text-anchor: middle;
+  }
+
+  .ring-unit {
+    font-size: 10px;
+    fill: #6b7280;
+    text-anchor: middle;
+  }
+
+  .ring-lbl {
+    font-size: 10px;
+    fill: #9ca3af;
+    text-anchor: middle;
+  }
+}
+
+.ring-hint {
+  font-size: .75rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+
+.reason-card {
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: .85rem 1rem;
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+  align-self: center;
+
+  .robot {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .reason-text {
+    font-size: .83rem;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0 0 .3rem;
+  }
+
+  .analysis-time {
+    font-size: .72rem;
+    color: #9ca3af;
+  }
+}
+
+
+.skeleton-ring {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}

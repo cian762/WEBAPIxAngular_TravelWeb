@@ -13,22 +13,26 @@ import {
   CdkDrag
 } from '@angular/cdk/drag-drop';
 import { ItineraryItem } from '../../interface/itinerarymainmodel';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { GoogleMAPservice } from '../../service/google-mapservice';
 import { RouterMapComponent } from '../router-map-component/router-map-component';
+import { ItineraryMetricscomponent } from '../itinerary-metricscomponent/itinerary-metricscomponent';
+import { VersionCompareDialog } from '../version-compare-dialog/version-compare-dialog';
+import { ToastService } from '../../service/toast-service';
 declare const google: any;
 
 @Component({
   selector: 'app-itinerary-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, RouterModule, RouterMapComponent],
+  imports: [CommonModule, FormsModule, CdkDropListGroup, CdkDropList, CdkDrag, RouterModule, RouterMapComponent, ItineraryMetricscomponent, VersionCompareDialog],
   templateUrl: './change-itinerary-item.html',
   styleUrl: './change-itinerary-item.css',
 })
 export class ItineraryDetailComponent implements OnInit {
   private http = inject(HttpClient);
   baseUrl: string = environment.apiBaseUrl;
+  private toast = inject(ToastService);
 
   @Input() itineraryId!: number;
   @ViewChild('searchInput') searchInput!: ElementRef;
@@ -40,10 +44,15 @@ export class ItineraryDetailComponent implements OnInit {
   days: DayPlan[] = [];
   startTime: string = '';
   endDate: string = '';
+  introduction: string = '';
   dayTabs: number[] = [];
   /** 目前顯示的天數（預設第1天） */
   activeDayIndex = 1;
   currentDayItinerary?: DayItineraryDto;
+  showCompareDialog = false;
+  currentVersionId = 0;
+  isEditingDescription = false;
+  editingDescription = '';
   /** 所有行程總數（地圖圖例用） */
   get totalItems(): number {
     return this.days.reduce((sum, d) => sum + d.items.length, 0);
@@ -51,13 +60,46 @@ export class ItineraryDetailComponent implements OnInit {
 
   private currentAddingDay?: DayPlan;
 
-  constructor(private activateroute: ActivatedRoute, private itineraryService: Mainservice, private mapsService: GoogleMAPservice) { }
+  constructor(private activateroute: ActivatedRoute, private itineraryService: Mainservice, private mapsService: GoogleMAPservice, private router: Router) { }
   /**建立HOOK */
   ngOnInit() {
     this.itineraryId = Number(this.activateroute.snapshot.params['id']);
     if (this.itineraryId) {
       this.loadData();
     }
+  }
+  /** 編輯行程描述 */
+  openDescriptionEdit(): void {
+    this.editingDescription = this.introduction || '';
+    this.isEditingDescription = true;
+  }
+
+  cancelDescriptionEdit(): void {
+    this.isEditingDescription = false;
+  }
+
+  confirmDescriptionEdit(): void {
+    if (this.editingDescription === this.introduction) {
+      this.isEditingDescription = false;
+      return;
+    }
+    this.updateIntroduction(this.editingDescription);
+  }
+  /**連接API更新行程描述 */
+  private updateIntroduction(newIntro: string) {
+    const url = `${this.baseUrl}/Itinerary/${this.itineraryId}/description`;
+
+    this.http.patch(url, { introduction: newIntro }).subscribe({
+      next: () => {
+        this.introduction = newIntro; // 成功後更新畫面
+        this.isEditingDescription = false;
+
+      },
+      error: (err) => {
+        console.error('更新失敗', err);
+
+      }
+    });
   }
   /**載入數據後分別對應到天數 */
   private mapApiToDays(items: ItineraryItem[]): DayPlan[] {
@@ -83,12 +125,14 @@ export class ItineraryDetailComponent implements OnInit {
     formDataimg.append('image', file);
     this.http.post<any>(`${this.baseUrl}/Itinerary/Savephoto/${this.itineraryId}`, formDataimg)
       .subscribe({
-        next: (res) => { this.imageUrl = res.url; alert('封面更新成功！'); },
-        error: (err) => { console.error('上傳失敗', err); alert('上傳失敗，請檢查網絡'); }
+        next: (res) => { this.imageUrl = res.url; this.toast.success('封面更新成功！');; },
+        error: (err) => { console.error('上傳失敗', err); this.toast.error('上傳失敗，請檢查網絡'); }
       });
   }
-  /**分割AI放入內容的字串 */
-
+  /**開啟過去版本視窗*/
+  viewVersions() {
+    this.showCompareDialog = true;
+  }
   /**數共有幾天數 */
   getCountForDay(dayNum: number): number {
     const dayData = this.days.find(d => d.day === dayNum);
@@ -155,6 +199,8 @@ export class ItineraryDetailComponent implements OnInit {
       this.startTime = res.startTime || res.StartTime;
       this.endDate = res.endTime || res.EndTime;
       console.log('存入元件後的 startTime:', this.startTime);
+      this.introduction = res.introduction || res.Introduction || '';
+      this.currentVersionId = res.VersionId || res.versionId || 0;
       this.generateDayTabs(this.startTime, this.endDate);
       this.days = this.mapApiToDays(res.currentVersion?.items || []);
       console.log('第一筆 item 原始結構:', res.currentVersion?.items?.[0]);
@@ -164,14 +210,7 @@ export class ItineraryDetailComponent implements OnInit {
         this.activeDayIndex = 1;
       }
       this.syncCurrentDayItinerary(this.activeDayIndex);
-      // this.days.forEach(day => {
-      //   day.items.forEach(item => {
-      //     // 如果 AttractionId 是 0 或 null，才需要解析字串
-      //     if (!item.attractionId || item.attractionId === 0) {
-      //       this.parseAiDescription(item);
-      //     }
-      //   });
-      // });
+      console.log(this.currentVersionId);
       this.syncCurrentDayItinerary(this.activeDayIndex);
     });
   }
@@ -278,6 +317,16 @@ export class ItineraryDetailComponent implements OnInit {
       this.updateSortOrders();
     }
   }
+  /**刪除整筆行程 */
+  deleteItinerary() {
+    if (confirm('確定要刪除整個行程嗎？')) {
+      this.http.delete(`${this.baseUrl}/Itinerary/${this.itineraryId}`)
+        .subscribe(() => {
+          this.toast.success('行程已刪除');
+          this.router.navigate(['/Itinerarylist']);
+        });
+    }
+  }
   /**把ITEM物件扁平化 */
   changeItem(event: any) {
     const flattenedItems: any[] = [];
@@ -306,7 +355,7 @@ export class ItineraryDetailComponent implements OnInit {
     };
     console.log("最後發送的 Payload:", payload);
     this.http.post(`${this.baseUrl}/Itinerary/${this.itineraryId}/save-snapshot`, payload)
-      .subscribe(() => alert('修改成功'));
+      .subscribe(() => this.toast.success('修改成功'));
   }
   /**判斷拖拉事件 */
   onDrop(event: CdkDragDrop<ItineraryItem[]>) {
@@ -382,7 +431,7 @@ export class ItineraryDetailComponent implements OnInit {
       },
       error: (err) => {
         console.error('匯出失敗', err);
-        alert('PDF 匯出失敗，請稍後再試');
+        this.toast.error('PDF 匯出失敗，請稍後再試');
         this.isExporting = false;
       }
     });

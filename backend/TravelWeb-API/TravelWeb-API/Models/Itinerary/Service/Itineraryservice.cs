@@ -29,7 +29,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public async Task<List<ItineraryCardDto>> GetItinerariesByMemberAsync(string memberId)
         {
             return await _context.Itineraries
-                .Where(i => i.MemberId == memberId)
+                .Where(i => i.MemberId == memberId && i.CurrentStatus == "Active")
                 .OrderByDescending(i => i.CreateTime)
                 .Select(i => new ItineraryCardDto
                 {
@@ -165,6 +165,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     StartTime = i.StartTime,
                     EndTime = i.EndTime,
                     Introduction = i.Introduction,
+                    VersionId = i.ItineraryVersions
+                        .Where(v => v.CurrentUsageStatus == "Y").Select(V => V.VersionId).FirstOrDefault(),
                     // 抓取「當前使用中」的版本
                     CurrentVersion = i.ItineraryVersions
                         .Where(v => v.CurrentUsageStatus == "Y")
@@ -180,6 +182,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                                 {
                                     AttractionId = item.AttractionId ?? 0,
                                     ItemId = item.ItemId,
+
                                     SortOrder = item.SortOrder ?? 0,
                                     DayNumber = item.DayNumber ?? 1,
                                     ContentDescription = item.ContentDescription,
@@ -393,7 +396,17 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 4. 回傳網址給前端，讓前端可以 [style.background-image] 顯示
             return imageUrl;
         }
+        //儲存描述
+        public async Task<bool> UpdateItineraryDescriptionAsync(int id, string introduction)
+        {
+            var itinerary = await _context.Itineraries.FindAsync(id);
+            if (itinerary == null) return false;
 
+            itinerary.Introduction = introduction;
+
+            // 如果你有版本快照系統，可以在這裡呼叫 SaveItinerarySnapshotAsync
+            return await _context.SaveChangesAsync() > 0;
+        }
         //額外增加一天
         public async Task<DateTime> ExtendOneDayAsync(int itineraryId)
         {

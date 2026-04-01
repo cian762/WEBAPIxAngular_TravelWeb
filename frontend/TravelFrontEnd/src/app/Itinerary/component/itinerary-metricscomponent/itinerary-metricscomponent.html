@@ -1,0 +1,39 @@
+<div class="metrics-wrap">
+
+  @if (isLoading) {
+  @for (_ of [1, 2, 3]; track _) {
+  <div class="skeleton-ring"></div>
+  }
+  }
+
+  @if (!isLoading && _analysis) {
+
+  @for (ring of rings; track ring.label) {
+  <div class="ring-card">
+    <svg viewBox="0 0 110 110" class="ring-svg">
+      <circle cx="55" cy="55" [attr.r]="R" class="ring-track" />
+      <circle cx="55" cy="55" [attr.r]="R" class="ring-fill" [attr.stroke-dasharray]="C"
+        [attr.stroke-dashoffset]="offset(ring.value)" [attr.stroke]="ring.color" />
+      <text x="55" y="50" class="ring-val">{{ pct(ring.value) }}</text>
+      <text x="55" y="63" class="ring-unit">%</text>
+      <text x="55" y="75" class="ring-lbl">{{ ring.label }}</text>
+    </svg>
+    <span class="ring-hint">{{ ring.hint }}</span>
+  </div>
+  }
+
+  @if (_analysis.reason) {
+  <div class="reason-card">
+    <span class="robot">🤖</span>
+    <div>
+      <p class="reason-text">{{ _analysis.reason }}</p>
+      <span class="analysis-time">
+        分析時間：{{ _analysis.analysisTime | date:'yyyy/MM/dd HH:mm' }}
+      </span>
+    </div>
+  </div>
+  }
+
+  }
+
+</div>

@@ -17,6 +17,21 @@
         <p class="cover-date">
           <span class="date-icon">📅</span> {{ startTime | date:'yyyy/MM/dd' }}-{{ endDate | date:'yyyy/MM/dd' }}
         </p>
+        <div class="cover-description">
+          @if (isEditingDescription) {
+          <textarea class="desc-textarea" [(ngModel)]="editingDescription" rows="3" placeholder="請輸入行程描述...">
+    </textarea>
+          <div class="desc-actions">
+            <button class="btn-confirm-desc" (click)="confirmDescriptionEdit()">✓ 儲存</button>
+            <button class="btn-cancel-desc" (click)="cancelDescriptionEdit()">✕ 取消</button>
+          </div>
+          } @else {
+          <p class="intro-text" (click)="openDescriptionEdit()">
+            {{ introduction || '點擊這裡新增行程描述...' }}
+          </p>
+          <span class="edit-icon" (click)="openDescriptionEdit()">✏️</span>
+          }
+        </div>
       </div>
       <label for="coverUpload" class="upload-btn">
         <span class="upload-icon">📷</span> 上傳封面
@@ -62,16 +77,23 @@
       </div>
 
       <div class="sidebar-actions">
+        <div class="sidebar-metrics">
+          @if(currentVersionId) {
+          <app-itinerary-metricscomponent [itineraryId]="itineraryId" [versionId]="currentVersionId">
+          </app-itinerary-metricscomponent>
+          }
+        </div>
         <button class="btn-save" (click)="changeItem($event)">
           <span>💾</span> 儲存快照
         </button>
-        <button class="btn-version">
+        <button class="btn-version" (click)="viewVersions()">
           <span>🕑</span> 查看過去版本
         </button>
         <button class="btn-export-pdf" (click)="exportPdf()" [disabled]="isExporting">
           <span>{{ isExporting ? '⏳' : '📄' }}</span>
           {{ isExporting ? '產生中...' : '匯出 PDF' }}
         </button>
+        <button class="btn-danger" (click)="deleteItinerary()"><span>🗑</span> 刪除行程</button>
       </div>
 
     </aside>
@@ -200,4 +222,8 @@
     </div>
   </div>
 </div>
+}
+@if (showCompareDialog) {
+<app-version-compare-dialog [itineraryId]="itineraryId" (close)="showCompareDialog = false">
+</app-version-compare-dialog>
 }
