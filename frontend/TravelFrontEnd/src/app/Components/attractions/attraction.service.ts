@@ -153,4 +153,18 @@ export class AttractionService {
       `${this.apiUrl}/Attraction/${attractionId}/nearby?radius=${radius}&top=${top}`
     ).pipe(catchError(() => of([])));
   }
+
+  // 切換票券收藏
+  toggleFavorite(productId: number): Observable<{ isFavorited: boolean; message: string }> {
+    return this.http.post<{ isFavorited: boolean; message: string }>(
+      `${this.apiUrl}/AttractionProduct/${productId}/favorite`, {}
+    ).pipe(catchError(() => of({ isFavorited: false, message: '操作失敗' })));
+  }
+
+  // 取得當前會員的收藏票券 ID 清單
+  getMyFavorites(): Observable<number[]> {
+    return this.http.get<number[]>(
+      `${this.apiUrl}/AttractionProduct/my-favorites`
+    ).pipe(catchError(() => of([])));
+  }
 }
