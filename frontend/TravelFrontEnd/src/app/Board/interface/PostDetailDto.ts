@@ -15,7 +15,7 @@ export interface PostDetailDto {
   commentCount: number,
   likeCount: number,
   isLike: boolean,
-
+  isCollect: boolean;
 
 
 

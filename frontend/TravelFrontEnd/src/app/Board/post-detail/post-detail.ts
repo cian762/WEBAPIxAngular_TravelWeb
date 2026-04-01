@@ -38,16 +38,24 @@ export class PostDetail implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
       this.id = Number(p.get('id'));
-      this.Serve.getArticleDetailAPI(this.id).subscribe((d) => {
-        this.post = d;
-        if (d.cover) {
-          this.allPhotoList?.push(d.cover);
+      this.Serve.getArticleDetailAPI(this.id).subscribe({
+        next: (d) => {
+          {
+            this.post = d;
+            if (d.cover) {
+              this.allPhotoList?.push(d.cover);
+            }
+            if (d.postPhoto) {
+              this.allPhotoList?.push(...d.postPhoto);
+              console.log(this.id);
+            }
+          }
+        },
+        error: (err: any) => {
+          if (err.status === 404) {
+            this.router.navigate(['Board/404']);
+          }
         }
-        if (d.postPhoto) {
-          this.allPhotoList?.push(...d.postPhoto);
-          console.log(this.id);
-        }
-
       });
       this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
         this.TagsList = d;
@@ -84,6 +92,18 @@ export class PostDetail implements OnInit {
         this.post.isLike = false;
       }
       this.Serve.postArticleLike(id).subscribe();
+    }
+  }
+
+  ToCollect(id: number) {
+    if (this.post) {
+      if (!this.post.isCollect) {
+        this.post.isCollect = true;
+      }
+      else {
+        this.post.isCollect = false;
+      }
+      this.Serve.postArticleCollect(id).subscribe();
     }
   }
 }

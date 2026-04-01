@@ -59,24 +59,7 @@
 }
 
 
-.btn-follow {
-  display: block;
-  background-color: white;
-  color: #f8b600;
-  border: 0.8px solid #f8b600;
-  padding: 10px 40px;
-  cursor: pointer;
-  margin: 20px auto;
-  transition: all 0.2s;
-  text-decoration: none;
-  font-size: 18px;
-}
 
-.btn-follow:hover {
-  background-color: #f8b600;
-  color: white;
-  border-color: transparent;
-}
 
 /* ===========以下為貼文區之樣式=========== */
 .user-avatar {

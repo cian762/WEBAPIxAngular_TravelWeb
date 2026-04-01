@@ -15,6 +15,7 @@ public partial class MemberSystemContext : DbContext
     {
     }
 
+    
     public virtual DbSet<Administrator> Administrators { get; set; }
 
     public virtual DbSet<Authorization> Authorizations { get; set; }
@@ -155,7 +156,9 @@ public partial class MemberSystemContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(50);
 
-            entity.HasMany(d => d.Followeds).WithMany(p => p.Followers)
+            // 只設定一側，EF Core 自動推導反向
+            entity.HasMany(d => d.Followeds)
+                .WithMany(p => p.Followers)
                 .UsingEntity<Dictionary<string, object>>(
                     "MemberFollowing",
                     r => r.HasOne<MemberInformation>().WithMany()
@@ -166,25 +169,6 @@ public partial class MemberSystemContext : DbContext
                         .HasForeignKey("FollowerId")
                         .OnDelete(DeleteBehavior.ClientSetNull)
                         .HasConstraintName("FK_Member_Following_Member_Information"),
-                    j =>
-                    {
-                        j.HasKey("FollowerId", "FollowedId").HasName("PK_Member_Following_1");
-                        j.ToTable("Member_Following", "Member");
-                        j.IndexerProperty<string>("FollowerId").HasMaxLength(50);
-                        j.IndexerProperty<string>("FollowedId").HasMaxLength(50);
-                    });
-
-            entity.HasMany(d => d.Followers).WithMany(p => p.Followeds)
-                .UsingEntity<Dictionary<string, object>>(
-                    "MemberFollowing",
-                    r => r.HasOne<MemberInformation>().WithMany()
-                        .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_Member_Following_Member_Information"),
-                    l => l.HasOne<MemberInformation>().WithMany()
-                        .HasForeignKey("FollowedId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_Member_Following_Member_Information1"),
                     j =>
                     {
                         j.HasKey("FollowerId", "FollowedId").HasName("PK_Member_Following_1");
@@ -193,6 +177,7 @@ public partial class MemberSystemContext : DbContext
                         j.IndexerProperty<string>("FollowedId").HasMaxLength(50);
                     });
         });
+        
 
         modelBuilder.Entity<MemberList>(entity =>
         {

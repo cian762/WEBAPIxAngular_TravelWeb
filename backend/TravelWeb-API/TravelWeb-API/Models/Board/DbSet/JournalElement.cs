@@ -9,6 +9,8 @@ public partial class JournalElement
 
     public int? ArticleId { get; set; }
 
+    public byte Page { get; set; }
+
     public double PosX { get; set; }
 
     public double PosY { get; set; }
@@ -21,5 +23,9 @@ public partial class JournalElement
 
     public string? Photo { get; set; }
 
-    public virtual Article Element { get; set; } = null!;
+    public int Width { get; set; }
+    public int Height { get; set; }
+
+    public Journal Journal { get; set; } = null!;
+    
 }

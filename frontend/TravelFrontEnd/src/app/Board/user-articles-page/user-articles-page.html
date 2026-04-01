@@ -1,72 +1,25 @@
 <div class="host-body">
   <!-- 用戶資訊起點 -->
-  <div class="d-flex  justify-content-center align-items-center">
+  <div class="d-flex flex-column justify-content-center align-items-center">
     <div class="user-info ">
       <img class="user-avatar m-3" [src]="curUser.avatarUrl">
       <h3 class="text-center">{{curUser.name}}</h3>
       <p class="text-center m-3">{{totalCount}}篇文章</p>
-      <button class="btn-follow"> 追蹤
-      </button>
+      <div class="btn-user-group dropup">
+        <button class="btn-follow" [class.btn-following]="isFollowing" [class.btn-unfollow]="!isFollowing"
+          (click)="ToFollow()">
+          {{ isFollowing ? '已追蹤' : '追蹤' }}
+        </button>
+        <button class="btn-user-more" data-bs-toggle="dropdown" aria-expanded="false"><i
+            class="ri-more-2-fill"></i></button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" (click)="toBlock()">封鎖</a></li>
+          <li><a class="dropdown-item" href="#">分享用戶主頁</a></li>
+          <li><a class="dropdown-item" href="#">複製用戶主頁連結</a></li>
+        </ul>
+      </div>
+
     </div>
-
+    <app-article-list class="col-lg-8" [articleList]="articleList"
+      (tagSelected)="onTagSelected($event)"></app-article-list>
   </div>
-  <!-- 文章列起點 -->
-  <div class="my-container col-6">
-    @for (article of articleList; track $index) {<div class="single-post border-bottom">
-      <!-- 作者 + 地點 -->
-      <div class="post-author-row">
-        <div class="author-info" (click)="goToMemderPage(article.userID)">
-          <img class="userAvatar" [src]="article.userAvatar">
-          <div>
-            <div class="author-name">{{article.userName}}</div>
-            <div class="author-date">
-              {{article.createdAt | date:'M月d日 y年':'zh-Hant'}}
-            </div>
-          </div>
-        </div>
-        <div class="post-location">
-          <i class="ri-map-pin-line"></i>{{article.regionName}}
-          <button class="btn-more"><i class="ri-more-2-fill"></i></button>
-        </div>
-
-      </div>
-
-      <!-- 大圖，無圓角 -->
-      <div class="post-cover">
-        <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
-      </div>
-      <!-- 標題 -->
-      <a class="posts-title" (click)="goToDetail(article.articleId)">
-        <h3>
-          <span class="post-type">討論</span>
-          {{article.title}}
-        </h3>
-      </a>
-      <!-- 底列：讚 留言 -->
-      <div class="post-footer">
-        <!-- 標籤 -->
-        <div class="tags">
-          <span>相關標籤:</span>
-          @for (tag of article.tags; track tag.tagId) {
-          <button class="tag-btn">
-            <i [className]="tag.icon"></i>
-            {{tag.tagName}}
-          </button>
-          }
-        </div>
-        <!-- 讚 留言 -->
-        <div class="post-reactions">
-          <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
-            <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
-            {{article.likeCount}}
-          </a>
-          <a class="reaction-item" href="#">
-            <span class="lnr lnr-bubble"></span>
-            N則留言
-          </a>
-        </div>
-      </div>
-    </div>}
-  </div>
-  <!-- 文章列終點 -->
-</div>
