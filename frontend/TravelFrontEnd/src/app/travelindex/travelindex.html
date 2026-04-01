@@ -20,8 +20,8 @@
 
           <ul class="search-suggestions" *ngIf="showSuggestions && suggestions.length > 0">
             <li *ngFor="let s of suggestions" (click)="selectSuggestion(s)">
-              <span class="suggestion-type" [ngClass]="'type-' + s.type">
-                {{ s.type }}
+              <span class="suggestion-type" [ngClass]="'type-' + s.categoryName">
+                {{ s.categoryName }}
               </span>
               <span class="suggestion-title">{{ s.title }}</span>
             </li>

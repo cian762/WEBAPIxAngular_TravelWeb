@@ -531,22 +531,22 @@ a {
 }
 
 /* 根據分類名稱上色 (需對應後端傳回的 type 字串) */
-.type-Attraction {
+.type-景點 {
   background: #dcfce7;
   color: #15803d;
 }
 
-.type-Product {
+.type-行程商品 {
   background: #e0f2fe;
   color: #0369a1;
 }
 
-.type-Article {
+.type-文章 {
   background: #fef9c3;
   color: #a16207;
 }
 
-.type-Activity {
+.type-活動 {
   background: #ffedd5;
   color: #c2410c;
 }
