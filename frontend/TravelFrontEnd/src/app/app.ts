@@ -13,10 +13,11 @@ import { TripProductDetail } from "./trip/component/trip-product-detail/trip-pro
 import { LoginComponent } from "./Member/login/login.component";
 import { filter } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { ToastComponent } from './Itinerary/component/toast-component/toast-component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer, Banner, CommonModule],
+  imports: [RouterOutlet, Header, Footer, Banner, CommonModule, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

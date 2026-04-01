@@ -17,6 +17,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         static bool isfontexist = false;
         private static readonly object _fontLock = new object();
         private readonly GooglePlaceService _placesService;
+        #region 查看行程相關
         public ItineraryService(TravelContext context, ICloudinaryService cloudinaryService, IConfiguration config, GooglePlaceService placesService)
         {
             _imageUploadService = cloudinaryService;
@@ -29,7 +30,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
         public async Task<List<ItineraryCardDto>> GetItinerariesByMemberAsync(string memberId)
         {
             return await _context.Itineraries
-                .Where(i => i.MemberId == memberId)
+                .Where(i => i.MemberId == memberId && i.CurrentStatus == "Active")
                 .OrderByDescending(i => i.CreateTime)
                 .Select(i => new ItineraryCardDto
                 {
@@ -165,6 +166,8 @@ namespace TravelWeb_API.Models.Itinerary.Service
                     StartTime = i.StartTime,
                     EndTime = i.EndTime,
                     Introduction = i.Introduction,
+                    VersionId = i.ItineraryVersions
+                        .Where(v => v.CurrentUsageStatus == "Y").Select(V => V.VersionId).FirstOrDefault(),
                     // 抓取「當前使用中」的版本
                     CurrentVersion = i.ItineraryVersions
                         .Where(v => v.CurrentUsageStatus == "Y")
@@ -180,6 +183,7 @@ namespace TravelWeb_API.Models.Itinerary.Service
                                 {
                                     AttractionId = item.AttractionId ?? 0,
                                     ItemId = item.ItemId,
+
                                     SortOrder = item.SortOrder ?? 0,
                                     DayNumber = item.DayNumber ?? 1,
                                     ContentDescription = item.ContentDescription,
@@ -393,6 +397,17 @@ namespace TravelWeb_API.Models.Itinerary.Service
             // 4. 回傳網址給前端，讓前端可以 [style.background-image] 顯示
             return imageUrl;
         }
+        //儲存描述
+        public async Task<bool> UpdateItineraryDescriptionAsync(int id, string introduction)
+        {
+            var itinerary = await _context.Itineraries.FindAsync(id);
+            if (itinerary == null) return false;
+
+            itinerary.Introduction = introduction;
+
+            // 如果你有版本快照系統，可以在這裡呼叫 SaveItinerarySnapshotAsync
+            return await _context.SaveChangesAsync() > 0;
+        }
         //額外增加一天
         public async Task<DateTime> ExtendOneDayAsync(int itineraryId)
         {
@@ -406,13 +421,14 @@ namespace TravelWeb_API.Models.Itinerary.Service
             await _context.SaveChangesAsync();
             return itinerary.EndTime.Value;
         }
+        #endregion
         #region GOOGLE地圖
         public async Task<DayItineraryDto> GetDayItineraryAsync(int itineraryId, int dayNumber)
         {
             var items = await _context.ItineraryItems
                 .Include(x => x.Attraction)          // ← 必加
     .Include(x => x.Version) // ← Where 用到 Version 也要 Include
-            .Where(x => x.Version.ItineraryId == itineraryId && x.DayNumber == dayNumber)
+            .Where(x => x.Version.ItineraryId == itineraryId && x.Version.CurrentUsageStatus == "Y" && x.DayNumber == dayNumber)
             .OrderBy(x => x.SortOrder)
             .ToListAsync();
 
@@ -592,6 +608,25 @@ namespace TravelWeb_API.Models.Itinerary.Service
             }
         }
 
+        #endregion
+        #region 報錯相關
+        public async Task<bool> CreateErrorReportAsync(ErrorReportDto dto)
+        {
+            var errorEntity = new AigenerationError
+            {
+                ItineraryId = dto.ItineraryId,
+                VersionId = dto.VersionId,
+                ErrorType = dto.ErrorType,
+                SeverityLevel = dto.SeverityLevel,
+                ErrorMessage = dto.ErrorMessage,
+                ErrorReason = dto.ErrorReason,
+                RelatedItemId = dto.RelatedItemId,
+                IsConfirmed = dto.IsConfirmed,
+                CreateTime = DateTime.Now
+            };
+            _context.AigenerationErrors.Add(errorEntity);
+            return await _context.SaveChangesAsync() > 0;
+        }
         #endregion
     }
 }

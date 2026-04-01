@@ -196,6 +196,8 @@ builder.Services.AddScoped<IAIService, AIService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IAIItineraryService, AIItineraryService>();
 builder.Services.AddScoped<IGooglePlaceService, GooglePlaceService>();
+builder.Services.AddScoped<IAnalysisRepository, AnalysisRepository>();
+builder.Services.AddScoped<IItineraryAnalysisService, ItineraryAnalysisService>();
 builder.Services.AddHttpClient<GooglePlaceService>();
 //builder.Services.AddControllers()
 //    .AddJsonOptions(options =>

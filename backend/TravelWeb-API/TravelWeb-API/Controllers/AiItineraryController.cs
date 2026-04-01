@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TravelWeb_API.Models.Itinerary.DBContext;
 using TravelWeb_API.Models.Itinerary.DTO;
 using TravelWeb_API.Models.Itinerary.Service;
@@ -23,40 +22,7 @@ namespace TravelWeb_API.Controllers
             _context = travelContext;
 
         }
-        private async Task<int> EnsureAttractionExists(ExternalLocationDto external)
-        {
-            // 1. 根據 GooglePlaceId 檢查景點是否已存在於資料庫
-            if (!string.IsNullOrEmpty(external.GooglePlaceId) && external.GooglePlaceId != "TEMP_AI_PLACE")
-            {
-                var existing = await _context.Attractions
-                .FirstOrDefaultAsync(a => a.GooglePlaceId == external.GooglePlaceId && a.IsDeleted == false);
-                if (existing != null)
-                {
-                    return existing.AttractionId;
-                }
-            }
 
-
-            // 2. 如果不存在，則建立新的 Attraction 實體
-            var newAttr = new Models.Itinerary.DBModel.Attraction
-            {
-                Name = external.Name,
-                RegionId = 1000,
-                Address = external.Address,
-                GooglePlaceId = external.GooglePlaceId == "TEMP_AI_PLACE" ? null : external.GooglePlaceId,
-                Latitude = (decimal?)external.Latitude,
-                Longitude = (decimal?)external.Longitude,
-                CreatedAt = DateTime.Now,
-                IsDeleted = false
-            };
-
-            _context.Attractions.Add(newAttr);
-
-            // 3. 儲存變更以取得資料庫自動產生的 AttractionId
-            await _context.SaveChangesAsync();
-
-            return newAttr.AttractionId;
-        }
 
         // POST api/<AiItineraryController>
         [HttpPost("generate-ai")]

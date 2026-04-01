@@ -1,59 +1,111 @@
+<!-- itinerary-list.component.html -->
 <section class="il-page">
 
-  <!-- Header -->
-  <header class="il-header">
-    <h1 class="il-title">我的行程</h1>
-    <p class="il-subtitle">管理與規劃你的每一段旅程</p>
-  </header>
+  <!-- ── Hero Banner ── -->
+  <div class="il-hero">
+    <div class="il-hero-inner">
+      <div class="il-hero-text">
+        <div class="il-hero-eyebrow">
+          <span>🗺</span> 旅遊行程管理
+        </div>
+        <h1 class="il-hero-title">
+          我的<span>旅程</span>規劃
+        </h1>
+        <p class="il-hero-subtitle">管理與規劃你的每一段精彩旅程</p>
+      </div>
 
-  <!-- Loading -->
+      <!-- 統計數字 -->
+      @if (!isLoading() && !errorMsg()) {
+      <div class="il-hero-stats">
+        <div class="il-stat">
+          <span class="il-stat-num">{{ itineraries().length }}</span>
+          <span class="il-stat-label">全部行程</span>
+        </div>
+        <div class="il-stat">
+          <span class="il-stat-num">{{ getCountByStatus('ongoing') }}</span>
+          <span class="il-stat-label">進行中</span>
+        </div>
+        <div class="il-stat">
+          <span class="il-stat-num">{{ getCountByStatus('planned') }}</span>
+          <span class="il-stat-label">已規劃</span>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="il-toolbar">
+    <div class="il-filter-tabs">
+      <button class="il-filter-tab active">全部</button>
+      <button class="il-filter-tab">進行中</button>
+      <button class="il-filter-tab">已規劃</button>
+      <button class="il-filter-tab">已完成</button>
+    </div>
+    <a class="il-btn-create" routerLink="/itinerary">
+      <span class="il-btn-create-icon">＋</span> 建立行程
+    </a>
+  </div>
+
+  <!-- ── Loading ── -->
   @if (isLoading()) {
   <div class="il-loading">
     <div class="il-spinner"></div>
-    <p>載入中…</p>
+    <p>載入你的行程中...</p>
   </div>
   }
 
-  <!-- Error -->
+  <!-- ── Error ── -->
   @if (errorMsg()) {
   <div class="il-error">
-    <span class="il-error-icon">⚠️</span>
+    <span>⚠️</span>
     <p>{{ errorMsg() }}</p>
   </div>
   }
 
-  <!-- Empty State -->
+  <!-- ── Empty State ── -->
   @if (!isLoading() && !errorMsg() && itineraries().length === 0) {
   <div class="il-empty">
-    <img src="assets/images/empty-trip.svg" alt="尚無行程" class="il-empty-img" />
-    <p>尚無行程，快來建立第一個旅遊計畫吧！</p>
-    <button class="il-btn-create" routerLink="/itinerary">＋ 建立行程</button>
+    <div class="il-empty-visual">✈️</div>
+    <h3>還沒有任何行程</h3>
+    <p>點擊右上角按鈕，開始規劃你的第一段旅程吧！</p>
+    <a class="il-btn-create" routerLink="/itinerary">＋ 建立行程</a>
   </div>
   }
 
-  <!-- Card Grid -->
-  @if (!isLoading() && itineraries().length > 0) {
+  <!-- ── Card Grid ── -->
+  @if (!isLoading() && !errorMsg() && itineraries().length > 0) {
   <div class="il-grid">
     @for (item of itineraries(); track item.itineraryId) {
     <article class="il-card" (click)="goToDetail(item.itineraryId)">
 
-      <!-- Cover Image -->
+      <!-- 封面圖 -->
       <div class="il-card-img-wrap">
         <img [src]="item.itineraryImage || getFallbackImage()" [alt]="item.itineraryName" class="il-card-img"
           (error)="$any($event.target).src = getFallbackImage()" />
-        <!-- Status Badge -->
+
+        <!-- 狀態標籤 -->
         <span class="il-badge il-badge--{{ item.currentStatus ?? 'draft' }}">
           {{ getStatusLabel(item.currentStatus) }}
         </span>
+
+        <!-- 天數標籤 -->
+        <div class="il-card-days">
+          📅 {{ getTripDays(item.startTime, item.endTime) }} 天
+        </div>
       </div>
 
-      <!-- Card Body -->
+      <!-- 卡片內容 -->
       <div class="il-card-body">
         <h2 class="il-card-name">{{ item.itineraryName }}</h2>
-        <p class="il-card-intro">{{ item.introduction || '暫無敘述' }}</p>
-        <div class="il-card-meta">
-          <span class="il-meta-icon">📅</span>
-          <span>{{ formatDate(item.startTime) }} — {{ formatDate(item.endTime) }}</span>
+        <p class="il-card-intro">{{ item.introduction || '點擊查看行程詳情' }}</p>
+
+        <div class="il-card-footer">
+          <div class="il-card-meta">
+            <span>📆</span>
+            <span>{{ formatDate(item.startTime) }} — {{ formatDate(item.endTime) }}</span>
+          </div>
+          <div class="il-card-arrow">→</div>
         </div>
       </div>
 

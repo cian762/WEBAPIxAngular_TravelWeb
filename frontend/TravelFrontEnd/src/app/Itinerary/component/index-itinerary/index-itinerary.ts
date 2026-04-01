@@ -1,7 +1,8 @@
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, Input, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Mainservice } from '../../service/mainservice';
 import { Router } from '@angular/router';
+import { ToastService } from '../../service/toast-service';
 
 declare var google: any;
 @Component({
@@ -11,7 +12,7 @@ declare var google: any;
   styleUrl: './index-itinerary.css',
 })
 export class IndexItinerary implements AfterViewInit {
-
+  private toast = inject(ToastService);
   constructor(private mainService: Mainservice, private router: Router) { }
   isLoading: boolean = false;
   loadingMessage: string = '';
@@ -51,7 +52,7 @@ export class IndexItinerary implements AfterViewInit {
       const place = autocomplete.getPlace();
       // 防呆（非常重要）
       if (!place.geometry) {
-        alert('請從下拉選單選擇地點');
+        this.toast.error('請從下拉選單選擇地點');
         return;
       }
       this.location = place.formatted_address;
@@ -73,7 +74,7 @@ export class IndexItinerary implements AfterViewInit {
   endDateTime: string = '';
   createTrip() {
     if (this.startDateTime > this.endDateTime) {
-      alert('時間錯誤');
+      this.toast.error('時間錯誤');
       return;
     }
     this.isLoading = true;
@@ -107,24 +108,24 @@ export class IndexItinerary implements AfterViewInit {
             this.router.navigate(['/itinerary-detail', newId]);
           } else {
             this.isLoading = false;
-            alert('建立成功，但無法取得行程編號');
+            this.toast.error('建立成功，但無法取得行程編號');
           }
         },
         error: (err) => {
           console.error('錯誤:', err);
-          alert('建立失敗');
+          this.toast.error('建立失敗');
         }
       });
   }
   createByAI() {
     if (!this.placeId) {
-      alert('請重新選擇正確的地點（需從 Google 下拉選單點擊）');
+      this.toast.error('請重新選擇正確的地點（需從 Google 下拉選單點擊）');
       return;
     }
     this.isLoading = true;
     this.loadingMessage = 'AI 正在規劃行程，請稍候...';
     if (this.startDateTime > this.endDateTime) {
-      alert('時間錯誤');
+      this.toast.error('時間錯誤');
       return;
     }
     const requestBody = {
@@ -156,12 +157,12 @@ export class IndexItinerary implements AfterViewInit {
             this.router.navigate(['/itinerary-detail', newId]);
           } else {
             this.isLoading = false;
-            alert('建立成功，但無法取得行程編號');
+            this.toast.error('建立成功，但無法取得行程編號');
           }
         },
         error: (err) => {
           console.error('錯誤:', err);
-          alert('建立失敗');
+          this.toast.error('建立失敗');
         }
       });
 

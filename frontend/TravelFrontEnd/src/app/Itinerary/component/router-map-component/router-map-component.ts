@@ -19,7 +19,7 @@ export class RouterMapComponent implements AfterViewInit, OnChanges {
   private renderer!: google.maps.DirectionsRenderer;
   private mapReady = false;
   constructor(private mapsService: GoogleMAPservice, private Mainservice: Mainservice) { }
-private lastLoadedKey = '';
+  private lastLoadedKey = '';
   ngAfterViewInit(): void {
     this.map = new google.maps.Map(this.mapContainer.nativeElement, {
       zoom: 12,
@@ -31,7 +31,7 @@ private lastLoadedKey = '';
     this.loadAndRenderRoute(); // ← 改這裡
   }
   ngOnChanges(changes: SimpleChanges): void {
-if (!this.mapReady) return;  // 地圖還沒好，AfterViewInit 會負責第一次載入
+    if (!this.mapReady) return;  // 地圖還沒好，AfterViewInit 會負責第一次載入
 
     const currentKey = `${this.itineraryId}_${this.dayNumber}`;
     if (currentKey === this.lastLoadedKey) return;  // ← 同樣組合不重複載入
@@ -41,7 +41,7 @@ if (!this.mapReady) return;  // 地圖還沒好，AfterViewInit 會負責第一�
   }
   private loadAndRenderRoute(): void {
     if (!this.itineraryId || !this.dayNumber) return;
- const currentKey = `${this.itineraryId}_${this.dayNumber}`;
+    const currentKey = `${this.itineraryId}_${this.dayNumber}`;
     this.lastLoadedKey = currentKey;  // ← 記錄這次載入的 key
     this.Mainservice.getDayItinerary(this.itineraryId, this.dayNumber)
       .subscribe({
@@ -57,14 +57,16 @@ if (!this.mapReady) return;  // 地圖還沒好，AfterViewInit 會負責第一�
       console.warn('地點數量不足');
       return;
     }
-    // AI 生成的地點可能 placeId 是 'TEMP_AI_PLACE'，過濾掉
-    const validItems = dto.items.filter(
-      item => item.placeId && item.placeId !== 'TEMP_AI_PLACE'
-    );
-    console.log('validItems:', validItems);
+    const seen = new Set<string>();
+    const uniqueItems = dto.items.filter(item => {
+      if (!item.placeId || item.placeId === 'TEMP_AI_PLACE') return false;
+      if (seen.has(item.placeId)) return false;
+      seen.add(item.placeId);
+      return true;
+    });
 
-    if (validItems.length < 2) {
-      console.warn('有效 placeId 不足 2 筆');
+    if (uniqueItems.length < 2) {
+      console.warn('去重後有效 placeId 不足 2 筆');
       return;
     }
 
@@ -73,7 +75,7 @@ if (!this.mapReady) return;  // 地圖還沒好，AfterViewInit 會負責第一�
       this.renderer,
       this.itineraryId,
       this.dayNumber,
-      validItems
+      uniqueItems
     );
   }
 

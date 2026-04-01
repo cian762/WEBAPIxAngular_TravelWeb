@@ -27,7 +27,16 @@ export class Itinerarylist implements OnInit {
   private apiUrl = `${this.baseUrl}/Itinerary/list`;
 
   constructor(private http: HttpClient, private router: Router) { }
+  getTripDays(start: string | null, end: string | null): number {
+    if (!start || !end) return 0;
+    const diff = new Date(end).getTime() - new Date(start).getTime();
+    return Math.max(1, Math.round(diff / (1000 * 60 * 60 * 24)) + 1);
+  }
 
+  // 依狀態計算數量
+  getCountByStatus(status: string): number {
+    return this.itineraries().filter(i => i.currentStatus === status).length;
+  }
   ngOnInit(): void {
     this.fetchItineraries();
   }

@@ -1,0 +1,222 @@
+.metrics-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  padding: .75rem 0;
+}
+
+
+.ring-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  min-width: 110px;
+}
+
+.ring-svg {
+  width: 110px;
+  height: 110px;
+
+  .ring-track {
+    fill: none;
+    stroke: #e5e7eb;
+    stroke-width: 9;
+  }
+
+  .ring-fill {
+    fill: none;
+    stroke-width: 9;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset .85s cubic-bezier(.4, 0, .2, 1), stroke .3s;
+  }
+
+  .ring-val {
+    font-size: 20px;
+    font-weight: 800;
+    fill: #111827;
+    text-anchor: middle;
+  }
+
+  .ring-unit {
+    font-size: 10px;
+    fill: #6b7280;
+    text-anchor: middle;
+  }
+
+  .ring-lbl {
+    font-size: 10px;
+    fill: #9ca3af;
+    text-anchor: middle;
+  }
+}
+
+.ring-hint {
+  font-size: .75rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.robot-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.robot-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(248, 182, 0, 0.1);
+  border: 1px solid rgba(248, 182, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  /* ← tooltip 的定位基準 */
+  transition: background 0.15s;
+  color: var(--gold-dark);
+}
+
+.robot-icon-wrap:hover {
+  background: rgba(248, 182, 0, 0.2);
+}
+
+.robot-label {
+  font-size: 11px;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+
+/* Tooltip 預設隱藏，絕對定位浮在上方 */
+.robot-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  /* icon 上方 */
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  width: 280px;
+  background: #ffffff;
+  border: 1px solid rgba(248, 182, 0, 0.25);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 999;
+}
+
+/* 開啟狀態 */
+.robot-tooltip.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 對話框小三角 */
+.robot-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: rgba(248, 182, 0, 0.25);
+}
+
+.robot-tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #ffffff;
+  z-index: 1;
+  margin-top: -1px;
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(248, 182, 0, 0.15);
+}
+
+.tooltip-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold-deeper, #7a5800);
+}
+
+.tooltip-reason {
+  font-size: 13px;
+  color: var(--text-soft);
+  line-height: 1.65;
+  margin: 0 0 10px;
+}
+
+.tooltip-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.reason-card {
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: .85rem 1rem;
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+  align-self: center;
+
+  .robot {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .reason-text {
+    font-size: .83rem;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0 0 .3rem;
+  }
+
+  .analysis-time {
+    font-size: .72rem;
+    color: #9ca3af;
+  }
+}
+
+
+.skeleton-ring {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}

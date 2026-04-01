@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.AI.OpenAI;
 using OpenAI.Chat;
+using System.Text.Json;
 
 namespace TravelWeb_API.Models.Itinerary.Service
 {
@@ -29,13 +30,16 @@ namespace TravelWeb_API.Models.Itinerary.Service
                 Temperature = 0.7f,
 
             };
+            var userContent = userJsonInput is string s
+        ? s
+        : JsonSerializer.Serialize(userJsonInput);
 
 
             // 4. 發送對話 (建立通道並傳送訊息)
             var completion = await _chatClient.CompleteChatAsync(
             [
                 new SystemChatMessage(systemPrompt),
-                new UserChatMessage(userJsonInput.ToString())
+                new UserChatMessage(userContent)
             ], options);
 
             // 4. 安全地獲取回傳文字

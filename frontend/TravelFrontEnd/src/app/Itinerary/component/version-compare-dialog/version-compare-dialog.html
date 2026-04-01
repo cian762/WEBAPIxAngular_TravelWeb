@@ -1,0 +1,170 @@
+<div class="backdrop">
+  <div class="dialog">
+
+    <div class="d-head">
+      <h2>{{ step === 'select' ? '📋 選擇比較版本' : '🔍 版本差異比較' }}</h2>
+      <div class="head-actions">
+        @if (step === 'result') {
+        <button class="btn-ghost" (click)="backToSelect()">← 重新選擇</button>
+        }
+        <button class="btn-ghost btn-close" (click)="closeDialog()">✕ 取消</button>
+      </div>
+    </div>
+
+    @if (errorMsg) {
+    <div class="error-bar">⚠️ {{ errorMsg }}</div>
+    }
+
+    <!-- ═ STEP 1：選版本 ═ -->
+    @if (step === 'select') {
+
+    @if (isLoadingList) {
+    <div class="loading-msg">載入中…</div>
+    } @else {
+
+    <!-- 已選狀態列 -->
+    <div class="sel-status">
+      @if (selectedA) {
+      <span class="sel-tag tag-a">A：v{{ versionALabel }}</span>
+      } @else {
+      <span class="sel-empty">未選 A</span>
+      }
+      <span class="vs">vs</span>
+      @if (selectedB) {
+      <span class="sel-tag tag-b">B：v{{ versionBLabel }}</span>
+      } @else {
+      <span class="sel-empty">未選 B</span>
+      }
+    </div>
+
+    <!-- 版本列表 -->
+    <div class="ver-list">
+      @for (v of versions; track v.versionId) {
+      <div class="ver-row" [class.is-a]="selectedA === v.versionId" [class.is-b]="selectedB === v.versionId">
+        <div class="ver-meta">
+          <b>v{{ v.versionNumber }}</b>
+          <span class="ver-time">{{ v.createTime | date:'MM/dd HH:mm' }}</span>
+          <span class="ver-src">{{ sourceLabel(v.source) }}</span>
+          @if (v.versionRemark) {
+          <span class="ver-remark">{{ v.versionRemark }}</span>
+          }
+          <span class="ver-status" [ngClass]="statusClass(v.currentUsageStatus)">
+            {{ v.currentUsageStatus === 'Active' ? '使用中' : '已封存' }}
+          </span>
+          @if (v.hasAnalysis) {
+          <span class="has-ai">🤖 已分析</span>
+          }
+        </div>
+        <div class="ver-btns">
+          <button class="slot-btn a" [class.on]="selectedA === v.versionId" [disabled]="selectedB === v.versionId"
+            (click)="select(v.versionId, 'A')">
+            {{ selectedA === v.versionId ? '✔ A' : '選A' }}
+          </button>
+          <button class="slot-btn b" [class.on]="selectedB === v.versionId" [disabled]="selectedA === v.versionId"
+            (click)="select(v.versionId, 'B')">
+            {{ selectedB === v.versionId ? '✔ B' : '選B' }}
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <div class="d-foot">
+      @if (!canCompare) {
+      <span class="hint">請分別選擇 A、B 版本</span>
+      }
+      <button class="btn-primary" [disabled]="!canCompare || isComparing" (click)="doCompare()">
+        {{ isComparing ? '分析中…' : '開始比較' }}
+      </button>
+    </div>
+    }
+
+    <!-- ═ STEP 2：比較結果 ═ -->
+    @if (step === 'result' && result) {
+
+    <div class="ver-badges">
+      <div class="badge-a">
+        v{{ result.versionA.versionNumber }}
+        <small>{{ result.versionA.createTime | date:'MM/dd HH:mm' }}</small>
+      </div>
+      <span class="vs-lbl">vs</span>
+      <div class="badge-b">
+        v{{ result.versionB.versionNumber }}
+        <small>{{ result.versionB.createTime | date:'MM/dd HH:mm' }}</small>
+      </div>
+    </div>
+
+    <!-- AI 指標對比 -->
+    @if (result.versionA.analysis && result.versionB.analysis) {
+    <div class="metrics-cmp">
+      <h4>AI 指標對比</h4>
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>指標</th>
+            <th>v{{ result.versionA.versionNumber }}</th>
+            <th>變化</th>
+            <th>v{{ result.versionB.versionNumber }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🗺️ 可行度</td>
+            <td>{{ (result.versionA.analysis.feasibilityScore * 100) | number:'1.0-0' }}%</td>
+            <td
+              [ngClass]="deltaClass(result.versionA.analysis.feasibilityScore, result.versionB.analysis.feasibilityScore)">
+              {{ delta(result.versionA.analysis.feasibilityScore, result.versionB.analysis.feasibilityScore) }}
+            </td>
+            <td>{{ (result.versionB.analysis.feasibilityScore * 100) | number:'1.0-0' }}%</td>
+          </tr>
+          <tr>
+            <td>⚖️ 步調平衡</td>
+            <td>{{ (result.versionA.analysis.paceBalanceScore * 100) | number:'1.0-0' }}%</td>
+            <td
+              [ngClass]="deltaClass(result.versionA.analysis.paceBalanceScore, result.versionB.analysis.paceBalanceScore)">
+              {{ delta(result.versionA.analysis.paceBalanceScore, result.versionB.analysis.paceBalanceScore) }}
+            </td>
+            <td>{{ (result.versionB.analysis.paceBalanceScore * 100) | number:'1.0-0' }}%</td>
+          </tr>
+          <tr>
+            <td>😓 疲勞指數</td>
+            <td>{{ (result.versionA.analysis.fatigueIndex * 100) | number:'1.0-0' }}%</td>
+            <td
+              [ngClass]="deltaClass(result.versionA.analysis.fatigueIndex, result.versionB.analysis.fatigueIndex, true)">
+              {{ delta(result.versionA.analysis.fatigueIndex, result.versionB.analysis.fatigueIndex) }}
+            </td>
+            <td>{{ (result.versionB.analysis.fatigueIndex * 100) | number:'1.0-0' }}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    }
+
+    <!-- Diff 清單 -->
+    <div class="diff-wrap">
+      <h4>行程差異 <span class="diff-cnt">{{ result.diffs.length }} 處</span></h4>
+      @if (result.diffs.length === 0) {
+      <div class="no-diff">✅ 兩版本行程相同</div>
+      } @else {
+      @for (d of result.diffs; track d.label) {
+      <div class="diff-row" [ngClass]="diffClass(d)">
+        <span class="di">{{ diffIcon(d) }}</span>
+        <span class="dl">{{ d.label }}</span>
+        @if (d.oldValue) {
+        <span class="do">{{ d.oldValue }}</span>
+        }
+        @if (d.oldValue && d.newValue) {
+        <span class="da">→</span>
+        }
+        @if (d.newValue) {
+        <span class="dn">{{ d.newValue }}</span>
+        }
+      </div>
+      }
+      }
+    </div>
+    }
+
+  </div>
+</div>
