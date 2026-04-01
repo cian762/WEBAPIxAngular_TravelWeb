@@ -43,7 +43,7 @@ public partial class Article
     public virtual ICollection<PostPhoto> PostPhotos { get; set; } = new List<PostPhoto>();
 
     public virtual MemberInformation MemberInformation { get; set; } = null!;
-    public virtual ICollection<ArticleSource> ArticleSources { get; set; } = new List<ArticleSource>();
+    //public virtual ICollection<ArticleSource> ArticleSources { get; set; } = new List<ArticleSource>();
 
 
 

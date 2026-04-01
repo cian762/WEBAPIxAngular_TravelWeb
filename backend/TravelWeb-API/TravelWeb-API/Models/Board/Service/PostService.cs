@@ -109,10 +109,10 @@ namespace TravelWeb_API.Models.Board.Service
                     LikeCount = a.ArticleLikes.Count,
                     isLike = a.ArticleLikes.Any(l => l.UserId == currentUserId),
                     isCollect = a.ArticleFolders.Any(c => c.UserId == currentUserId),
-                    ArticleSourceID = GetSource(a.ArticleSources.FirstOrDefault()).ArticleSourceID,
-                    SourceName = GetSource(a.ArticleSources.FirstOrDefault()).SourceName,
-                    SourceCoverUrl= GetSource(a.ArticleSources.FirstOrDefault()).SourceCoverUrl,
-                    Sourcetype = GetSource(a.ArticleSources.FirstOrDefault()).Sourcetype,
+                    //ArticleSourceID = GetSource(a.ArticleSources.FirstOrDefault()).ArticleSourceID,
+                    //SourceName = GetSource(a.ArticleSources.FirstOrDefault()).SourceName,
+                    //SourceCoverUrl= GetSource(a.ArticleSources.FirstOrDefault()).SourceCoverUrl,
+                    //Sourcetype = GetSource(a.ArticleSources.FirstOrDefault()).Sourcetype,
 
                 }).FirstOrDefaultAsync();
 

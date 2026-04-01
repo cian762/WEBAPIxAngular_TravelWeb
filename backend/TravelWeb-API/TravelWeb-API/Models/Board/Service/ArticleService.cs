@@ -267,7 +267,7 @@ namespace TravelWeb_API.Models.Board.Service
                 .Include(a => a.ArticleTags)
                 .Include(a => a.ArticleFolders)
                 .Include(a => a.Post)
-                .Include(a => a.ArticleSources)                
+                                
                 .FirstOrDefaultAsync(); ;
 
             if (article != null && article.UserId == authorID)
