@@ -494,7 +494,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     join p in priceList on item.ProductCode equals p.Code
                     select item.Quantity * p.Price).Sum();
         }
-        //
+        //產品名稱
         private async Task<string> GetProductNameSnapshotAsync(string code)
         {
             // 1. 先去行程產品表找 (因為行程名稱存在 TripProducts，而 TripSchedules 是子表)
@@ -521,6 +521,7 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
 
             return attName ?? "未知商品"; // 如果都找不到，給個預設值避免報錯
         }
+        //找票種名稱及價格
         private async Task<decimal> GetSpecificUnitPriceAsync(string code, int ticketId)
         {
             // 1. 優先找行程 (TripSchedules)
