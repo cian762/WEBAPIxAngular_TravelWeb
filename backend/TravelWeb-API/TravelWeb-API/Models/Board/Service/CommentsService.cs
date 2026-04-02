@@ -24,7 +24,8 @@ namespace TravelWeb_API.Models.Board.Service
                 .Where(c => c.ArticleId == id)
                 .Include(c => c.CommentPhotos)
                 .Include(c => c.MemberInformation)
-                .Include(c => c.InverseParent).ToList();
+                .Include(c => c.InverseParent)                
+                .ToList();
 
             var result = commentList.Where(c => c.ParentId == null).Select(c => new CommentsDTO
             {
@@ -123,6 +124,7 @@ namespace TravelWeb_API.Models.Board.Service
                 Contents = c.Contents,
                 CreatedAt = c.CreatedAt,
                 LikeCount = LikeCount(c),
+                CommentPhoto = c.CommentPhotos?.FirstOrDefault()?.Photo,
                 isLiked = false,
             }).ToList();
 

@@ -48,11 +48,14 @@
           <img [src]="reply.avatarUrl" class="avatar">
         </div>
         <div class="desc">
-          <h5><a href="#">{{reply.authorName}}</a></h5>
+          <h5><a>{{reply.authorName}}</a></h5>
           <p class="date">{{reply.createdAt}}</p>
           <p class="comment">
             {{reply.contents}}
           </p>
+          @if(reply.commentPhoto){
+          <img class="comment-photo" [src]="reply.commentPhoto">
+          }
         </div>
       </div>
       <div class="btn-comment-group">

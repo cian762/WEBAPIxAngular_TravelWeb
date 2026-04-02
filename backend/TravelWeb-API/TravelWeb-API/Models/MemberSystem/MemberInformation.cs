@@ -23,4 +23,6 @@ public partial class MemberInformation
     public virtual ICollection<MemberInformation> Followeds { get; set; } = new List<MemberInformation>();
 
     public virtual ICollection<MemberInformation> Followers { get; set; } = new List<MemberInformation>();
+    public virtual ICollection<MemberInformation> blockedIngs { get; set; } = new List<MemberInformation>();
+    public virtual ICollection<MemberInformation>  blockedIds { get; set; } = new List<MemberInformation>();
 }
