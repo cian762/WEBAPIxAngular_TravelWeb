@@ -6,6 +6,7 @@ export interface CartItem {
   quantity: number;
   coverImage: string;
   ticketCategoryId: number;
+  ticketCategoryName?: string;  // ← 加票種名稱
   attractionId?: number;   // 用於編輯按鈕導回景點售票區
   // attractionName?: string;  // 景點名稱
   tags?: string[];

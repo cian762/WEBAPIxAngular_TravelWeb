@@ -10,6 +10,7 @@
         public int Quantity { get; set; }       // 購買數量
         public string ?CoverImage { get; set; }  // 產品圖片路徑 (記得拼上 MVC 網域)        
         public int? ticketCategoryId { get; set; }//票種ID
+        public string? TicketCategoryName { get; set; } // 加票種名稱
         // 計算小計 (唯讀)
         public decimal SubTotal => Price * Quantity;
         // 這裡是原始從資料庫抓出來的路徑
