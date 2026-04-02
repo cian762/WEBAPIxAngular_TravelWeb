@@ -301,7 +301,9 @@ namespace TravelWeb_API.Controllers
             {
                 user.PasswordHash = HashPassword(request.NewPassword);
 
-                _context.EmailVerifications.Remove(record);
+                record.IsVerified = true;
+                record.ExpiryTime = DateTime.Now.AddDays(-1); 
+                record.VerificationCode = "USED"; 
 
                 await _context.SaveChangesAsync();
 
