@@ -19,9 +19,11 @@ export class Header implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
+
   // 綁定到畫面的變數
   isLoggedIn: boolean = false;
   userName: string = '';
+
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(params => {

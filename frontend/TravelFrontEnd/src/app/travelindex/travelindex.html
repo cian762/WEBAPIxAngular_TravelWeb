@@ -44,34 +44,6 @@
       <app-global-search></app-global-search>
     </div>
   </section>
-  <!-- 會員收藏 -->
-  <section class="section">
-    <div class="container">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Member Picks</p>
-          <h2>會員收藏</h2>
-        </div>
-        <a href="#" class="section-link">查看全部</a>
-      </div>
-
-      <div class="card-scroll">
-        @for (item of favoriteList; track item.id) {
-        <article class="travel-card travel-card--horizontal">
-          <div class="travel-card__image">
-            <img [src]="item.imageUrl" [alt]="item.title">
-            <span class="badge badge--favorite">已收藏</span>
-          </div>
-          <div class="travel-card__body">
-            <div class="travel-card__meta">{{ item.region }}・{{ item.category }}</div>
-            <h3>{{ item.title }}</h3>
-            <p>{{ item.description }}</p>
-          </div>
-        </article>
-        }
-      </div>
-    </div>
-  </section>
 
   <!-- 組員嵌入區 -->
   <section class="section section--embed">
