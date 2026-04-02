@@ -6,6 +6,7 @@ export interface ItineraryCreateDto {
   itemsToPush: any[];
 }
 export interface ItineraryItem {
+  isTimePickerOpen?: boolean;
   itemId: number;
   dayNumber: number;
   attractionId: number;

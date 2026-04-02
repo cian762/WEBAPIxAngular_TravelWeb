@@ -116,7 +116,7 @@
         </div>
         }
         <div class="map-legend">
-          <span class="legend-dot"></span> 景點天行程 ({{ totalItems }})
+          <span class="legend-dot"></span> 景點與行程 ({{ totalItems }})
         </div>
       </div>
 
@@ -185,20 +185,40 @@
             </div>
 
             <div class="card-description">{{ item.contentDescription }}</div>
+
+            <!-- ===== 時間顯示標籤（有設才顯示，融入排版不突兀） ===== -->
+            @if (item.startTime) {
+            <div class="card-time-badge">
+              <span class="time-icon">🕐</span>
+              <span class="time-text">{{ formatDisplayTime(item.startTime) }}</span>
+            </div>
+            }
           </div>
-
-
 
           <!-- Actions -->
           <div class="card-actions">
-            <button class="btn-icon btn-time" title="設定時間">
-              <span>▶</span>
+            <!-- 時間選擇按鈕：點擊展開／收起 inline timepicker -->
+            <button class="btn-icon btn-time" title="設定時間" [class.active]="item.isTimePickerOpen"
+              (click)="toggleTimePicker(item, currentDay, $event)">
+              <span>⏱</span>
             </button>
             <button class="btn-icon btn-edit" title="編輯" (click)="editName($event, item)">✏️</button>
             <button class="btn-icon btn-delete" title="刪除" (click)="deleteItem(currentDay, $index)">🗑</button>
           </div>
 
         </div>
+
+        <!-- ===== Inline Time Picker（展開在 card 正下方） ===== -->
+        @if (item.isTimePickerOpen) {
+        <div class="inline-timepicker" (click)="$event.stopPropagation()">
+          <span class="timepicker-label">選擇時間</span>
+          <input type="time" class="timepicker-input" [ngModel]="getPureTime(item.startTime)"
+            (ngModelChange)="onTimeChange(item, currentDay, $event)">
+          <button class="timepicker-confirm" (click)="confirmTimePicker(item, currentDay)">✓ 確認</button>
+          <button class="timepicker-cancel" (click)="item.isTimePickerOpen = false">✕</button>
+        </div>
+        }
+
         }
 
         <!-- Add button -->
