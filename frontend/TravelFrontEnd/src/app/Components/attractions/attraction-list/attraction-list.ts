@@ -15,13 +15,13 @@ import { Attraction, AttractionType } from '../attraction.models';
 export class AttractionListComponent implements OnInit {
 
   customTabs = [
-    { label: 'All', icon: '🗺️', typeIds: [] },
-    { label: '旅遊景點', icon: '📷', typeIds: [1, 6, 7, 8, 9] },
-    { label: '溫泉景點', icon: '♨️', typeIds: [9, 11, 13] },
-    { label: '藝文展館', icon: '🏛️', typeIds: [4, 2] },
-    { label: '夜市老街', icon: '🌙', typeIds: [10, 2, 4] },
-    { label: '古蹟寺廟', icon: '⛩️', typeIds: [2, 5] },
-    { label: '遊樂區', icon: '🎡', typeIds: [3, 11, 13] },
+    { label: 'All', svg: '🗺️', typeIds: [] },
+    { label: '旅遊景點', svg: '📸', typeIds: [1, 6, 7, 8, 9] },
+    { label: '溫泉景點', svg: '♨️', typeIds: [9, 11, 13] },
+    { label: '藝文展館', svg: '🏛️', typeIds: [4, 2] },
+    { label: '夜市老街', svg: '🌃', typeIds: [10, 2, 4] },
+    { label: '古蹟寺廟', svg: '⛩️', typeIds: [2, 5] },
+    { label: '遊樂區', svg: '🎡', typeIds: [3, 11, 13] },
   ];
   activeTabIdx = 0;
   attractions: Attraction[] = [];
