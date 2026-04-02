@@ -265,7 +265,7 @@ namespace TravelWeb_API.Controllers.Attraction
         // 同一 IP 對同一景點只能按一次
         // ────────────────────────────────────────────
         [HttpPost("{id}/like")]
-        public async Task<IActionResult> LikeAttraction(int id, [FromBody] LikeRequest request)
+        public async Task<IActionResult> LikeAttraction(int id)
         {
             var attractionExists = await _dbContext.Attractions
                 .AnyAsync(a => a.AttractionId == id && !a.IsDeleted && a.ApprovalStatus == 1);
@@ -273,27 +273,38 @@ namespace TravelWeb_API.Controllers.Attraction
             if (!attractionExists)
                 return NotFound(new { message = "找不到此景點" });
 
-            // 檢查同 IP 是否已按讚
-            var alreadyLiked = await _dbContext.AttractionLikes
-                .AnyAsync(l => l.AttractionId == id && l.IpAddress == request.IpAddress);
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-            var likeCount = await _dbContext.AttractionLikes
-                .CountAsync(l => l.AttractionId == id);
+            var existing = await _dbContext.AttractionLikes
+                .FirstOrDefaultAsync(l => l.AttractionId == id && l.IpAddress == ip);
 
-            if (alreadyLiked)
-                return Ok(new { message = "已經按過讚了", likeCount, liked = true });
-
-            // 新增按讚記錄
-            _dbContext.AttractionLikes.Add(new AttractionLike
+            if (existing != null)
             {
-                AttractionId = id,
-                IpAddress = request.IpAddress,
-                CreatedAt = DateTime.Now
-            });
-            await _dbContext.SaveChangesAsync();
+                // 已按過 → 取消按讚（刪除記錄）
+                _dbContext.AttractionLikes.Remove(existing);
+                await _dbContext.SaveChangesAsync();
 
-            likeCount++;
-            return Ok(new { message = "按讚成功", likeCount, liked = true });
+                var countAfterUnlike = await _dbContext.AttractionLikes
+                    .CountAsync(l => l.AttractionId == id);
+
+                return Ok(new { message = "已取消按讚", likeCount = countAfterUnlike, liked = false });
+            }
+            else
+            {
+                // 第一次按 → 新增按讚
+                _dbContext.AttractionLikes.Add(new AttractionLike
+                {
+                    AttractionId = id,
+                    IpAddress = ip,
+                    CreatedAt = DateTime.Now
+                });
+                await _dbContext.SaveChangesAsync();
+
+                var countAfterLike = await _dbContext.AttractionLikes
+                    .CountAsync(l => l.AttractionId == id);
+
+                return Ok(new { message = "按讚成功", likeCount = countAfterLike, liked = true });
+            }
         }
 
         // ────────────────────────────────────────────

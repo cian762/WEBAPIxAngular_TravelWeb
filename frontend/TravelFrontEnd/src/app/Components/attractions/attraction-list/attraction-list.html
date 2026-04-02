@@ -44,16 +44,16 @@
 
   <!-- 類型 Tab -->
   <div class="type-nav" *ngIf="!isFromTag">
-    <div class="container">
-      <div class="type-nav__inner">
-        <button *ngFor="let t of customTabs; let i = index" class="type-btn" [class.active]="activeTabIdx === i"
-          (click)="switchCustomTab(i)">
-          <span class="type-btn__icon">{{ t.icon }}</span>
-          <span class="type-btn__name">{{ t.label }}</span>
-        </button>
-      </div>
+    <div class="type-nav__title">{{ cityName }} 旅遊資訊</div>
+    <div class="type-nav__inner">
+      <button *ngFor="let t of customTabs; let i = index" class="type-btn" [class.active]="activeTabIdx === i"
+        (click)="switchCustomTab(i)">
+        <span class="type-btn__icon">{{ t.svg }}</span>
+        <span class="type-btn__name">{{ t.label }}</span>
+      </button>
     </div>
   </div>
+
 
   <!-- 搜尋列 -->
   <div class="search-bar">

@@ -143,28 +143,47 @@
   <!-- 熱門景點 -->
   <section class="section section--destination">
     <div class="container">
+
       <div class="section-heading">
         <div>
           <p class="eyebrow">Top Attractions</p>
           <h2>熱門景點</h2>
         </div>
-        <a href="#" class="section-link">更多景點</a>
+        <a routerLink="/attractions" class="section-link">更多景點</a>
       </div>
 
-      <div class="destination-grid">
+      <!-- 地區切換列 -->
+      <div class="region-nav">
+        <div class="region-nav__labels">
+          <span *ngFor="let r of topRegions; let i = index" class="region-nav__dot"
+            [class.active]="i === currentRegionIdx" (click)="switchRegion(i, r.regionId)">
+            {{ r.regionName }}
+          </span>
+        </div>
+      </div>
 
-        @for (spot of attractionList; track spot.id) {
-        <article class="destination-card">
-          <img [src]="spot.imageUrl" [alt]="spot.title">
-          <div class="destination-card__overlay">
-            <span>{{ spot.region }}</span>
-            <h3>{{ spot.title }}</h3>
+      <!-- 景點卡片 -->
+      <div class="destination-grid">
+        @for (spot of currentAttractions; track spot.attractionId) {
+        <article class="dest-card" (click)="goToAttractionDetail(spot.attractionId)">
+          <div class="dest-card__img-wrap">
+            <img [src]="getAttractionImage(spot)" [alt]="spot.name" onerror="this.src='assets/img/b1.jpg'">
+          </div>
+          <div class="dest-card__body">
+            <span class="dest-card__region">{{ spot.regionName }}</span>
+            <h3 class="dest-card__name">{{ spot.name }}</h3>
+            <div class="dest-card__stats">
+              <span><i class="fa fa-eye"></i> {{ spot.viewCount | number }}</span>
+              <span class="like-btn-sm" [class.liked]="spot.isLiked" (click)="toggleHomeLike($event, spot)">
+                <i class="fa" [class.fa-thumbs-up]="spot.isLiked" [class.fa-thumbs-o-up]="!spot.isLiked"></i>
+                {{ spot.likeCount || 0 }}
+              </span>
+            </div>
           </div>
         </article>
         }
-
-
       </div>
+
     </div>
   </section>
 

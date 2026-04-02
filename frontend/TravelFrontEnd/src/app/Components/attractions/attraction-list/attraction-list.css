@@ -59,62 +59,79 @@
 }
 
 
-/* 類型 Tab */
+/* 類型導覽列（圖二風格：置中、大圖示、底線 active） */
 .type-nav {
   background: #fff;
   border-bottom: 2px solid #eee;
-  position: sticky;
-  top: 0;
-  z-index: 200;
+  padding: 20px 0 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  padding: 10px 0;
+}
+
+.type-nav__title {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #222;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
 }
 
 .type-nav__inner {
   display: flex;
-  gap: 8px;
+  justify-content: center;
+  /* ← 置中 */
+  gap: 0;
   overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 .type-nav__inner::-webkit-scrollbar {
-  height: 4px;
-}
-
-.type-nav__inner::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 4px;
+  display: none;
 }
 
 .type-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  background: #f8f8f8;
-  border: 2px solid transparent;
-  border-radius: 10px;
-  padding: 10px 14px;
-  min-width: 70px;
+  gap: 6px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 24px 14px;
+  min-width: 90px;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  color: #555;
 }
 
 .type-btn__icon {
-  font-size: 1.4rem;
+  font-size: 2rem;
+  /* ← 放大 */
+  line-height: 1;
 }
 
 .type-btn__name {
-  font-size: 0.75rem;
-  color: #666;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #555;
 }
 
-.type-btn.active,
+.type-btn.active {
+  border-bottom-color: #e84611;
+  /* ← 底線變橘紅，不填色 */
+  color: #e84611;
+}
+
+.type-btn.active .type-btn__name,
+.type-btn:hover .type-btn__name {
+  color: #e84611;
+  font-weight: 700;
+}
+
 .type-btn:hover {
-  border-color: #e84611;
-  background: #fff5f2;
+  border-bottom-color: #e84611;
+  color: #e84611;
 }
 
 .type-btn.active .type-btn__name,
@@ -365,7 +382,8 @@
 .city-intro__banner {
   width: 100%;
   overflow: hidden;
-  line-height: 0;   /* 消除 img 下方間隙 */
+  line-height: 0;
+  /* 消除 img 下方間隙 */
 }
 
 .city-intro__banner-img {
@@ -378,7 +396,7 @@
 
 /* 文字區：限制最大寬度並水平置中，模仿觀光局排版 */
 .city-intro__content-wrap {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 36px 20px 44px;
 }
@@ -426,6 +444,7 @@
   .city-intro__banner-img {
     height: 220px;
   }
+
   .city-intro__content-wrap {
     padding: 24px 16px 28px;
   }

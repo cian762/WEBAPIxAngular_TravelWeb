@@ -604,3 +604,115 @@ a {
     font-size: 0.9rem;
   }
 }
+
+/* 地區切換列 */
+.region-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.region-nav__arrow {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.2s;
+}
+
+.region-nav__arrow:hover {
+  background: #f5f5f5;
+}
+
+.region-nav__labels {
+  display: flex;
+  gap: 8px;
+}
+
+.region-nav__dot {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.region-nav__dot.active {
+  background: #FF6B35;
+  color: white;
+  border-color: #FF6B35;
+}
+
+/* 景點卡片 */
+.dest-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dest-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.dest-card__img-wrap {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.dest-card__img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dest-card__body {
+  padding: 14px 16px 16px;
+}
+
+.dest-card__region {
+  font-size: 12px;
+  color: #FF6B35;
+  font-weight: 600;
+}
+
+.dest-card__name {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 4px 0 10px;
+  color: #222;
+}
+
+.dest-card__stats {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #888;
+}
+
+.dest-card__stats i {
+  margin-right: 4px;
+}
+
+.like-btn-sm {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.like-btn-sm:hover {
+  color: #FF6B35;
+}
+
+.like-btn-sm.liked {
+  color: #FF6B35;
+}
