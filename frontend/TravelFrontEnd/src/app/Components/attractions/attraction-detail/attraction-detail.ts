@@ -6,6 +6,7 @@ import { AttractionService } from '../attraction.service';
 import { SafeUrlPipe } from '../safe-url.pipe';
 import { Attraction } from '../attraction.models';
 import { TicketSectionComponent } from '../ticket-section/ticket-section';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-attraction-detail',
@@ -102,13 +103,13 @@ export class AttractionDetailComponent implements OnInit {
           this.attraction = data;
           this.loading = false;
           if (data) {
+            // ← 從 localStorage 還原按讚狀態
+            const liked = localStorage.getItem(`liked_attraction_${id}`);
+            if (liked && this.attraction) this.attraction.isLiked = true;
+
             this.loadWeather(data);
-            this.svc.getNearbyAttractions(id).subscribe(list => {
-              this.nearbyAttractions = list;
-            });
-            this.svc.getRelatedTickets(id).subscribe(list => {
-              this.relatedTickets = list;
-            });
+            this.svc.getNearbyAttractions(id).subscribe(list => { this.nearbyAttractions = list; });
+            this.svc.getRelatedTickets(id).subscribe(list => { this.relatedTickets = list; });
           }
         });
       }
@@ -213,10 +214,25 @@ export class AttractionDetailComponent implements OnInit {
 
   toggleLike(): void {
     if (!this.attraction) return;
-    this.svc.toggleLike(this.attraction.attractionId).subscribe(res => {
-      if (this.attraction) {
+    const id = this.attraction.attractionId;
+
+    this.svc.toggleLike(id).subscribe({
+      next: (res) => {
+        if (!this.attraction) return;
         this.attraction.likeCount = res.likeCount;
-        this.attraction.isLiked = res.isLiked;
+
+        if (res.liked) {
+          // 按讚成功
+          this.attraction.isLiked = true;
+          localStorage.setItem(`liked_attraction_${id}`, '1');
+        } else {
+          // 取消按讚
+          this.attraction.isLiked = false;
+          localStorage.removeItem(`liked_attraction_${id}`);
+        }
+      },
+      error: () => {
+        Swal.fire({ icon: 'error', title: '操作失敗', text: '請稍後再試', timer: 2000 });
       }
     });
   }

@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { TripIndex } from "../trip/component/trip-index/trip-index";
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { GlobalSearchService } from '../Services/global-search-service';
@@ -9,6 +9,9 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { GlobalSearch } from "../global-search/global-search";
 import { ActivityIndexCard } from "../Activity/Component/activity-index-card/activity-index-card";
+//[YJ] 景點 Service 與 Model，供熱門景點區塊使用
+import { AttractionService } from '../Components/attractions/attraction.service';
+import { Attraction } from '../Components/attractions/attraction.models';
 
 @Component({
   selector: 'app-travelindex',
@@ -17,14 +20,69 @@ import { ActivityIndexCard } from "../Activity/Component/activity-index-card/act
   styleUrl: './travelindex.css',
   template: `<input [formControl]="searchControl" placeholder="搜景點、活動...">`
 })
-export class Travelindex implements OnInit {
+export class Travelindex implements OnInit, OnDestroy {
   searchControl = new FormControl('');
   suggestions: string[] = []; // 存放純文字建議
   showSuggestions = false;    // 控制下拉選單顯示
+
+
+
+  // ── [YJ] 景點區塊 ──────────────────────────────
+  topRegions: { regionId: number; regionName: string }[] = [];  // 五大頂層地區清單（北/中/南/東/離島），由 API 動態載入
+  currentRegionIdx = 0;  // 目前顯示第幾個地區（index）
+  regionCache = new Map<number, Attraction[]>();  // 快取各地區已載入的景點，避免重複打 API
+  currentAttractions: Attraction[] = [];  // 目前畫面上顯示的 4 筆景點
+  private autoSlideTimer: any;  // 自動輪播計時器 handle
+
+
   constructor(
     private searchService: GlobalSearchService, // 負責去後端搬貨
-    private searchBridge: SearchBridge           // 負責把貨傳給子元件
+    private searchBridge: SearchBridge,           // 負責把貨傳給子元件
+    private attractionSvc: AttractionService,   //  [YJ] 景點 Service
+    private router: Router                       //[YJ] 路由，用於點擊卡片跳轉
   ) { }
+
+
+  get currentRegionName(): string {
+    return this.topRegions[this.currentRegionIdx]?.regionName ?? '';
+  }
+
+  // ── [YJ] 景點地區輪播邏輯 ──────────────────────────────
+  loadRegionAttractions(regionId: number): void {
+    if (this.regionCache.has(regionId)) {
+      this.currentAttractions = this.regionCache.get(regionId)!;
+      return;
+    }
+    this.attractionSvc.getAttractions({ regionId }).subscribe(data => {
+      const top4 = data
+        .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+        .slice(0, 4);
+      this.regionCache.set(regionId, top4);
+      this.currentAttractions = top4;
+    });
+  }
+  switchRegion(idx: number, regionId: number): void {
+    this.currentRegionIdx = idx;
+    this.loadRegionAttractions(regionId);
+    this.resetAutoSlide(); // 點擊後重置計時
+  }
+  private startAutoSlide(): void {
+    this.autoSlideTimer = setInterval(() => {
+      if (this.topRegions.length === 0) return;
+      this.currentRegionIdx = (this.currentRegionIdx + 1) % this.topRegions.length;
+      this.loadRegionAttractions(this.topRegions[this.currentRegionIdx].regionId);
+    }, 4000);
+  }
+  private resetAutoSlide(): void {
+    clearInterval(this.autoSlideTimer);
+    this.startAutoSlide();
+  }
+  ngOnDestroy(): void {
+    clearInterval(this.autoSlideTimer);
+  }
+  //景點結束
+
+
   ngOnInit() {
     // 監聽打字：專門用來抓「提示詞」
     this.searchControl.valueChanges.pipe(
@@ -42,6 +100,35 @@ export class Travelindex implements OnInit {
     ).subscribe(data => {
       this.suggestions = data;
       this.showSuggestions = data.length > 0;
+    });
+
+    //[YJ] 載入五大地區，預設顯示第一區並啟動自動輪播
+    this.attractionSvc.getTopRegions().subscribe(regions => {
+      this.topRegions = regions.filter(r => r.regionName !== '待定');
+      if (this.topRegions.length > 0) {
+        this.loadRegionAttractions(this.topRegions[0].regionId);
+        this.startAutoSlide();
+      }
+    });
+
+  }
+
+  //[YJ]點卡片導到景點詳情頁
+  goToAttractionDetail(id: number): void {
+    this.router.navigate(['/attractions/detail', id]);
+  }
+  //[YJ] 取得景點主圖完整 URL
+  getAttractionImage(a: Attraction): string {
+    return a.mainImage
+      ? `https://localhost:7285${a.mainImage}`
+      : 'assets/img/b1.jpg';
+  }
+  //[YJ] 首頁景點卡片按讚
+  toggleHomeLike(e: Event, spot: Attraction): void {
+    e.stopPropagation();
+    this.attractionSvc.toggleLike(spot.attractionId).subscribe(res => {
+      spot.likeCount = res.likeCount;
+      spot.isLiked = res.liked; // ← 直接用 API 回傳的值，liked=false 就取消
     });
   }
 
@@ -187,32 +274,7 @@ export class Travelindex implements OnInit {
     }
   ];
 
-  attractionList = [
-    {
-      id: 1,
-      title: '台北 101',
-      region: '北部',
-      imageUrl: 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      title: '日月潭',
-      region: '中部',
-      imageUrl: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      title: '安平古堡',
-      region: '南部',
-      imageUrl: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 4,
-      title: '太魯閣峽谷',
-      region: '東部',
-      imageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
+
 
   packageList = [
     {
