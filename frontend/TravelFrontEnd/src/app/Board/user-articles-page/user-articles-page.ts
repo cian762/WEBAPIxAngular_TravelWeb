@@ -5,6 +5,7 @@ import { ArticleData, TagDTO } from '../interface/ArticleData';
 import localeZhTw from '@angular/common/locales/zh-Hant';
 import { DatePipe, registerLocaleData } from '@angular/common';
 import { ArticleList } from "../Components/article-list/article-list";
+import Swal from 'sweetalert2';
 
 registerLocaleData(localeZhTw);
 
@@ -26,7 +27,15 @@ export class UserArticlesPage implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
       this.UserId = p.get('id')!;
-      this.Serve.getAuthorUser(this.UserId).subscribe((d) => { this.curUser = d; });
+      this.Serve.getAuthorUser(this.UserId).subscribe({
+        next: (d) => {
+          if (d == null) {
+            this.router.navigate(['Board/Main']);
+          }
+          this.curUser = d;
+        },
+        error: () => { this.router.navigate(['Board/404']); }
+      });
     });
     this.Serve.getArticleByAuthor(1, this.UserId).subscribe((p) => {
       this.articleList = p.articleList;
@@ -84,7 +93,41 @@ export class UserArticlesPage implements OnInit {
   }
 
   toBlock() {
-    if (this.UserId)
-      this.Serve.postBlock(this.UserId).subscribe();
+    if (!this.UserId) return;
+    Swal.fire({
+      title: "封鎖中...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    this.Serve.postBlock(this.UserId).subscribe({
+      next: () => {
+        let timerInterval: any;
+        Swal.fire({
+          title: `封鎖用戶 ${this.curUser.name} 成功！`,
+          html: '即將於 <b></b> 秒後返回所有文章',
+          icon: 'success',
+          allowOutsideClick: false,
+          confirmButtonText: '返回所有文章',
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: () => {
+            const b = Swal.getPopup()!.querySelector('b')!;
+            timerInterval = setInterval(() => {
+              b.textContent = `${Math.ceil(Swal.getTimerLeft()! / 1000)}`;
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          }
+        }).then((result) => {
+          if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+            this.router.navigate(['Board']);
+          }
+        });
+      }
+    }
+    );
   }
 }

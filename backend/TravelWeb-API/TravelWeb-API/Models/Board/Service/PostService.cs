@@ -86,7 +86,12 @@ namespace TravelWeb_API.Models.Board.Service
 
         public async Task<PostDetailDto?> GetPostDetailed(int id, string? currentUserId)
         {
+            var blockedIds = _memberDb.Blockeds
+                         .Where(b => b.MemberId == currentUserId || b.BlockedId == currentUserId)
+                         .Select(b => b.MemberId == currentUserId ? b.BlockedId : b.MemberId)
+                         .ToList();
             var postDetail = await _context.Articles.Where(a => a.ArticleId == id)
+                 .Where(a => !blockedIds.Contains(a.MemberInformation.MemberId))
                 .Select(
                 a => new PostDetailDto
                 {

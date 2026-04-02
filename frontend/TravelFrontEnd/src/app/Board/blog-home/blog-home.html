@@ -6,25 +6,99 @@
     <div class="row my-5">
       <div class="d-flex justify-content-center align-items-center">
         <div class="col-5">
-          <div class="search-form" (submit)="$event.preventDefault()">
+          <div class="search-form">
             <div class="search-box">
               <input placeholder="搜尋文章" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event);"
-                (input)="onSeach($event)">
-              <button type="button"><i class="fa fa-search"></i></button>
+                (input)="searchByKeyword($event)">
+              <button type="button" (click)="onSeach()"><i class="fa fa-search"></i></button>
             </div>
 
-            <!-- <ul class="my-dropdown-menu">
-            @for(tag of filteredTags; track tag.tagId) {
-            <li class="dropdown-item" (click)="addTag(tag.tagId); $event.stopPropagation()">{{ tag.tagName }} <i
-                class="ri-add-large-line"></i>
-            </li>
-            }
-          </ul> -->
+
+
           </div>
         </div>
         <a href="#" class="genric-btn primary-border circle">進階搜尋</a>
       </div>
     </div>
+    <input #datePicker type="text" class="form-control" placeholder="選擇日期">
+
+    <!-- 地區選項 -->
+    <section id="sec4">
+      <div class="mb-5 border-bottom">
+        <label class="form-label my-title">標註地區</label>
+        <div class="row mb-5">
+          <div class="col-4">
+            <div class="single-element-widget">
+              <label class="form-label">縣市</label>
+              <div class="default-select">
+                <select id="region-select">
+                  <option [value]="null">請選擇縣市</option>
+                  @for (city of regions; track city.regionId) {
+                  <option [value]="city.regionId">{{ city.regionName }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="single-element-widget">
+              <label class="form-label">鄉/鎮/市/區</label>
+              <div class="default-select">
+                <select id="dist-select">
+                  <option [value]="null">請選擇鄉鎮市區</option>
+                  @for (dist of districts; track dist.regionId) {
+                  <option [value]="dist.regionId">{{ dist.regionName }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="sb-wrap">
+      <div class="sb-row">
+        <div class="sb-input-wrap">
+          <input type="text" [(ngModel)]="Keyword" placeholder="搜尋文章標題、關鍵字…">
+        </div>
+        <button class="sb-btn" (click)="onSeach()">搜尋</button>
+      </div>
+      <div class="sb-row">
+        <div class="sb-input-wrap">
+          <input type="text" [(ngModel)]="AuthorKeyword" placeholder="作者關鍵字">
+        </div>
+        <button class="sb-btn" (click)="onBackSeach()">取消搜尋</button>
+      </div>
+      <div class="sb-filters">
+        <div class="sb-fg">
+          <span class="sb-label">縣市</span>
+          <select id="region-select" class="sb-select">
+            <option [value]="null">請選擇縣市</option>
+            @for (city of regions; track city.regionId) {
+            <option [value]="city.regionId">{{ city.regionName }}</option>
+            }
+          </select>
+        </div>
+        <div class="sb-fg">
+          <span class="sb-label">鄉鎮市區</span>
+          <select id="dist-select" class="sb-select">
+            <option [value]="null">請選擇區域</option>
+            @for (dist of districts; track dist.regionId) {
+            <option [value]="dist.regionId">{{ dist.regionName }}</option>
+            }
+          </select>
+        </div>
+        <div class="sb-fg">
+          <span class="sb-label">日期區間</span>
+          <input #startPicker type="text" class="sb-date" placeholder="選擇日期">
+        </div>
+        <button class="sb-reset" (click)="onSeachReset()">清空搜尋</button>
+      </div>
+    </div>
+
     <div class="d-flex align-items-center gap-3">
       @if (isSearch) {
       <span>共{{totalCount}}筆資料</span>

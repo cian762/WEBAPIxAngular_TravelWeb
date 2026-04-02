@@ -9,6 +9,167 @@
 }
 
 
+
+.sb-wrap {
+  padding: 2rem 1rem;
+  max-width: 900px;
+}
+
+.sb-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.sb-input-wrap {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+
+.sb-input-wrap input {
+  width: 100%;
+  height: 44px;
+  padding: 0 42px 0 16px;
+  border: 1.5px solid #b8d8ff;
+  border-radius: 3px;
+  font-size: 14px;
+  color: var(--bs-body-color);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sb-input-wrap input:focus {
+  border-color: #38a4ff;
+  box-shadow: 0 0 0 3px rgba(56, 164, 255, 0.12);
+}
+
+.sb-input-wrap input::placeholder {
+  color: #aaa;
+}
+
+.sb-search-icon {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b8d8ff;
+  pointer-events: none;
+}
+
+.sb-btn {
+  height: 44px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 3px;
+  background: #38a4ff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sb-btn:hover {
+  background: #1a8fff;
+}
+
+.sb-btn:active {
+  background: #0d7de0;
+}
+
+.sb-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-top: 10px;
+}
+
+.sb-fg {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sb-label {
+  font-size: 11px;
+  color: #38a4ff;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding-left: 2px;
+}
+
+.sb-select {
+  height: 38px;
+  padding: 0 30px 0 12px;
+  border: 1.5px solid #b8d8ff;
+  border-radius: 3px;
+  font-size: 13px;
+  color: var(--bs-body-color);
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2338a4ff' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  min-width: 120px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sb-select:focus {
+  border-color: #38a4ff;
+  box-shadow: 0 0 0 3px rgba(56, 164, 255, 0.12);
+}
+
+.sb-date {
+  height: 38px;
+  padding: 0 12px;
+  border: 1.5px solid #b8d8ff;
+  border-radius: 3px;
+  font-size: 13px;
+  color: var(--bs-body-color);
+  background: #fff;
+  outline: none;
+  width: 148px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.sb-date:focus {
+  border-color: #38a4ff;
+  box-shadow: 0 0 0 3px rgba(56, 164, 255, 0.12);
+}
+
+.sb-reset {
+  height: 38px;
+  padding: 0 16px;
+  border: 1.5px solid #b8d8ff;
+  border-radius: 3px;
+  background: transparent;
+  font-size: 13px;
+  color: #38a4ff;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sb-reset:hover {
+  background: #e8f4ff;
+  border-color: #38a4ff;
+}
+
+
 /* ===========以下為標籤搜尋框之樣式=========== */
 .my-dropdown-menu {
   background-color: #fff;

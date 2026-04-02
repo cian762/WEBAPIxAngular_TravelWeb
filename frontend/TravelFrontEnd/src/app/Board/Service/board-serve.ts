@@ -42,8 +42,13 @@ export class BoardServe {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByTags?page=${page}&${TagsId}&isprecise=false`)
   }
 
-  getArticleByAllSearch(page: number, authorId?: string) {
-    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByAll?page=${page}&Keyword=10000006&StartTime=2026-02-21&EndTime=2026-02-28&AuthorId=${authorId}&TagIds=6`)
+  getArticleByAllSearch(dto: any) {
+    const params = new HttpParams({
+      fromObject:
+        Object.fromEntries(Object.entries(dto).filter(([_, v]) => v != null).map(([k, v]) => [k, String(v)]))
+    });
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/searchByAll`, { params });
+
   }
 
   getArticleByCollect(page: number, authorId?: string) {
@@ -106,8 +111,9 @@ export class BoardServe {
     return this.http.get(`${this.apiUrl}/Board/Articles/curUser?page=1`)
   }
   getAuthorUser(para: string) {
-    return this.http.get(`${this.apiUrl}/Board/Articles/authorUser?userId=${para}`)
+    return this.http.get(`${this.apiUrl}/Board/Articles/authorUser?authorID=${para}`)
   }
+
 
   deleteArticle(id: number) {
     return this.http.delete(`${this.apiUrl}/Board/Articles/${id}`)
