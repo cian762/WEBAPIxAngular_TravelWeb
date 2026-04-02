@@ -176,6 +176,18 @@ public partial class MemberSystemContext : DbContext
                         j.IndexerProperty<string>("FollowerId").HasMaxLength(50);
                         j.IndexerProperty<string>("FollowedId").HasMaxLength(50);
                     });
+
+            modelBuilder.Entity<MemberInformation>()
+                         .HasMany(m => m.blockedIds)        // 我封鎖的人
+                         .WithMany(m => m.blockedIngs)      // 封鎖我的人
+                         .UsingEntity<Blocked>(
+                          j => j.HasOne<MemberInformation>()
+                                 .WithMany()
+                                 .HasForeignKey(b => b.BlockedId),
+                                  j => j.HasOne<MemberInformation>()
+                                         .WithMany()
+                                         .HasForeignKey(b => b.MemberId)
+                                                                          );
         });
         
 

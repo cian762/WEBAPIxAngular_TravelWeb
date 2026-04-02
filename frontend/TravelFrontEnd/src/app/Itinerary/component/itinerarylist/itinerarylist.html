@@ -37,10 +37,12 @@
   <!-- ── Toolbar ── -->
   <div class="il-toolbar">
     <div class="il-filter-tabs">
-      <button class="il-filter-tab active">全部</button>
-      <button class="il-filter-tab">進行中</button>
-      <button class="il-filter-tab">已規劃</button>
-      <button class="il-filter-tab">已完成</button>
+      <button class="il-filter-tab" [class.active]="activeFilter() === 'all'" (click)="setFilter('all')">全部</button>
+      <button class="il-filter-tab" [class.active]="activeFilter() === 'ongoing'"
+        (click)="setFilter('ongoing')">進行中</button>
+      <button class="il-filter-tab" [class.active]="activeFilter() === 'planned'"
+        (click)="setFilter('planned')">已規劃</button>
+      <button class="il-filter-tab" [class.active]="activeFilter() === 'done'" (click)="setFilter('done')">已完成</button>
     </div>
     <a class="il-btn-create" routerLink="/itinerary">
       <span class="il-btn-create-icon">＋</span> 建立行程
@@ -76,7 +78,7 @@
   <!-- ── Card Grid ── -->
   @if (!isLoading() && !errorMsg() && itineraries().length > 0) {
   <div class="il-grid">
-    @for (item of itineraries(); track item.itineraryId) {
+    @for (item of filteredItineraries; track item.itineraryId) {
     <article class="il-card" (click)="goToDetail(item.itineraryId)">
 
       <!-- 封面圖 -->
@@ -85,8 +87,8 @@
           (error)="$any($event.target).src = getFallbackImage()" />
 
         <!-- 狀態標籤 -->
-        <span class="il-badge il-badge--{{ item.currentStatus ?? 'draft' }}">
-          {{ getStatusLabel(item.currentStatus) }}
+        <span class="il-badge il-badge--{{ getComputedStatus(item) }}">
+          {{ getStatusLabel(getComputedStatus(item)) }}
         </span>
 
         <!-- 天數標籤 -->

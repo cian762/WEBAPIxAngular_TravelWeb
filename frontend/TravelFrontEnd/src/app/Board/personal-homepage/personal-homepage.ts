@@ -19,6 +19,7 @@ registerLocaleData(localeZhTw);
 export class PersonalHomepage implements OnInit {
   constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) {
   }
+  privateList: ArticleData[] = [];
   articleList: ArticleData[] = [];
   collectList: ArticleData[] = [];
   AllTags: TagDTO[] = [];
@@ -26,13 +27,22 @@ export class PersonalHomepage implements OnInit {
   totalCount = 0;
 
   ngOnInit(): void {
-    this.Serve.getCurUser().subscribe(d => this.curUser = d);
-    this.Serve.getArticleByUserAPI(1).subscribe(p => this.articleList = p.articleList);
+    this.Serve.getCurUser().subscribe(d => {
+      this.curUser = d;
+      this.Serve.getArticleByAuthor(1, this.curUser.memberId).subscribe(p => this.articleList = p.articleList);
+    });
+
+
+    this.Serve.getArticleByUserAPI(1).subscribe(p => this.privateList = p.articleList);
     this.Serve.getAllTags().subscribe(p => this.AllTags = p);
+
+
     this.Serve.getArticleByCollect(1).subscribe(p => {
       this.collectList = p.articleList;
       this.totalCount = p.totalCount
     })
+
+   
   }
 
 
@@ -49,7 +59,7 @@ export class PersonalHomepage implements OnInit {
   }
 
   ToLike(id: number) {
-    var article = this.articleList.find(a => a.articleId === id);
+    var article = this.privateList.find(a => a.articleId === id);
     if (article) {
       if (!article.isLike) {
         article.likeCount++;

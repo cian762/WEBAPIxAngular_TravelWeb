@@ -36,6 +36,7 @@ export class CommentsArea implements OnInit {
   async postComment(contents: string) {
     if (this.selectedImageFile) {
       this.ImageURL = await this._Cserve.uploadImage(this.selectedImageFile);
+      console.log("上傳", this.parent, this.selectedImageFile);
     }
 
     var CommentDto = {
@@ -98,6 +99,7 @@ export class CommentsArea implements OnInit {
 
     this.Serve.deleteComment(id).subscribe();
   }
+
 
 }
 

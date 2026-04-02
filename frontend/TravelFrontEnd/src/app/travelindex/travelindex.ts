@@ -12,6 +12,12 @@ import { ActivityIndexCard } from "../Activity/Component/activity-index-card/act
 //[YJ] 景點 Service 與 Model，供熱門景點區塊使用
 import { AttractionService } from '../Components/attractions/attraction.service';
 import { Attraction } from '../Components/attractions/attraction.models';
+const categoryMap: Record<string, string> = {
+  'Article': '文章',
+  'Activity': '活動',
+  'Attraction': '景點',
+  'Product': '行程商品'
+};
 
 @Component({
   selector: 'app-travelindex',
@@ -22,7 +28,7 @@ import { Attraction } from '../Components/attractions/attraction.models';
 })
 export class Travelindex implements OnInit, OnDestroy {
   searchControl = new FormControl('');
-  suggestions: string[] = []; // 存放純文字建議
+  suggestions: any[] = []; // any才可以裝物件
   showSuggestions = false;    // 控制下拉選單顯示
 
 
@@ -98,7 +104,11 @@ export class Travelindex implements OnInit, OnDestroy {
         return this.searchService.getSuggestions(term);
       })
     ).subscribe(data => {
-      this.suggestions = data;
+      // 【修改點 A】: 讓下拉選單也具備中文類別名稱
+      this.suggestions = data.map((item: any) => ({
+        ...item,
+        categoryName: categoryMap[item.type as keyof typeof categoryMap] || '未分類'
+      }));
       this.showSuggestions = data.length > 0;
     });
 
@@ -133,10 +143,10 @@ export class Travelindex implements OnInit, OnDestroy {
   }
 
   // 當使用者點擊提示詞時
-  selectSuggestion(word: string) {
-    this.searchControl.setValue(word); // 把字填入框框
-    this.showSuggestions = false;     // 關閉選單
-    this.onSearch();                  // 直接執行搜尋
+  selectSuggestion(s: any) {
+    this.searchControl.setValue(s.title); // 直接取 title
+    this.showSuggestions = false;
+    this.onSearch();
   }
   onSearch() {
     const term = this.searchControl.value;
@@ -152,7 +162,13 @@ export class Travelindex implements OnInit, OnDestroy {
     this.searchService.getSearchResults(term).subscribe({
       next: (results) => {
         // 3. 把貨推給橋樑，讓子元件 <app-global-search> 收到並顯示
-        this.searchBridge.pushData(results);
+        const resultsWithChinese = results.map(item => ({
+          ...item,
+          categoryName: categoryMap[item.type as keyof typeof categoryMap] || '未分類'
+        }));
+
+        // 推送含有 categoryName 的資料
+        this.searchBridge.pushData(resultsWithChinese);
 
         // 4. 關閉提示詞選單（因為已經搜尋了）
         this.showSuggestions = false;
