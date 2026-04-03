@@ -12,4 +12,5 @@ export interface ActivityInfoInterface {
   propaganda: string,
   officialLink: string,
   images: string[]
+  commentCount: number,
 }
