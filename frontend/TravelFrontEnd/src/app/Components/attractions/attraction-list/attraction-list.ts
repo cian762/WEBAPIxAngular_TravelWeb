@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AttractionService } from '../attraction.service';
 import { Attraction, AttractionType } from '../attraction.models';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-attraction-list',
@@ -174,9 +175,12 @@ export class AttractionListComponent implements OnInit {
   onSearch(): void { this.loadAttractions(); }
   getTypeIcon(name: string): string { return this.typeIcons[name] ?? '📍'; }
 
+  //20260403 陳冠甫加上 baseUrl2，為了方便發佈使用
+  private baseUrl2 = environment.apiBaseUrl2;
+
   getMainImage(a: Attraction): string {
     if (a.mainImage) {
-      return `https://localhost:7285${a.mainImage}`;
+      return `${this.baseUrl2 + a.mainImage}`;
     }
     return 'assets/img/b1.jpg';
   }

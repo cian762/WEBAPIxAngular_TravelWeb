@@ -12,6 +12,7 @@ import { ActivityIndexCard } from "../Activity/Component/activity-index-card/act
 //[YJ] 景點 Service 與 Model，供熱門景點區塊使用
 import { AttractionService } from '../Components/attractions/attraction.service';
 import { Attraction } from '../Components/attractions/attraction.models';
+import { environment } from '../../environments/environment';
 const categoryMap: Record<string, string> = {
   'Article': '文章',
   'Activity': '活動',
@@ -127,10 +128,12 @@ export class Travelindex implements OnInit, OnDestroy {
   goToAttractionDetail(id: number): void {
     this.router.navigate(['/attractions/detail', id]);
   }
+
+  private baseUrl2 = environment.apiBaseUrl2;
   //[YJ] 取得景點主圖完整 URL
   getAttractionImage(a: Attraction): string {
     return a.mainImage
-      ? `https://localhost:7285${a.mainImage}`
+      ? `${this.baseUrl2 + a.mainImage}`
       : 'assets/img/b1.jpg';
   }
   //[YJ] 首頁景點卡片按讚

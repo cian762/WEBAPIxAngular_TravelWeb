@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Attraction, AttractionType } from './attraction.models';
+import { environment } from '../../../environments/environment';
 
 export interface AttractionProduct {
   productId: number;
@@ -53,7 +54,7 @@ export interface StockResult {
 
 @Injectable({ providedIn: 'root' })
 export class AttractionService {
-  private apiUrl = 'https://localhost:7276/api';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) { }
 
