@@ -3,6 +3,7 @@
     public class ArticleDataDTO
     {
         public int articleId { get; set; }
+        public int Type { get; set; }
         public string? title { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? photoUrl { get; set; }

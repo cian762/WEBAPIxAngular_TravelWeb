@@ -5,6 +5,8 @@ import { PostDetailDto } from '../interface/PostDetailDto';
 import { switchMap } from 'rxjs/operators';
 import { CommentsDTO } from '../interface/CommentsDTO';
 import { environment } from '../../../environments/environment';
+import { JournalElementDTO, JournalUpDateDTO } from '../interface/JournalElementDTO';
+import { JournalDetailDTO } from '../interface/JournalDetailDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +22,10 @@ export class BoardServe {
 
   getArticleAPI(para: number) {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
+  }
+
+  getActicleByTrending() {
+    return this.http.get(`${this.apiUrl}/Board/Articles/trending`);
   }
 
   getArticleByUserAPI(para: number) {
@@ -103,6 +109,26 @@ export class BoardServe {
       `${this.apiUrl}/Post/${id}`, para);
   }
 
+  getJournalAPI(id: number) {
+    return this.http.get<JournalUpDateDTO>(
+      `${this.apiUrl}/Board/Journals/${id}`);
+  }
+
+  getJournalDetailAPI(id: number) {
+    return this.http.get<JournalDetailDTO>(
+      `${this.apiUrl}/Board/Journals/JournalDetail/${id}`);
+  }
+
+  postJournalAPI() {
+    return this.http.post<number>(
+      `${this.apiUrl}/Board/Journals`, null);
+  }
+
+  putJournalAPI(id: number, para: JournalUpDateDTO) {
+    return this.http.put(
+      `${this.apiUrl}/Board/Journals/${id}`, para);
+  }
+
   getNewActivity() {
     return this.http.get(`${this.apiUrl}/ActivityInfo/NewActivity`)
   }
@@ -147,6 +173,9 @@ export class BoardServe {
     return this.http.delete(`${this.apiUrl}/Board/Comments/DeleteComment?commentID=${id}`)
   }
 
+  postLogView(id: number) {
+    return this.http.post(`${this.apiUrl}/Board/UserActivityLogs/${id}/view`, null)
+  }
 
 }
 

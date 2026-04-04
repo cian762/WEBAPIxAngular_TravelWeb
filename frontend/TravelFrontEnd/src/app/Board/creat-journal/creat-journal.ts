@@ -1,54 +1,85 @@
 import { RowType } from './../Components/center-editor/center-editor';
-import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { CdkDrag, CdkDragDrop, CdkDragEnd, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CloudinaryServe } from '../Service/cloudinary-serve';
 import { BoardServe } from '../Service/board-serve';
-export interface ImageBox {
+import { JournalElementDTO, JournalUpDateDTO } from '../interface/JournalElementDTO';
+import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+export interface ItemBox {
   id: number;
+  zIndex: number;
   type: number;
   content: string;
   width: number,
   height: number,
   x: number;
   y: number;
+  needFiletoUpload?: File;
 }
-
-export interface TextBox {
-  id: number;
-  content: string;
-  width: number,
-  height: number,
-  x: number;
-  y: number;
-}
-
-export interface ImageBox {
-  id: number;
-  content: string;
-  width: number,
-  height: number,
-  x: number;
-  y: number;
-}
-
 
 // [alt]="item.name"
 @Component({
   selector: 'app-creat-journal',
   standalone: true,
-  imports: [CdkDrag, CdkDropList],
+  imports: [CdkDrag, CdkDropList, FormsModule],
   templateUrl: './creat-journal.html',
   styleUrl: './creat-journal.css',
 })
 
-export class CreatJournal {
-  constructor(private Serve: BoardServe, private _Cserve: CloudinaryServe,) { }
+export class CreatJournal implements OnInit {
+  constructor(private Serve: BoardServe, private _Cserve: CloudinaryServe, private route: ActivatedRoute, private router: Router,) { }
+  id: number = 0;
   imageFileList: File[] = [];
-  itemBox: ImageBox[] = [];
+  itemBoxs: ItemBox[] = [];
   selectedImageId?: null;
   cdr = inject(ChangeDetectorRef);
   @ViewChild('listFileInput') listInputRef!: ElementRef<HTMLInputElement>;
+  journalUpdate: JournalUpDateDTO = {
+    title: '',
+    cover: undefined,
+    regionId: undefined,
+    status: 0,
+    elements: undefined
+  };
 
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(p => {
+      this.id = Number(p.get('id'));
+
+      this.Serve.getJournalAPI(this.id).subscribe((d) => {
+        this.journalUpdate = d;
+        const El = d.elements;
+        if (El)
+          this.itemBoxs = El.map((El) => ({
+            id: this.itemBoxs.length + 1,
+            zIndex: El.zindex,
+            type: El.elementType,
+            content: El.content,
+            width: El.width,
+            height: El.height,
+            x: El.posX,
+            y: El.posY,
+          }));
+      });
+
+
+      // this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
+      //   this.tagList = d;
+      // });
+      // this.Serve.getAllTags().subscribe((d: any) => {
+      //   this.allTags = d;
+      // });
+
+
+
+    });
+  }
+
+  //創建圖片物件
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -60,16 +91,19 @@ export class CreatJournal {
         img.src = reader.result as string;
 
         img.onload = () => {
-          let box: ImageBox = {
-            id: this.itemBox.length + 1,
+          this.itemBoxs.forEach(item => item.zIndex++);
+          let box: ItemBox = {
+            id: this.itemBoxs.length + 1,
+            zIndex: 1,
             type: 1,
             content: reader.result as string,
             width: img.naturalWidth,
             height: img.naturalHeight,
             x: 0,
-            y: 0
+            y: 0,
+            needFiletoUpload: file
           };
-          this.itemBox.unshift(box);// 加在陣列開頭，而不是 push
+          this.itemBoxs.unshift(box);// 加在陣列開頭，而不是 push
         };
 
       };
@@ -82,10 +116,10 @@ export class CreatJournal {
 
 
   startResize(e: MouseEvent, direction: string, imageid: number) {
-    console.log("startResize");
+
     e.preventDefault();
-    const box: ImageBox = this.itemBox.find(b => b.id === imageid)!;
-    console.log('startDrag', box.x, box.y);
+    const box: ItemBox = this.itemBoxs.find(b => b.id === imageid)!;
+
     const startX = e.clientX;
     const startY = e.clientY;
     const startW = box.width;
@@ -95,7 +129,7 @@ export class CreatJournal {
     const onMouseMove = (moveEvent: MouseEvent) => {
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
-      console.log('move', box.x, box.y);
+
       let newW = startW;
 
       if (direction === 'bottom-right') {
@@ -123,7 +157,7 @@ export class CreatJournal {
   }
 
 
-  startDrag(e: MouseEvent, box: ImageBox) {
+  startDrag(e: MouseEvent, box: ItemBox) {
     e.preventDefault();
 
     const startX = e.clientX - box.x;
@@ -144,36 +178,142 @@ export class CreatJournal {
     document.addEventListener('mouseup', onMouseUp);
   }
 
+  //創建物件(文字)
   triggerListUpload(type: number) {
     if (type === 1) {
       this.listInputRef.nativeElement.click();
     }
     else if (type === 0) {
-      let box: ImageBox = {
-        id: this.itemBox.length + 1,
+      this.itemBoxs.forEach(item => item.zIndex++);
+      let box: ItemBox = {
+        id: this.itemBoxs.length + 1,
+        zIndex: this.itemBoxs.length + 1,
         type: 0,
         content: "請輸入文字...",
         width: 100,
         height: 100,
         x: 0,
-        y: 0
+        y: 0,
+
       };
-      this.itemBox.unshift(box);// 加在陣列開頭，而不是 push
+      this.itemBoxs.unshift(box);// 加在陣列開頭，而不是 push
     }
 
   }
 
 
   removeFromList(id: number, event: Event) {
-
+    event.stopPropagation();
+    this.itemBoxs = this.itemBoxs.filter(item => item.id !== id);
+    this.itemBoxs.forEach((item, index) => {
+      item.zIndex = index + 1;
+    });
   }
 
   drop(event: CdkDragDrop<any[]>) {
-    moveItemInArray(this.itemBox, event.previousIndex, event.currentIndex);
+    moveItemInArray(this.itemBoxs, event.previousIndex, event.currentIndex);
+
+    // 重新根據陣列順序分配 zIndex
+    this.itemBoxs.forEach((item, index) => {
+      item.zIndex = index + 1;
+    });
   }
 
-  onSave() {
-    console.log(this.itemBox);
+  async onSave() {
+    Swal.fire({
+      title: "上傳中...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    await this.uploadAllParallel();
+    const Elements: JournalElementDTO[] = this.itemBoxs.map(item => ({
+      page: 1,
+      posX: item.x,
+      posY: item.y,
+      rotation: 0,
+      zindex: item.zIndex,
+      elementType: item.type,
+      content: item.content,
+      width: item.width,
+      height: item.height,
+    }));
+    console.log(Elements);
+
+    this.journalUpdate.elements = Elements;
+
+    this.Serve.putJournalAPI(this.id, this.journalUpdate).subscribe({
+      next: () => {
+        Swal.fire({
+          title: "上傳完成!",
+          icon: "success",
+          showCancelButton: true,
+          confirmButtonText: "返回主頁",
+          cancelButtonText: "繼續編輯"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.router.navigate(['Board/Main']);
+          } else if (result.isDismissed) Swal.close();
+        });
+      },
+      error: (err) => {
+        Swal.fire({ title: "儲存失敗", icon: "error" });
+        console.error(err);
+      }
+    });
+  }
+
+
+  async uploadAllParallel() {
+    // 1. 分出需要上傳的和已有網址的
+    const toUpload = this.itemBoxs.filter(p => p.needFiletoUpload);
+    const alreadyUploaded = this.itemBoxs.filter(p => !p.needFiletoUpload);
+
+    try {
+      // 2. 並行上傳所有需要上傳的
+      const uploadTasks = toUpload.map(p =>
+        this.uploadImage(p.needFiletoUpload!).then(url => ({
+          id: p.zIndex,
+          url
+        }))
+      );
+      const uploadedResults = await Promise.all(uploadTasks);
+
+      // 3. 把上傳結果塞回 photoList 對應的 item
+      uploadedResults.forEach(result => {
+        const item = this.itemBoxs.find(p => p.zIndex === result.id);
+        if (item) {
+          item.content = result.url;
+          item.needFiletoUpload = undefined;
+        }
+      });
+
+      // 4. 依照 id 排序後輸出 photoUrlList，順序不亂
+      this.itemBoxs.sort((a, b) => a.zIndex - b.zIndex);
+
+      console.log('所有圖片上傳完成！');
+    } catch (err) {
+      console.error('其中一張上傳失敗，整個程序停止', err);
+    }
+  }
+
+  async uploadImage(file: File) {
+    try {
+      return this._Cserve.uploadImage(file);
+    } catch (err) {
+      console.error('上傳失敗', err);
+      throw err;
+    }
+  }
+
+
+  onCoverSelected(event: Event) {
+
+  }
+  onDelete() {
+
   }
 
 }

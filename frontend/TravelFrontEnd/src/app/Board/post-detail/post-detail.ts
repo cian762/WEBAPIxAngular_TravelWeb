@@ -26,9 +26,7 @@ interface ArticleTag {
   styleUrl: './post-detail.css',
 })
 export class PostDetail implements OnInit {
-  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) {
-
-  }
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) { };
   id = 0;
   selectedIndex = 0;
   allPhotoList: string[] = [];
@@ -42,6 +40,7 @@ export class PostDetail implements OnInit {
         next: (d) => {
           {
             this.post = d;
+            this.Serve.postLogView(this.id).subscribe();
             if (d.cover) {
               this.allPhotoList?.push(d.cover);
             }

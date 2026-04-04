@@ -33,10 +33,10 @@
 
     <!-- 大圖，無圓角 -->
     <div class="post-cover">
-      <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+      <img [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
     </div>
     <!-- 標題 -->
-    <a class="posts-title" (click)="goToDetail(article.articleId)">
+    <a class="posts-title" (click)="goToDetail(article.articleId,article.type)">
       <h3>
         <span class="post-type">討論</span>
         {{article.title}}

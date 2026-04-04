@@ -65,17 +65,17 @@
               <!-- 大圖，無圓角 -->
               @if (article.photoUrl) {
               <div class="post-cover">
-                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
               </div>
               }
               @else {
               <div class="post-cover">
-                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
               </div>
               }
 
               <!-- 標題 -->
-              <a class="posts-title" (click)="goToDetail(article.articleId)">
+              <a class="posts-title" (click)="goToDetail(article.articleId,article.type)">
                 <h3>
                   <span class="post-type">討論</span>
                   {{article.title}}
@@ -119,7 +119,7 @@
                 </div>
                 <div>
                   <button type="button" class="btn btn-outline-danger btn-sm"
-                    (click)="goToUpdate(article.articleId)">編輯貼文</button>
+                    (click)="goToUpdate(article.articleId,article.type)">編輯貼文</button>
                 </div>
               </div>
             </div>}
@@ -159,17 +159,17 @@
               <!-- 大圖，無圓角 -->
               @if (article.photoUrl) {
               <div class="post-cover">
-                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
               </div>
               }
               @else {
               <div class="post-cover">
-                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId)">
+                <img [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
               </div>
               }
 
               <!-- 標題 -->
-              <a class="posts-title" (click)="goToDetail(article.articleId)">
+              <a class="posts-title" (click)="goToDetail(article.articleId,article.type)">
                 <h3>
                   <span class="post-type">討論</span>
                   {{article.title}}
@@ -213,7 +213,7 @@
                 </div>
                 <div>
                   <button type="button" class="btn btn-outline-danger btn-sm"
-                    (click)="goToUpdate(article.articleId)">編輯貼文</button>
+                    (click)="goToUpdate(article.articleId,article.type)">編輯貼文</button>
                 </div>
               </div>
             </div>}

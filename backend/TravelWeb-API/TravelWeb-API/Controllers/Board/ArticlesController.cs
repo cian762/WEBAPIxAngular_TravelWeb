@@ -60,6 +60,14 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
+        //熱門文章
+        [HttpGet("trending")]
+        public async Task<ActionResult<List<Trending>>> GetTrendings()
+        {
+            var result = await _ArticleService.GetTrendings();
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetArticlesByID(int id)
         {

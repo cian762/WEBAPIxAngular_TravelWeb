@@ -35,8 +35,8 @@ export class BlogHome implements OnInit, AfterViewInit {
   Keyword = "";
   AuthorKeyword = "";
   isSearch = false;
-
-
+  isFocused = false;
+  showAdvancedSearch = false;
   private fpInstance: flatpickr.Instance | null = null;
   startdate?: string;
   enddate?: string;
@@ -144,6 +144,7 @@ export class BlogHome implements OnInit, AfterViewInit {
   }
 
   onFocus(event: any) {
+    this.isFocused = true;
     event.target.closest('.search-box').classList.add('focused');
     if (event.target.value) {
       this.searchByKeyword(event);
@@ -165,6 +166,7 @@ export class BlogHome implements OnInit, AfterViewInit {
   }
 
   onBlur(event: any) {
+    this.isFocused = false;
     setTimeout(() => {
       event.target.closest('.search-box').classList.remove('focused');
     }, 200);
@@ -217,6 +219,10 @@ export class BlogHome implements OnInit, AfterViewInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  toggleAdvancedSearch() {
+    this.showAdvancedSearch = !this.showAdvancedSearch;
   }
 
 }

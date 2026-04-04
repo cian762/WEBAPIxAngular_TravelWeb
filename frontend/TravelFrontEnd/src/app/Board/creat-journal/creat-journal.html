@@ -1,13 +1,65 @@
 <div class="host-body">
   <div class="d-flex justify-content-evenly">
-    <div>
-      <button type="button" class="btn btn-primary" (click)="onSave()">儲存</button>
+
+
+    <!-- 左欄 -->
+    <div class=" right-panel">
+      <div class="panel-card">
+        <div class="panel-card-header">
+          <h5 class="panel-card-title">文章詳情</h5>
+        </div>
+        <div class="panel-card-body">
+          <!-- 標題 -->
+          <div class="mb-3">
+            <label class="form-label">標題</label>
+            <input type="text" class="form-control" [(ngModel)]="journalUpdate.title" placeholder="請輸入標題">
+          </div>
+
+          <!-- 封面 -->
+          <div class="mb-3">
+            <label class="form-label">封面</label>
+            <img [src]="journalUpdate.cover" class="img-fluid-size d-block mb-2">
+            <input type="file" accept="image/*" (change)="onCoverSelected($event)">
+          </div>
+
+          <!-- 標註地區 -->
+          <div class="mb-3">
+            <label class="form-label">標註地區</label>
+            <select class="form-select" [(ngModel)]="journalUpdate.regionId">
+              <!-- @for (region of regions; track region.id) {
+              <option [value]="region.id">{{ region.name }}</option>
+              } -->
+            </select>
+          </div>
+
+          <!-- 文章權限 -->
+          <div class="mb-3">
+            <label class="form-label">文章權限</label>
+            <select class="form-select" [(ngModel)]="journalUpdate.status">
+              <option [value]="0">公開</option>
+              <option [value]="1">私人</option>
+            </select>
+          </div>
+
+          <!-- 刪除 -->
+          <div class="mb-3">
+            <button type="button" class="btn btn-danger w-100" (click)="onDelete()">刪除文章</button>
+          </div>
+
+          <!-- 儲存 -->
+          <button type="button" class="btn btn-primary w-100" (click)="onSave()">儲存</button>
+        </div>
+
+
+      </div>
     </div>
 
+
+    <!-- 中欄 -->
     <div class="ground">
-      @for (item of itemBox; track item.id; let i = $index) {
+      @for (item of itemBoxs; track item.id;) {
       <div class="cube" [style.width.px]="item.width" [style.height.px]="item.height"
-        [style.z-index]="itemBox.length - i" [style.left.px]="item.x" [style.top.px]="item.y"
+        [style.z-index]="itemBoxs.length - item.zIndex" [style.left.px]="item.x" [style.top.px]="item.y"
         (mousedown)="startDrag($event, item)">
 
         <div class="controller top-left"
@@ -29,10 +81,13 @@
       </div>
       }
     </div>
+
+
+    <!-- 右欄 -->
     <div class=" right-panel">
       <div class="panel-card">
         <div class="panel-card-header">
-          <h5 class="panel-card-title">圖片列</h5>
+          <h5 class="panel-card-title">物件箱</h5>
           <button class="upload-btn" (click)="triggerListUpload(1)" title="上傳圖片">
             <i class="ri-upload-2-line"></i>
           </button>
@@ -41,10 +96,10 @@
             (change)="onFileSelected($event)" />
         </div>
         <!-- 空白提示 -->
-        @if (imageFileList.length === 0) {
+        @if (itemBoxs.length === 0) {
         <div class="list-empty" CdkDropList>
           <i class="ri-image-line list-empty-icon"></i>
-          <p>尚無圖片</p>
+          <p>尚無物件</p>
         </div>}
 
         @else {
@@ -57,10 +112,8 @@
               <th></th>
             </tr>
           </thead>
-          <tbody cdkDropList cdkDropList [cdkDropListData]="itemBox" (cdkDropListDropped)="drop($event)">
-            <!-- (click)="insertFromList(item)"  *ngFor="let item of imageList; let i = index" [class.row-active]="selectedImageId === item.id"
-              title="點擊插入編輯器"-->
-            @for (item of itemBox; track item.id; let i = $index) {
+          <tbody cdkDropList cdkDropList [cdkDropListData]="itemBoxs" (cdkDropListDropped)="drop($event)">
+            @for (item of itemBoxs; track item.id; let i = $index) {
             <tr cdkDrag>
               <td class="td-index">{{$index}}</td>
               <td class="td-thumb">
@@ -78,5 +131,12 @@
 
       </div>
     </div>
+
+
+
+
+
+
+
   </div>
 </div>

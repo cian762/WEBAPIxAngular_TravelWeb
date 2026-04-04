@@ -194,3 +194,32 @@
 .no-csspointerevents .nice-select.open .list {
   display: block;
 }
+
+/* nice-select 下拉選單加滾軸 */
+.nice-select .list {
+  max-height: 200px;
+  /* 限制高度 */
+  overflow-y: auto;
+  /* 超過就出現滾軸 */
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 美化滾軸（可選） */
+.nice-select .list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nice-select .list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.nice-select .list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.nice-select .list::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

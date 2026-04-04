@@ -38,8 +38,13 @@ export class ArticleList {
   reportImageFile?: File;
   reportPhotoView?: string;
 
-  goToDetail(id: number): void {
-    this.router.navigate(['Board', 'detail', id]);
+  goToDetail(id: number, type: number): void {
+    if (type === 0) {
+      this.router.navigate(['Board', 'detail', id]);
+    }
+    else if (type === 1) {
+      this.router.navigate(['Board', 'JournalDetail', id]);
+    }
   }
 
   goToMemderPage(memderID: string): void {

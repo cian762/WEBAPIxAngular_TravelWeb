@@ -115,8 +115,8 @@ namespace TravelWeb_API.Models.Board.Service
             // 作者
             if (!string.IsNullOrEmpty(dto.authorKeyword))
             {
-                query = query                
-                .Where(a => a.UserId.Contains(dto.authorKeyword)||
+                query = query
+                .Where(a => a.UserId.Contains(dto.authorKeyword) ||
                 a.MemberInformation.Name.Contains(dto.authorKeyword));
             }
 
@@ -162,7 +162,7 @@ namespace TravelWeb_API.Models.Board.Service
             var blockedIds = _memberDb.Blockeds
                          .Where(b => b.MemberId == userID || b.BlockedId == userID)
                          .Select(b => b.MemberId == userID ? b.BlockedId : b.MemberId)
-                         .ToList(); 
+                         .ToList();
             int pageSize = 10;
             return data
                 .OrderByDescending(a => a.CreatedAt)
@@ -172,6 +172,7 @@ namespace TravelWeb_API.Models.Board.Service
                 .Select(a => new ArticleDataDTO
                 {
                     articleId = a.ArticleId,
+                    Type = a.Type,
                     title = a.Title,
                     CreatedAt = a.CreatedAt,
                     photoUrl = a.PhotoUrl,
@@ -303,7 +304,7 @@ namespace TravelWeb_API.Models.Board.Service
                 .Include(a => a.ArticleTags)
                 .Include(a => a.ArticleFolders)
                 .Include(a => a.Post)
-                                
+
                 .FirstOrDefaultAsync(); ;
 
             if (article != null && article.UserId == authorID)
@@ -331,7 +332,7 @@ namespace TravelWeb_API.Models.Board.Service
             {
                 _context.ArticleFolders.Remove(collect);
             }
-           await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         ArticleFolder? isCollect(int articleID, string userID)
@@ -355,8 +356,47 @@ namespace TravelWeb_API.Models.Board.Service
             throw new NotImplementedException();
         }
 
+        public async Task<List<Trending>> GetTrendings()
+        {
+            var trending = await _context.Articles
+                .Where(a => a.Status == 1).Include(a => a.MemberInformation)
+                .Select(a => new
+                {
+                    Article = a,
+                    LikeCount = _context.ArticleLikes.Count(l => l.ArticleId == a.ArticleId),
+                    CommentCount = _context.Comments.Count(c => c.ArticleId == a.ArticleId),
+                    ViewCount = _context.UserActivityLogs.Count(l => l.TargetId == a.ArticleId),
+                    FolderCount = _context.ArticleFolders.Count(f => f.ArticleId == a.ArticleId),
+                    HoursSince = EF.Functions.DateDiffHour(a.CreatedAt, DateTime.UtcNow)
+                })
+                .ToListAsync();
 
+            var TOP = trending
+                .Select(x => new
+                {
+                    x.Article,
+                    Score = (x.ViewCount * 1.0 + x.LikeCount * 3.0 + x.CommentCount * 5.0 + x.FolderCount * 4.0)
+                            / Math.Pow(x.HoursSince + 2, 1.5)
+                })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Article.CreatedAt)
+                .Take(5)
+                .ToList();
+            var result = TOP.Select(t =>
+            new Trending
+            {
+                articleId = t.Article.ArticleId,
+                title = t.Article.Title,
+                Type = t.Article.Type,
+                photoUrl = t.Article.PhotoUrl,
+                author = t.Article.MemberInformation.Name,
 
+            }
+            ).ToList();
+
+            return result;
+        }
+        
 
     }
     

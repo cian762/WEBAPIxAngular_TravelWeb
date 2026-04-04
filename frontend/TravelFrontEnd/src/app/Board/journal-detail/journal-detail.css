@@ -1,0 +1,71 @@
+.img-fluid {
+  width: 855px;
+  height: 400px;
+  object-fit: cover;
+  /* 關鍵：等比例縮放並裁切，不變形 */
+  object-position: center;
+  /* 從圖片中心點裁切 */
+}
+
+
+.cube {
+  width: 100px;
+  position: absolute;
+  /* height: 300px;
+  width: 300px; */
+  display: inline-block;
+  /* 或 inline-flex，讓寬高由內容決定 */
+  background-color: transparent;
+  /* 必須加，讓子元素 absolute 以此為基準 */
+  cursor: move;
+}
+
+
+.box-textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
+}
+
+
+.ground {
+  position: relative;
+  height: 1000px;
+  width: 800px;
+  margin: 50px 0px;
+  background-color: transparent;
+  overflow: hidden;
+}
+
+.user-details a {
+  margin: 7px 0px;
+  color: #777777;
+  transition: 0.2s;
+}
+
+
+.user-details a i {
+  margin-left: 10px;
+}
+
+.user-details a span {
+  margin-left: 10px;
+}
+
+
+/* 點讚與收藏變色 */
+.like-item:hover,
+.like-item.liked {
+  color: #e8a838 !important;
+}
+
+.collect-item:hover,
+.collect-item.collect {
+  color: #4cd3e3 !important;
+}
+
+.other-item:hover {
+  color: #e8a838 !important;
+  cursor: pointer;
+}

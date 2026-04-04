@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TravelWeb_API.Models.Board.DbSet;
+using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
 using TravelWeb_API.Models.Board.Service;
 
@@ -24,63 +25,51 @@ namespace TravelWeb_API.Controllers.Board
             _journalService = journalService;
         }
 
-       
+        [HttpGet("JournalDetail/{id}")]
+        public async Task<ActionResult<JournalDetailDTO>> GetJournalDetail(int id)
+        {
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return BadRequest();
 
-        //// GET: api/Journals/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Journal>> GetJournal(int id)
-        //{
-        //    var journal = await _context.Journals.FindAsync(id);
+            var journal = await _journalService.GetJournalDetail(id,currentUserId);
 
-        //    if (journal == null)
-        //    {
-        //        return NotFound();
-        //    }
+            return journal;
+        }
 
-        //    return journal;
-        //}
 
-        //// PUT: api/Journals/5
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutJournal(int id, Journal journal)
-        //{
-        //    if (id != journal.ArticleId)
-        //    {
-        //        return BadRequest();
-        //    }
+        // GET: api/Journals/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<JournalUpdateDTO>> GetJournal(int id)
+        {
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return BadRequest();
 
-        //    _context.Entry(journal).State = EntityState.Modified;
+            var journal = await _journalService.UpdateJournal(id);                       
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!JournalExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            return journal;
+        }
 
-        //    return NoContent();
-        //}
+        // PUT: api/Journals/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<bool> PutJournal(int id, JournalUpdateDTO updateDTO)
+        {
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return false;
+            var isJournalUpdateSuccessful = await _journalService.putJournal(id, updateDTO);
+            return isJournalUpdateSuccessful;
+        }
 
         // POST: api/Journals
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<bool> PostJournal()
+        public async Task<ActionResult<int>> PostJournal()
         {
             string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (currentUserId == null) return false;
-            var journal = await _journalService.postJournal(currentUserId);      
-
-            return journal;
+            if (currentUserId == null) return BadRequest();
+            var articleId = await _journalService.postJournal(currentUserId);            
+            return articleId;
+            
         }
 
         //// DELETE: api/Journals/5

@@ -177,21 +177,63 @@
   margin: 5px auto;
 }
 
+/* 新增：按鈕群組容器 */
+.search-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+  /* 讓子元素的圓角被切齊 */
+  box-shadow: 0 2px 8px rgba(56, 164, 255, 0.15);
+}
+
+/* 進階搜尋按鈕 */
+.advanced-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  background-color: #f0f8ff;
+  color: #38a4ff;
+  border: 1px solid #38a4ff;
+  border-right: none;
+  /* 跟搜尋框無縫連接 */
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border-radius: 5px 0 0 5px;
+  /* 只有左邊圓角 */
+}
+
+/* .advanced-search-btn:hover {
+  background-color: #38a4ff;
+  color: #fff;
+} */
+
+/* 搜尋框（修改） */
 .search-box {
   display: flex;
   align-items: center;
-  background-color: #f8b600;
-  border-radius: 999px;
+  flex: 1;
+  /* 佔據剩餘空間 */
+  background-color: #38a4ff;
   padding: 8px 16px;
-  border: 1px solid transparent;
-  /* transition: all 0.2s ease; */
-  margin: 5px auto;
-  width: 80%;
+  border: 1px solid #38a4ff;
+  transition: all 0.2s ease;
+  border-radius: 0 5px 5px 0;
+  /* 只有右邊圓角 */
+  margin: 0;
+  /* 移除原本的 margin */
 }
 
 .search-box.focused {
   background-color: #fff;
-  border: 1px solid #f8b600;
+  border: 1px solid #38a4ff;
+  border-left: 1px solid #e0e0e0;
+  /* focus 時左側加淡邊框 */
 }
 
 .search-box input {
@@ -204,15 +246,15 @@
 }
 
 .search-box input::placeholder {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .search-box.focused input {
-  color: #f8b600;
+  color: #38a4ff;
 }
 
 .search-box.focused input::placeholder {
-  color: #f8b600;
+  color: #38a4ff;
 }
 
 .search-box button {
@@ -223,26 +265,107 @@
   padding: 0;
   display: flex;
   align-items: center;
+  font-size: 16px;
 }
 
 .search-box.focused button {
-  color: #f8b600;
+  color: #38a4ff;
 }
 
 .search-box input:-webkit-autofill,
 .search-box input:-webkit-autofill:hover,
 .search-box input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
-  -webkit-text-fill-color: #f8b600 !important;
+  -webkit-text-fill-color: #38a4ff !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 .search-box:not(.focused) input:-webkit-autofill,
 .search-box:not(.focused) input:-webkit-autofill:hover,
 .search-box:not(.focused) input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #f8b600 inset !important;
+  -webkit-box-shadow: 0 0 0px 1000px #38a4ff inset !important;
   -webkit-text-fill-color: #fff !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+
+/* 手風琴面板 */
+.advanced-search-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+  background: white;
+  border-radius: 16px;
+  margin-top: 0;
+  box-shadow: 0 0 0 rgba(56, 164, 255, 0);
+}
+
+.advanced-search-panel.show {
+  max-height: 500px;
+  /* 足夠大的值，讓內容完全展開 */
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(56, 164, 255, 0.1);
+}
+
+.accordion-body {
+  padding: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, padding 0.3s ease;
+}
+
+.advanced-search-panel.show .accordion-body {
+  padding: 20px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 表單樣式美化 */
+.accordion-body .form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.accordion-body .form-control,
+.accordion-body .form-select {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.accordion-body .form-control:focus,
+.accordion-body .form-select:focus {
+  border-color: #38a4ff;
+  box-shadow: 0 0 0 3px rgba(56, 164, 255, 0.1);
+}
+
+.accordion-body .btn-primary {
+  background-color: #38a4ff;
+  border-color: #38a4ff;
+  border-radius: 8px;
+}
+
+.accordion-body .btn-primary:hover {
+  background-color: #2694e5;
+  border-color: #2694e5;
+}
+
+.accordion-body .btn-outline-secondary {
+  border-radius: 8px;
+}
+
+/* 進階搜尋按鈕動畫 */
+.advanced-search-btn i {
+  transition: transform 0.3s ease;
+}
+
+.advanced-search-btn.active i {
+  transform: rotate(180deg);
+}
+
+
 
 /* ===========以上為標籤搜尋框之樣式=========== */

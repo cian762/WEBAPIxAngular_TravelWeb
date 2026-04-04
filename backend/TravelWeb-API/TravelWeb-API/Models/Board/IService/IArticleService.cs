@@ -17,5 +17,7 @@ namespace TravelWeb_API.Models.Board.IService
         public Task Collect(int articleID, string userId);
         public Task<bool> DeleteArticle(int articleID, string? authorID);
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) GetArticlesBySource(int page, string productCode);
+        public Task<List<Trending>> GetTrendings();
+
     }
 }

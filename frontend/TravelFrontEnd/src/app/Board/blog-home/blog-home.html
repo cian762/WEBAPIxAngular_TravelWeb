@@ -4,98 +4,90 @@
   <div class="container">
     <!-- 搜尋起點 -->
     <div class="row my-5">
-      <div class="d-flex justify-content-center align-items-center">
+      <div class="d-flex justify-content-center align-items-center flex-column">
         <div class="col-5">
           <div class="search-form">
-            <div class="search-box">
-              <input placeholder="搜尋文章" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event);"
-                (input)="searchByKeyword($event)">
-              <button type="button" (click)="onSeach()"><i class="fa fa-search"></i></button>
-            </div>
+            <div class="search-group">
+              <!-- 進階搜尋按鈕（左） -->
+              <a class="advanced-search-btn" (click)="toggleAdvancedSearch()">
+                <i class="fa" [class.fa-sliders]="!showAdvancedSearch" [class.fa-times]="showAdvancedSearch"></i>
+                {{ showAdvancedSearch ? '收起' : '進階搜尋' }}
+              </a>
 
-
-
-          </div>
-        </div>
-        <a href="#" class="genric-btn primary-border circle">進階搜尋</a>
-      </div>
-    </div>
-    <input #datePicker type="text" class="form-control" placeholder="選擇日期">
-
-    <!-- 地區選項 -->
-    <section id="sec4">
-      <div class="mb-5 border-bottom">
-        <label class="form-label my-title">標註地區</label>
-        <div class="row mb-5">
-          <div class="col-4">
-            <div class="single-element-widget">
-              <label class="form-label">縣市</label>
-              <div class="default-select">
-                <select id="region-select">
-                  <option [value]="null">請選擇縣市</option>
-                  @for (city of regions; track city.regionId) {
-                  <option [value]="city.regionId">{{ city.regionName }}</option>
-                  }
-                </select>
+              <!-- 搜尋框（右） -->
+              <div class="search-box" [class.focused]="isFocused">
+                <input placeholder="搜尋文章" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event)"
+                  (input)="searchByKeyword($event)">
+                <button type="button" (click)="onSeach()">
+                  <i class="fa fa-search"></i>
+                </button>
               </div>
             </div>
-          </div>
 
-          <div class="col-4">
-            <div class="single-element-widget">
-              <label class="form-label">鄉/鎮/市/區</label>
-              <div class="default-select">
-                <select id="dist-select">
-                  <option [value]="null">請選擇鄉鎮市區</option>
-                  @for (dist of districts; track dist.regionId) {
-                  <option [value]="dist.regionId">{{ dist.regionName }}</option>
-                  }
-                </select>
+
+          </div>
+        </div>
+        <div class="col-10">
+          <!-- 手風琴內容 -->
+          <div class="advanced-search-panel" [class.show]="showAdvancedSearch">
+            <div class="accordion-body">
+              <!-- 文章&作者 輸入框並排 -->
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">文章搜尋</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="Keyword"
+                    placeholder="搜尋文章標題、關鍵字…">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">作者</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="AuthorKeyword"
+                    placeholder="作者關鍵字">
+                </div>
               </div>
+
+              <!-- 日期 地點 -->
+              <div class="row g-3">
+                <!-- 日期 -->
+                <div class="col-md-4">
+                  <label class="form-label">日期</label>
+                  <input #datePicker type="text" class="form-control form-control-sm" placeholder="選擇日期">
+                </div>
+
+                <!-- 縣市 -->
+                <div class="col-md-4">
+                  <label class="form-label">縣市</label>
+                  <div class="default-select">
+                    <select id="region-select" class="form-select form-select-sm">
+                      <option [value]="null">請選擇縣市</option>
+                      @for (city of regions; track city.regionId) {
+                      <option [value]="city.regionId">{{ city.regionName }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 鄉鎮市區 -->
+                <div class="col-md-4">
+                  <label class="form-label">鄉/鎮/市/區</label>
+                  <div class="default-select">
+                    <select id="dist-select" class="form-select form-select-sm">
+                      <option [value]="null">請選擇鄉鎮市區</option>
+                      @for (dist of districts; track dist.regionId) {
+                      <option [value]="dist.regionId">{{ dist.regionName }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <button class="sb-btn" (click)="onSeach()">搜尋</button>
+              <button class="sb-btn" (click)="onBackSeach()">取消搜尋</button>
+
+              <button class="sb-reset" (click)="onSeachReset()">清空搜尋</button>
+
             </div>
           </div>
         </div>
-
-      </div>
-    </section>
-
-    <div class="sb-wrap">
-      <div class="sb-row">
-        <div class="sb-input-wrap">
-          <input type="text" [(ngModel)]="Keyword" placeholder="搜尋文章標題、關鍵字…">
-        </div>
-        <button class="sb-btn" (click)="onSeach()">搜尋</button>
-      </div>
-      <div class="sb-row">
-        <div class="sb-input-wrap">
-          <input type="text" [(ngModel)]="AuthorKeyword" placeholder="作者關鍵字">
-        </div>
-        <button class="sb-btn" (click)="onBackSeach()">取消搜尋</button>
-      </div>
-      <div class="sb-filters">
-        <div class="sb-fg">
-          <span class="sb-label">縣市</span>
-          <select id="region-select" class="sb-select">
-            <option [value]="null">請選擇縣市</option>
-            @for (city of regions; track city.regionId) {
-            <option [value]="city.regionId">{{ city.regionName }}</option>
-            }
-          </select>
-        </div>
-        <div class="sb-fg">
-          <span class="sb-label">鄉鎮市區</span>
-          <select id="dist-select" class="sb-select">
-            <option [value]="null">請選擇區域</option>
-            @for (dist of districts; track dist.regionId) {
-            <option [value]="dist.regionId">{{ dist.regionName }}</option>
-            }
-          </select>
-        </div>
-        <div class="sb-fg">
-          <span class="sb-label">日期區間</span>
-          <input #startPicker type="text" class="sb-date" placeholder="選擇日期">
-        </div>
-        <button class="sb-reset" (click)="onSeachReset()">清空搜尋</button>
       </div>
     </div>
 
@@ -105,6 +97,7 @@
       <span (click)="ReflashArticles(1)">_返回</span>
       }
     </div>
+
     <!-- 搜尋終點 -->
 
     <div class="row my-container">
@@ -114,7 +107,7 @@
       <div class="col-lg-4 sidebar-widgets">
         <div class="widget-wrap">
           <app-popular-post></app-popular-post>
-          <app-tag-clouds></app-tag-clouds>
+          <app-tag-clouds (tagSelected)="onTagSelected($event)"></app-tag-clouds>
           <app-post-catgories></app-post-catgories>
           <div class="single-sidebar-widget ads-widget">
             <a href="#"><img class="img-fluid" src="img/blog/ads-banner.jpg" alt=""></a>
