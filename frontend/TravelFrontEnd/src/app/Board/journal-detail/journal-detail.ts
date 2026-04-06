@@ -10,10 +10,12 @@ import { PostCatgories } from "../Components/post-catgories/post-catgories";
 
 import { DatePipe, registerLocaleData } from '@angular/common';
 import localeZhTw from '@angular/common/locales/zh-Hant';
+import { AuthorInfoSidebar } from "../Components/author-info-sidebar/author-info-sidebar";
+import { TagDTO } from '../interface/ArticleData';
 
 @Component({
   selector: 'app-journal-detail',
-  imports: [CreateArticleButton, CommentsArea, PopularPost, TagClouds, PostCatgories, DatePipe,],
+  imports: [CreateArticleButton, CommentsArea, PopularPost, TagClouds, PostCatgories, DatePipe, AuthorInfoSidebar],
   templateUrl: './journal-detail.html',
   styleUrl: './journal-detail.css',
 })
@@ -21,7 +23,7 @@ export class JournalDetail implements OnInit {
   constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) { };
   id = 0;
   journal?: JournalDetailDTO;
-
+  TagsList?: TagDTO[];
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -38,6 +40,8 @@ export class JournalDetail implements OnInit {
           }
         }
       });
+
+      this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => this.TagsList = d)
     });
   }
 

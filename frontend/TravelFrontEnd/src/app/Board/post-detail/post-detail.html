@@ -123,7 +123,8 @@
       <!-- 側欄起點 -->
       <div class="col-lg-4 sidebar-widgets">
         <div class="widget-wrap">
-          <app-author-info-sidebar [post]="post"></app-author-info-sidebar>
+          @if (post?.authorID) {
+          <app-author-info-sidebar [authorID]="post?.authorID"></app-author-info-sidebar>}
           <app-popular-post></app-popular-post>
 
           <app-post-catgories></app-post-catgories>

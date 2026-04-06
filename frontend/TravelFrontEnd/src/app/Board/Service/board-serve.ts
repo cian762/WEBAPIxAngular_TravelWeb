@@ -19,6 +19,9 @@ export class BoardServe {
   baseUrl: string = environment.apiBaseUrl;
   private apiUrl = this.baseUrl;
 
+  getArtcleForVister() {
+    return this.http.get<ArticleData[]>(`${this.apiUrl}/Board/Articles/Visitors`)
+  }
 
   getArticleAPI(para: number) {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
@@ -138,6 +141,10 @@ export class BoardServe {
   }
   getAuthorUser(para: string) {
     return this.http.get(`${this.apiUrl}/Board/Articles/authorUser?authorID=${para}`)
+  }
+
+  getAuthorUserInfo(para: string) {
+    return this.http.get(`${this.apiUrl}/Board/Articles/getAuthorUserInfo?authorID=${para}`)
   }
 
 

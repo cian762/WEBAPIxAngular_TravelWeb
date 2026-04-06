@@ -19,10 +19,12 @@ namespace TravelWeb_API.Controllers.Board
     public class JournalsController : ControllerBase
     {
         private readonly IJournalService _journalService;
+        private readonly ITagsService _tagsService;
 
-        public JournalsController(IJournalService journalService)
+        public JournalsController(IJournalService journalService, ITagsService tagsService)
         {
             _journalService = journalService;
+            _tagsService = tagsService;
         }
 
         [HttpGet("JournalDetail/{id}")]
@@ -44,7 +46,12 @@ namespace TravelWeb_API.Controllers.Board
             string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (currentUserId == null) return BadRequest();
 
-            var journal = await _journalService.UpdateJournal(id);                       
+            var journal = await _journalService.UpdateJournal(id);
+            journal.tags = _tagsService.getTagsByArticleId(id).Select(t=>new TagDTO { 
+            TagId = t.TagId,
+            icon=t.icon,
+            TagName = t.TagName,
+            }).ToList();
 
             return journal;
         }
@@ -56,8 +63,11 @@ namespace TravelWeb_API.Controllers.Board
         {
             string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (currentUserId == null) return false;
+            var tagIds = updateDTO.tags?.Select(t => t.TagId).ToList();
+            var isTagUpdateSuccessful = await _tagsService.EditTagsByArticleId(id, tagIds);                       
             var isJournalUpdateSuccessful = await _journalService.putJournal(id, updateDTO);
-            return isJournalUpdateSuccessful;
+            if (isJournalUpdateSuccessful&& isTagUpdateSuccessful) return true;
+            return false;
         }
 
         // POST: api/Journals

@@ -60,6 +60,7 @@ export class PersonalHomepage implements OnInit {
   }
 
   goToUpdate(id: number, type: number): void {
+    console.log(id, type);
     if (type === 0) {
       this.router.navigate(['Board', 'creat', id]);
     }

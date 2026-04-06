@@ -50,8 +50,11 @@ export class ArticleList {
   goToMemderPage(memderID: string): void {
     this.router.navigate(['Board', 'user', memderID]);
   }
-
+  animatingIds = new Set<number>();
   ToLike(id: number) {
+    this.animatingIds.add(id);
+    setTimeout(() => this.animatingIds.delete(id), 800);
+
     var article = this.articleList.find(a => a.articleId === id);
     if (article) {
       if (!article.isLike) {

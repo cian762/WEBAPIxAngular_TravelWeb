@@ -1,0 +1,23 @@
+.blur-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, #f9f9ff);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 32px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.blur-text {
+  font-size: 15px;
+  color: #38a4ff;
+  font-weight: 500;
+  pointer-events: auto;
+  cursor: pointer;
+  margin: 0;
+}

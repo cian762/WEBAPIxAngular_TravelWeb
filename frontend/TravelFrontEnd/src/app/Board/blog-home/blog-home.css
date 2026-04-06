@@ -1,5 +1,5 @@
 .host-body {
-  background-color: #f9f9ff;
+  background-color: white;
   padding-top: 50px;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .sb-btn {
-  height: 44px;
+  height: 38px;
   padding: 0 22px;
   border: none;
   border-radius: 3px;
@@ -297,14 +297,18 @@
   background: white;
   border-radius: 16px;
   margin-top: 0;
-  box-shadow: 0 0 0 rgba(56, 164, 255, 0);
+  margin-bottom: 40px;
+
 }
 
 .advanced-search-panel.show {
   max-height: 500px;
   /* 足夠大的值，讓內容完全展開 */
   margin-top: 16px;
-  box-shadow: 0 4px 12px rgba(56, 164, 255, 0.1);
+  outline: 1px solid #eee;
+  outline-offset: 1px;
+
+
 }
 
 .accordion-body {
@@ -334,12 +338,13 @@
   border-radius: 8px;
   font-size: 14px;
   transition: border-color 0.2s ease;
+
 }
 
 .accordion-body .form-control:focus,
 .accordion-body .form-select:focus {
   border-color: #38a4ff;
-  box-shadow: 0 0 0 3px rgba(56, 164, 255, 0.1);
+
 }
 
 .accordion-body .btn-primary {
@@ -366,6 +371,30 @@
   transform: rotate(180deg);
 }
 
+
+.custom-select {
+  width: 100%;
+  padding: 6px 32px 6px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #555;
+  appearance: none;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2338a4ff' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 12px center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.custom-select:focus {
+  outline: 2px solid rgba(56, 164, 255, 0.3);
+  outline-offset: 1px;
+  border-color: #38a4ff;
+}
+
+.custom-select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
 
 
 /* ===========以上為標籤搜尋框之樣式=========== */

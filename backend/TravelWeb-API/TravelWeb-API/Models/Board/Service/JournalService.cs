@@ -28,7 +28,7 @@ namespace TravelWeb_API.Models.Board.Service
                     Cover = a.PhotoUrl,
                     Title = a.Title,
                     Status = a.Status,
-                    RegionId = a.RegionID
+                    RegionId = a.RegionID,                    
                 })
                 .FirstOrDefaultAsync();
 

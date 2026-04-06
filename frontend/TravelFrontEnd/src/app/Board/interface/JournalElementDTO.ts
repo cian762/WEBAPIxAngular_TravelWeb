@@ -6,7 +6,7 @@ export interface JournalUpDateDTO {
   status: number,
   regionId?: number
   elements?: JournalElementDTO[]
-  tags?: TagDTO[];
+  tags: TagDTO[];
 }
 
 export interface JournalElementDTO {

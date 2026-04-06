@@ -113,7 +113,7 @@
       </section>
       <!-- 地區選項 -->
       <section id="sec4">
-        <div class="mb-5 border-bottom">
+        <div class="mb-3 border-bottom">
           <label class="form-label my-title">標註地區</label>
           <div class="row mb-5">
             <div class="col-4">
@@ -168,30 +168,35 @@
       </section>
       <!-- 引用站內活動 -->
       <section id="sec5">
-        <label class="form-label my-title">引用站內景點&活動</label>
+        <div class="border-bottom mb-5">
+          <label class="form-label my-title">引用站內景點&活動</label>
+        </div>
       </section>
       <!-- 文章權限選項 -->
       <section id="sec6">
-        <div class="mb-5 border-bottom">
-          <div class="d-flex justify-content-evenly align-items-center mb-5">
-            <span><button (click)="deleteArticle()" class="genric-btn danger-border radius">刪除文章</button>
-            </span>
-            <div class="single-element-widget">
-              <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
-              <div class="default-select">
-                <select formControlName="status" id="status-select">
-                  <option [value]="0"><i class="bi bi-lock-fill"></i>私人</option>
-                  <option [value]="1"><i class="bi bi-globe-asia-australia"></i>公開</option>
-                  <option [value]="2"><i class="bi bi-suit-heart-fill"></i>粉絲</option>
-                </select>
-              </div>
+        <div class="d-flex justify-content-evenly align-items-center mb-5">
+          <span><button (click)="deleteArticle()" class="genric-btn danger-border radius">刪除文章</button>
+          </span>
+          <div class="single-element-widget">
+            <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span [style.color]="!form.get('status')?.value ? '#777777' : '#ffffff'">私人</span>
+              <label class="toggle">
+                <input type="checkbox" formControlName="status">
+                <span class="slider"></span>
+              </label>
+              <span [style.color]="form.get('status')?.value ? '#777777' : '#ffffff'">公開</span>
             </div>
           </div>
+          <div class="d-flex justify-content-around">
+            <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
+          </div>
+
+
+
         </div>
       </section>
-      <div class="d-flex justify-content-around">
-        <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
-      </div>
+
     </form>
   </div>
 </div>

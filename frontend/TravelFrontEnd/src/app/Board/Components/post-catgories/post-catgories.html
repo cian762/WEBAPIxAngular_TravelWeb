@@ -3,9 +3,8 @@
   <ul class="cat-list">
     @for (activity of newActivityList; track $index) {
     <li>
-      <a href="#" class="d-flex justify-content-between">
+      <a (click)="goToActivityInfo(activity.activityId)" class="d-flex justify-content-between">
         <p>{{activity.title}}</p>
-        <p>{{activity.activityId}}</p>
       </a>
     </li>
     }

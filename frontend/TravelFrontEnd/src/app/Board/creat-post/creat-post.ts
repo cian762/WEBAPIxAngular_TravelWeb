@@ -151,7 +151,7 @@ export class CreatPost implements OnInit, OnDestroy {
     this.form.reset({
       title: post.title,
       content: post.contents,
-      status: post.status,
+      status: post.status === 1,
 
     });
     setTimeout(() => {
@@ -241,7 +241,7 @@ export class CreatPost implements OnInit, OnDestroy {
       id: this.id,
       title: formValue.title ?? null,
       photoUrl: this.coverUrl ?? null,
-      status: Number(formValue.status || 0), // 確保一定是數字 0-255，不要給空值
+      status: Number(formValue.status.value ? 1 : 0), // 確保一定是數字 0-255，不要給空值
       content: formValue.content ?? null,
       regionId: this.selectedRegionId ?? null,
       photoUrlList: this.photoUrlList ?? null

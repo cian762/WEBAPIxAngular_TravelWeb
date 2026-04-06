@@ -128,6 +128,11 @@ export const routes: Routes = [
         path: 'user/:id',
         loadComponent: () => import('./Board/user-articles-page/user-articles-page').then(m => m.UserArticlesPage),
       },
+      //訪客
+      {
+        path: 'Visitors',
+        loadComponent: () => import('./Board/visitors/visitors').then(m => m.Visitors),
+      },
       //404
       {
         path: '404',

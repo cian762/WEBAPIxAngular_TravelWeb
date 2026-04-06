@@ -28,3 +28,11 @@
 .my-btn:focus {
   outline: none;
 }
+
+.btn-home {
+  display: block;
+  padding: 8px 25px;
+  color: #fff;
+  border: none;
+  background-color: #38a4ff !important;
+}

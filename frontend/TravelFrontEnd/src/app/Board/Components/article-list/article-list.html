@@ -1,9 +1,10 @@
 <!-- 文章列起點 -->
 <div class="my-container col-6">
-  @for (article of articleList; track $index) {<div class="single-post border-bottom">
+  @for (article of articleList; track $index) {
+  <div class="article-card" (click)="goToDetail(article.articleId,article.type)">
     <!-- 作者 + 地點 -->
     <div class="post-author-row">
-      <div class="author-info" (click)="goToMemderPage(article.userID)">
+      <div class="author-info" (click)="goToMemderPage(article.userID); $event.stopPropagation()">
         <img class="userAvatar" [src]="article.userAvatar">
         <div>
           <div class="author-name">{{article.userName}}</div>
@@ -14,14 +15,15 @@
       </div>
       <div class="post-location">
         <i class="ri-map-pin-line"></i>{{article.regionName}}
-        <button class="btn-more" data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-fill"></i></button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">分享貼文</a></li>
-          <li><a class="dropdown-item" href="#">複製留言</a></li>
+        <button class="btn-more" data-bs-toggle="dropdown" aria-expanded="false" (click)="$event.stopPropagation()"><i
+            class="ri-more-2-fill"></i></button>
+        <ul class="dropdown-menu" style="position: fixed;">
+          <li><a class="dropdown-item" (click)="$event.stopPropagation()">分享貼文</a></li>
+          <li><a class="dropdown-item" (click)="$event.stopPropagation()">複製留言</a></li>
           @if(true){
           <!-- Angular 裡綁定 data-* 屬性要用 [attr.屬性名稱] -->
-          <li><a data-bs-toggle="modal" data-bs-target="#ReportBackdrop" (click)="openReport(article)"
-              class="dropdown-item">檢舉</a></li>
+          <li><a data-bs-toggle="modal" data-bs-target="#ReportBackdrop"
+              (click)="openReport(article);$event.stopPropagation()" class="dropdown-item">檢舉</a></li>
           }
           @else {
 
@@ -33,23 +35,23 @@
 
     <!-- 大圖，無圓角 -->
     <div class="post-cover">
-      <img [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
+      <img class="article-card-img" [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
     </div>
     <!-- 標題 -->
-    <a class="posts-title" (click)="goToDetail(article.articleId,article.type)">
+    <a class="posts-title">
       <h3>
         <span class="post-type">討論</span>
         {{article.title}}
       </h3>
     </a>
     <!-- 底列：讚 留言 -->
-    <div class="post-footer">
+    <div class="post-footer border-bottom">
       <!-- 標籤 -->
       @if(article.tags && article.tags.length > 0){
       <div class="tags">
         <span>相關標籤:</span>
         @for (tag of article.tags; track tag.tagId) {
-        <button class="tag-btn" (click)="seachTag(tag.tagId)">
+        <button class="tag-btn" (click)="seachTag(tag.tagId); $event.stopPropagation()">
           <i [class]="tag.icon"></i>&nbsp;{{tag.tagName}}
         </button>
         }
@@ -59,8 +61,10 @@
 
       <!-- 讚 留言 -->
       <div class="post-reactions">
-        <a class="reaction-item" [class.liked]="article.isLike" (click)="ToLike(article.articleId)">
-          <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+        <a class="reaction-item" [class.liked]="article.isLike"
+          (click)="ToLike(article.articleId); $event.stopPropagation()">
+          <i [class]="article.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"
+            [class.pop-animate]="animatingIds.has(article.articleId)"></i>
           {{article.likeCount}}
         </a>
         <a class="reaction-item" href="#">

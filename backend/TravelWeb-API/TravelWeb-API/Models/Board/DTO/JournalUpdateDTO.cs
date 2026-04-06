@@ -6,7 +6,8 @@
         public string? Cover { get; set; }        
         public List<JournalElementDTO>? Elements { get; set; }        
         public byte Status { get; set; }        
-        public int? RegionId { get; set; }        
-        
+        public int? RegionId { get; set; }           
+        public List<TagDTO>? tags { get; set; }
+
     }
 }

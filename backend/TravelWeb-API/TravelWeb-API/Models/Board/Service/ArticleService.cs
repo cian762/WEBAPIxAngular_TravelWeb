@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Helpers;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -150,9 +151,7 @@ namespace TravelWeb_API.Models.Board.Service
                                                      IQueryable<Article> data, int page, string? userID)
         {
             List<ArticleDataDTO> result = GetArticles(page, data, userID);
-            int totalCount = data.Count();
-            //GetArticleCount(articles);
-            //List<ArticleDataDTO> result = ToArticleDTO(articles,userID);
+            int totalCount = data.Count();            
             return (result, totalCount);
         }
 
@@ -290,34 +289,28 @@ namespace TravelWeb_API.Models.Board.Service
         {
             var article = await _context.Articles
                 .Where(a => a.ArticleId == articleID)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.CommentPhotos)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.CommentLikes)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.InverseParent)
-                .ThenInclude(ic => ic.CommentLikes)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.InverseParent)
-                .ThenInclude(ic => ic.CommentPhotos)
+                .Include(a => a.Comments).ThenInclude(c => c.CommentPhotos)
+                .Include(a => a.Comments).ThenInclude(c => c.CommentLikes)
+                .Include(a => a.Comments).ThenInclude(c => c.InverseParent).ThenInclude(ic => ic.CommentLikes)
+                .Include(a => a.Comments).ThenInclude(c => c.InverseParent).ThenInclude(ic => ic.CommentPhotos)
                 .Include(a => a.ArticleLikes)
                 .Include(a => a.ArticleTags)
                 .Include(a => a.ArticleFolders)
                 .Include(a => a.Post)
+                .Include(a => a.Journals).ThenInclude(j => j.JournalElements)
+                .FirstOrDefaultAsync();
 
-                .FirstOrDefaultAsync(); ;
+            if (article == null || article.UserId != authorID) return false;
 
-            if (article != null && article.UserId == authorID)
+            foreach (var journal in article.Journals.ToList())
             {
-                _context.Articles.Remove(article);
-                await _context.SaveChangesAsync();
-                return true;
+                _context.JournalElements.RemoveRange(journal.JournalElements);
+                _context.Journals.Remove(journal);
             }
-            return false;
-            //.Include(a=>a.Journal)
-            //.Include(a=>a.JournalPages)
-            //.Include(a=>a.jo)
-            //.ThenInclude(j=>j.)            
+
+            _context.Articles.Remove(article);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task Collect(int articleID, string userId)
@@ -396,8 +389,60 @@ namespace TravelWeb_API.Models.Board.Service
 
             return result;
         }
-        
 
+        public List<ArticleDataDTO> GetTrendingsForVisitors()
+        {
+            var trending = _context.Articles
+    .Where(a => a.Status == 1)
+    .Include(a => a.MemberInformation)
+    .Include(a => a.Region).ThenInclude(r => r.UidNavigation)
+    .Include(a => a.ArticleTags).ThenInclude(t => t.Tag)
+    .Include(a => a.ArticleLikes)
+    .Include(a => a.Comments)
+    .Select(a => new {
+        Article = a,
+        LikeCount = _context.ArticleLikes.Count(l => l.ArticleId == a.ArticleId),
+        CommentCount = _context.Comments.Count(c => c.ArticleId == a.ArticleId),
+        ViewCount = _context.UserActivityLogs.Count(l => l.TargetId == a.ArticleId),
+        FolderCount = _context.ArticleFolders.Count(f => f.ArticleId == a.ArticleId),
+        HoursSince = EF.Functions.DateDiffHour(a.CreatedAt, DateTime.UtcNow)
+    })
+    .ToList();
+
+            return trending
+                .Select(x => new {
+                    x.Article,
+                    x.LikeCount,
+                    x.CommentCount,
+                    Score = (x.ViewCount * 1.0 + x.LikeCount * 3.0 + x.CommentCount * 5.0 + x.FolderCount * 4.0)
+                            / Math.Pow(x.HoursSince + 2, 1.5)
+                })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Article.CreatedAt)
+                .Take(10)
+                .Select(x => new ArticleDataDTO
+                {
+                    articleId = x.Article.ArticleId,
+                    Type = x.Article.Type,
+                    title = x.Article.Title,
+                    CreatedAt = x.Article.CreatedAt,
+                    photoUrl = x.Article.PhotoUrl,
+                    userID = x.Article.UserId,
+                    userName = x.Article.MemberInformation.Name,
+                    userAvatar = x.Article.MemberInformation.AvatarUrl,
+                    RegionID = x.Article.RegionID,
+                    RegionName = x.Article.Region != null
+                        ? $"{x.Article.Region.UidNavigation.RegionName},{x.Article.Region.RegionName}"
+                        : null,
+                    LikeCount = x.LikeCount,
+                    isLike = false,
+                    tags = x.Article.ArticleTags
+                        .Select(t => new TagDTO { TagId = t.TagId, TagName = t.Tag.TagName, icon = t.Tag.icon })
+                        .ToList(),
+                    CommentCount = x.CommentCount,
+                })
+                .ToList();
+        }
     }
     
 }

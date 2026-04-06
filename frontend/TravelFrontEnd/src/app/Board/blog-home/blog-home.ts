@@ -188,38 +188,10 @@ export class BlogHome implements OnInit, AfterViewInit {
   initRegion() {
     this.Serve.getAllRegions().subscribe((d: any) => {
       this.regions = d;
-      setTimeout(() => {
-        this.initNiceSelect();
-      }, 0);
     });
   }
 
-  initNiceSelect() {
-    this.bindSelect('region-select', 'cityId');
-    this.bindSelect('dist-select', 'distId');
-  }
 
-  bindSelect(id: string, controlName: string) {
-    const $el = $(`#${id}`);
-    if ($el.length === 0) return;
-
-    $el.niceSelect('destroy');
-    $el.niceSelect();
-    $el.on('change', (event: any) => {
-      const val = event.target.value;
-      const parsed = val === '' || val === 'null' ? null : Number(val);
-
-      if (controlName === 'cityId') {
-        this.selectedCityId = parsed;
-        this.cdr.detectChanges();
-        setTimeout(() => this.bindSelect('dist-select', 'distId'), 0);
-      }
-      if (controlName === 'distId') {
-        this.selectedRegionID = parsed;
-        this.cdr.detectChanges();
-      }
-    });
-  }
 
   toggleAdvancedSearch() {
     this.showAdvancedSearch = !this.showAdvancedSearch;

@@ -38,8 +38,8 @@
 .tag-btn {
   display: inline-block;
   background-color: white;
-  color: #4cd3e3;
-  border: 0.8px solid #4cd3e3;
+  color: #38a4ff;
+  border: 0.8px solid #38a4ff;
   border-radius: 20px;
   padding: 4px 20px;
   cursor: pointer;
@@ -49,9 +49,9 @@
 }
 
 .tag-btn:hover {
-  background-color: #4cd3e3;
+  background-color: #38a4ff;
   color: #fff;
-  border-color: #4cd3e3;
+  border-color: #38a4ff;
 }
 
 /* ===========以下為圖片輪播之樣式=========== */
@@ -135,15 +135,31 @@
 /* 點讚與收藏變色 */
 .like-item:hover,
 .like-item.liked {
-  color: #e8a838 !important;
+  color: #38a4ff !important;
 }
 
 .collect-item:hover,
 .collect-item.collect {
-  color: #4cd3e3 !important;
+  color: #38a4ff !important;
 }
 
 .other-item:hover {
-  color: #e8a838 !important;
+  color: #38a4ff !important;
   cursor: pointer;
+}
+
+
+
+/* ===========以下為more按鈕之樣式=========== */
+.btn-more {
+  background-color: transparent;
+  border: 0.8px solid transparent;
+  /* border-radius: 6px; */
+}
+
+.btn-more:hover {
+  color: #38a4ff;
+  border-color: #38a4ff;
+  cursor: pointer;
+  transition: all 0.2s;
 }
