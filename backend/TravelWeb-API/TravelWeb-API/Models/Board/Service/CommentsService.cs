@@ -134,6 +134,9 @@ namespace TravelWeb_API.Models.Board.Service
         public async Task DeleteComment(int commentID, string UserId)
         {
             var comment = await _context.Comments
+                .Include(c=>c.CommentLikes)
+                .Include(c=>c.CommentPhotos)
+                .Include(c=>c.InverseParent).ThenInclude(c=>c.CommentPhotos)
                 .FirstOrDefaultAsync(c => c.CommentId == commentID);
             if (UserId == comment!.UserId) 
             {

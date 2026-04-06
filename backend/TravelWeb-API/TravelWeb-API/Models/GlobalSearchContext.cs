@@ -15,5 +15,7 @@ namespace TravelWeb_API.Models
                 entity.ToView("View_GlobalSearch");
             });
         }
+
+
     }
 }

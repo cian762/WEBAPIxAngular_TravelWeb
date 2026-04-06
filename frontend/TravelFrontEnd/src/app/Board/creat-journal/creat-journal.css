@@ -13,7 +13,7 @@
   border: 0.8px dashed #7777779f;
   background-color: transparent;
   color: #777777;
-  font-size: 14px;
+  font-size: 16px;
   overflow: hidden;
 }
 
@@ -508,6 +508,10 @@ input:checked+.slider::before {
   background-color: rgb(255, 255, 255);
   overflow: hidden;
   box-shadow: 2px 2px 3px #27272721;
+  background-image:
+    linear-gradient(to right, #ededed 1px, transparent 1px),
+    linear-gradient(to bottom, #ededed 1px, transparent 1px);
+  background-size: 10px 10px;
 }
 
 .cube {

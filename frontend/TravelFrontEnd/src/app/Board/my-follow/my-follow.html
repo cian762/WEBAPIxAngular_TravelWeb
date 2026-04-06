@@ -1,0 +1,33 @@
+<div class="container">
+
+  <h3 class="m-3" style="padding-left: 30px;">追蹤列表</h3>
+  <div class="author-search-wrap">
+    <input class="author-search-input" type="text" placeholder="搜尋追蹤用戶..."
+      (input)="onAuthorSearch($event.target.value)">
+    <i class="ri-search-line author-search-icon"></i>
+  </div>
+  <div class="author-carousel mb-5">
+    <button class="carousel-arrow left" (click)="prevPage()" [disabled]="carouselPage === 0">&#8249;</button>
+    <div class="author-list">
+      @for (author of visibleAuthors; track $index) {
+      <div class="author-card" (click)="goToMemderPage(author.authorId)">
+        <img class="author-avatar" [src]="author.avatarUrl">
+        <div class="author-name">{{author.authorName}}</div>
+        <div class="author-count">{{author.articleCount}} 篇文章</div>
+        <!-- <button class="follow-btn">追蹤</button> -->
+      </div>
+      }
+    </div>
+
+    <button class="carousel-arrow right" (click)="nextPage()"
+      [disabled]="(carouselPage + 1) * 5 >= authorList.length">&#8250;</button>
+  </div>
+
+
+</div>
+
+
+<app-article-list class="col-lg-8" [articleList]="articleList"></app-article-list>
+
+
+<!-- (tagSelected)="onTagSelected($event)" -->

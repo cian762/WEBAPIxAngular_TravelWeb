@@ -31,10 +31,10 @@ namespace TravelWeb_API.Controllers.Board
         public async Task<ActionResult<JournalDetailDTO>> GetJournalDetail(int id)
         {
             string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (currentUserId == null) return BadRequest();
+            if (currentUserId == null) return Unauthorized();
 
             var journal = await _journalService.GetJournalDetail(id,currentUserId);
-
+            if (journal == null) return NotFound();
             return journal;
         }
 

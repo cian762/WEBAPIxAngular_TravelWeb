@@ -64,6 +64,17 @@ export class BoardServe {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/articlesByCollect?page=1`)
   }
 
+  getArticlesByFollowed() {
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/articlesByFollowed?page=1`)
+
+  }
+
+  getFollowed() {
+    return this.http.get(`${this.apiUrl}/Board/ArticlePermissions/myFollow`)
+  }
+
+
+
   getArticleDetailAPI(para: number) {
     return this.http.get<PostDetailDto>(`${this.apiUrl}/Post/${para}`);
   }
@@ -182,6 +193,10 @@ export class BoardServe {
 
   postLogView(id: number) {
     return this.http.post(`${this.apiUrl}/Board/UserActivityLogs/${id}/view`, null)
+  }
+
+  getProduct(id: number) {
+    return this.http.get(`${this.apiUrl}/GlobalSearch/getProduct?articleId=${id}`)
   }
 
 }

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using TravelWeb_API.Models.Board.DbSet;
+using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.MemberSystem;
 
 namespace TravelWeb_API.Controllers.Board
@@ -16,10 +18,12 @@ namespace TravelWeb_API.Controllers.Board
     public class ArticlePermissionsController : ControllerBase
     {
         private readonly MemberSystemContext _context;
-
-        public ArticlePermissionsController(MemberSystemContext context)
+        private readonly BoardDbContext _boardDbContext;
+        public ArticlePermissionsController(MemberSystemContext context,
+            BoardDbContext boardDbContext)
         {
             _context = context;
+            _boardDbContext = boardDbContext;
         }
 
         [HttpGet("isFollowing")]
@@ -47,6 +51,34 @@ namespace TravelWeb_API.Controllers.Board
         //       return Ok();
 
         //   }
+        [HttpGet("myFollow")]
+        public async Task<ActionResult<List<AuthorInfo>>> GetMyFollow()
+        {
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return NotFound();
+            var myFollow = await _context.MemberInformations
+                .Where(m => m.MemberId == currentUserId)
+                .SelectMany(m => m.Followeds
+                .Select(f => new AuthorInfo
+                {
+                    authorId = f.MemberId,  
+                    authorName = f.Name,
+                    avatarUrl = f.AvatarUrl,
+                    ArticleCount = 0,
+                    isCurrentUser = false
+                }
+                )).ToListAsync();
+
+            foreach (var f in myFollow)
+            {
+                f.ArticleCount = _boardDbContext.Articles
+                    .Count(a => a.UserId == f.authorId && a.Status == 1);
+            }
+
+            return myFollow;
+
+        }
+
 
     }
 }

@@ -133,6 +133,11 @@ export const routes: Routes = [
         path: 'Visitors',
         loadComponent: () => import('./Board/visitors/visitors').then(m => m.Visitors),
       },
+      {
+        path: 'MyFollow',
+        loadComponent: () => import('./Board/my-follow/my-follow').then(m => m.MyFollow),
+      },
+
       //404
       {
         path: '404',

@@ -1,0 +1,11 @@
+.banner-img {
+  height: 500px;
+  object-fit: cover;
+}
+
+.carousel-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 80%, rgba(0, 0, 0, 0.808));
+}

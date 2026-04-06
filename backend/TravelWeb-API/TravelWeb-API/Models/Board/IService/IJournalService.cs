@@ -8,7 +8,7 @@ namespace TravelWeb_API.Models.Board.IService
         public Task<int> postJournal(string userId);
         public Task<bool> putJournal(int articleId, JournalUpdateDTO updateDTO);
         public Task<bool> isAuthor(int articleId,string currentUserId);
-        public Task<JournalDetailDTO> GetJournalDetail(int articleId,string currentUserId);
+        public Task<JournalDetailDTO?> GetJournalDetail(int articleId,string currentUserId);
         public Task<JournalUpdateDTO> UpdateJournal(int articleId);
     }
 }

@@ -189,6 +189,7 @@ namespace TravelWeb_API.Models.Board.Service
                         { TagId = t.TagId, TagName = t.Tag.TagName, icon = t.Tag.icon })
                         .ToList(),
                     CommentCount = a.Comments.Count(),
+                    viewCount = _context.UserActivityLogs.Count(l => l.TargetId == a.ArticleId),
 
                 })
                 .ToList();
@@ -442,6 +443,20 @@ namespace TravelWeb_API.Models.Board.Service
                     CommentCount = x.CommentCount,
                 })
                 .ToList();
+        }
+
+        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByFollowed(int page, string userId)
+        {
+            List<string> myFollow = _memberDb.MemberInformations
+             .Where(m => m.MemberId == userId)
+             .SelectMany(m => m.Followeds
+             .Select(f => f.MemberId)).ToList();
+
+            IQueryable<Article> data = _context.Articles
+               .Where(a => a.Status == 1)
+               .Where(a => myFollow.Contains(a.UserId));
+
+            return BuildPagedResult(data, page, userId);
         }
     }
     

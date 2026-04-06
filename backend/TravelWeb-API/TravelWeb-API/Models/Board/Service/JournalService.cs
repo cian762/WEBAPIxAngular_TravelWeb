@@ -12,10 +12,12 @@ namespace TravelWeb_API.Models.Board.Service
 {
     public class JournalService : IJournalService
     {
-        private readonly BoardDbContext _context;        
-        public JournalService(BoardDbContext context)
+        private readonly BoardDbContext _context;
+        private readonly MemberSystemContext _memberDb;
+        public JournalService(BoardDbContext context, MemberSystemContext memberDb)
         {
             _context = context;
+            _memberDb = memberDb;
             
         }
 
@@ -59,7 +61,7 @@ namespace TravelWeb_API.Models.Board.Service
             return result;
         }
 
-        public async Task<JournalDetailDTO> GetJournalDetail(int articleId,string currentUserId)
+        public async Task<JournalDetailDTO?> GetJournalDetail(int articleId,string currentUserId)
         {
             JournalDetailDTO DTO = new JournalDetailDTO();
              DTO = await _context.Articles.Where(a=>a.ArticleId==articleId)                
@@ -80,6 +82,12 @@ namespace TravelWeb_API.Models.Board.Service
                     isCollect = a.ArticleFolders.Any(c => c.UserId == currentUserId),
 
                 }).FirstAsync();
+
+            bool isBlocked = await _memberDb.Blockeds
+                .AnyAsync(b => b.BlockedId == DTO.AuthorID && b.MemberId == currentUserId);
+            bool isBlocking = await _memberDb.Blockeds
+                .AnyAsync(b => b.BlockedId == currentUserId && b.MemberId == DTO.AuthorID);
+            if (isBlocked || isBlocking) return null;
 
             DTO.Elements = await _context.JournalElements.Where(j => j.ArticleId == articleId)
                 .Select(j=> new JournalElementDTO

@@ -38,9 +38,11 @@ export class JournalDetail implements OnInit {
           if (err.status === 404) {
             this.router.navigate(['Board/404']);
           }
+          if (err.status === 401) {
+            this.router.navigate(['/login']);
+          }
         }
       });
-
       this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => this.TagsList = d)
     });
   }

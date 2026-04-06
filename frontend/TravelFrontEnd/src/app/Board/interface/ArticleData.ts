@@ -18,6 +18,7 @@ export interface ArticleData {
   regionName?: string;
   commentCount: number;
   tags?: TagDTO[];
+  viewCount: number;
 
 }
 

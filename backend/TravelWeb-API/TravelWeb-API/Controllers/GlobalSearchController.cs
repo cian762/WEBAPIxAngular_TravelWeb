@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using TravelWeb_API.Models;
 using Microsoft.EntityFrameworkCore;
+using TravelWeb_API.Models;
+using TravelWeb_API.Models.Board.DbSet;
 
 namespace TravelWeb_API.Controllers
 {
@@ -10,13 +12,16 @@ namespace TravelWeb_API.Controllers
     public class GlobalSearchController : ControllerBase
     {
         private readonly GlobalSearchContext _context;
+        private readonly BoardDbContext _boardContext;
         private readonly IConfiguration _config;
        
 
-        public GlobalSearchController(GlobalSearchContext context, IConfiguration config)
+        public GlobalSearchController(GlobalSearchContext context, IConfiguration config,
+            BoardDbContext boardContext)
         {
             _context = context;
             _config = config;
+            _boardContext = boardContext;
         }
         //全站導航引擎搜尋框使用
         [HttpGet]
@@ -77,6 +82,64 @@ namespace TravelWeb_API.Controllers
                 .ToListAsync();
 
             return Ok(suggestions);
+        }
+
+
+
+        // 3. 這是文章引用的
+        [HttpGet("getProduct")]
+        public async Task<IActionResult> GetProduct(int articleId)
+        {
+            ArticleSource? source = await _boardContext.ArticleSources
+                .Where(a => a.ArticleId == articleId)
+                .FirstOrDefaultAsync();
+            if (source == null) return Ok();
+
+            var results = await _context.ViewGlobalSearches.ToListAsync();
+            var result =  results.Where(g => int.Parse(g.Id) == source.Source &&
+                CategorytoINT(g.Category) == source.Type).FirstOrDefault();
+            if (result == null) return Ok();
+            // 從 appsettings.json 讀取路徑
+            string mvcDomain = _config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
+            string mvchung = _config["AppSettings:Mvchung"]!;
+
+
+            if (string.IsNullOrEmpty(result.ImageUrl)) return Ok(result);
+
+            // 如果已經是 http 開頭（如 Article），就不處理
+            if (result.ImageUrl.StartsWith("http")) return Ok(result);
+
+            // 根據分類補上對應的前綴
+            if (result.Category == "Attraction")
+            {
+                // 景點：補上 Domain (因為路徑裡已經有 uploads/attractions/...)
+                result.ImageUrl = mvcDomain + result.ImageUrl;
+            }
+            else if (result.Category == "Product")
+            {
+                // 行程：補上 Mvchung (專門指向 PImages 資料夾)
+                result.ImageUrl = mvchung + result.ImageUrl;
+            }
+
+
+            return Ok(result);
+        }
+
+        int CategorytoINT(string CategoryName)
+        {
+            if (CategoryName == "Attraction")
+            {
+                return 0;
+            }
+            if (CategoryName == "Product")
+            {
+                return 2;
+            }
+            if (CategoryName == "Activity")
+            {
+                return 1;
+            }
+            return 999;
         }
     }
 }

@@ -180,112 +180,68 @@
 /* 新增：按鈕群組容器 */
 .search-group {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   width: 100%;
-  border-radius: 5px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
   overflow: hidden;
-  /* 讓子元素的圓角被切齊 */
-  box-shadow: 0 2px 8px rgba(56, 164, 255, 0.15);
+  background: #fff;
+  transition: border-color 0.2s;
 }
 
-/* 進階搜尋按鈕 */
+.search-group:focus-within {
+  border-color: #38a4ff;
+}
+
 .advanced-search-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 12px 20px;
-  background-color: #f0f8ff;
+  padding: 10px 16px;
   color: #38a4ff;
-  border: 1px solid #38a4ff;
-  border-right: none;
-  /* 跟搜尋框無縫連接 */
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  text-decoration: none;
   white-space: nowrap;
-  transition: all 0.2s ease;
-  border-radius: 5px 0 0 5px;
-  /* 只有左邊圓角 */
+  border-right: 1px solid #e0e0e0;
+  cursor: pointer;
+  text-decoration: none;
 }
 
-/* .advanced-search-btn:hover {
-  background-color: #38a4ff;
-  color: #fff;
-} */
+.advanced-search-btn:hover {
+  background: #f0f8ff;
+}
 
-/* 搜尋框（修改） */
 .search-box {
   display: flex;
   align-items: center;
   flex: 1;
-  /* 佔據剩餘空間 */
-  background-color: #38a4ff;
-  padding: 8px 16px;
-  border: 1px solid #38a4ff;
-  transition: all 0.2s ease;
-  border-radius: 0 5px 5px 0;
-  /* 只有右邊圓角 */
+  padding: 0 12px;
+  background: transparent;
+  border: none;
   margin: 0;
-  /* 移除原本的 margin */
-}
-
-.search-box.focused {
-  background-color: #fff;
-  border: 1px solid #38a4ff;
-  border-left: 1px solid #e0e0e0;
-  /* focus 時左側加淡邊框 */
 }
 
 .search-box input {
   flex: 1;
   border: none;
   outline: none;
-  background: transparent !important;
+  background: transparent;
   font-size: 14px;
-  color: #fff;
+  color: #212529;
+  padding: 10px 0;
 }
 
 .search-box input::placeholder {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.search-box.focused input {
-  color: #38a4ff;
-}
-
-.search-box.focused input::placeholder {
-  color: #38a4ff;
+  color: #aaa;
 }
 
 .search-box button {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #fff;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-}
-
-.search-box.focused button {
   color: #38a4ff;
-}
-
-.search-box input:-webkit-autofill,
-.search-box input:-webkit-autofill:hover,
-.search-box input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
-  -webkit-text-fill-color: #38a4ff !important;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-.search-box:not(.focused) input:-webkit-autofill,
-.search-box:not(.focused) input:-webkit-autofill:hover,
-.search-box:not(.focused) input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #38a4ff inset !important;
-  -webkit-text-fill-color: #fff !important;
-  transition: background-color 5000s ease-in-out 0s;
+  font-size: 16px;
+  padding: 0;
 }
 
 

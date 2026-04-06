@@ -1,30 +1,23 @@
 <app-create-article-button></app-create-article-button>
+<!-- <app-board-banner></app-board-banner> -->
 <div class="host-body">
-
   <div class="container">
-    <!-- 搜尋起點 -->
     <div class="row my-5">
+      <!-- 搜尋起點 -->
       <div class="d-flex justify-content-center align-items-center flex-column">
         <div class="col-5">
-          <div class="search-form">
-            <div class="search-group">
-              <!-- 進階搜尋按鈕（左） -->
-              <a class="advanced-search-btn" (click)="toggleAdvancedSearch()">
-                <i class="fa" [class.fa-sliders]="!showAdvancedSearch" [class.fa-times]="showAdvancedSearch"></i>
-                {{ showAdvancedSearch ? '收起' : '進階搜尋' }}
-              </a>
-
-              <!-- 搜尋框（右） -->
-              <div class="search-box" [class.focused]="isFocused">
-                <input placeholder="搜尋文章" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event)"
-                  (input)="searchByKeyword($event)">
-                <button type="button" (click)="onSeach()">
-                  <i class="fa fa-search"></i>
-                </button>
-              </div>
+          <div class="search-group">
+            <a class="advanced-search-btn" (click)="toggleAdvancedSearch()">
+              <i class="fa" [class.fa-sliders]="!showAdvancedSearch" [class.fa-times]="showAdvancedSearch"></i>
+              {{ showAdvancedSearch ? '收起' : '進階搜尋' }}
+            </a>
+            <div class="search-box" [class.focused]="isFocused">
+              <input placeholder="搜尋文章" name="search" type="text" (focus)="onFocus($event)" (blur)="onBlur($event)"
+                (input)="searchByKeyword($event)">
+              <button type="button" (click)="onSeach()">
+                <i class="fa fa-search"></i>
+              </button>
             </div>
-
-
           </div>
         </div>
         <div class="col-10">

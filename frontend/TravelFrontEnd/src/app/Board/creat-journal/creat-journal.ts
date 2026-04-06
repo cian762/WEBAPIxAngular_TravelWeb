@@ -139,7 +139,7 @@ export class CreatJournal implements OnInit {
 
 
   startResize(e: MouseEvent, direction: string, imageid: number) {
-
+    const snap = (val: number) => Math.round(val / 10) * 10;
     e.preventDefault();
     const box: ItemBox = this.itemBoxs.find(b => b.id === imageid)!;
 
@@ -164,14 +164,13 @@ export class CreatJournal implements OnInit {
       } else if (direction === 'top-left') {
         newW = Math.max(50, startW - dx);
       }
-
-      box.width = Math.round(newW);
-
+      box.width = snap(Math.max(50, newW));
       if (box.type === 1) {
-        box.height = Math.round(newW / ratio); // 圖片照比例
+        box.height = snap(Math.round(newW / ratio));// 圖片照比例
       } else {
-        box.height = Math.max(50, Math.round(startH + dy)); // 文字自由調整高度
+        box.height = snap(Math.max(50, startH + dy));// 文字自由調整高度
       }
+
     };
 
     const onMouseUp = () => {
@@ -185,14 +184,15 @@ export class CreatJournal implements OnInit {
 
 
   startDrag(e: MouseEvent, box: ItemBox) {
+    const snap = (val: number) => Math.round(val / 10) * 10;
     e.preventDefault();
 
     const startX = e.clientX - box.x;
     const startY = e.clientY - box.y;
 
     const onMouseMove = (moveEvent: MouseEvent) => {
-      box.x = moveEvent.clientX - startX;
-      box.y = moveEvent.clientY - startY;
+      box.x = snap(moveEvent.clientX - startX);
+      box.y = snap(moveEvent.clientY - startY);
       this.cdr.detectChanges();
     };
 
@@ -284,6 +284,7 @@ export class CreatJournal implements OnInit {
     this.journalUpdate.regionId = this.selectedRegionId;
     this.journalUpdate.tags = this.tagList;
     this.journalUpdate.cover = this.viewCover;
+
 
     if (this.coverFile) {
       this.journalUpdate.cover =

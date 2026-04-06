@@ -13,8 +13,11 @@
           </div>
         </div>
       </div>
+
       <div class="post-location">
+        @if(article.regionName != null && article.regionName !== ''){
         <i class="ri-map-pin-line"></i>{{article.regionName}}
+        }
         <button class="btn-more" data-bs-toggle="dropdown" aria-expanded="false" (click)="$event.stopPropagation()"><i
             class="ri-more-2-fill"></i></button>
         <ul class="dropdown-menu" style="position: fixed;">
@@ -35,12 +38,19 @@
 
     <!-- 大圖，無圓角 -->
     <div class="post-cover">
-      <img class="article-card-img" [src]="article.photoUrl" (click)="goToDetail(article.articleId,article.type)">
+      @if(article.photoUrl){
+      <img class="article-card-img" [src]="article.photoUrl" (click)="goToDetail(article.articleId, article.type)">
+      }
+      @else {
+      <img class="article-card-img" src="assets/css/Board/image-fill.png"
+        (click)="goToDetail(article.articleId, article.type)">
+      }
+
     </div>
     <!-- 標題 -->
     <a class="posts-title">
       <h3>
-        <span class="post-type">討論</span>
+        <span class="post-type">{{article.type === 1 ? '手帳簿' : '討論'}}</span>
         {{article.title}}
       </h3>
     </a>

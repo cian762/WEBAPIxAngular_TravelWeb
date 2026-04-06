@@ -716,3 +716,138 @@ a {
 .like-btn-sm.liked {
   color: #FF6B35;
 }
+
+
+
+
+
+
+
+
+
+
+
+/* 以下文章的CSS */
+
+.hot-article-wrapper {
+  overflow: hidden;
+  width: 100%;
+  height: 400px;
+}
+
+.hot-article-track {
+  display: flex;
+  transition: transform 0.5s ease;
+  width: 100%;
+}
+
+.hot-article-slide {
+  min-width: 33.333%;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.hot-article-section {
+  padding: 40px 0;
+}
+
+.hot-article-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 32px;
+}
+
+.hot-article-list {
+  display: flex;
+  gap: 24px;
+}
+
+.hot-article-card {
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+  height: 380px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+
+.hot-article-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.hot-article-thumb {
+  overflow: hidden;
+  height: 220px;
+  margin-bottom: 16px;
+
+}
+
+.hot-article-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.hot-article-card:hover .hot-article-thumb img {
+  transform: scale(1.05);
+}
+
+.hot-article-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.hot-tag {
+  font-size: 12px;
+  color: #555;
+  border: 1px solid #ccc;
+  padding: 2px 10px;
+  border-radius: 2px;
+}
+
+.hot-article-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hot-article-date {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.hot-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.hot-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.hot-dot.active {
+  background: #e8a838;
+}
+
+.hot-article-body {
+  padding: 20px;
+  padding-top: 0px;
+}

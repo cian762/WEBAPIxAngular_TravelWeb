@@ -12,11 +12,12 @@ import { PageNumberList } from "../Components/page-number-list/page-number-list"
 import { DatePipe } from '@angular/common';
 import Mandarin from "flatpickr/dist/l10n/zh-tw"
 import flatpickr from 'flatpickr';
+import { BoardBanner } from "../Components/board-banner/board-banner";
 declare var $: any;
 @Component({
   selector: 'app-blog-home',
   standalone: true,
-  imports: [RouterModule, FormsModule, PopularPost, TagClouds, ArticleList, CreateArticleButton, PostCatgories, PageNumberList],
+  imports: [RouterModule, FormsModule, PopularPost, TagClouds, ArticleList, CreateArticleButton, PostCatgories, PageNumberList, BoardBanner],
   templateUrl: './blog-home.html',
   styleUrl: './blog-home.css',
 

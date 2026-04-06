@@ -23,7 +23,14 @@
         <button data-bs-toggle="dropdown" aria-expanded="false"><i class="ri-more-2-fill"></i></button>
         <button (click)="setParent(comment.commentId,comment.authorName,comment.contents)"><i
             class="ri-reply-line"></i></button>
-        <button><i class="bi bi-hand-thumbs-up"></i></button>
+        <button (click)="ToLike(comment.commentId)">
+          @if (comment.isLiked) {
+          <i class="fa-solid fa-thumbs-up"></i>
+          }
+          @else {
+          <i class="bi bi-hand-thumbs-up"></i>
+          }
+        </button>
         <ul class="dropdown-menu">
           <li><a class="dropdown-item" href="#">分享留言</a></li>
           <li><a class="dropdown-item" href="#">複製留言</a></li>

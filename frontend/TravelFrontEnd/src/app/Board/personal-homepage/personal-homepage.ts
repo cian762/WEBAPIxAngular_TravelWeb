@@ -4,15 +4,18 @@ import { BoardServe } from '../Service/board-serve';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ArticleData, TagDTO } from '../interface/ArticleData';
 import localeZhTw from '@angular/common/locales/zh-Hant';
-import { DatePipe, registerLocaleData } from '@angular/common';
+import { DatePipe, NgTemplateOutlet, registerLocaleData } from '@angular/common';
 import { CreateArticleButton } from "../Components/create-article-button/create-article-button";
 import { ArticleList } from "../Components/article-list/article-list";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 
 registerLocaleData(localeZhTw);
 
 @Component({
   selector: 'app-personal-homepage',
-  imports: [DatePipe, CreateArticleButton, ArticleList],
+  imports: [DatePipe, CreateArticleButton, ArticleList, NgTemplateOutlet],
   templateUrl: './personal-homepage.html',
   styleUrl: './personal-homepage.css',
 })
@@ -29,10 +32,8 @@ export class PersonalHomepage implements OnInit {
   ngOnInit(): void {
     this.Serve.getCurUser().subscribe(d => {
       this.curUser = d;
-      this.Serve.getArticleByAuthor(1, this.curUser.memberId).subscribe(p => this.articleList = p.articleList);
+      this.Serve.getArticleByAuthor(1, this.curUser.authorId).subscribe(p => this.articleList = p.articleList);
     });
-
-
     this.Serve.getArticleByUserAPI(1).subscribe(p => this.privateList = p.articleList);
     this.Serve.getAllTags().subscribe(p => this.AllTags = p);
 
@@ -90,6 +91,11 @@ export class PersonalHomepage implements OnInit {
   onTagSelected(tag: any) {
 
   }
+
+
+
+
+
 
 }
 

@@ -209,6 +209,21 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
+        [HttpGet("articlesByFollowed")]
+        public IActionResult GetArticlesByFollowed([FromQuery] int page)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId)) return NotFound();
+            var result = _ArticleService.ArticlesByFollowed(page, currentUserId);
+            return Ok(new
+            {
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
+            });
+
+        }
+
         [HttpGet("curUser")]
         public IActionResult GetCurUser([FromQuery] int page)
         {
@@ -217,9 +232,18 @@ namespace TravelWeb_API.Controllers.Board
             string? userId = GetUser.Id(token);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("無效的 Token");
-            var member = _memberDb.MemberInformations
-                .FirstOrDefault(m=>m.MemberId==userId);
-            
+            AuthorInfo? member = _memberDb.MemberInformations
+                .Where(m=>m.MemberId==userId)
+                .Select(m=>new AuthorInfo
+                {
+                    authorId = m.MemberId,
+                    authorName = m.Name,
+                    avatarUrl = m.AvatarUrl,                    
+                    isCurrentUser = true,   
+                })
+                .FirstOrDefault();
+
+            member.ArticleCount = _context.Articles.Where(a => a.UserId == userId).Count();
             return Ok(member);
         }
 
