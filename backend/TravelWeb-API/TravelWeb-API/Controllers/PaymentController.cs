@@ -51,19 +51,22 @@ namespace TravelWeb_API.Controllers
             //2.判斷成功與否並導回不同的參數
             if (rtnCode == "1")
             {
+                //TODO 記得切換
                 // 成功就帶 paySuccess=true
                 return Redirect("http://localhost:4200/app/?paySuccess=true");
+
+                //部署用下面這個
+                //return Redirect("https://taiwanstory.site/app/?paySuccess=true");
             }
             else
             {
+                //TODO 記得切換
                 // 失敗就帶 paySuccess=false
                 return Redirect("http://localhost:4200/app/?paySuccess=false");
-            }
-            //這裡不做邏輯處理，單純把使用者轉回前端
-            //return Redirect("http://localhost:4200/app/?paySuccess=true");
 
-            //部屬時要改成下面這個
-            //return Redirect("https://taiwanstory.site/app/?paySuccess=true");
+                //部署用下面這個
+                //return Redirect("https://taiwanstory.site/app/?paySuccess=false");
+            }
         }
         //綠界回傳
         [HttpPost("EcpayReturn")]
