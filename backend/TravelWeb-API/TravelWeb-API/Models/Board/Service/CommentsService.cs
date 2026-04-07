@@ -119,6 +119,7 @@ namespace TravelWeb_API.Models.Board.Service
         {
             var result = comment.InverseParent.Select(c => new CommentsDTO
             {
+                CommentId = c.CommentId,
                 AuthorName = c.MemberInformation.Name,
                 AvatarUrl = c.MemberInformation.AvatarUrl,
                 Contents = c.Contents,

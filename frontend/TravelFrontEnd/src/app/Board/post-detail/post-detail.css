@@ -174,3 +174,19 @@
   cursor: pointer;
   transition: all 0.2s;
 }
+
+.quotes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.product-img {
+  width: 300px !important;
+  height: auto;
+  object-fit: cover;
+  /* 關鍵：等比例縮放並裁切，不變形 */
+  object-position: center;
+  /* 從圖片中心點裁切 */
+}

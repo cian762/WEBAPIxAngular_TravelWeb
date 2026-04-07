@@ -62,7 +62,7 @@ export class CommentsArea implements OnInit {
         this.removeImage();
         this.commentCount++;
         Swal.fire({
-          title: "上傳完成!",
+          title: "留言已送出!",
           icon: "success",
           showConfirmButton: false,
           timer: 1000,
