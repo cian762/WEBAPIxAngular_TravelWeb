@@ -416,7 +416,7 @@ namespace TravelWeb_API.Models.Board.Service
                     x.LikeCount,
                     x.CommentCount,
                     Score = (x.ViewCount * 1.0 + x.LikeCount * 3.0 + x.CommentCount * 5.0 + x.FolderCount * 4.0)
-                            / Math.Pow(x.HoursSince + 2, 1.5)
+                          / Math.Pow(x.HoursSince + 2, 1.5)
                 })
                 .OrderByDescending(x => x.Score)
                 .ThenByDescending(x => x.Article.CreatedAt)

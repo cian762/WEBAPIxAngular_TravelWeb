@@ -19,6 +19,7 @@ export class MyFollow implements OnInit {
   authorKeyword = '';
   filteredAuthors: any[] = [];
 
+
   ngOnInit(): void {
     this.Serve.getArticlesByFollowed().subscribe(d => this.articleList = d.articleList)
     this.Serve.getFollowed().subscribe((d: any) => this.authorList = d);

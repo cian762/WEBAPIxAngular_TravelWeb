@@ -32,10 +32,10 @@ namespace TravelWeb_API.Controllers.Board
             string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (currentUserId == null) return false;
             var isFollowing = await _context.MemberInformations
-                .Where(m=>m.MemberId== currentUserId)
+                .Where(m => m.MemberId == currentUserId)
                 .AnyAsync(m => m.Followeds.Any(f => f.MemberId == followedId));
             return isFollowing;
-         
+
 
         }
         //   [HttpPost("Follow")]
@@ -61,7 +61,7 @@ namespace TravelWeb_API.Controllers.Board
                 .SelectMany(m => m.Followeds
                 .Select(f => new AuthorInfo
                 {
-                    authorId = f.MemberId,  
+                    authorId = f.MemberId,
                     authorName = f.Name,
                     avatarUrl = f.AvatarUrl,
                     ArticleCount = 0,
@@ -79,6 +79,29 @@ namespace TravelWeb_API.Controllers.Board
 
         }
 
+        [HttpGet("searchAuthors")]
+        public async Task<ActionResult<List<AuthorInfo>>> searchAuthors(string keyword)
+        {
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return NotFound();
+            var result = await _context.MemberInformations
+                .Where(m => m.MemberId.Contains(keyword) || m.Name.Contains(keyword))
+                .Where(m => m.MemberId != currentUserId) // 排除自己
+                //.Where(m => !m..Any(b => b.BlockedId == currentUserId)) // 排除封鎖我的人
+                //.Where(m => !m.BlockedBys.Any(b => b.MemberId == currentUserId)) // 排除我封鎖的人
+                //&& m.blockedIngs.Contains(currentUserId))
+                .Select(f => new AuthorInfo
+                 {
+                     authorId = f.MemberId,
+                     authorName = f.Name,
+                     avatarUrl = f.AvatarUrl,
+                     ArticleCount = 0,
+                     isCurrentUser = false
+                 }
+                ).ToListAsync();
+
+            return result;
+        }
 
     }
 }

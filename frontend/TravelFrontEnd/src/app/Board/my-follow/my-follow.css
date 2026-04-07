@@ -28,58 +28,19 @@
   font-size: 16px;
 }
 
-.author-carousel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 16px;
-}
+
 
 .author-list {
   display: flex;
-  gap: 12px;
+  gap: 30px;
   flex: 1;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
-
-.author-card {
-  flex: 1;
-  max-width: calc((100% - 48px) / 5);
-  border: 0.5px solid #e0e0e0;
-  border-radius: 12px;
-  background: #fff;
-  height: 200px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-
-.author-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  border-color: #38a4ff;
-}
-
-
-
-
-
-
 
 .author-carousel {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.author-list {
-  display: flex;
-  gap: 12px;
-  flex: 1;
+  gap: 55px;
 }
 
 .carousel-arrow {
@@ -101,15 +62,22 @@
 
 .author-card {
   border: 0.5px solid #e0e0e0;
-  border-radius: 0px;
+  /* border-radius: 12px; */
   background: #fff;
-  height: 270px;
-  width: 160px;
+  height: 220px;
+  width: 200px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   gap: 8px;
+}
+
+.author-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-color: #38a4ff;
 }
 
 .author-avatar {

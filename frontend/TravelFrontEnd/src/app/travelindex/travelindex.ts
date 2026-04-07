@@ -16,7 +16,8 @@ import { ArticleData } from '../Board/interface/ArticleData';
 import { BoardServe } from '../Board/Service/board-serve';
 import { AuthService } from '../Member/services/auth.service';
 const categoryMap: Record<string, string> = {
-  'Article': '文章',
+  'ArticleA': '文章',
+  'ArticleB': '文章',
   'Activity': '活動',
   'Attraction': '景點',
   'Product': '行程商品'

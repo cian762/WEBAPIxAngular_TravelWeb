@@ -45,6 +45,7 @@ export class BlogHome implements OnInit, AfterViewInit {
   regions: any[] = [];
   selectedCityId: number | null = null;
   selectedRegionID: number | null = null;
+  searchAuthors: any[] = [];
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -67,6 +68,7 @@ export class BlogHome implements OnInit, AfterViewInit {
         this.articleList = d.articleList;
         this.totalCount = d.totalCount;
         this.isSearch = true;
+        this.Serve.getAuthorsbyKeyword(dto.authorKeyword).subscribe((d: any) => this.searchAuthors = d);
       });
     });
 
@@ -107,12 +109,15 @@ export class BlogHome implements OnInit, AfterViewInit {
 
   onSeachReset() {
     this.fpInstance?.clear();
+    const input = document.querySelector('.flatpickr-input') as HTMLInputElement;
+    if (input) input.value = '';
     this.Keyword = '';
     this.AuthorKeyword = '';
     this.startdate = undefined;
     this.enddate = undefined;
     this.selectedCityId = null;
     this.selectedRegionID = null;
+    this.searchAuthors = [];
   }
 
   ReflashArticles(currentPage: number) {
@@ -141,6 +146,7 @@ export class BlogHome implements OnInit, AfterViewInit {
   }
 
   onBackSeach() {
+    this.searchAuthors = [];
     this.router.navigate(['/Board']);
   }
 
@@ -191,11 +197,29 @@ export class BlogHome implements OnInit, AfterViewInit {
       this.regions = d;
     });
   }
+  get visibleAuthors() {
+    const list = this.searchAuthors;
+    const start = this.carouselPage * 5;
+    return list.slice(start, start + 5);
+  }
 
-
-
+  carouselPage = 0;
   toggleAdvancedSearch() {
     this.showAdvancedSearch = !this.showAdvancedSearch;
   }
 
+
+  goToMemderPage(memderID: string): void {
+    this.router.navigate(['Board', 'user', memderID]);
+  }
+
+  prevPage() {
+    if (this.carouselPage > 0) this.carouselPage--;
+  }
+
+  nextPage() {
+    if ((this.carouselPage + 1) * 5 < this.searchAuthors.length) this.carouselPage++;
+  }
 }
+
+

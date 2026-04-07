@@ -199,6 +199,11 @@ export class BoardServe {
     return this.http.get(`${this.apiUrl}/GlobalSearch/getProduct?articleId=${id}`)
   }
 
+
+  getAuthorsbyKeyword(id: string) {
+    return this.http.get(`${this.apiUrl}/Board/ArticlePermissions/searchAuthors?keyword=${id}`)
+  }
+
 }
 
 

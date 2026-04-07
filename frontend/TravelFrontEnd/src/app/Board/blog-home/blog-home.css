@@ -354,3 +354,71 @@
 
 
 /* ===========以上為標籤搜尋框之樣式=========== */
+
+.author-list {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.author-carousel {
+  display: flex;
+  align-items: center;
+  gap: 55px;
+}
+
+.carousel-arrow {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #38a4ff;
+  flex-shrink: 0;
+}
+
+.carousel-arrow:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.author-card {
+  border: 0.5px solid #e0e0e0;
+  /* border-radius: 12px; */
+  background: #fff;
+  height: 220px;
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.author-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-color: #38a4ff;
+}
+
+.author-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #212529;
+}
+
+.author-count {
+  font-size: 13px;
+  color: #aaa;
+}

@@ -29,7 +29,7 @@ export class CommentsArea implements OnInit {
   contents = "";
   parent?: number;
   parentComment? = "";
-  selectedImage = "";
+  selectedImage?: string = undefined;
   selectedImageFile?: File;
   ImageURL?: string;
   showPreview: boolean = false;
@@ -56,17 +56,17 @@ export class CommentsArea implements OnInit {
     console.log(CommentDto);
     this.Serve.postCommentAPI(CommentDto).subscribe(({
       next: (res) => {
+        this.ReflashComments();
+        this.contents = '';
+        this.removeParent();
+        this.removeImage();
+        this.commentCount++;
         Swal.fire({
           title: "上傳完成!",
           icon: "success",
           showConfirmButton: false,
           timer: 1000,
         });
-        this.ReflashComments();
-        this.contents = '';
-        this.removeParent();
-        this.removeImage;
-        this.commentCount++;
       },
       error: (err) => {
       }
@@ -105,13 +105,15 @@ export class CommentsArea implements OnInit {
   }
 
   removeImage() {
-    this.selectedImage = "";
+    console.log("removeImage");
+    this.selectedImageFile = undefined;
+    this.selectedImage = undefined;
     this.showPreview = false;
   }
 
   deleteComment(id: number) {
-
     this.Serve.deleteComment(id).subscribe();
+    this.commentList = this.commentList.filter(c => c.commentId !== id);
   }
 
 
