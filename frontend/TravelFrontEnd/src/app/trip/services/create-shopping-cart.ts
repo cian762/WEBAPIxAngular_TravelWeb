@@ -27,13 +27,27 @@ export class CreateShoppingCart {
         tap(items => this.cartCountSubject.next(items.length))
       );
     } else {
-      // 遊客：回傳本地資料，並用 of 轉成 Observable 保持介面一致
-      const items = this.getLocalCartItems();
+      // 遊客：從 localStorage 讀，補上票種名稱
+      const items = this.getLocalCartItems().map((item: any) => ({
+        ...item,
+        ticketCategoryName: item.ticketCategoryId
+          ? (this.ticketCategoryMap[item.ticketCategoryId] ?? `票種 ${item.ticketCategoryId}`)
+          : null
+      }));
       this.cartCountSubject.next(items.length);
       return of(items);
     }
-  }
 
+  }
+  // 票種 ID → 名稱對照表（對應 product.TicketCategories）
+  private readonly ticketCategoryMap: Record<number, string> = {
+    1: '敬老票',
+    2: '成人票',
+    3: '兒童票',
+    4: '學生票',
+    5: '家庭票',
+    6: '愛心票',
+  };
   // --- 2. 加入購物車 ---
   addToCart(dto: any): Observable<any> {
     if (this.authService.isLoggedIn()) {

@@ -67,36 +67,52 @@
   </section>
 
   <!-- 熱門文章推薦 -->
-  <section class="section section--soft">
+  <section class="hot-article-section">
+
     <div class="container">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Travel Stories</p>
           <h2>熱門文章推薦</h2>
         </div>
-        <a href="#" class="section-link">更多文章</a>
+        @if(isLoggedIn){
+        <a routerLink="Board" class="section-link">更多文章</a>
+        }
+        @else {
+        <a routerLink="Board/Visitors" class="section-link">更多文章</a>
+        }
       </div>
-
-      <div class="article-grid">
-        @for (article of articleList; track article.id) {
-        <article class="article-card">
-          <div class="article-card__image">
-            <img [src]="article.imageUrl" [alt]="article.title">
-          </div>
-          <div class="article-card__body">
-            <div class="article-card__tag">{{ article.tag }}</div>
-            <h3>{{ article.title }}</h3>
-            <p>{{ article.summary }}</p>
-            <div class="article-card__footer">
-              <span>{{ article.date }}</span>
-              <a href="#">閱讀更多</a>
+      <div class="hot-article-wrapper">
+        <div class="hot-article-track" [style.transform]="trackTranslate">
+          @for (article of loopedArticles; track $index) {
+          <div class="hot-article-slide">
+            <div class="hot-article-card" (click)="gotoLogin(article.articleId,article.type)">
+              <div class="hot-article-thumb">
+                <img [src]="article.photoUrl || 'assets/default.jpg'">
+              </div>
+              <div class="hot-article-body">
+                <div class="hot-article-tags">
+                  @for (tag of article.tags; track $index) {
+                  <span class="hot-tag">{{tag.tagName}}</span>
+                  }
+                </div>
+                <div class="hot-article-name">{{article.title}}</div>
+                <div class="hot-article-date">{{article.createdAt | date:'M月d日 y年'}}</div>
+              </div>
             </div>
           </div>
-        </article>
+          }
+        </div>
+      </div>
+      <div class="hot-dots">
+        @for (dot of totalPages; track $index) {
+        <span class="hot-dot" [class.active]="$index === articlePage" (click)="goToPage($index)"></span>
         }
       </div>
     </div>
   </section>
+
+
 
   <!-- 熱門活動 -->
   <section class="section">

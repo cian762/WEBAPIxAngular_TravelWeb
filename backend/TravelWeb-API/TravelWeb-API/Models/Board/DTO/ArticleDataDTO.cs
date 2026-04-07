@@ -3,6 +3,7 @@
     public class ArticleDataDTO
     {
         public int articleId { get; set; }
+        public int Type { get; set; }
         public string? title { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? photoUrl { get; set; }
@@ -15,7 +16,8 @@
         public int? RegionID { get; set; }
         public string? RegionName { get; set; }
         public int CommentCount { get; set; }  
-        
+        public int viewCount { get; set; }
+
 
     }
 

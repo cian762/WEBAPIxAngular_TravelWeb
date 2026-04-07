@@ -3,14 +3,14 @@
   <div class="popular-post-list">
     @for (article of articleSamples; track $index) {
     <div class="single-post-list d-flex flex-row align-items-center">
-      <div class="thumb">
-        <img class="img-fluid img-fluid-size" [src]="article.cover" alt="">
+      <div class="">
+        <img class="img-fluid-size" [src]="article.photoUrl" alt="">
       </div>
       <div class="details">
-        <a href="blog-single.html">
+        <a (click)="goToDetail(article.articleId,article.type)">
           <h6>{{article.title}}</h6>
         </a>
-        <p>{{article.creatat| date:'M月d日 y年':'zh-Hant'}}</p>
+        <p>{{article.author}}</p>
       </div>
     </div>
     }

@@ -1,5 +1,5 @@
 .host-body {
-  background-color: #f9f9ff;
+  background-color: white;
   padding-top: 50px;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .sb-btn {
-  height: 44px;
+  height: 38px;
   padding: 0 22px;
   border: none;
   border-radius: 3px;
@@ -177,72 +177,248 @@
   margin: 5px auto;
 }
 
+/* 新增：按鈕群組容器 */
+.search-group {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.search-group:focus-within {
+  border-color: #38a4ff;
+}
+
+.advanced-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  color: #38a4ff;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-right: 1px solid #e0e0e0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.advanced-search-btn:hover {
+  background: #f0f8ff;
+}
+
 .search-box {
   display: flex;
   align-items: center;
-  background-color: #f8b600;
-  border-radius: 999px;
-  padding: 8px 16px;
-  border: 1px solid transparent;
-  /* transition: all 0.2s ease; */
-  margin: 5px auto;
-  width: 80%;
-}
-
-.search-box.focused {
-  background-color: #fff;
-  border: 1px solid #f8b600;
+  flex: 1;
+  padding: 0 12px;
+  background: transparent;
+  border: none;
+  margin: 0;
 }
 
 .search-box input {
   flex: 1;
   border: none;
   outline: none;
-  background: transparent !important;
+  background: transparent;
   font-size: 14px;
-  color: #fff;
+  color: #212529;
+  padding: 10px 0;
 }
 
 .search-box input::placeholder {
-  color: #fff;
-}
-
-.search-box.focused input {
-  color: #f8b600;
-}
-
-.search-box.focused input::placeholder {
-  color: #f8b600;
+  color: #aaa;
 }
 
 .search-box button {
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #fff;
+  color: #38a4ff;
+  font-size: 16px;
   padding: 0;
-  display: flex;
-  align-items: center;
 }
 
-.search-box.focused button {
-  color: #f8b600;
+
+/* 手風琴面板 */
+.advanced-search-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+  background: white;
+  border-radius: 16px;
+  margin-top: 0;
+  margin-bottom: 40px;
+
 }
 
-.search-box input:-webkit-autofill,
-.search-box input:-webkit-autofill:hover,
-.search-box input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
-  -webkit-text-fill-color: #f8b600 !important;
-  transition: background-color 5000s ease-in-out 0s;
+.advanced-search-panel.show {
+  max-height: 500px;
+  /* 足夠大的值，讓內容完全展開 */
+  margin-top: 16px;
+  outline: 1px solid #eee;
+  outline-offset: 1px;
+
+
 }
 
-.search-box:not(.focused) input:-webkit-autofill,
-.search-box:not(.focused) input:-webkit-autofill:hover,
-.search-box:not(.focused) input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #f8b600 inset !important;
-  -webkit-text-fill-color: #fff !important;
-  transition: background-color 5000s ease-in-out 0s;
+.accordion-body {
+  padding: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, padding 0.3s ease;
 }
+
+.advanced-search-panel.show .accordion-body {
+  padding: 20px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 表單樣式美化 */
+.accordion-body .form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.accordion-body .form-control,
+.accordion-body .form-select {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+
+}
+
+.accordion-body .form-control:focus,
+.accordion-body .form-select:focus {
+  border-color: #38a4ff;
+
+}
+
+.accordion-body .btn-primary {
+  background-color: #38a4ff;
+  border-color: #38a4ff;
+  border-radius: 8px;
+}
+
+.accordion-body .btn-primary:hover {
+  background-color: #2694e5;
+  border-color: #2694e5;
+}
+
+.accordion-body .btn-outline-secondary {
+  border-radius: 8px;
+}
+
+/* 進階搜尋按鈕動畫 */
+.advanced-search-btn i {
+  transition: transform 0.3s ease;
+}
+
+.advanced-search-btn.active i {
+  transform: rotate(180deg);
+}
+
+
+.custom-select {
+  width: 100%;
+  padding: 6px 32px 6px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #555;
+  appearance: none;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2338a4ff' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 12px center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.custom-select:focus {
+  outline: 2px solid rgba(56, 164, 255, 0.3);
+  outline-offset: 1px;
+  border-color: #38a4ff;
+}
+
+.custom-select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
 
 /* ===========以上為標籤搜尋框之樣式=========== */
+
+.author-list {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.author-carousel {
+  display: flex;
+  align-items: center;
+  gap: 55px;
+}
+
+.carousel-arrow {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #38a4ff;
+  flex-shrink: 0;
+}
+
+.carousel-arrow:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.author-card {
+  border: 0.5px solid #e0e0e0;
+  /* border-radius: 12px; */
+  background: #fff;
+  height: 220px;
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.author-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-color: #38a4ff;
+}
+
+.author-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #212529;
+}
+
+.author-count {
+  font-size: 13px;
+  color: #aaa;
+}

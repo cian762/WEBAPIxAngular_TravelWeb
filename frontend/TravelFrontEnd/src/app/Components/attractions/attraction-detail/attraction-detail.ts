@@ -8,11 +8,16 @@ import { Attraction } from '../attraction.models';
 import { TicketSectionComponent } from '../ticket-section/ticket-section';
 import Swal from 'sweetalert2';
 import { environment } from '../../../../environments/environment';
+import { FormsModule } from '@angular/forms';
+import { ReviewItem } from '../attraction.service'; // 確認路徑
+import { AuthService } from '../../../Member/services/auth.service';
+// 路徑確認：auth.service 在 app/Member/services/ 下
+
 
 @Component({
   selector: 'app-attraction-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, SafeUrlPipe, TicketSectionComponent],
+  imports: [CommonModule, RouterModule, SafeUrlPipe, TicketSectionComponent, FormsModule],
   templateUrl: './attraction-detail.html',
   styleUrls: ['./attraction-detail.css']
 })
@@ -42,6 +47,17 @@ export class AttractionDetailComponent implements OnInit {
     ticketTypeName: string | null;
     overlapCount: number;
   }[] = [];
+
+  // [YJ] 評論
+  reviews: ReviewItem[] = [];
+  avgRating = 0;
+  reviewCount = 0;
+  canWriteReview = false;
+  reviewReason = '';
+  showReviewForm = false;
+  submitting = false;
+  newReview = { rating: 5, title: '', comment: '' };
+
 
   tabs = [
     { key: 'feature', label: '景點特色', icon: '🏞️' },
@@ -91,7 +107,8 @@ export class AttractionDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private svc: AttractionService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService   // ← 加這行
   ) { }
 
   ngOnInit(): void {
@@ -114,6 +131,21 @@ export class AttractionDetailComponent implements OnInit {
             this.loadWeather(data);
             this.svc.getNearbyAttractions(id).subscribe(list => { this.nearbyAttractions = list; });
             this.svc.getRelatedTickets(id).subscribe(list => { this.relatedTickets = list; });
+
+            // [YJ] 載入評論
+            this.svc.getAttractionReviews(id).subscribe(res => {
+              this.reviews = res.reviews;
+              this.avgRating = res.averageRating;
+              this.reviewCount = res.totalCount;
+            });
+
+            // [YJ] 確認是否可評論
+            if (this.authService.isLoggedIn()) {
+              this.svc.canReview(id).subscribe(res => {
+                this.canWriteReview = res.canReview;
+                this.reviewReason = res.reason;
+              });
+            }
           }
         });
       }
@@ -270,5 +302,65 @@ export class AttractionDetailComponent implements OnInit {
   /** 將介紹文字依換行切成段落陣列 */
   splitParagraphs(text: string): string[] {
     return text.split(/\n+/).map(s => s.trim()).filter(s => s.length > 0);
+  }
+
+  // [YJ] 星星陣列（顯示用）
+  starArray(n: number): number[] {
+    return Array(Math.round(n)).fill(0);
+  }
+
+  emptyStarArray(n: number): number[] {
+    return Array(5 - Math.round(n)).fill(0);
+  }
+
+  // [YJ] 送出評論
+  submitReview(): void {
+    if (!this.attraction) return;
+    if (!this.newReview.title.trim() || !this.newReview.comment.trim()) {
+      Swal.fire({ icon: 'warning', title: '請填寫標題與內容', timer: 2000, showConfirmButton: false });
+      return;
+    }
+    this.submitting = true;
+    this.svc.submitReview({
+      attractionId: this.attraction.attractionId,
+      rating: this.newReview.rating,
+      title: this.newReview.title,
+      comment: this.newReview.comment
+    }).subscribe({
+      next: () => {
+        Swal.fire({ icon: 'success', title: '評論送出成功！', timer: 2000, showConfirmButton: false });
+        this.showReviewForm = false;
+        this.canWriteReview = false;
+        this.newReview = { rating: 5, title: '', comment: '' };
+        // 重新載入評論
+        this.svc.getAttractionReviews(this.attraction!.attractionId).subscribe(res => {
+          this.reviews = res.reviews;
+          this.avgRating = res.averageRating;
+          this.reviewCount = res.totalCount;
+        });
+      },
+      error: () => {
+        this.submitting = false;
+        Swal.fire({ icon: 'error', title: '送出失敗', text: '請稍後再試', timer: 2000, showConfirmButton: false });
+      }
+    });
+  }
+
+
+  // [YJ] 點擊「留下評價」按鈕
+  onReviewBtnClick(): void {
+    if (!this.authService.isLoggedIn()) {
+      Swal.fire({ icon: 'warning', title: '請先登入', text: '登入後即可留下評價', timer: 2000, showConfirmButton: false });
+      return;
+    }
+    if (this.reviewReason === 'already_reviewed') {
+      Swal.fire({ icon: 'info', title: '您已評論過此景點', timer: 2000, showConfirmButton: false });
+      return;
+    }
+    if (this.reviewReason === 'not_purchased') {
+      Swal.fire({ icon: 'warning', title: '需購買票券才能評論', timer: 2000, showConfirmButton: false });
+      return;
+    }
+    this.showReviewForm = true;
   }
 }

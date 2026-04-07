@@ -12,11 +12,12 @@ import { PageNumberList } from "../Components/page-number-list/page-number-list"
 import { DatePipe } from '@angular/common';
 import Mandarin from "flatpickr/dist/l10n/zh-tw"
 import flatpickr from 'flatpickr';
+import { BoardBanner } from "../Components/board-banner/board-banner";
 declare var $: any;
 @Component({
   selector: 'app-blog-home',
   standalone: true,
-  imports: [RouterModule, FormsModule, PopularPost, TagClouds, ArticleList, CreateArticleButton, PostCatgories, PageNumberList],
+  imports: [RouterModule, FormsModule, PopularPost, TagClouds, ArticleList, CreateArticleButton, PostCatgories, PageNumberList, BoardBanner],
   templateUrl: './blog-home.html',
   styleUrl: './blog-home.css',
 
@@ -35,8 +36,8 @@ export class BlogHome implements OnInit, AfterViewInit {
   Keyword = "";
   AuthorKeyword = "";
   isSearch = false;
-
-
+  isFocused = false;
+  showAdvancedSearch = false;
   private fpInstance: flatpickr.Instance | null = null;
   startdate?: string;
   enddate?: string;
@@ -44,6 +45,7 @@ export class BlogHome implements OnInit, AfterViewInit {
   regions: any[] = [];
   selectedCityId: number | null = null;
   selectedRegionID: number | null = null;
+  searchAuthors: any[] = [];
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -66,6 +68,7 @@ export class BlogHome implements OnInit, AfterViewInit {
         this.articleList = d.articleList;
         this.totalCount = d.totalCount;
         this.isSearch = true;
+        this.Serve.getAuthorsbyKeyword(dto.authorKeyword).subscribe((d: any) => this.searchAuthors = d);
       });
     });
 
@@ -106,12 +109,15 @@ export class BlogHome implements OnInit, AfterViewInit {
 
   onSeachReset() {
     this.fpInstance?.clear();
+    const input = document.querySelector('.flatpickr-input') as HTMLInputElement;
+    if (input) input.value = '';
     this.Keyword = '';
     this.AuthorKeyword = '';
     this.startdate = undefined;
     this.enddate = undefined;
     this.selectedCityId = null;
     this.selectedRegionID = null;
+    this.searchAuthors = [];
   }
 
   ReflashArticles(currentPage: number) {
@@ -140,10 +146,12 @@ export class BlogHome implements OnInit, AfterViewInit {
   }
 
   onBackSeach() {
+    this.searchAuthors = [];
     this.router.navigate(['/Board']);
   }
 
   onFocus(event: any) {
+    this.isFocused = true;
     event.target.closest('.search-box').classList.add('focused');
     if (event.target.value) {
       this.searchByKeyword(event);
@@ -165,6 +173,7 @@ export class BlogHome implements OnInit, AfterViewInit {
   }
 
   onBlur(event: any) {
+    this.isFocused = false;
     setTimeout(() => {
       event.target.closest('.search-box').classList.remove('focused');
     }, 200);
@@ -186,37 +195,31 @@ export class BlogHome implements OnInit, AfterViewInit {
   initRegion() {
     this.Serve.getAllRegions().subscribe((d: any) => {
       this.regions = d;
-      setTimeout(() => {
-        this.initNiceSelect();
-      }, 0);
     });
   }
-
-  initNiceSelect() {
-    this.bindSelect('region-select', 'cityId');
-    this.bindSelect('dist-select', 'distId');
+  get visibleAuthors() {
+    const list = this.searchAuthors;
+    const start = this.carouselPage * 5;
+    return list.slice(start, start + 5);
   }
 
-  bindSelect(id: string, controlName: string) {
-    const $el = $(`#${id}`);
-    if ($el.length === 0) return;
-
-    $el.niceSelect('destroy');
-    $el.niceSelect();
-    $el.on('change', (event: any) => {
-      const val = event.target.value;
-      const parsed = val === '' || val === 'null' ? null : Number(val);
-
-      if (controlName === 'cityId') {
-        this.selectedCityId = parsed;
-        this.cdr.detectChanges();
-        setTimeout(() => this.bindSelect('dist-select', 'distId'), 0);
-      }
-      if (controlName === 'distId') {
-        this.selectedRegionID = parsed;
-        this.cdr.detectChanges();
-      }
-    });
+  carouselPage = 0;
+  toggleAdvancedSearch() {
+    this.showAdvancedSearch = !this.showAdvancedSearch;
   }
 
+
+  goToMemderPage(memderID: string): void {
+    this.router.navigate(['Board', 'user', memderID]);
+  }
+
+  prevPage() {
+    if (this.carouselPage > 0) this.carouselPage--;
+  }
+
+  nextPage() {
+    if ((this.carouselPage + 1) * 5 < this.searchAuthors.length) this.carouselPage++;
+  }
 }
+
+

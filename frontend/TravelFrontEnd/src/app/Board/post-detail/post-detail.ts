@@ -26,14 +26,13 @@ interface ArticleTag {
   styleUrl: './post-detail.css',
 })
 export class PostDetail implements OnInit {
-  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) {
-
-  }
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) { };
   id = 0;
   selectedIndex = 0;
   allPhotoList: string[] = [];
   TagsList: ArticleTag[] = [];
   post?: PostDetailDto;
+  product?: any;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -42,6 +41,7 @@ export class PostDetail implements OnInit {
         next: (d) => {
           {
             this.post = d;
+            this.Serve.postLogView(this.id).subscribe();
             if (d.cover) {
               this.allPhotoList?.push(d.cover);
             }
@@ -49,6 +49,7 @@ export class PostDetail implements OnInit {
               this.allPhotoList?.push(...d.postPhoto);
               console.log(this.id);
             }
+
           }
         },
         error: (err: any) => {
@@ -59,7 +60,10 @@ export class PostDetail implements OnInit {
       });
       this.Serve.getTagsByArticleAPI(this.id).subscribe((d: any) => {
         this.TagsList = d;
-      })
+      });
+      this.Serve.getProduct(this.id).subscribe((d: any) => {
+        this.product = d;
+      });
     });
   }
 
@@ -104,6 +108,25 @@ export class PostDetail implements OnInit {
         this.post.isCollect = false;
       }
       this.Serve.postArticleCollect(id).subscribe();
+    }
+  }
+
+
+  // 跳轉邏輯也搬到這裡，讓原件自己處理點擊
+  goToDetail(item: any) {
+    const routeMap: any = {
+      'Article': '/Board/detail',        // 對應 Board -> detail/:id
+      'Activity': '/ActivityInfo',       // 對應 ActivityInfo -> :id
+      'Attraction': '/attractions/detail', // 對應 attractions -> detail/:id
+      'Product': '/trip-detail'          // 對應 trip-detail/:id
+    };
+    const basePath = routeMap[item.category]; // 如果你之前改成了 type，這裡記得用 type
+
+    if (basePath && item.id) {
+      // Angular navigate 會自動幫你加上斜線：/Board/detail/123
+      this.router.navigate([basePath, item.id]);
+    } else {
+      console.error('找不到對應路由或 ID', item);
     }
   }
 }

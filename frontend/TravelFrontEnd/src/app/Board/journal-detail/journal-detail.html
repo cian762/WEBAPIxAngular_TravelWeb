@@ -1,0 +1,121 @@
+<app-create-article-button></app-create-article-button>
+<!-- Start post-content Area -->
+<section class="post-content-area single-post-area">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 posts-list">
+        <!-- 內文區在這 -->
+        <div class="single-post row">
+          <div class="my-container">
+            <!-- 文章標題&地點 -->
+            <div class="d-flex justify-content-between">
+              <div class="mb-2">
+                <h3 class="mb-1">{{journal?.title}}</h3>
+                <!-- 時間 -->
+                <a> {{journal?.createdAt | date:'M月d日 y年':'zh-Hant'}}&nbsp;<span
+                    class="lnr lnr-calendar-full"></span></a>
+              </div>
+              <!-- 地區 -->
+              <a class="region-item"><i class="ri-map-pin-line"></i>{{journal?.regionName}}</a>
+            </div>
+
+            <!-- 封面 -->
+            <img class="img-fluid" [src]="journal?.cover">
+
+            <!-- 點讚/收藏/留言/更多 -->
+            <div class="mt-3 d-flex justify-content-between">
+              <!-- 更多 -->
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <button class="btn-more"><i class="ri-more-fill"></i></button>
+                <!-- 標籤 -->
+                <ul class="tags">
+                  @for (tag of TagsList; track $index)
+                  {
+                  <li>
+                    <a class="tag-btn">
+                      <i [class]="tag.icon"></i>&nbsp;{{tag.tagName}}
+                    </a>
+                  </li>
+                  }
+                </ul>
+              </div>
+
+              <div class="user-details">
+                <!-- 點讚 -->
+                <a class="like-item" [class.liked]="journal?.isLike" (click)="ToLike(id)">
+                  {{journal?.likeCount}}
+                  <i [class]="journal?.isLike ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+                </a>
+                <!-- 收藏 -->
+                <a class="collect-item" [class.collect]="journal?.isCollect" (click)="ToCollect(id)">
+                  {{journal?.isCollect ? "已收藏":"收藏"}}
+                  <i [class]="journal?.isCollect ? 'ri-bookmark-3-fill' : 'ri-bookmark-line'"></i>
+                </a>
+                <!-- 留言 -->
+                <a class="other-item">{{journal?.commentCount}}&nbsp;<span class="lnr lnr-bubble"></span></a>
+
+              </div>
+            </div>
+
+            <!-- 內容元素 -->
+            <div class="ground">
+              @if (journal?.elements) {
+              @for (element of journal!.elements; track $index) {
+              <div class="cube" [style.width.px]="element.width" [style.height.px]="element.height"
+                [style.z-index]="journal!.elements.length - element.zindex" [style.left.px]="element.posX"
+                [style.top.px]="element.posY">
+
+                @if (element.elementType === 1) {
+                <img [src]="element.content" width="100%" height="100%">
+                } @else if (element.elementType === 0) {
+                <div class="box-textarea" style="white-space: pre-wrap;" [innerHTML]="element.content"></div>
+                }
+              </div>
+              }
+              }
+            </div>
+            <!-- 標籤 -->
+            <!-- <ul class="tags">
+            @for (tag of TagsList; track $index)
+            {
+            <li>
+              <a class="tag-btn" (click)="seachTag(tag)">
+                <i [class]="tag.icon"></i>&nbsp;{{tag.tagName}}
+              </a>
+            </li>
+            }
+          </ul> -->
+
+
+            <!-- 內文區結束 -->
+            <!-- 引用的站內連結 -->
+            @if(false){
+            <div class="quotes">
+              MCSE boot camps have its supporters and its detractors. Some people do not understand why you should have
+              to spend money on boot camp when you can get the MCSE study materials yourself at a fraction of the camp
+              price. However, who has the willpower to actually sit through a self-imposed MCSE training.
+            </div>
+            }
+          </div>
+          <app-comments-area [id]="id" [commentCount]="journal?.commentCount?? 0"></app-comments-area>
+        </div>
+      </div>
+
+      <!-- 側欄起點 -->
+      <div class="col-lg-4 sidebar-widgets">
+        <div class="widget-wrap">
+          @if (journal) {
+          <app-author-info-sidebar [authorID]="journal.authorID"></app-author-info-sidebar>
+          }
+          <app-popular-post></app-popular-post>
+
+          <app-post-catgories></app-post-catgories>
+
+        </div>
+      </div>
+      <!-- 側欄終點 -->
+
+    </div>
+  </div>
+</section>
+<!-- End post-content Area -->

@@ -6,7 +6,8 @@ import { SearchBridge } from '../Services/search-bridge';
 import { Router } from '@angular/router';
 
 const categoryMap: Record<string, string> = {
-  'Article': '文章',
+  'ArticleA': '文章',
+  'ArticleB': '文章',
   'Activity': '活動',
   'Attraction': '景點',
   'Product': '行程商品'
@@ -39,7 +40,8 @@ export class GlobalSearch implements OnInit {
   // 跳轉邏輯也搬到這裡，讓原件自己處理點擊
   goToDetail(item: any) {
     const routeMap: any = {
-      'Article': '/Board/detail',        // 對應 Board -> detail/:id
+      'ArticleA': '/Board/detail',        // 對應 Board -> detail/:id
+      'ArticleB': '/Board/JournalDetail',        // 對應 Board -> detail/:id
       'Activity': '/ActivityInfo',       // 對應 ActivityInfo -> :id
       'Attraction': '/attractions/detail', // 對應 attractions -> detail/:id
       'Product': '/trip-detail'          // 對應 trip-detail/:id
@@ -57,7 +59,8 @@ export class GlobalSearch implements OnInit {
 
 }
 export enum CategoryType {
-  Article = '文章',
+  ArticleA = '文章',
+  ArticleB = '文章',
   Activity = '活動',
   Attraction = '景點',
   Product = '行程商品'

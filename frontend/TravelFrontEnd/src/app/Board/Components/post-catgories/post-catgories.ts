@@ -21,4 +21,8 @@ export class PostCatgories implements OnInit {
     });
   }
 
+  goToActivityInfo(id: number) {
+    this.router.navigate(['ActivityInfo', id]);
+  }
+
 }

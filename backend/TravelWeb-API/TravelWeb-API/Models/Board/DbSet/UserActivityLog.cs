@@ -7,9 +7,9 @@ public partial class UserActivityLog
 {
     public int LogId { get; set; }
 
-    public int UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
-    public byte TargetType { get; set; }
+    public byte? TargetType { get; set; }
 
     public int TargetId { get; set; }
 

@@ -16,11 +16,11 @@ namespace TravelWeb_API.Models.Board.Service
             _memberDb = memberDb;
         }
 
-        public bool EditTagsByArticleId(int articleId, List<int>? TagIDList)
+        public async Task<bool> EditTagsByArticleId(int articleId, List<int>? TagIDList)
         {
             try
             {
-                var removeList = _context.ArticleTags.Where(t => t.ArticleId == articleId);
+                var removeList = await _context.ArticleTags.Where(t => t.ArticleId == articleId).ToListAsync();
                 _context.ArticleTags.RemoveRange(removeList);
                 if (TagIDList == null) return true;
                 var tagsToAdd = new List<ArticleTag>();
@@ -32,8 +32,8 @@ namespace TravelWeb_API.Models.Board.Service
                         TagId = tagId
                     });
                 }
-                _context.ArticleTags.AddRange(tagsToAdd);
-                _context.SaveChanges();
+                await _context.ArticleTags.AddRangeAsync(tagsToAdd);
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch { return false; }
