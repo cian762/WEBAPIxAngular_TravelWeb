@@ -46,7 +46,8 @@ export class ActivityIntro implements OnInit, AfterViewInit {
     propaganda: '',
     officialLink: '',
     images: [],
-    regions: []
+    regions: [],
+    commentCount: 0,
   };
 
   productInfoCollection: productInfoInterface[] = [{

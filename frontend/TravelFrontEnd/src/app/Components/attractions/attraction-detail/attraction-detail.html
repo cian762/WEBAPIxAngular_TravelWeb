@@ -58,7 +58,7 @@
 
         <!-- 縮圖列 -->
         <div class="thumb-row" *ngIf="imageCount > 1">
-          <img *ngFor="let img of attraction.images; let i = index" [src]="'https://localhost:7285' + img"
+          <img *ngFor="let img of attraction.images; let i = index" [src]="baseUrl2 + img"
             [class.active]="currentImgIdx === i" (click)="currentImgIdx = i"
             onerror="this.src='https://placehold.co/100x100?text=No+Image'" [alt]="attraction.name">
         </div>
@@ -186,8 +186,7 @@
           <!-- 圖片 + 說明 -->
           <div class="activity-intro__images" *ngIf="attraction.productImages?.length">
             <div class="activity-intro__img-item" *ngFor="let img of attraction.productImages">
-              <img [src]="'https://localhost:7285' + img.imagePath" [alt]="img.caption || ''"
-                class="activity-intro__img"
+              <img [src]="baseUrl2 + img.imagePath" [alt]="img.caption || ''" class="activity-intro__img"
                 onerror="this.src='https://placehold.co/800x500?text=No+Image';this.onerror=null;">
               <p class="activity-intro__caption" *ngIf="img.caption">
                 ▲ {{ img.caption }}
@@ -266,7 +265,7 @@
             <div class="ts-related__track">
               <div class="ts-related__card" *ngFor="let t of relatedTickets" (click)="goToRelated(t.attractionId)">
                 <div class="ts-related__img-wrap">
-                  <img [src]="'https://localhost:7285' + t.mainImage" [alt]="t.name"
+                  <img [src]="baseUrl2 + t.mainImage" [alt]="t.name"
                     onerror="this.src='https://placehold.co/280x180?text=No+Image';this.onerror=null;">
                   <span class="ts-related__type-badge" *ngIf="t.ticketTypeName">
                     {{ t.ticketTypeName }}
@@ -302,7 +301,7 @@
         <div class="nearby-grid" *ngIf="nearbyAttractions.length > 0">
           <div class="nearby-card" *ngFor="let a of nearbyAttractions" (click)="goToNearby(a.attractionId)">
             <div class="nearby-card__img-wrap">
-              <img [src]="'https://localhost:7285' + a.mainImage" [alt]="a.name"
+              <img [src]="baseUrl2 + a.mainImage" [alt]="a.name"
                 onerror="this.src='https://placehold.co/300x200?text=No+Image';this.onerror=null;">
             </div>
             <div class="nearby-card__body">

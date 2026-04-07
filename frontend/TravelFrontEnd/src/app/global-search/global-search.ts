@@ -26,6 +26,7 @@ export class GlobalSearch implements OnInit {
     private searchBridge: SearchBridge,
     private router: Router
   ) { }
+
   ngOnInit(): void {
     // 訂閱橋樑，首頁搜尋框一推資料，這裡就會自動更新
     this.searchBridge.currentResults$.subscribe(data => {
@@ -35,6 +36,7 @@ export class GlobalSearch implements OnInit {
       }));
     });
   }
+
   // 跳轉邏輯也搬到這裡，讓原件自己處理點擊
   goToDetail(item: any) {
     const routeMap: any = {
@@ -44,6 +46,7 @@ export class GlobalSearch implements OnInit {
       'Attraction': '/attractions/detail', // 對應 attractions -> detail/:id
       'Product': '/trip-detail'          // 對應 trip-detail/:id
     };
+
     const basePath = routeMap[item.category]; // 如果你之前改成了 type，這裡記得用 type
 
     if (basePath && item.id) {

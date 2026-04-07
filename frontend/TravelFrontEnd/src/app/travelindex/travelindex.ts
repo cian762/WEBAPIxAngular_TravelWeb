@@ -12,6 +12,7 @@ import { ActivityIndexCard } from "../Activity/Component/activity-index-card/act
 //[YJ] 景點 Service 與 Model，供熱門景點區塊使用
 import { AttractionService } from '../Components/attractions/attraction.service';
 import { Attraction } from '../Components/attractions/attraction.models';
+import { environment } from '../../environments/environment';
 import { ArticleData } from '../Board/interface/ArticleData';
 import { BoardServe } from '../Board/Service/board-serve';
 import { AuthService } from '../Member/services/auth.service';
@@ -140,10 +141,12 @@ export class Travelindex implements OnInit, OnDestroy {
   goToAttractionDetail(id: number): void {
     this.router.navigate(['/attractions/detail', id]);
   }
+
+  private baseUrl2 = environment.apiBaseUrl2;
   //[YJ] 取得景點主圖完整 URL
   getAttractionImage(a: Attraction): string {
     return a.mainImage
-      ? `https://localhost:7285${a.mainImage}`
+      ? `${this.baseUrl2 + a.mainImage}`
       : 'assets/img/b1.jpg';
   }
   //[YJ] 首頁景點卡片按讚
@@ -161,6 +164,7 @@ export class Travelindex implements OnInit, OnDestroy {
     this.showSuggestions = false;
     this.onSearch();
   }
+
   onSearch() {
     const term = this.searchControl.value;
 
@@ -210,107 +214,6 @@ export class Travelindex implements OnInit, OnDestroy {
     }, 200);
   }
 
-  favoriteList = [
-    {
-      id: 1,
-      title: '九份山城散策',
-      region: '新北',
-      category: '景點',
-      description: '老街、茶樓與山海景色一次收集。',
-      imageUrl: 'https://images.unsplash.com/photo-1526481280695-3c4691dbbb72?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      title: '花蓮海岸線一日遊',
-      region: '花蓮',
-      category: '行程',
-      description: '山海交會的經典路線，適合放鬆出走。',
-      imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      title: '台南古城美食路線',
-      region: '台南',
-      category: '文章',
-      description: '從牛肉湯到老屋巷弄，一次吃遍。',
-      imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
-
-
-  eventList = [
-    {
-      id: 1,
-      title: '阿里山日出鐵道體驗',
-      location: '嘉義',
-      description: '搭配林鐵與山林景觀的熱門活動。',
-      score: 4.8,
-      price: 1680,
-      imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      title: '宜蘭溫泉放鬆小旅行',
-      location: '宜蘭',
-      description: '泡湯、美食、慢旅行一次滿足。',
-      score: 4.7,
-      price: 1380,
-      imageUrl: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      title: '墾丁海上活動體驗',
-      location: '屏東',
-      description: '適合喜歡陽光與海洋的玩家。',
-      score: 4.9,
-      price: 2200,
-      imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 4,
-      title: '九族文化村親子遊',
-      location: '南投',
-      description: '適合家庭客群的熱門體驗。',
-      score: 4.6,
-      price: 980,
-      imageUrl: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
-
-
-
-  packageList = [
-    {
-      id: 1,
-      title: '花東三日精華套裝',
-      days: '3 天 2 夜',
-      description: '結合海岸、公路、美食與住宿安排的輕鬆路線。',
-      tags: ['含住宿', '親子適合', '熱門路線'],
-      score: 4.8,
-      price: 6990,
-      imageUrl: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      title: '阿里山日月潭經典套裝',
-      days: '2 天 1 夜',
-      description: '山景與湖景雙主題的人氣經典組合。',
-      tags: ['自然景觀', '交通便利', '熱銷'],
-      score: 4.7,
-      price: 4880,
-      imageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      title: '台南高雄南部文化行',
-      days: '3 天 2 夜',
-      description: '老城、美食、港灣風景一次打包。',
-      tags: ['美食', '古蹟', '城市漫遊'],
-      score: 4.6,
-      price: 5590,
-      imageUrl: 'https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
 
   serviceList = [
     { icon: '✈️', title: '交通資訊', desc: '機場、鐵路、高鐵與轉乘資訊' },
