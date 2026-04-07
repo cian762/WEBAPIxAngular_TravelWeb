@@ -16,6 +16,7 @@ import { environment } from '../../environments/environment';
 import { ArticleData } from '../Board/interface/ArticleData';
 import { BoardServe } from '../Board/Service/board-serve';
 import { AuthService } from '../Member/services/auth.service';
+import Swal from 'sweetalert2';
 const categoryMap: Record<string, string> = {
   'ArticleA': '文章',
   'ArticleB': '文章',
@@ -229,6 +230,11 @@ export class Travelindex implements OnInit, OnDestroy {
   articleList: ArticleData[] = []
   gotoLogin(id: number, type: number) {
     if (this.isLoggedIn == false) {
+      Swal.fire({
+        icon: "warning",
+        title: "請先登入",
+        timer: 1500
+      });
       this.router.navigate(['login']);
     }
     else {

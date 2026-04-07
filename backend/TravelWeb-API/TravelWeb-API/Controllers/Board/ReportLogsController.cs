@@ -80,7 +80,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpPost]
         public async Task<ActionResult> PostReportLog(Log reportLog)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (string.IsNullOrEmpty(currentUserId))
                 return BadRequest();
             try
