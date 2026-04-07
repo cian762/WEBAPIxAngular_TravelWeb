@@ -12,6 +12,7 @@ import { DatePipe, registerLocaleData } from '@angular/common';
 import localeZhTw from '@angular/common/locales/zh-Hant';
 import { AuthorInfoSidebar } from "../Components/author-info-sidebar/author-info-sidebar";
 import { TagDTO } from '../interface/ArticleData';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-journal-detail',
@@ -39,6 +40,11 @@ export class JournalDetail implements OnInit {
             this.router.navigate(['Board/404']);
           }
           if (err.status === 401) {
+            Swal.fire({
+              icon: "warning",
+              title: "請先登入",
+              timer: 1500
+            });
             this.router.navigate(['/login']);
           }
         }

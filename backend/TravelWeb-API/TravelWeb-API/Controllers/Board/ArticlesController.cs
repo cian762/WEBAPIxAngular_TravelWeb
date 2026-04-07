@@ -47,12 +47,12 @@ namespace TravelWeb_API.Controllers.Board
         // GET: api/Articles 瀏覽(全部文章之瀑布流)async Task<ActionResult<IEnumerable<Article>>>
         [HttpGet("Bypage/{page}")]
         public IActionResult GetArticlesByDate(int page)
-        {    
+        {
             // 從 Cookie 取出 Token  
-            string? token = Request.Cookies["AuthToken"];
-            string? userId = GetUser.Id(token);
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
-            var result = _ArticleService.GetArticles(page, userId);
+            var result = _ArticleService.GetArticles(page, currentUserId);
             return Ok(new
             {
                 totalCount = result.TotalCount,

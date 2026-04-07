@@ -11,6 +11,7 @@ import { PostCatgories } from "../Components/post-catgories/post-catgories";
 import { AuthorInfoSidebar } from "../Components/author-info-sidebar/author-info-sidebar";
 import localeZhTw from '@angular/common/locales/zh-Hant';
 import { DatePipe, registerLocaleData } from '@angular/common';
+import Swal from 'sweetalert2';
 
 registerLocaleData(localeZhTw);
 interface ArticleTag {
@@ -53,6 +54,14 @@ export class PostDetail implements OnInit {
           }
         },
         error: (err: any) => {
+          if (err.status === 401) {
+            Swal.fire({
+              icon: "warning",
+              title: "請先登入",
+              timer: 1500
+            });
+            this.router.navigate(['/login']);
+          }
           if (err.status === 404) {
             this.router.navigate(['Board/404']);
           }

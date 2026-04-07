@@ -13,6 +13,7 @@ import { DatePipe } from '@angular/common';
 import Mandarin from "flatpickr/dist/l10n/zh-tw"
 import flatpickr from 'flatpickr';
 import { BoardBanner } from "../Components/board-banner/board-banner";
+import Swal from 'sweetalert2';
 declare var $: any;
 @Component({
   selector: 'app-blog-home',
@@ -121,12 +122,29 @@ export class BlogHome implements OnInit, AfterViewInit {
   }
 
   ReflashArticles(currentPage: number) {
-    this.Serve.getArticleAPI(currentPage).subscribe((d: ArticleResponse) => {
-      this.articleList = d.articleList;
-      this.totalCount = d.totalCount;
-      this.isSearch = false;
-      console.log("totalCount", this.totalCount);
-    });
+    this.Serve.getArticleAPI(currentPage).subscribe(
+      {
+        next: (d: ArticleResponse) => {
+          this.articleList = d.articleList;
+          this.totalCount = d.totalCount;
+          this.isSearch = false;
+          console.log("totalCount", this.totalCount);
+
+        },
+        error: (err: any) => {
+          if (err.status === 404) {
+            this.router.navigate(['Board/404']);
+          }
+          if (err.status === 401) {
+            Swal.fire({
+              icon: "warning",
+              title: "請先登入",
+              timer: 1500
+            });
+            this.router.navigate(['/login']);
+          }
+        }
+      });
   }
 
 
