@@ -43,7 +43,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -168,7 +167,7 @@ builder.Services.AddScoped<QRCodeService>();
 
 //SMTP 相關組態強型別引用、Email Service 註冊
 builder.Services.Configure<SmtpSettings>(
-    builder.Configuration.GetSection("SmtpSettings"));
+    builder.Configuration.GetSection("SmtpSettingsGFC"));
 builder.Services.AddScoped<EmailService>();
 
 //Ticket 相關服務註冊
@@ -270,7 +269,7 @@ if (app.Environment.IsDevelopment())
 
 
 
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 
 app.UseStaticFiles();

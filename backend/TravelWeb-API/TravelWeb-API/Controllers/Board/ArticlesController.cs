@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -119,11 +120,10 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByTags([FromQuery]int page, [FromQuery] SearchByTagsDTO searchByTags)
         {
             // 從 Cookie 取出 Token  
-            string? token = Request.Cookies["AuthToken"];
-            string? userId = GetUser.Id(token);
-            if (string.IsNullOrEmpty(userId))
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized("無效的 Token");
-            var result = _ArticleService.ArticlesByTags(page, searchByTags, userId);
+            var result = _ArticleService.ArticlesByTags(page, searchByTags, currentUserId);
             return Ok(new
             {
                 totalCount = result.TotalCount,
@@ -138,10 +138,12 @@ namespace TravelWeb_API.Controllers.Board
             // 從 Cookie 取出 Token  
             string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(currentUserId))
-                return Unauthorized("無效的 Token");
+                return Unauthorized("無效的 Token"); 
+
             var result = _ArticleService.ArticlesByAuthorID(page, authorID, currentUserId);
             return Ok(new
             {
+                
                 totalCount = result.TotalCount,
                 articleList = result.ArticleDTOList
             });
@@ -162,7 +164,7 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
-        //GET:用戶主頁:自己發布的文章
+        //GET:用戶主頁:自己發布的私人文章
         [HttpGet("articlesByUser")]
         public IActionResult GetArticlesByUser([FromQuery]int page)
         {
@@ -208,11 +210,37 @@ namespace TravelWeb_API.Controllers.Board
         }
 
         [HttpGet("authorUser")]
-        public IActionResult GetauthorUser([FromQuery]string userId)
-        {            
-            var member = _memberDb.MemberInformations
-                .FirstOrDefault(m => m.MemberId == userId);
+        public async Task <ActionResult> GetAuthorUser([FromQuery]string authorID)
+        {
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized("無效的 Token");
+            bool IsSelf = authorID == currentUserId;
+            if (IsSelf) return Ok();
 
+            var member = _memberDb.MemberInformations
+                .FirstOrDefault(m => m.MemberId == authorID);
+            if (member==null) return NotFound(new { message = "找不到該名會員或您無權查看此頁面" });
+            if (!string.IsNullOrEmpty(currentUserId))
+            {
+                var myInfo = await _context.MemberInformations.FirstOrDefaultAsync(m => m.MemberId == currentUserId);
+                if (myInfo != null)
+                {                    
+
+                    bool isBlockedByMe = await _memberDb.Blockeds
+                        .AnyAsync(b => b.MemberId == currentUserId && b.BlockedId == authorID); // 我封鎖他
+
+                    bool isBlockingMe = await _memberDb.Blockeds
+                        .AnyAsync(b => b.MemberId == authorID && b.BlockedId == currentUserId); // 他封鎖我
+
+                    if (isBlockedByMe || isBlockingMe)
+                    {
+                        return NotFound(new { message = "找不到該名會員或您無權查看此頁面" });
+                    }
+                }
+
+            }
             return Ok(member);
         }
 

@@ -1,7 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using TravelWeb_API.Controllers.Board;
+using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.Board.DbSet;
 using TravelWeb_API.Models.Board.DTO;
 using TravelWeb_API.Models.Board.IService;
@@ -15,10 +19,12 @@ namespace TravelWeb_API.Models.Board.Service
     {
         private readonly BoardDbContext _context;
         private readonly MemberSystemContext _memberDb;
-        public ArticleService(BoardDbContext context, MemberSystemContext memberDb)
+        private readonly ActivityDbContext _activityDb;
+        public ArticleService(BoardDbContext context, MemberSystemContext memberDb, ActivityDbContext activityDb)
         {
             _context = context;
             _memberDb = memberDb;
+            _activityDb = activityDb;
         }
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) GetArticles(int page, string? userId)
@@ -31,8 +37,7 @@ namespace TravelWeb_API.Models.Board.Service
         {
             IQueryable<Article> data = _context.Articles
                 .Where(a => a.Status == 1)
-                .Where(a => (a.Title != null && a.Title.Contains(keyword)) ||
-                a.UserId.Contains(keyword));
+                .Where(a => a.Title != null && a.Title.Contains(keyword));
             return BuildPagedResult(data, page, userId);
         }
 
@@ -85,7 +90,9 @@ namespace TravelWeb_API.Models.Board.Service
 
         public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) Search(int page, ArticleSearchDTO dto, string? userId)
         {
-            IQueryable<Article> query = _context.Articles.Where(a => a.Status == 1).AsQueryable();
+            IQueryable<Article> query = _context.Articles.Where(a => a.Status == 1)
+                .Include(a => a.MemberInformation)
+                .AsQueryable();
 
             // 標題
             if (!string.IsNullOrEmpty(dto.Keyword))
@@ -94,31 +101,47 @@ namespace TravelWeb_API.Models.Board.Service
             }
 
             // 日期
-            if (dto.StartTime.HasValue)
+            if (!string.IsNullOrEmpty(dto.StartTime))
             {
-                query = query.Where(a => a.CreatedAt >= dto.StartTime.Value);
+                var start = DateTime.Parse(dto.StartTime);
+                query = query.Where(a => a.CreatedAt >= start);
             }
-
-            if (dto.EndTime.HasValue)
+            if (!string.IsNullOrEmpty(dto.EndTime))
             {
-                query = query.Where(a => a.CreatedAt <= dto.EndTime.Value);
+                var end = DateTime.Parse(dto.EndTime).AddDays(1).Date;
+                query = query.Where(a => a.CreatedAt < end);
             }
 
             // 作者
-            if (!string.IsNullOrEmpty(dto.AuthorId))
+            if (!string.IsNullOrEmpty(dto.authorKeyword))
             {
-                query = query.Where(a => a.UserId == dto.AuthorId);
+                query = query                
+                .Where(a => a.UserId.Contains(dto.authorKeyword)||
+                a.MemberInformation.Name.Contains(dto.authorKeyword));
             }
 
-            // Tags（全部符合）
-            if (dto.TagIds != null && dto.TagIds.Any())
+            //地點
+            if (dto.RegionId.HasValue)
             {
-                var tagIds = dto.TagIds;
-                query = _context.ArticleTags
-                               .Where(t => tagIds.Contains(t.TagId))
-                               .Select(t => t.Article)
-                               .Distinct();
+                var childIds = _activityDb.TagsRegions
+                        .Where(r => r.Uid == dto.RegionId.Value)//上層等於dto.RegionId
+                        .Select(r => r.RegionId)
+                        .ToList();
+
+                childIds.Add(dto.RegionId.Value);
+
+                query = query.Where(a => childIds.Contains(a.RegionID.Value));
             }
+
+            //// Tags（全部符合）
+            //if (dto.TagIds != null && dto.TagIds.Any())
+            //{
+            //    var tagIds = dto.TagIds;
+            //    query = _context.ArticleTags
+            //                   .Where(t => tagIds.Contains(t.TagId))
+            //                   .Select(t => t.Article)
+            //                   .Distinct();
+            //}
 
             return BuildPagedResult(query, page, userId);
         }
@@ -133,11 +156,17 @@ namespace TravelWeb_API.Models.Board.Service
             return (result, totalCount);
         }
 
+
         List<ArticleDataDTO> GetArticles(int page, IQueryable<Article> data, string? userID)
         {
+            var blockedIds = _memberDb.Blockeds
+                         .Where(b => b.MemberId == userID || b.BlockedId == userID)
+                         .Select(b => b.MemberId == userID ? b.BlockedId : b.MemberId)
+                         .ToList(); 
             int pageSize = 10;
             return data
                 .OrderByDescending(a => a.CreatedAt)
+                .Where(a => !blockedIds.Contains(a.MemberInformation.MemberId))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(a => new ArticleDataDTO
@@ -152,7 +181,7 @@ namespace TravelWeb_API.Models.Board.Service
                     RegionID = a.RegionID,
                     RegionName = a.Region != null
                         ? $"{a.Region.UidNavigation.RegionName},{a.Region.RegionName}"
-                        : null,                    
+                        : null,
                     LikeCount = a.ArticleLikes.Count(),
                     isLike = a.ArticleLikes.Any(l => l.UserId == userID),
                     tags = a.ArticleTags
@@ -160,7 +189,7 @@ namespace TravelWeb_API.Models.Board.Service
                         { TagId = t.TagId, TagName = t.Tag.TagName, icon = t.Tag.icon })
                         .ToList(),
                     CommentCount = a.Comments.Count(),
-                    
+
                 })
                 .ToList();
         }
@@ -244,10 +273,17 @@ namespace TravelWeb_API.Models.Board.Service
         {
             int pageSize = 10;
             var data = _context.Articles
-                .Where(a => a.UserId == userId);
+                .Where(a => a.UserId == userId && a.Status == 0);
 
             return BuildPagedResult(data, page, userId);
         }
+
+
+
+
+
+
+
 
         public async Task<bool> DeleteArticle(int articleID, string? authorID)
         {
@@ -318,6 +354,10 @@ namespace TravelWeb_API.Models.Board.Service
         {
             throw new NotImplementedException();
         }
+
+
+
+
     }
     
 }

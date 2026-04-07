@@ -4,6 +4,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import Swal from 'sweetalert2'
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -60,6 +61,7 @@ export class ItineraryDetailComponent implements OnInit {
     errorMessage: '',
     errorReason: ''
   };
+
   /** 所有行程總數（地圖圖例用） */
   get totalItems(): number {
     return this.days.reduce((sum, d) => sum + d.items.length, 0);
@@ -356,41 +358,98 @@ export class ItineraryDetailComponent implements OnInit {
   }
   /**刪除物件 */
   deleteItem(day: DayPlan, index: number) {
-    if (confirm('確定要刪除嗎？')) {
-      day.items.splice(index, 1);
-      this.updateSortOrders();
-    }
+    Swal.fire({
+      title: '確定要刪除此地點嗎？',
+      text: "這將會從當天行程中移除該項目。",
+      icon: 'question', // 使用問題圖示，比警告圖示 (warning) 輕微一點
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6', // 這裡可以用藍色，因為是微調行程
+      cancelButtonColor: '#aaa',
+      confirmButtonText: '確定移除',
+      cancelButtonText: '取消',
+      backdrop: `rgba(0,0,0,0.2) blur(2px)` // 輕微霧化
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // 執行原本的刪除邏輯
+        day.items.splice(index, 1);
+        this.updateSortOrders();
+
+        // 因為是前端操作，可以快速給一個輕量的 Toast 提示
+        this.toast.success('已移除該地點');
+
+        // 同步地圖狀態（如果需要的話）
+        this.mapsService.clearDayCache(this.itineraryId, this.activeDayIndex);
+        this.syncCurrentDayItinerary(this.activeDayIndex);
+      }
+    });
   }
   /**刪除整筆行程 */
   deleteItinerary() {
-    if (confirm('確定要刪除整個行程嗎？')) {
-      this.http.delete(`${this.baseUrl}/Itinerary/${this.itineraryId}`)
-        .subscribe(() => {
-          this.toast.success('行程已刪除');
-          this.router.navigate(['/Itinerarylist']);
-        });
-    }
+    Swal.fire({
+      title: '確定要刪除整個行程嗎？',
+      text: "刪除後將無法還原此內容！",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',     // 建議使用紅色對應「刪除」
+      cancelButtonColor: '#3085d6',    // 取消按鈕使用藍色或灰色
+      confirmButtonText: '確定刪除',
+      cancelButtonText: '我再想想',
+      reverseButtons: true,            // 讓「取消」在左，「確定」在右，符合一般習慣
+      backdrop: `rgba(0,0,0,0.4) blur(4px)` // 加上霧化效果連動
+    }).then((result) => {
+      // 只有當使用者按下「確定刪除」時才執行
+      if (result.isConfirmed) {
+        this.http.delete(`${this.baseUrl}/Itinerary/${this.itineraryId}`)
+          .subscribe({
+            next: () => {
+              // 刪除成功後，可以用 Swal 做一個精美的小通知再跳轉
+              Swal.fire({
+                title: '已刪除！',
+                text: '您的行程已成功移除。',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+              });
+
+              this.router.navigate(['/Itinerarylist']);
+            },
+            error: (err) => {
+              console.error('刪除失敗', err);
+              this.toast.error('刪除失敗，請稍後再試');
+            }
+          });
+      }
+    });
   }
+  /** 依天數算出對應日期字串 */
+getDateForDay(dayNumber: number): string {
+  if (!this.startTime) return '';
+  const d = new Date(this.startTime);
+  d.setDate(d.getDate() + (dayNumber - 1));
+  return d.toISOString();
+}
   /**把ITEM物件扁平化 */
   changeItem(event: any) {
     const flattenedItems: any[] = [];
-    this.days.forEach(day => {
-      day.items.forEach(item => {
-        flattenedItems.push({
-          AttractionId: item.attractionId || (item as any).AttractionId || 0,
-          Name: (item as any).editingName || item.attractionName || (item as any).Name,
-          Address: item.address || (item as any).Address,
-          Latitude: item.latitude,
-          Longitude: item.longitude,
-          DayNumber: day.day,
-          ContentDescription: (item as any).editingName || item.contentDescription || "無描述",
-          PlaceId: item.placeId || item.googlePlaceId || null, // 👈 統一使用 PlaceId
-          // 注意：StartTime 的處理見下方第 2 點
-          StartTime: this.combineDateAndTime(this.date, item.startTime),
-          EndTime: item.endTime ? this.combineDateAndTime(this.date, item.endTime) : null
-        });
+  this.days.forEach(day => {
+    // 算出這一天對應的實際日期（startTime + (day - 1) 天）
+    const baseDateForDay = this.getDateForDay(day.day);
+
+    day.items.forEach(item => {
+      flattenedItems.push({
+        AttractionId: item.attractionId || 0,
+        Name: (item as any).editingName || item.attractionName,
+        Address: item.address,
+        Latitude: item.latitude,
+        Longitude: item.longitude,
+        DayNumber: day.day,
+        ContentDescription: (item as any).editingName || item.contentDescription || '無描述',
+        PlaceId: item.placeId || item.googlePlaceId || null,
+        StartTime: this.combineDateAndTime(baseDateForDay, item.startTime),
+        EndTime: this.combineDateAndTime(baseDateForDay, item.endTime || item.startTime)
       });
     });
+  });
 
     const payload = {
       ItineraryId: Number(this.itineraryId),
@@ -398,8 +457,20 @@ export class ItineraryDetailComponent implements OnInit {
       Items: flattenedItems
     };
     console.log("最後發送的 Payload:", payload);
-    this.http.post(`${this.baseUrl}/Itinerary/${this.itineraryId}/save-snapshot`, payload)
-      .subscribe(() => this.toast.success('修改成功'));
+    this.http.post<{success: boolean; message: string; versionId: number}>(`${this.baseUrl}/Itinerary/${this.itineraryId}/save-snapshot`, payload)
+      .subscribe({next: (res) => {
+        this.currentVersionId = res.versionId; // 更新元件上的版本 ID
+
+        this.toast.success('修改成功，正在重新分析...');
+
+        // 用新版本 ID 觸發分析（fire-and-forget，分析完成不需等待）
+        this.http.get(`${this.baseUrl}/Itinerary/${this.itineraryId}/versions/${res.versionId}/analysis`)
+          .subscribe({
+            next: () => this.toast.success('AI 分析已更新'),
+            error: () => { /* 分析失敗不影響主流程，靜默處理 */ }
+          });
+      },
+      error: () => this.toast.error('儲存失敗，請稍後再試')});
   }
   /**判斷拖拉事件 */
   onDrop(event: CdkDragDrop<ItineraryItem[]>) {
@@ -452,6 +523,75 @@ export class ItineraryDetailComponent implements OnInit {
       });
     });
   }
+  // ===== TIME PICKER 相關方法 =====
+
+  /**
+   * 從 startTime 字串中提取純 HH:mm，
+   * 相容 "10:00"、"2026-03-20T10:00:00" 兩種格式。
+   */
+  getPureTime(timeStr: string | undefined): string {
+    if (!timeStr) return '';
+    if (timeStr.includes('T')) {
+      return timeStr.split('T')[1].substring(0, 5);
+    }
+    return timeStr.substring(0, 5);
+  }
+
+  /**
+   * 格式化顯示用時間（card 上的時間標籤）。
+   * 輸出範例：「10:30」
+   */
+  formatDisplayTime(timeStr: string | undefined): string {
+    return this.getPureTime(timeStr);
+  }
+
+  /**
+   * 開啟或關閉指定 item 的 inline timepicker，
+   * 同時關閉同一天其他 item 已開啟的 timepicker（一次只開一個）。
+   */
+  toggleTimePicker(item: any, currentDay: DayPlan, event: Event): void {
+    event.stopPropagation();
+    const wasOpen = item.isTimePickerOpen;
+    // 先關掉全部
+    currentDay.items.forEach(i => (i as any).isTimePickerOpen = false);
+    // 若原本是關的就開起來
+    if (!wasOpen) {
+      (item as any).isTimePickerOpen = true;
+    }
+  }
+
+  /**
+   * 使用者在 timepicker 輸入時間時觸發：
+   * 1. 同步更新 startTime / endTime（兩者相同）
+   * 2. 依照時間重新排序當天 items
+   */
+  onTimeChange(item: any, currentDay: DayPlan, timeValue: string): void {
+    if (!timeValue) return;
+    item.startTime = timeValue;   // 純 HH:mm，送出時 combineDateAndTime 會補上日期
+    item.endTime = timeValue;     // startTime == endTime，避免 NULL
+    item.isDirty = true;
+  }
+
+  /**
+   * 點「✓ 確認」關閉 timepicker。
+   */
+  confirmTimePicker(item: any, currentDay: DayPlan): void {
+    // 若使用者沒改時間，補一個預設值避免 NULL
+    if (!item.startTime) {
+      item.startTime = '09:00';
+      item.endTime = '09:00';
+    }
+    currentDay.items.sort((a, b) => {
+      const ta = this.getPureTime((a as any).startTime) || '00:00';
+      const tb = this.getPureTime((b as any).startTime) || '00:00';
+      return ta.localeCompare(tb);
+    });
+
+    this.updateSortOrders();
+    this.syncCurrentDayItinerary(this.activeDayIndex);
+    (item as any).isTimePickerOpen = false;
+  }
+
   /**下載PDF */
   exportPdf(): void {
     if (this.isExporting) return;

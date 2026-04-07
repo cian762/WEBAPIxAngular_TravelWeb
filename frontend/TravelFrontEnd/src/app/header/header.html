@@ -52,6 +52,7 @@
             </ul>
           </li>
           <li><a routerLink="tripProduct">套裝行程商品</a></li>
+          @if(isLoggedIn){
           <li class="menu-has-children"><a routerLink="Board">文章討論</a>
             <ul>
               <li><a routerLink="Board">所有文章</a></li>
@@ -59,6 +60,11 @@
               <li><a href="Board/Main">個人主頁</a></li>
             </ul>
           </li>
+          }
+          @else {
+
+          }
+
           <li><a routerLink="Shoppingcart"><i class="bi bi-cart3 fs-4"></i> <span
                 *ngIf="(cartService.cartCount$ | async) as count"
                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger fs-6">

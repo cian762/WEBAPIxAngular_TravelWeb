@@ -18,9 +18,10 @@ namespace TravelWeb_API.Controllers
             _context = context;
             _config = config;
         }
+
         //全站導航引擎搜尋框使用
         [HttpGet]
-        public async Task<IActionResult> Search(string q)
+        public async Task<IActionResult> Search([FromQuery] string q)
         {
             if (string.IsNullOrWhiteSpace(q)) return Ok(new List<ViewGlobalSearch>());
 
@@ -31,7 +32,7 @@ namespace TravelWeb_API.Controllers
 
             // 從 appsettings.json 讀取路徑
             string mvcDomain = _config["AppSettings:MvcDomain"]?.TrimEnd('/') ?? "";
-            string mvchung = _config["AppSettings:Mvchung"]!;     
+            string mvchung = _config["AppSettings:Mvchung"] ?? "";     
 
             foreach (var item in results)
             {
@@ -57,14 +58,21 @@ namespace TravelWeb_API.Controllers
         }
         // 2. 這是給「搜尋框下拉提示」用的 (只回傳字串陣列)
         [HttpGet("suggestions")]
-        public async Task<IActionResult> GetSuggestions(string q)
+        public async Task<IActionResult> GetSuggestions([FromQuery] string q)
         {
-            if (string.IsNullOrWhiteSpace(q)) return Ok(new List<string>());
+            if (string.IsNullOrWhiteSpace(q)) return Ok(new List<object>());
 
             var suggestions = await _context.ViewGlobalSearches
                 .Where(v => v.Title!.Contains(q))
                 .OrderByDescending(v => v.Title!.StartsWith(q))
-                .Select(v => v.Title)
+                // 這裡修改 Select，同時抓取標題與類型
+                .Select(v => new
+                {
+                    Title = v.Title,
+                    // 假設你的 View 裡面有一欄叫 Category 或 Source
+                    // 如果沒有，可以根據你的業務邏輯在 SQL 層轉換
+                    Type = v.Category ?? "景點"
+                })
                 .Distinct()
                 .Take(8)
                 .ToListAsync();

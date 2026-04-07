@@ -24,6 +24,7 @@ namespace TravelWeb_API.Services
 
             var result = await _activityDbContext.Activities
                 .AsNoTracking()
+                .Include(a=>a.Reviews)
                 .Where(a => a.ActivityId == activityId)
                 .Select(a => new ActivityInfoResponseDTO
                 {
@@ -39,6 +40,7 @@ namespace TravelWeb_API.Services
                     Latitude = a.Latitude,
                     Propaganda = a.Propaganda,
                     OfficialLink = a.OfficialLink,
+                    CommentCount = a.Reviews.Where(r=>r.IsSoftDeleted == false).Count(),
                     Images = a.ActivityImages.Select(a => a.ImageUrl).ToList(),
                 })
                 .FirstOrDefaultAsync();

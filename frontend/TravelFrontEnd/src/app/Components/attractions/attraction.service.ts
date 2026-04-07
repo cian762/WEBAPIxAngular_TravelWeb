@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Attraction, AttractionType } from './attraction.models';
+import { environment } from '../../../environments/environment';
 
 export interface AttractionProduct {
   productId: number;
@@ -53,7 +54,7 @@ export interface StockResult {
 
 @Injectable({ providedIn: 'root' })
 export class AttractionService {
-  private apiUrl = 'https://localhost:7276/api';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) { }
 
@@ -81,10 +82,12 @@ export class AttractionService {
       .pipe(catchError(() => of([])));
   }
 
-  toggleLike(attractionId: number): Observable<{ likeCount: number; isLiked: boolean }> {
-    return this.http.post<{ likeCount: number; isLiked: boolean }>(
+
+
+  toggleLike(attractionId: number): Observable<{ likeCount: number; liked: boolean }> {
+    return this.http.post<{ likeCount: number; liked: boolean }>(
       `${this.apiUrl}/Attraction/${attractionId}/like`, {}
-    ).pipe(catchError(() => of({ likeCount: 0, isLiked: false })));
+    ).pipe(catchError(() => of({ likeCount: 0, liked: false })));
   }
 
   getAttractionsByType(typeId: number): Observable<Attraction[]> {
@@ -165,6 +168,13 @@ export class AttractionService {
   getMyFavorites(): Observable<number[]> {
     return this.http.get<number[]>(
       `${this.apiUrl}/AttractionProduct/my-favorites`
+    ).pipe(catchError(() => of([])));
+  }
+
+  // 取得五大頂層地區（北/中/南/東/離島）
+  getTopRegions(): Observable<{ regionId: number; regionName: string }[]> {
+    return this.http.get<{ regionId: number; regionName: string }[]>(
+      `${this.apiUrl}/Attraction/regions`
     ).pipe(catchError(() => of([])));
   }
 }

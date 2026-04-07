@@ -21,7 +21,7 @@
               <div>
                 <h5 class="fw-bold mb-1 text-dark">{{ item.productName }}</h5>
                 <p class="text-muted small mb-2">數量：{{ item.quantity }}</p>
-                <p class="text-muted small mb-2">票種編號：{{ item.ticketCategoryId }}</p>
+                <p class="text-muted small mb-2">票種：{{ item.ticketCategoryName || item.ticketCategoryId }}</p>
                 <div class="text-success small">
                   <i class="bi bi-check-circle-fill me-1"></i> 免費取消
                 </div>

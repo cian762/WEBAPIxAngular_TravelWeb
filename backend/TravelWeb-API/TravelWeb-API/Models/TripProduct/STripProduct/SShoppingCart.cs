@@ -82,7 +82,15 @@ namespace TravelWeb_API.Models.TripProduct.STripProduct
                     Quantity = item.Quantity ?? 0,
                     ticketCategoryId = item.TicketCategoryId
                 };
-
+                // 新增查票種名稱（從 product.TicketCategories 撈）
+                if (item.TicketCategoryId.HasValue)
+                {
+                    var category = await _context.TicketCategories
+                        .Where(tc => tc.TicketCategoryId == item.TicketCategoryId.Value)
+                        .Select(tc => tc.CategoryName)
+                        .FirstOrDefaultAsync();
+                    dto.TicketCategoryName = category ?? $"票種 {item.TicketCategoryId}";
+                }
                 // --- 第一段：找「行程商品」(重點：s.Price 是檔期價格) ---
                 // 1. 行程票 (合併日期到名字)
                 var trip = await _context.TripSchedules
