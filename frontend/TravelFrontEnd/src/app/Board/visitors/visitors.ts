@@ -3,6 +3,7 @@ import { ArticleList } from "../Components/article-list/article-list";
 import { ArticleData } from '../interface/ArticleData';
 import { BoardServe } from '../Service/board-serve';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-visitors',
@@ -20,6 +21,11 @@ export class Visitors implements OnInit {
   articleList: ArticleData[] = []
 
   gotoLogin() {
+    Swal.fire({
+      icon: "warning",
+      title: "請先登入",
+      timer: 1500
+    });
     this.router.navigate(['login']);
   }
 }
