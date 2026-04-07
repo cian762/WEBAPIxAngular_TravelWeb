@@ -18,6 +18,7 @@ import { EMPTY, finalize, forkJoin, of, Subscription, switchMap, tap } from 'rxj
 import { UserCommentForm } from "../user-comment-form/user-comment-form";
 import { PersonalCommentService } from '../../Service/personal-comment-service';
 import { EditCommentForm } from "../edit-comment-form/edit-comment-form";
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-activity-intro',
@@ -46,7 +47,8 @@ export class ActivityIntro implements OnInit, AfterViewInit {
     propaganda: '',
     officialLink: '',
     images: [],
-    regions: []
+    regions: [],
+    commentCount: 0,
   };
 
   productInfoCollection: productInfoInterface[] = [{
@@ -241,7 +243,7 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
   getCurrentLocation(): void {
     if (!navigator.geolocation) {
-      alert('瀏覽器不支援定位功能');
+      ('瀏覽器不支援定位功能');
       return;
     }
 
@@ -277,7 +279,11 @@ export class ActivityIntro implements OnInit, AfterViewInit {
       },
       (error) => {
         console.error('定位失敗', error);
-        alert('無法取得位置，請確認是否允許定位權限');
+        Swal.fire({
+          icon: "error",
+          title: "無法取得位置",
+          text: "請確認是否允許定位權限",
+        });
       },
       {
         enableHighAccuracy: true
@@ -299,7 +305,10 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
   getRoute() {
     if (!this.userPosition) {
-      alert('請先取得目前位置');
+      Swal.fire({
+        icon: "info",
+        title: "請先取得當前位置",
+      });
       return;
     }
 
@@ -325,7 +334,11 @@ export class ActivityIntro implements OnInit, AfterViewInit {
       },
       error: (err) => {
         console.error(err);
-        alert('目前無法取得這個交通方式路線');
+        Swal.fire({
+          icon: "error",
+          title: "無法取得該交通資訊",
+          text: "目前無法取得這個交通方式路線",
+        });
       }
     });
   }
@@ -447,6 +460,11 @@ export class ActivityIntro implements OnInit, AfterViewInit {
     this.authService.checkAuthStatus().subscribe({
       next: (res) => {
         if (res === false) {
+          Swal.fire({
+            icon: "warning",
+            title: "請確認登入狀態",
+            timer: 500
+          });
           this.router.navigate(['login']);
         }
         console.log('res', res);

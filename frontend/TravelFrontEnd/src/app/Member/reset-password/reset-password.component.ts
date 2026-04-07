@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-reset-password',
@@ -30,7 +31,10 @@ export class ResetPasswordComponent implements OnInit {
 
       // 防呆：如果網址沒有帶 email，直接踢回登入頁
       if (!this.targetEmail) {
-        alert('無效的重設密碼連結！');
+        Swal.fire({
+          icon: "error",
+          title: "無效的重設密碼連結！",
+        });
         this.router.navigate(['/login']);
       }
     });
@@ -80,7 +84,10 @@ export class ResetPasswordComponent implements OnInit {
     this.authService.resetPassword(requestData).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        alert(res.message || '密碼重設成功！請使用新密碼登入。');
+        Swal.fire({
+          title: res.message || '密碼重設成功！請使用新密碼登入。',
+          icon: "success",
+        });
         // 成功後跳轉回登入頁
         this.router.navigate(['/login']);
       },

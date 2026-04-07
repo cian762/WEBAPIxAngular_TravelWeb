@@ -35,7 +35,7 @@ namespace TravelWeb_API.Controllers.Attraction
                         title                  AS Title,
                         comment                AS Comment,
                         created_at             AS CreatedAt
-                    FROM [product].[AttractionProductReviews]
+                    FROM [Attractions].[AttractionProductReviews]
                     WHERE attraction_id = {attractionId}
                       AND is_deleted = 0
                     ORDER BY created_at DESC
@@ -72,7 +72,7 @@ namespace TravelWeb_API.Controllers.Attraction
             var alreadyReviewed = await _tripDb.Database
                 .SqlQuery<int>($@"
                     SELECT COUNT(1) AS Value
-                    FROM [product].[AttractionProductReviews]
+                    FROM [Attractions].[AttractionProductReviews]
                     WHERE attraction_id = {attractionId}
                       AND member_id = {memberId}
                       AND is_deleted = 0
@@ -116,7 +116,7 @@ namespace TravelWeb_API.Controllers.Attraction
             var alreadyReviewed = await _tripDb.Database
                 .SqlQuery<int>($@"
                     SELECT COUNT(1) AS Value
-                    FROM [product].[AttractionProductReviews]
+                    FROM [Attractions].[AttractionProductReviews]
                     WHERE attraction_id = {dto.AttractionId}
                       AND member_id = {memberId}
                       AND is_deleted = 0
@@ -148,7 +148,7 @@ namespace TravelWeb_API.Controllers.Attraction
 
             // 寫入評論
             await _tripDb.Database.ExecuteSqlAsync($@"
-                INSERT INTO [product].[AttractionProductReviews]
+                INSERT INTO [Attractions].[AttractionProductReviews]
                   (attraction_id, member_id, member_name, avatar_url, rating, title, comment, created_at, is_deleted)
                 VALUES
                   ({dto.AttractionId}, {memberId}, {memberName}, {avatarUrl},

@@ -21,6 +21,8 @@
                 <a class="genric-btn info radius set-cover-btn">封面</a>
                 }
                 @else {
+                <a class="remove-photo-btn"><i class="ri-close-circle-line"
+                    (click)="removePhoto(selectedIndex)"></i></a>
                 <a (click)="selectCover()" class="genric-btn info-border radius set-cover-btn">設定為封面</a>
                 }
               </div>
@@ -39,12 +41,13 @@
                 }
                 }
                 <!-- 新增按鈕 -->
-                <label
-                  class="thumb-UpdatePhoto-item border rounded-2 border-2 border-dashed text-center d-block upload-btn"
-                  style="cursor: pointer;">
-                  上傳更多圖片 <i class="bi bi-images"></i>
-                  <input type="file" (change)="onFileSelected($event)" accept="image/*" class="visually-hidden">
-                </label>
+                <div class="thumb-item thumb-UpdatePhoto-item">
+                  <label class="UpdatePhotoLab">
+                    上傳更多圖片 <i class="bi bi-images"></i>
+                    <input type="file" (change)="onFileSelected($event)" accept="image/*" multiple
+                      class="visually-hidden">
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -113,7 +116,7 @@
       </section>
       <!-- 地區選項 -->
       <section id="sec4">
-        <div class="mb-5 border-bottom">
+        <div class="mb-3 border-bottom">
           <label class="form-label my-title">標註地區</label>
           <div class="row mb-5">
             <div class="col-4">
@@ -146,63 +149,65 @@
               </div>
               }
             </div>
-            <div class="col-4">
-              @if(form.get('cityId')?.value) {
-              <div class="single-element-widget">
-                <label class="form-label">鄉/鎮/市/區</label>
-                <div class="default-select">
-                  <select formControlName="distId" id="dist-select">
-                    <option [value]="null">請選擇鄉鎮市區</option>
-                    @for (dist of (regions.find(r => r.regionId === form.get('cityId')?.value)?.dist ?? []); track
-                    $index)
-                    {
-                    <option [value]="dist.regionId">{{ dist.regionName }}</option>
-                    }
-                  </select>
-                </div>
-              </div>
-              }
-            </div>
           </div>
         </div>
       </section>
       <!-- 引用站內活動 -->
-      <section id="sec5">
-        <label class="form-label my-title">引用站內景點&活動</label>
-      </section>
+      <!-- <section id="sec5">
+        <div class="border-bottom mb-5">
+          <label class="form-label my-title">引用站內景點&活動</label>
+          <div class="hero-search" [class.has-suggestions]="showSuggestions && suggestions.length > 0">
+            <input type="text" [formControl]="searchControl" placeholder="搜尋景點...">
+            <button (click)="onProductSearch()">搜尋</button>
+          </div>
+
+          <ul class="search-suggestions" *ngIf="showSuggestions && suggestions.length > 0">
+            <li *ngFor="let s of suggestions" (click)="selectSuggestion(s)">
+              <span class="suggestion-type" [ngClass]="'type-' + s.categoryName">
+                {{ s.categoryName }}
+              </span>
+              <span class="suggestion-title">{{ s.title }}</span>
+            </li>
+          </ul>
+
+        </div>
+      </section> -->
       <!-- 文章權限選項 -->
       <section id="sec6">
-        <div class="mb-5 border-bottom">
-          <div class="d-flex justify-content-evenly align-items-center mb-5">
-            <span><button (click)="deleteArticle()" class="genric-btn danger-border radius">刪除文章</button>
-            </span>
-            <div class="single-element-widget">
-              <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限:</label>
-              <div class="default-select">
-                <select formControlName="status" id="status-select">
-                  <option [value]="0"><i class="bi bi-lock-fill"></i>私人</option>
-                  <option [value]="1"><i class="bi bi-globe-asia-australia"></i>公開</option>
-                  <option [value]="2"><i class="bi bi-suit-heart-fill"></i>粉絲</option>
-                </select>
-              </div>
+        <div class="d-flex justify-content-evenly align-items-center mb-5 mt-5">
+          <span><button (click)="deleteArticle()" class="genric-btn danger-border radius">刪除文章</button>
+          </span>
+          <div class="single-element-widget">
+            <label for="exampleFormControlTextarea1" class="form-label my-title">文章權限</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span [style.color]="!form.get('status')?.value ? '#777777' : '#ffffff'">私人</span>
+              <label class="toggle">
+                <input type="checkbox" formControlName="status">
+                <span class="slider"></span>
+              </label>
+              <span [style.color]="form.get('status')?.value ? '#777777' : '#ffffff'">公開</span>
             </div>
           </div>
+          <div class="d-flex justify-content-around">
+            <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
+          </div>
+
+
+
         </div>
       </section>
-      <div class="d-flex justify-content-around">
-        <a (click)="onCreat()" class="genric-btn info radius">儲存文章</a>
-      </div>
+
     </form>
   </div>
 </div>
 
 
 
-<nav class="float-nav">
+<!-- <nav class="float-nav">
   @for (item of navItems; track item.id) {
   <a class="nav-item" [class.active]="activeId === item.id" (click)="scrollTo(item.id)">
     <span class="nav-dot"></span>
     <span class="nav-label">{{ item.id }}</span>
   </a>
   }
-</nav>
+</nav> -->

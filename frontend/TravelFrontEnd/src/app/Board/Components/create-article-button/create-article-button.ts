@@ -21,14 +21,15 @@ export class CreateArticleButton implements OnInit {
   goToCreatePost(): void {
     this.Serve.postPostAPI().subscribe(p => {
       window.open(`/app/Board/creat/${p}`, '_blank');
-      // this.router.navigate(['Board', 'creat', p]);
+
     });
   }
   goToCreateJournal(): void {
-    window.open(`/app/Board/creatJournal`, '_blank');
-    // this.Serve.postPostAPI().subscribe(p => {
-    //   // this.router.navigate(['Board', 'creat', p]);
-    // });
+    this.Serve.postJournalAPI().subscribe(p => {
+      window.open(`/app/Board/creatJournal/${p}`, '_blank');
+
+    });
+
   }
 
 

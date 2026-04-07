@@ -37,6 +37,7 @@ namespace TravelWeb_API.Controllers.Board
         public async Task<ActionResult<PostDetailDto>> GetPostDetail(int id)
         {   
             string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return Unauthorized();
             var post = await _PostService.GetPostDetailed(id, currentUserId);
             if (post == null)
                 return NotFound("文章不存在");            

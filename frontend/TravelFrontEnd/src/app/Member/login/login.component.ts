@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-login',
@@ -51,7 +52,11 @@ export class LoginComponent {
 
         this.authService.authState$.next(true);
 
-        alert('登入成功！歡迎回來');
+        Swal.fire({
+          title: "登入成功！歡迎回來",
+          icon: "success",
+          draggable: true
+        });
 
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/profile';
         this.router.navigateByUrl(returnUrl);
@@ -77,7 +82,10 @@ export class LoginComponent {
     }
 
     if (!this.forgotAccount) {
-      alert('請輸入您註冊時的信箱或帳號');
+      Swal.fire({
+        icon: "error",
+        title: "請輸入您註冊時的信箱或帳號",
+      });
       return;
     }
 
@@ -88,13 +96,19 @@ export class LoginComponent {
         this.isSendingEmail = false;
 
         this.startCountdown(30);
-
-        alert(res.message || '重設密碼驗證信已寄出，請前往信箱查收！');
-
+        Swal.fire({
+          title: "密碼重設服務",
+          text: res.message || '重設密碼驗證信已寄出，請前往信箱查收！',
+          icon: "info"
+        });
       },
       error: (err: any) => {
         this.isSendingEmail = false;
-        alert(err.error?.message || '發送失敗，請稍後再試');
+
+        Swal.fire({
+          icon: "error",
+          title: err.error?.message || '發送失敗，請稍後再試',
+        });
         console.error('發送忘記密碼信件錯誤:', err);
       }
     });

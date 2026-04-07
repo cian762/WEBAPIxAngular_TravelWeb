@@ -6,6 +6,7 @@ export interface ArticleResponse {
 }
 export interface ArticleData {
   articleId: number;
+  type: number;
   title?: string;
   createdAt: Date;
   photoUrl?: string;
@@ -17,6 +18,7 @@ export interface ArticleData {
   regionName?: string;
   commentCount: number;
   tags?: TagDTO[];
+  viewCount: number;
 
 }
 

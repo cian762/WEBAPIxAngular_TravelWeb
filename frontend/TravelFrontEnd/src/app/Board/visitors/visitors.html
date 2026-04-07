@@ -1,0 +1,9 @@
+<div class="article-list-container">
+  <div class="article-list-inner" (click)="gotoLogin()">
+    <app-article-list [articleList]="articleList" (click)="gotoLogin()"></app-article-list>
+    <app-article-list [articleList]="articleList" (click)="gotoLogin()"></app-article-list> <!-- 複製一份 -->
+  </div>
+</div>
+<div class="blur-overlay" (click)="gotoLogin()">
+  <p class="blur-text">登入以查看更多精彩內容</p>
+</div>

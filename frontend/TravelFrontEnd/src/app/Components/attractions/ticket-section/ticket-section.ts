@@ -198,8 +198,8 @@ export class TicketSectionComponent implements OnInit, OnChanges {
       .split('\n')
       .map(s => s.trim())
       .filter(s => s.length > 0);
-//     return text.replace(/\\n/g, '\n').split('\n')
-//       .map(s => s.trim()).filter(s => s.length > 0);
+    //     return text.replace(/\\n/g, '\n').split('\n')
+    //       .map(s => s.trim()).filter(s => s.length > 0);
   }
 
   getSubtotal(p: AttractionProduct): number {
@@ -220,8 +220,19 @@ export class TicketSectionComponent implements OnInit, OnChanges {
       tags: p.tags?.map(t => t.tagName) ?? [],
     };
     this.cartService.addToCart(dto).subscribe({
-      next: () => alert(`已加入購物車：${p.title} × ${qty}`),
-      error: (err: any) => alert('加入購物車失敗：' + err.message),
+      next: () => {
+
+        Swal.fire({
+          title: `已加入購物車：${p.title} × ${qty}`,
+          icon: "success",
+        });
+      },
+      error: (err: any) => {
+        Swal.fire({
+          title: '加入購物車失敗：' + err.message,
+          icon: "error",
+        });
+      },
     });
   }
 

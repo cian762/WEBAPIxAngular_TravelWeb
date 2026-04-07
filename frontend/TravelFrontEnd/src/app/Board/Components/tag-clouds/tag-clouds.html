@@ -2,7 +2,7 @@
   <h4 class="tagcloud-title"><i class="ri-chat-smile-ai-line"></i> 人氣標籤</h4>
   <ul>
     @for (tag of allTags; track $index) {
-    <li><a href="#">{{tag.tagName}}</a></li>
+    <li><a (click)="seachTag(tag.tagId)"><i [class]="tag.icon"></i>&nbsp;{{tag.tagName}}</a></li>
     }
   </ul>
 </div><!-- #4cd3e3 -->

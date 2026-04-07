@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Helpers;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -115,8 +116,8 @@ namespace TravelWeb_API.Models.Board.Service
             // 作者
             if (!string.IsNullOrEmpty(dto.authorKeyword))
             {
-                query = query                
-                .Where(a => a.UserId.Contains(dto.authorKeyword)||
+                query = query
+                .Where(a => a.UserId.Contains(dto.authorKeyword) ||
                 a.MemberInformation.Name.Contains(dto.authorKeyword));
             }
 
@@ -150,9 +151,7 @@ namespace TravelWeb_API.Models.Board.Service
                                                      IQueryable<Article> data, int page, string? userID)
         {
             List<ArticleDataDTO> result = GetArticles(page, data, userID);
-            int totalCount = data.Count();
-            //GetArticleCount(articles);
-            //List<ArticleDataDTO> result = ToArticleDTO(articles,userID);
+            int totalCount = data.Count();            
             return (result, totalCount);
         }
 
@@ -162,7 +161,7 @@ namespace TravelWeb_API.Models.Board.Service
             var blockedIds = _memberDb.Blockeds
                          .Where(b => b.MemberId == userID || b.BlockedId == userID)
                          .Select(b => b.MemberId == userID ? b.BlockedId : b.MemberId)
-                         .ToList(); 
+                         .ToList();
             int pageSize = 10;
             return data
                 .OrderByDescending(a => a.CreatedAt)
@@ -172,6 +171,7 @@ namespace TravelWeb_API.Models.Board.Service
                 .Select(a => new ArticleDataDTO
                 {
                     articleId = a.ArticleId,
+                    Type = a.Type,
                     title = a.Title,
                     CreatedAt = a.CreatedAt,
                     photoUrl = a.PhotoUrl,
@@ -189,6 +189,7 @@ namespace TravelWeb_API.Models.Board.Service
                         { TagId = t.TagId, TagName = t.Tag.TagName, icon = t.Tag.icon })
                         .ToList(),
                     CommentCount = a.Comments.Count(),
+                    viewCount = _context.UserActivityLogs.Count(l => l.TargetId == a.ArticleId),
 
                 })
                 .ToList();
@@ -289,34 +290,28 @@ namespace TravelWeb_API.Models.Board.Service
         {
             var article = await _context.Articles
                 .Where(a => a.ArticleId == articleID)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.CommentPhotos)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.CommentLikes)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.InverseParent)
-                .ThenInclude(ic => ic.CommentLikes)
-                .Include(a => a.Comments)
-                .ThenInclude(c => c.InverseParent)
-                .ThenInclude(ic => ic.CommentPhotos)
+                .Include(a => a.Comments).ThenInclude(c => c.CommentPhotos)
+                .Include(a => a.Comments).ThenInclude(c => c.CommentLikes)
+                .Include(a => a.Comments).ThenInclude(c => c.InverseParent).ThenInclude(ic => ic.CommentLikes)
+                .Include(a => a.Comments).ThenInclude(c => c.InverseParent).ThenInclude(ic => ic.CommentPhotos)
                 .Include(a => a.ArticleLikes)
                 .Include(a => a.ArticleTags)
                 .Include(a => a.ArticleFolders)
                 .Include(a => a.Post)
-                                
-                .FirstOrDefaultAsync(); ;
+                .Include(a => a.Journals).ThenInclude(j => j.JournalElements)
+                .FirstOrDefaultAsync();
 
-            if (article != null && article.UserId == authorID)
+            if (article == null || article.UserId != authorID) return false;
+
+            foreach (var journal in article.Journals.ToList())
             {
-                _context.Articles.Remove(article);
-                await _context.SaveChangesAsync();
-                return true;
+                _context.JournalElements.RemoveRange(journal.JournalElements);
+                _context.Journals.Remove(journal);
             }
-            return false;
-            //.Include(a=>a.Journal)
-            //.Include(a=>a.JournalPages)
-            //.Include(a=>a.jo)
-            //.ThenInclude(j=>j.)            
+
+            _context.Articles.Remove(article);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task Collect(int articleID, string userId)
@@ -331,7 +326,7 @@ namespace TravelWeb_API.Models.Board.Service
             {
                 _context.ArticleFolders.Remove(collect);
             }
-           await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
 
         ArticleFolder? isCollect(int articleID, string userID)
@@ -355,9 +350,114 @@ namespace TravelWeb_API.Models.Board.Service
             throw new NotImplementedException();
         }
 
+        public async Task<List<Trending>> GetTrendings()
+        {
+            var trending = await _context.Articles
+                .Where(a => a.Status == 1).Include(a => a.MemberInformation)
+                .Select(a => new
+                {
+                    Article = a,
+                    LikeCount = _context.ArticleLikes.Count(l => l.ArticleId == a.ArticleId),
+                    CommentCount = _context.Comments.Count(c => c.ArticleId == a.ArticleId),
+                    ViewCount = _context.UserActivityLogs.Count(l => l.TargetId == a.ArticleId),
+                    FolderCount = _context.ArticleFolders.Count(f => f.ArticleId == a.ArticleId),
+                    HoursSince = EF.Functions.DateDiffHour(a.CreatedAt, DateTime.UtcNow)
+                })
+                .ToListAsync();
 
+            var TOP = trending
+                .Select(x => new
+                {
+                    x.Article,
+                    Score = (x.ViewCount * 1.0 + x.LikeCount * 3.0 + x.CommentCount * 5.0 + x.FolderCount * 4.0)
+                            / Math.Pow(x.HoursSince + 2, 1)
+                })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Article.CreatedAt)
+                .Take(5)
+                .ToList();
+            var result = TOP.Select(t =>
+            new Trending
+            {
+                articleId = t.Article.ArticleId,
+                title = t.Article.Title,
+                Type = t.Article.Type,
+                photoUrl = t.Article.PhotoUrl,
+                author = t.Article.MemberInformation.Name,
 
+            }
+            ).ToList();
 
+            return result;
+        }
+
+        public List<ArticleDataDTO> GetTrendingsForVisitors()
+        {
+            var trending = _context.Articles
+    .Where(a => a.Status == 1)
+    .Include(a => a.MemberInformation)
+    .Include(a => a.Region).ThenInclude(r => r.UidNavigation)
+    .Include(a => a.ArticleTags).ThenInclude(t => t.Tag)
+    .Include(a => a.ArticleLikes)
+    .Include(a => a.Comments)
+    .Select(a => new {
+        Article = a,
+        LikeCount = _context.ArticleLikes.Count(l => l.ArticleId == a.ArticleId),
+        CommentCount = _context.Comments.Count(c => c.ArticleId == a.ArticleId),
+        ViewCount = _context.UserActivityLogs.Count(l => l.TargetId == a.ArticleId),
+        FolderCount = _context.ArticleFolders.Count(f => f.ArticleId == a.ArticleId),
+        HoursSince = EF.Functions.DateDiffHour(a.CreatedAt, DateTime.UtcNow)
+    })
+    .ToList();
+
+            return trending
+                .Select(x => new {
+                    x.Article,
+                    x.LikeCount,
+                    x.CommentCount,
+                    Score = (x.ViewCount * 1.0 + x.LikeCount * 3.0 + x.CommentCount * 5.0 + x.FolderCount * 4.0)
+                          / Math.Pow(x.HoursSince + 2, 1.5)
+                })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Article.CreatedAt)
+                .Take(10)
+                .Select(x => new ArticleDataDTO
+                {
+                    articleId = x.Article.ArticleId,
+                    Type = x.Article.Type,
+                    title = x.Article.Title,
+                    CreatedAt = x.Article.CreatedAt,
+                    photoUrl = x.Article.PhotoUrl,
+                    userID = x.Article.UserId,
+                    userName = x.Article.MemberInformation.Name,
+                    userAvatar = x.Article.MemberInformation.AvatarUrl,
+                    RegionID = x.Article.RegionID,
+                    RegionName = x.Article.Region != null
+                        ? $"{x.Article.Region.UidNavigation.RegionName},{x.Article.Region.RegionName}"
+                        : null,
+                    LikeCount = x.LikeCount,
+                    isLike = false,
+                    tags = x.Article.ArticleTags
+                        .Select(t => new TagDTO { TagId = t.TagId, TagName = t.Tag.TagName, icon = t.Tag.icon })
+                        .ToList(),
+                    CommentCount = x.CommentCount,
+                })
+                .ToList();
+        }
+
+        public (List<ArticleDataDTO> ArticleDTOList, int TotalCount) ArticlesByFollowed(int page, string userId)
+        {
+            List<string> myFollow = _memberDb.MemberInformations
+             .Where(m => m.MemberId == userId)
+             .SelectMany(m => m.Followeds
+             .Select(f => f.MemberId)).ToList();
+
+            IQueryable<Article> data = _context.Articles
+               .Where(a => a.Status == 1)
+               .Where(a => myFollow.Contains(a.UserId));
+
+            return BuildPagedResult(data, page, userId);
+        }
     }
     
 }

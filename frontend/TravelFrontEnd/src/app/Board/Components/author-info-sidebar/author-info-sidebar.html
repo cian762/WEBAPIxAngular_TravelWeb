@@ -1,11 +1,13 @@
+@if (authorID) {
 <div class="single-sidebar-widget user-info-widget">
-  <img [src]="post?.avatarUrl" class="user-info rounded-circle" (click)="goToMemderPage(authorID)">
+  <img [src]="AuthorInfo.avatarUrl" class="user-info rounded-circle" (click)="goToMemderPage(authorID)">
   <a (click)="goToMemderPage(authorID)">
-    <h4>{{post?.authorName}}</h4>
+    <h4>{{AuthorInfo.authorName}}</h4>
   </a>
+  <p>{{AuthorInfo.articleCount}}篇文章</p>
   <p>&nbsp;</p>
-
   <div class="btn-user-group dropup">
+    @if(!AuthorInfo.isCurrentUser){
     <button class="btn-follow" [class.btn-following]="isFollowing" [class.btn-unfollow]="!isFollowing"
       (click)="ToFollow()">
       {{ isFollowing ? '已追蹤' : '追蹤' }}
@@ -13,10 +15,17 @@
     <button class="btn-user-more" data-bs-toggle="dropdown" aria-expanded="false"><i
         class="ri-more-2-fill"></i></button>
     <ul class="dropdown-menu">
-      <li><a class="dropdown-item" (click)="toBlock(post?.authorName)">封鎖</a></li>
+      <li><a class="dropdown-item" (click)="toBlock(AuthorInfo.authorName)">封鎖</a></li>
       <li><a class="dropdown-item" href="#">分享用戶主頁</a></li>
       <li><a class="dropdown-item" href="#">複製用戶主頁連結</a></li>
     </ul>
+    }
+    @else {
+    <button class="btn-home" (click)="goToMain()">
+      前往個人主頁
+    </button>
+    }
+
   </div>
 
   <!-- <p>
@@ -32,4 +41,4 @@
     Boot camps have its supporters andit sdetractors. Some people do not understand why you should have to
     spend money on boot camp when you can get. Boot camps have itssuppor ters andits detractors.
   </p> -->
-</div>
+</div>}

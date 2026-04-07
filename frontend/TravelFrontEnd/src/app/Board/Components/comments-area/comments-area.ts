@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { CloudinaryServe } from '../../Service/cloudinary-serve';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-comments-area',
@@ -28,12 +29,19 @@ export class CommentsArea implements OnInit {
   contents = "";
   parent?: number;
   parentComment? = "";
-  selectedImage = "";
+  selectedImage?: string = undefined;
   selectedImageFile?: File;
   ImageURL?: string;
   showPreview: boolean = false;
 
   async postComment(contents: string) {
+    Swal.fire({
+      title: "上傳中...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
     if (this.selectedImageFile) {
       this.ImageURL = await this._Cserve.uploadImage(this.selectedImageFile);
       console.log("上傳", this.parent, this.selectedImageFile);
@@ -51,8 +59,14 @@ export class CommentsArea implements OnInit {
         this.ReflashComments();
         this.contents = '';
         this.removeParent();
-        this.removeImage;
-
+        this.removeImage();
+        this.commentCount++;
+        Swal.fire({
+          title: "留言已送出!",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1000,
+        });
       },
       error: (err) => {
       }
@@ -91,14 +105,23 @@ export class CommentsArea implements OnInit {
   }
 
   removeImage() {
-    this.selectedImage = "";
+    console.log("removeImage");
+    this.selectedImageFile = undefined;
+    this.selectedImage = undefined;
     this.showPreview = false;
   }
 
   deleteComment(id: number) {
-
     this.Serve.deleteComment(id).subscribe();
+    this.commentList = this.commentList.filter(c => c.commentId !== id);
   }
+
+
+  ToLike(id: number) {
+    const comment = this.commentList.find(c => c.commentId === id);
+    if (comment) comment.isLiked = !comment.isLiked;
+  }
+
 
 
 }

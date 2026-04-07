@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-complaint-form',
@@ -45,7 +46,13 @@ export class ComplaintFormComponent implements OnInit {
         this.complaintForm.patchValue({ replyEmail: res.email });
       },
       error: () => {
-        alert('請先登入會員！');
+        Swal.fire({
+          position: "center",
+          icon: "error",
+          title: "請先登入會員！",
+          showConfirmButton: false,
+          timer: 1500
+        });
         this.router.navigate(['/login']);
       }
     });
@@ -95,7 +102,11 @@ export class ComplaintFormComponent implements OnInit {
     this.authService.submitComplaint(formData).subscribe({
       next: (res) => {
         this.isLoading = false;
-        alert(`申訴已成功送出！案件編號：${res.complaintId}`);
+        Swal.fire({
+          title: "申訴已成功送出",
+          text: `案件編號：${res.complaintId}`,
+          icon: "info"
+        });
         this.router.navigate(['/profile']);
       },
       error: (err) => {
@@ -103,9 +114,11 @@ export class ComplaintFormComponent implements OnInit {
 
         const detailError = err.error?.error ? `\n詳細原因：${err.error.error}` : '';
         const msg = err.error?.message || '送出失敗，請稍後再試';
-
-        alert(msg + detailError);
-
+        Swal.fire({
+          icon: "error",
+          title: "申訴送出失敗",
+          text: msg + detailError,
+        });
         console.error('🚨 申訴送出失敗的完整錯誤：', err);
       }
     });

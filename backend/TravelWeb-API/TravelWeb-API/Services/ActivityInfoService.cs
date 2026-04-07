@@ -24,6 +24,7 @@ namespace TravelWeb_API.Services
 
             var result = await _activityDbContext.Activities
                 .AsNoTracking()
+                .Include(a=>a.Reviews)
                 .Where(a => a.ActivityId == activityId)
                 .Select(a => new ActivityInfoResponseDTO
                 {
@@ -39,6 +40,7 @@ namespace TravelWeb_API.Services
                     Latitude = a.Latitude,
                     Propaganda = a.Propaganda,
                     OfficialLink = a.OfficialLink,
+                    CommentCount = a.Reviews.Where(r=>r.IsSoftDeleted == false).Count(),
                     Images = a.ActivityImages.Select(a => a.ImageUrl).ToList(),
                 })
                 .FirstOrDefaultAsync();
@@ -192,9 +194,9 @@ namespace TravelWeb_API.Services
         public List<NewActivity> GetNewActivity()
         {
             List<NewActivity> results = _activityDbContext.Activities
-                //多一個where 條件去篩選掉已經過期的活動
-                .Select(a => new NewActivity { activityId= a.ActivityId, title=a.Title })
-                .Take(10)
+                .Where(a => a.EndTime >= DateOnly.FromDateTime(DateTime.Now))
+                .Select(a => new NewActivity { activityId= a.ActivityId, title=a.Title})
+                .Take(5)
                 .ToList();
 
             return results;

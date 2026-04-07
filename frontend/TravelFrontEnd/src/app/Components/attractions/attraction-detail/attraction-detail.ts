@@ -7,6 +7,7 @@ import { SafeUrlPipe } from '../safe-url.pipe';
 import { Attraction } from '../attraction.models';
 import { TicketSectionComponent } from '../ticket-section/ticket-section';
 import Swal from 'sweetalert2';
+import { environment } from '../../../../environments/environment';
 import { FormsModule } from '@angular/forms';
 import { ReviewItem } from '../attraction.service'; // 確認路徑
 import { AuthService } from '../../../Member/services/auth.service';
@@ -21,6 +22,9 @@ import { AuthService } from '../../../Member/services/auth.service';
   styleUrls: ['./attraction-detail.css']
 })
 export class AttractionDetailComponent implements OnInit {
+
+
+
   attraction: Attraction | null = null;
   loading = true;
   activeTab = 'feature';
@@ -228,9 +232,11 @@ export class AttractionDetailComponent implements OnInit {
     return { label: '危險', emoji: '⛔' };
   }
 
+  //20260403 陳冠甫加上 baesUrl2，為了方便發佈使用
+  baseUrl2 = environment.apiBaseUrl2;
   get mainImage(): string {
     if (this.attraction?.images?.length) {
-      return `https://localhost:7285${this.attraction.images[this.currentImgIdx]}`;
+      return `${this.baseUrl2 + this.attraction.images[this.currentImgIdx]}`;
     }
     return 'https://placehold.co/600x400?text=No+Image';
   }
