@@ -7,7 +7,7 @@ namespace TravelWeb_API.Models.Board.IService
     public interface ITagsService
     {
         public List<TagsList> getTagsByArticleId(int articleId);
-        public bool EditTagsByArticleId(int articleId,List<int>? TagIDList);
+        public Task<bool> EditTagsByArticleId(int articleId,List<int>? TagIDList);
         public List<TagsList> getAllTags();
     }
 }

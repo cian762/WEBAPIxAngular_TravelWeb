@@ -385,8 +385,7 @@ public partial class BoardDbContext : DbContext
 
             entity.ToTable("UserActivityLog", "Board");
 
-            entity.Property(e => e.LogId)
-                .ValueGeneratedNever()
+            entity.Property(e => e.LogId)               
                 .HasColumnName("LogID");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")

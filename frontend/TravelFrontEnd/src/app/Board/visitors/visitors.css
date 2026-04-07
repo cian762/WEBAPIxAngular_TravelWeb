@@ -1,0 +1,48 @@
+.blur-overlay {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  height: 500px;
+  background: linear-gradient(to bottom, transparent, #ffffff);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 32px;
+  margin-top: -500px;
+  /* 往上蓋住內容 */
+  pointer-events: none;
+}
+
+.blur-text {
+  font-size: 18px;
+  color: #38a4ff;
+  font-weight: 500;
+  pointer-events: auto;
+  cursor: pointer;
+  margin: 0;
+}
+
+.article-list-container {
+  max-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.article-list-inner {
+  animation: scroll-up 50s linear infinite;
+}
+
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.v-panal {
+  overflow: hidden;
+  height: 100vh;
+}

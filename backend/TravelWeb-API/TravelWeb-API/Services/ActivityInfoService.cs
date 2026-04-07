@@ -192,9 +192,9 @@ namespace TravelWeb_API.Services
         public List<NewActivity> GetNewActivity()
         {
             List<NewActivity> results = _activityDbContext.Activities
-                //多一個where 條件去篩選掉已經過期的活動
-                .Select(a => new NewActivity { activityId= a.ActivityId, title=a.Title })
-                .Take(10)
+                .Where(a => a.EndTime >= DateOnly.FromDateTime(DateTime.Now))
+                .Select(a => new NewActivity { activityId= a.ActivityId, title=a.Title})
+                .Take(5)
                 .ToList();
 
             return results;

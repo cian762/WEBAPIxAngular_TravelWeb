@@ -119,6 +119,7 @@ namespace TravelWeb_API.Models.Board.Service
         {
             var result = comment.InverseParent.Select(c => new CommentsDTO
             {
+                CommentId = c.CommentId,
                 AuthorName = c.MemberInformation.Name,
                 AvatarUrl = c.MemberInformation.AvatarUrl,
                 Contents = c.Contents,
@@ -134,6 +135,9 @@ namespace TravelWeb_API.Models.Board.Service
         public async Task DeleteComment(int commentID, string UserId)
         {
             var comment = await _context.Comments
+                .Include(c=>c.CommentLikes)
+                .Include(c=>c.CommentPhotos)
+                .Include(c=>c.InverseParent).ThenInclude(c=>c.CommentPhotos)
                 .FirstOrDefaultAsync(c => c.CommentId == commentID);
             if (UserId == comment!.UserId) 
             {

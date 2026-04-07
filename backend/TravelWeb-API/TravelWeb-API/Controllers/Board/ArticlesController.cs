@@ -60,13 +60,27 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
+        //熱門文章
+        [HttpGet("trending")]
+        public async Task<ActionResult<List<Trending>>> GetTrendings()
+        {
+            var result = await _ArticleService.GetTrendings();
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetArticlesByID(int id)
         {
             return Ok(_context.Articles.FirstOrDefault(x => x.ArticleId == id));
         }
 
-
+        //熱門文章(訪客版)
+        [HttpGet("Visitors")]
+        public async Task<ActionResult<List<ArticleDataDTO>>> GetTrendingsForVisitors()
+        {
+            var result = _ArticleService.GetTrendingsForVisitors();
+            return Ok(result);
+        }
 
         // GET:用標題KeyWord搜尋
         [HttpGet("search")]
@@ -195,6 +209,21 @@ namespace TravelWeb_API.Controllers.Board
             });
         }
 
+        [HttpGet("articlesByFollowed")]
+        public IActionResult GetArticlesByFollowed([FromQuery] int page)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId)) return NotFound();
+            var result = _ArticleService.ArticlesByFollowed(page, currentUserId);
+            return Ok(new
+            {
+                totalCount = result.TotalCount,
+                articleList = result.ArticleDTOList
+            });
+
+        }
+
         [HttpGet("curUser")]
         public IActionResult GetCurUser([FromQuery] int page)
         {
@@ -203,9 +232,18 @@ namespace TravelWeb_API.Controllers.Board
             string? userId = GetUser.Id(token);
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("無效的 Token");
-            var member = _memberDb.MemberInformations
-                .FirstOrDefault(m=>m.MemberId==userId);
-            
+            AuthorInfo? member = _memberDb.MemberInformations
+                .Where(m=>m.MemberId==userId)
+                .Select(m=>new AuthorInfo
+                {
+                    authorId = m.MemberId,
+                    authorName = m.Name,
+                    avatarUrl = m.AvatarUrl,                    
+                    isCurrentUser = true,   
+                })
+                .FirstOrDefault();
+
+            member.ArticleCount = _context.Articles.Where(a => a.UserId == userId).Count();
             return Ok(member);
         }
 
@@ -242,6 +280,32 @@ namespace TravelWeb_API.Controllers.Board
 
             }
             return Ok(member);
+        }
+
+        [HttpGet("getAuthorUserInfo")]
+        public async Task<ActionResult<AuthorInfo>> GetAuthorUserInfo([FromQuery] string authorID)
+        {
+            // 從 Cookie 取出 Token  
+            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId)) return NotFound();
+            AuthorInfo? author = await _memberDb.MemberInformations
+                .Where(m => m.MemberId == authorID)
+                .Select(m => new AuthorInfo
+                {
+                    authorName = m.Name,
+                    avatarUrl = m.AvatarUrl,
+                    isCurrentUser = (currentUserId == m.MemberId),
+                    ArticleCount = 0
+
+                }).FirstOrDefaultAsync();
+            if (author == null) return NotFound();
+            author.ArticleCount = _context.Articles
+                .Where(a => a.UserId == authorID && a.Status == 1)
+                .ToList().Count();
+
+
+            return author;
+
         }
 
 

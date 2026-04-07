@@ -41,18 +41,18 @@ namespace TravelWeb_API.Controllers.Board
             return Ok(result);
         }
 
-       
+
 
         // POST: Tags/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        public async Task<IActionResult> EditTagsByArticleId([FromQuery] int articleId, 
-            [FromBody]List<int>? TagIDList)
+        public async Task<IActionResult> EditTagsByArticleId([FromQuery] int articleId,
+            [FromBody] List<int>? TagIDList)
         {
-            bool result=_tagsService.EditTagsByArticleId(articleId, TagIDList);
-            if (result)return Ok();
-            return NotFound();           
+            bool result = await _tagsService.EditTagsByArticleId(articleId, TagIDList);
+            if (result) return Ok();
+            return NotFound();
 
         }
 

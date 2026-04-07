@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { TripIndex } from "../trip/component/trip-index/trip-index";
 import { Router, RouterLink } from '@angular/router';
 import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
@@ -12,8 +12,12 @@ import { ActivityIndexCard } from "../Activity/Component/activity-index-card/act
 //[YJ] 景點 Service 與 Model，供熱門景點區塊使用
 import { AttractionService } from '../Components/attractions/attraction.service';
 import { Attraction } from '../Components/attractions/attraction.models';
+import { ArticleData } from '../Board/interface/ArticleData';
+import { BoardServe } from '../Board/Service/board-serve';
+import { AuthService } from '../Member/services/auth.service';
 const categoryMap: Record<string, string> = {
-  'Article': '文章',
+  'ArticleA': '文章',
+  'ArticleB': '文章',
   'Activity': '活動',
   'Attraction': '景點',
   'Product': '行程商品'
@@ -30,6 +34,7 @@ export class Travelindex implements OnInit, OnDestroy {
   searchControl = new FormControl('');
   suggestions: any[] = []; // any才可以裝物件
   showSuggestions = false;    // 控制下拉選單顯示
+  private authService = inject(AuthService);
 
 
 
@@ -45,7 +50,8 @@ export class Travelindex implements OnInit, OnDestroy {
     private searchService: GlobalSearchService, // 負責去後端搬貨
     private searchBridge: SearchBridge,           // 負責把貨傳給子元件
     private attractionSvc: AttractionService,   //  [YJ] 景點 Service
-    private router: Router                       //[YJ] 路由，用於點擊卡片跳轉
+    private router: Router,                      //[YJ] 路由，用於點擊卡片跳轉
+    private BoardServe: BoardServe,//文章Serve
   ) { }
 
 
@@ -85,6 +91,7 @@ export class Travelindex implements OnInit, OnDestroy {
   }
   ngOnDestroy(): void {
     clearInterval(this.autoSlideTimer);
+    clearInterval(this.autoTimer);
   }
   //景點結束
 
@@ -121,6 +128,12 @@ export class Travelindex implements OnInit, OnDestroy {
       }
     });
 
+    //文章
+    this.BoardServe.getArtcleForVister().subscribe(d =>
+      this.articleList = d
+    );
+    this.startAutoPlay();
+    this.isLogin()
   }
 
   //[YJ]點卡片導到景點詳情頁
@@ -224,32 +237,6 @@ export class Travelindex implements OnInit, OnDestroy {
     }
   ];
 
-  articleList = [
-    {
-      id: 1,
-      tag: '旅遊攻略',
-      title: '2026 台北兩天一夜這樣玩',
-      summary: '整合景點、美食與交通建議，適合第一次來台北的旅人。',
-      date: '2026-03-25',
-      imageUrl: 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      tag: '季節主題',
-      title: '春季賞花景點推薦',
-      summary: '精選北中南東值得安排的花季路線。',
-      date: '2026-03-21',
-      imageUrl: 'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      tag: '在地體驗',
-      title: '夜市美食探索地圖',
-      summary: '從經典小吃到新派創意點心，吃貨必收。',
-      date: '2026-03-18',
-      imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
 
   eventList = [
     {
@@ -331,4 +318,61 @@ export class Travelindex implements OnInit, OnDestroy {
     { icon: '🗺️', title: '旅遊地圖', desc: '快速查看地區與熱門景點' },
     { icon: '📶', title: '旅遊便利', desc: 'Wi-Fi、支付與旅客服務資訊' }
   ];
+
+
+
+
+  //文章
+  articleList: ArticleData[] = []
+  gotoLogin(id: number, type: number) {
+    if (this.isLoggedIn == false) {
+      this.router.navigate(['login']);
+    }
+    else {
+      if (type === 0) {
+        this.router.navigate(['Board', 'detail', id]);
+      }
+      else if (type === 1) {
+        this.router.navigate(['Board', 'JournalDetail', id]);
+      }
+    }
+  }
+  articlePage = 0;
+  private autoTimer: any;
+  get totalPages() {
+    return Array.from({ length: this.articleList.length });
+  }
+
+  goToPage(index: number) {
+    this.articlePage = index;
+    this.resetTimer();
+  }
+
+  startAutoPlay() {
+    this.autoTimer = setInterval(() => {
+      this.articlePage = (this.articlePage + 1) % this.articleList.length;
+    }, 5000);
+  }
+
+  resetTimer() {
+    clearInterval(this.autoTimer);
+    this.startAutoPlay();
+  }
+
+  get trackTranslate() {
+    return `translateX(-${this.articlePage * 33.333}%)`;
+  }
+
+  get loopedArticles() {
+    return [...this.articleList, ...this.articleList.slice(0, 3)];
+  }
+  isLoggedIn: boolean = false;
+
+  isLogin() {
+    this.authService.authState$.subscribe(status => {
+      this.isLoggedIn = status;
+    });
+  }
 }
+
+

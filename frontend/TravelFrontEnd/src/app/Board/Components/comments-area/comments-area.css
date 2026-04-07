@@ -47,33 +47,15 @@
   transition: all 0.2s;
   font-size: 14px;
   text-decoration: none;
-  background-color: #ffffff;
-  color: #f8b600;
+  background-color: transparent;
+  color: #777;
   padding: 8px 10px;
-}
-
-.btn-comment-group button:first-of-type {
-  border-radius: 3px 0 0 3px;
-  margin-right: -1px !important;
-  border: 0.8px solid #f8b600;
-  border-right: none;
-}
-
-.btn-comment-group button:not(:first-of-type):not(:last-of-type) {
-  border-radius: 0;
-  border: 0.8px solid #f8b600;
-}
-
-.btn-comment-group button:last-of-type {
-  border-radius: 0 3px 3px 0;
-  border: 0.8px solid #f8b600;
-  border-left: none;
+  border: none;
 }
 
 .btn-comment-group button:hover {
-  border: 0.8px solid #f8b600;
-  background-color: #f8b600;
-  color: #ffffff;
+  color: #38a4ff;
+  background-color: transparent;
 }
 
 /* === 留言附圖漂浮框 === */
