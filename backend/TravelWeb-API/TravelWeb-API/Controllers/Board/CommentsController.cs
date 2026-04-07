@@ -46,7 +46,8 @@ namespace TravelWeb_API.Controllers.Board
         public async Task<ActionResult<Comment>> PostComment([FromBody] PostCommentDto dto)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             Comment comment = _commentsService.AddComment(dto, currentUserId);
 
             return NoContent();
@@ -60,7 +61,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCommentLike(int commentID)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return NotFound();
             bool isUserExist = _commentsService.CommentLike(commentID, currentUserId);
             if (isUserExist) return NoContent();//只要有成功就改UI，或者再看看
@@ -72,8 +75,10 @@ namespace TravelWeb_API.Controllers.Board
         public async Task<IActionResult> DeleteComment(int commentID)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if(currentUserId==null) return NotFound();
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
+            if (currentUserId==null) return NotFound();
             try
             {
                 await _commentsService.DeleteComment(commentID, currentUserId);

@@ -35,8 +35,10 @@ namespace TravelWeb_API.Controllers.Board
         // GET: api/PostsDetailed 瀏覽Post
         [HttpGet("{id}")]
         public async Task<ActionResult<PostDetailDto>> GetPostDetail(int id)
-        {   
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        {
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return Unauthorized();
             var post = await _PostService.GetPostDetailed(id, currentUserId);
             if (post == null)

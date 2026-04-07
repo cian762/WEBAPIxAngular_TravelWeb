@@ -29,7 +29,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("isFollowing")]
         public async Task<ActionResult<bool>> Follow(string followedId)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return false;
             var isFollowing = await _context.MemberInformations
                 .Where(m => m.MemberId == currentUserId)
@@ -54,7 +56,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("myFollow")]
         public async Task<ActionResult<List<AuthorInfo>>> GetMyFollow()
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return NotFound();
             var myFollow = await _context.MemberInformations
                 .Where(m => m.MemberId == currentUserId)
@@ -82,7 +86,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("searchAuthors")]
         public async Task<ActionResult<List<AuthorInfo>>> searchAuthors(string keyword)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return NotFound();
             var result = await _context.MemberInformations
                 .Where(m => m.MemberId.Contains(keyword) || m.Name.Contains(keyword))

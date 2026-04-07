@@ -25,8 +25,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpPost("{id}/view")]
         public async Task<IActionResult> LogView(int id)
         {
-            // 從 JWT 拿 userId，沒登入就用 IP
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return NoContent();
 
             // 防刷：同用戶/IP 同文章 30 分鐘內只記一次

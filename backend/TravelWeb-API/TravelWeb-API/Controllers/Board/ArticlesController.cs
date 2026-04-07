@@ -49,7 +49,8 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByDate(int page)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
 
             var result = _ArticleService.GetArticles(page, currentUserId);
@@ -134,7 +135,8 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByTags([FromQuery]int page, [FromQuery] SearchByTagsDTO searchByTags)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized("無效的 Token");
             var result = _ArticleService.ArticlesByTags(page, searchByTags, currentUserId);
@@ -150,7 +152,8 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByAuthor([FromQuery] int page, [FromQuery]string authorID)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized("無效的 Token"); 
 
@@ -167,7 +170,8 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesBySource([FromQuery] int page, [FromQuery] string productCode)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized("無效的 Token");
             var result = _ArticleService.GetArticlesBySource(page, productCode);
@@ -200,7 +204,8 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByCollect([FromQuery] int page)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             var result = _ArticleService.ArticlesByCollect(page, currentUserId);
             return Ok(new
             {
@@ -213,7 +218,8 @@ namespace TravelWeb_API.Controllers.Board
         public IActionResult GetArticlesByFollowed([FromQuery] int page)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (string.IsNullOrEmpty(currentUserId)) return NotFound();
             var result = _ArticleService.ArticlesByFollowed(page, currentUserId);
             return Ok(new
@@ -286,7 +292,8 @@ namespace TravelWeb_API.Controllers.Board
         public async Task<ActionResult<AuthorInfo>> GetAuthorUserInfo([FromQuery] string authorID)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (string.IsNullOrEmpty(currentUserId)) return NotFound();
             AuthorInfo? author = await _memberDb.MemberInformations
                 .Where(m => m.MemberId == authorID)
@@ -330,7 +337,8 @@ namespace TravelWeb_API.Controllers.Board
         public async Task<IActionResult> ArticleCollect(int articleID)
         {
             // 從 Cookie 取出 Token  
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId != null) { 
                 await _ArticleService.Collect(articleID, currentUserId);
             }
@@ -358,7 +366,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticle(int id)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             bool isSuccess = await _ArticleService.DeleteArticle(id, currentUserId);
             if (isSuccess)
             {

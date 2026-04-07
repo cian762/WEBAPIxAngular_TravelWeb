@@ -30,7 +30,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("JournalDetail/{id}")]
         public async Task<ActionResult<JournalDetailDTO>> GetJournalDetail(int id)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return Unauthorized();
 
             var journal = await _journalService.GetJournalDetail(id,currentUserId);
@@ -43,7 +45,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpGet("{id}")]
         public async Task<ActionResult<JournalUpdateDTO>> GetJournal(int id)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return BadRequest();
 
             var journal = await _journalService.UpdateJournal(id);
@@ -61,7 +65,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpPut("{id}")]
         public async Task<bool> PutJournal(int id, JournalUpdateDTO updateDTO)
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return false;
             var tagIds = updateDTO.tags?.Select(t => t.TagId).ToList();
             var isTagUpdateSuccessful = await _tagsService.EditTagsByArticleId(id, tagIds);                       
@@ -75,7 +81,9 @@ namespace TravelWeb_API.Controllers.Board
         [HttpPost]
         public async Task<ActionResult<int>> PostJournal()
         {
-            string? currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 從 Cookie 取出 Token  
+            string? token = Request.Cookies["AuthToken"];
+            string? currentUserId = GetUser.Id(token);
             if (currentUserId == null) return BadRequest();
             var articleId = await _journalService.postJournal(currentUserId);            
             return articleId;
