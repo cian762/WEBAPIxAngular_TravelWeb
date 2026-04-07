@@ -101,7 +101,10 @@ export class Order implements OnInit {
       error: (err) => {
         this.isLoading = false;
         console.error('預覽失敗:', err);
-        alert('無法取得結帳資訊，請確認商品狀態');
+        Swal.fire({
+          icon: "error",
+          title: '無法取得結帳資訊，請確認商品狀態',
+        });
       }
     });
   }
