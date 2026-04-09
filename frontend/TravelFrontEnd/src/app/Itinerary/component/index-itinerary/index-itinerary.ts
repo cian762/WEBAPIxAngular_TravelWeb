@@ -114,6 +114,7 @@ export class IndexItinerary implements AfterViewInit {
         error: (err) => {
           console.error('錯誤:', err);
           this.toast.error('建立失敗');
+          this.isLoading = false;
         }
       });
   }
@@ -163,6 +164,7 @@ export class IndexItinerary implements AfterViewInit {
         error: (err) => {
           console.error('錯誤:', err);
           this.toast.error('建立失敗');
+          this.isLoading = false;
         }
       });
 
