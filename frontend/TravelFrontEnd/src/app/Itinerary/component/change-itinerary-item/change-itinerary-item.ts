@@ -304,7 +304,11 @@ export class ItineraryDetailComponent implements OnInit {
     this.currentAddingDay = day;
     setTimeout(() => {
       if (this.searchInput) {
-        const autocomplete = new google.maps.places.Autocomplete(this.searchInput.nativeElement);
+        const taiwanBounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(21.8, 119.9),  // 西南角
+          new google.maps.LatLng(25.3, 122.1)   // 東北角
+        );
+        const autocomplete = new google.maps.places.Autocomplete(this.searchInput.nativeElement, { bounds: taiwanBounds });
         autocomplete.addListener('place_changed', () => {
           const place = autocomplete.getPlace();
           if (place.geometry) {
@@ -422,34 +426,34 @@ export class ItineraryDetailComponent implements OnInit {
     });
   }
   /** 依天數算出對應日期字串 */
-getDateForDay(dayNumber: number): string {
-  if (!this.startTime) return '';
-  const d = new Date(this.startTime);
-  d.setDate(d.getDate() + (dayNumber - 1));
-  return d.toISOString();
-}
+  getDateForDay(dayNumber: number): string {
+    if (!this.startTime) return '';
+    const d = new Date(this.startTime);
+    d.setDate(d.getDate() + (dayNumber - 1));
+    return d.toISOString();
+  }
   /**把ITEM物件扁平化 */
   changeItem(event: any) {
     const flattenedItems: any[] = [];
-  this.days.forEach(day => {
-    // 算出這一天對應的實際日期（startTime + (day - 1) 天）
-    const baseDateForDay = this.getDateForDay(day.day);
+    this.days.forEach(day => {
+      // 算出這一天對應的實際日期（startTime + (day - 1) 天）
+      const baseDateForDay = this.getDateForDay(day.day);
 
-    day.items.forEach(item => {
-      flattenedItems.push({
-        AttractionId: item.attractionId || 0,
-        Name: (item as any).editingName || item.attractionName,
-        Address: item.address,
-        Latitude: item.latitude,
-        Longitude: item.longitude,
-        DayNumber: day.day,
-        ContentDescription: (item as any).editingName || item.contentDescription || '無描述',
-        PlaceId: item.placeId || item.googlePlaceId || null,
-        StartTime: this.combineDateAndTime(baseDateForDay, item.startTime),
-        EndTime: this.combineDateAndTime(baseDateForDay, item.endTime || item.startTime)
+      day.items.forEach(item => {
+        flattenedItems.push({
+          AttractionId: item.attractionId || 0,
+          Name: (item as any).editingName || item.attractionName,
+          Address: item.address,
+          Latitude: item.latitude,
+          Longitude: item.longitude,
+          DayNumber: day.day,
+          ContentDescription: (item as any).editingName || item.contentDescription || '無描述',
+          PlaceId: item.placeId || item.googlePlaceId || null,
+          StartTime: this.combineDateAndTime(baseDateForDay, item.startTime),
+          EndTime: this.combineDateAndTime(baseDateForDay, item.endTime || item.startTime)
+        });
       });
     });
-  });
 
     const payload = {
       ItineraryId: Number(this.itineraryId),
@@ -457,20 +461,22 @@ getDateForDay(dayNumber: number): string {
       Items: flattenedItems
     };
     console.log("最後發送的 Payload:", payload);
-    this.http.post<{success: boolean; message: string; versionId: number}>(`${this.baseUrl}/Itinerary/${this.itineraryId}/save-snapshot`, payload)
-      .subscribe({next: (res) => {
-        this.currentVersionId = res.versionId; // 更新元件上的版本 ID
+    this.http.post<{ success: boolean; message: string; versionId: number }>(`${this.baseUrl}/Itinerary/${this.itineraryId}/save-snapshot`, payload)
+      .subscribe({
+        next: (res) => {
+          this.currentVersionId = res.versionId; // 更新元件上的版本 ID
 
-        this.toast.success('修改成功，正在重新分析...');
+          this.toast.success('修改成功，正在重新分析...');
 
-        // 用新版本 ID 觸發分析（fire-and-forget，分析完成不需等待）
-        this.http.get(`${this.baseUrl}/Itinerary/${this.itineraryId}/versions/${res.versionId}/analysis`)
-          .subscribe({
-            next: () => this.toast.success('AI 分析已更新'),
-            error: () => { /* 分析失敗不影響主流程，靜默處理 */ }
-          });
-      },
-      error: () => this.toast.error('儲存失敗，請稍後再試')});
+          // 用新版本 ID 觸發分析（fire-and-forget，分析完成不需等待）
+          this.http.get(`${this.baseUrl}/Itinerary/${this.itineraryId}/versions/${res.versionId}/analysis`)
+            .subscribe({
+              next: () => this.toast.success('AI 分析已更新'),
+              error: () => { /* 分析失敗不影響主流程，靜默處理 */ }
+            });
+        },
+        error: () => this.toast.error('儲存失敗，請稍後再試')
+      });
   }
   /**判斷拖拉事件 */
   onDrop(event: CdkDragDrop<ItineraryItem[]>) {
