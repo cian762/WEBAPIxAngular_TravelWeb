@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { TripIndex } from "../trip/component/trip-index/trip-index";
 import { Router, RouterLink } from '@angular/router';
 import { HeroSection } from "../Itinerary/component/hero-section/hero-section";
@@ -12,8 +12,14 @@ import { ActivityIndexCard } from "../Activity/Component/activity-index-card/act
 //[YJ] 景點 Service 與 Model，供熱門景點區塊使用
 import { AttractionService } from '../Components/attractions/attraction.service';
 import { Attraction } from '../Components/attractions/attraction.models';
+import { environment } from '../../environments/environment';
+import { ArticleData } from '../Board/interface/ArticleData';
+import { BoardServe } from '../Board/Service/board-serve';
+import { AuthService } from '../Member/services/auth.service';
+import Swal from 'sweetalert2';
 const categoryMap: Record<string, string> = {
-  'Article': '文章',
+  'ArticleA': '文章',
+  'ArticleB': '文章',
   'Activity': '活動',
   'Attraction': '景點',
   'Product': '行程商品'
@@ -30,6 +36,7 @@ export class Travelindex implements OnInit, OnDestroy {
   searchControl = new FormControl('');
   suggestions: any[] = []; // any才可以裝物件
   showSuggestions = false;    // 控制下拉選單顯示
+  private authService = inject(AuthService);
 
 
 
@@ -45,7 +52,8 @@ export class Travelindex implements OnInit, OnDestroy {
     private searchService: GlobalSearchService, // 負責去後端搬貨
     private searchBridge: SearchBridge,           // 負責把貨傳給子元件
     private attractionSvc: AttractionService,   //  [YJ] 景點 Service
-    private router: Router                       //[YJ] 路由，用於點擊卡片跳轉
+    private router: Router,                      //[YJ] 路由，用於點擊卡片跳轉
+    private BoardServe: BoardServe,//文章Serve
   ) { }
 
 
@@ -85,6 +93,7 @@ export class Travelindex implements OnInit, OnDestroy {
   }
   ngOnDestroy(): void {
     clearInterval(this.autoSlideTimer);
+    clearInterval(this.autoTimer);
   }
   //景點結束
 
@@ -121,16 +130,24 @@ export class Travelindex implements OnInit, OnDestroy {
       }
     });
 
+    //文章
+    this.BoardServe.getArtcleForVister().subscribe(d =>
+      this.articleList = d
+    );
+    this.startAutoPlay();
+    this.isLogin()
   }
 
   //[YJ]點卡片導到景點詳情頁
   goToAttractionDetail(id: number): void {
     this.router.navigate(['/attractions/detail', id]);
   }
+
+  private baseUrl2 = environment.apiBaseUrl2;
   //[YJ] 取得景點主圖完整 URL
   getAttractionImage(a: Attraction): string {
     return a.mainImage
-      ? `https://localhost:7285${a.mainImage}`
+      ? `${this.baseUrl2 + a.mainImage}`
       : 'assets/img/b1.jpg';
   }
   //[YJ] 首頁景點卡片按讚
@@ -148,6 +165,7 @@ export class Travelindex implements OnInit, OnDestroy {
     this.showSuggestions = false;
     this.onSearch();
   }
+
   onSearch() {
     const term = this.searchControl.value;
 
@@ -197,133 +215,6 @@ export class Travelindex implements OnInit, OnDestroy {
     }, 200);
   }
 
-  favoriteList = [
-    {
-      id: 1,
-      title: '九份山城散策',
-      region: '新北',
-      category: '景點',
-      description: '老街、茶樓與山海景色一次收集。',
-      imageUrl: 'https://images.unsplash.com/photo-1526481280695-3c4691dbbb72?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      title: '花蓮海岸線一日遊',
-      region: '花蓮',
-      category: '行程',
-      description: '山海交會的經典路線，適合放鬆出走。',
-      imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      title: '台南古城美食路線',
-      region: '台南',
-      category: '文章',
-      description: '從牛肉湯到老屋巷弄，一次吃遍。',
-      imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
-
-  articleList = [
-    {
-      id: 1,
-      tag: '旅遊攻略',
-      title: '2026 台北兩天一夜這樣玩',
-      summary: '整合景點、美食與交通建議，適合第一次來台北的旅人。',
-      date: '2026-03-25',
-      imageUrl: 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      tag: '季節主題',
-      title: '春季賞花景點推薦',
-      summary: '精選北中南東值得安排的花季路線。',
-      date: '2026-03-21',
-      imageUrl: 'https://images.unsplash.com/photo-1462275646964-a0e3386b89fa?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      tag: '在地體驗',
-      title: '夜市美食探索地圖',
-      summary: '從經典小吃到新派創意點心，吃貨必收。',
-      date: '2026-03-18',
-      imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
-
-  eventList = [
-    {
-      id: 1,
-      title: '阿里山日出鐵道體驗',
-      location: '嘉義',
-      description: '搭配林鐵與山林景觀的熱門活動。',
-      score: 4.8,
-      price: 1680,
-      imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      title: '宜蘭溫泉放鬆小旅行',
-      location: '宜蘭',
-      description: '泡湯、美食、慢旅行一次滿足。',
-      score: 4.7,
-      price: 1380,
-      imageUrl: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      title: '墾丁海上活動體驗',
-      location: '屏東',
-      description: '適合喜歡陽光與海洋的玩家。',
-      score: 4.9,
-      price: 2200,
-      imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 4,
-      title: '九族文化村親子遊',
-      location: '南投',
-      description: '適合家庭客群的熱門體驗。',
-      score: 4.6,
-      price: 980,
-      imageUrl: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
-
-
-
-  packageList = [
-    {
-      id: 1,
-      title: '花東三日精華套裝',
-      days: '3 天 2 夜',
-      description: '結合海岸、公路、美食與住宿安排的輕鬆路線。',
-      tags: ['含住宿', '親子適合', '熱門路線'],
-      score: 4.8,
-      price: 6990,
-      imageUrl: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 2,
-      title: '阿里山日月潭經典套裝',
-      days: '2 天 1 夜',
-      description: '山景與湖景雙主題的人氣經典組合。',
-      tags: ['自然景觀', '交通便利', '熱銷'],
-      score: 4.7,
-      price: 4880,
-      imageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80'
-    },
-    {
-      id: 3,
-      title: '台南高雄南部文化行',
-      days: '3 天 2 夜',
-      description: '老城、美食、港灣風景一次打包。',
-      tags: ['美食', '古蹟', '城市漫遊'],
-      score: 4.6,
-      price: 5590,
-      imageUrl: 'https://images.unsplash.com/photo-1482192505345-5655af888cc4?auto=format&fit=crop&w=900&q=80'
-    }
-  ];
 
   serviceList = [
     { icon: '✈️', title: '交通資訊', desc: '機場、鐵路、高鐵與轉乘資訊' },
@@ -331,4 +222,66 @@ export class Travelindex implements OnInit, OnDestroy {
     { icon: '🗺️', title: '旅遊地圖', desc: '快速查看地區與熱門景點' },
     { icon: '📶', title: '旅遊便利', desc: 'Wi-Fi、支付與旅客服務資訊' }
   ];
+
+
+
+
+  //文章
+  articleList: ArticleData[] = []
+  gotoLogin(id: number, type: number) {
+    if (this.isLoggedIn == false) {
+      Swal.fire({
+        icon: "warning",
+        title: "請先登入",
+        timer: 1500
+      });
+      this.router.navigate(['login']);
+    }
+    else {
+      if (type === 0) {
+        this.router.navigate(['Board', 'detail', id]);
+      }
+      else if (type === 1) {
+        this.router.navigate(['Board', 'JournalDetail', id]);
+      }
+    }
+  }
+  articlePage = 0;
+  private autoTimer: any;
+  get totalPages() {
+    return Array.from({ length: this.articleList.length });
+  }
+
+  goToPage(index: number) {
+    this.articlePage = index;
+    this.resetTimer();
+  }
+
+  startAutoPlay() {
+    this.autoTimer = setInterval(() => {
+      this.articlePage = (this.articlePage + 1) % this.articleList.length;
+    }, 5000);
+  }
+
+  resetTimer() {
+    clearInterval(this.autoTimer);
+    this.startAutoPlay();
+  }
+
+  get trackTranslate() {
+    return `translateX(-${this.articlePage * 33.333}%)`;
+  }
+
+  get loopedArticles() {
+    return [...this.articleList, ...this.articleList.slice(0, 3)];
+  }
+  isLoggedIn: boolean = false;
+
+  isLogin() {
+    this.authService.authState$.subscribe(status => {
+      this.isLoggedIn = status;
+    });
+  }
 }
+
+

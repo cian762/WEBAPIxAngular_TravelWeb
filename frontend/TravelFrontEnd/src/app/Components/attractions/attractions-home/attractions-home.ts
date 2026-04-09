@@ -76,10 +76,10 @@ export class AttractionsHomeComponent implements OnInit, OnDestroy {
       description: '日月潭的湖光山色、八卦山、梨山、獅頭山等，都可充分感受臺灣多元文化及豐富自然景觀。苗栗、台中、彰化、南投、雲林皆有精彩可期。',
       cities: [
         { name: '苗栗縣', regionIds: [21], imageUrl: 'assets/img/attraction/city/苗栗縣.jpg' },
-        { name: '台中市', regionIds: [20], imageUrl: 'assets/img/attraction/city/台中市.jpg' },
+        { name: '臺中市', regionIds: [20], imageUrl: 'assets/img/attraction/city/台中市.jpg' },
         { name: '彰化縣', regionIds: [22], imageUrl: 'assets/img/attraction/city/彰化縣.jpg' },
         { name: '南投縣', regionIds: [23], imageUrl: 'assets/img/attraction/city/南投縣.webp' },
-        { name: '雲林縣', regionIds: [24], imageUrl: 'assets/img/attraction/city/雲林縣.avif' },
+        { name: '雲林縣', regionIds: [24], imageUrl: 'assets/img/attraction/city/雲林縣.jpeg' },
       ]
     },
     {
@@ -89,9 +89,9 @@ export class AttractionsHomeComponent implements OnInit, OnDestroy {
       cities: [
         { name: '嘉義縣', regionIds: [33], imageUrl: 'assets/img/attraction/city/嘉義縣.webp' },
         { name: '嘉義市', regionIds: [32], imageUrl: 'assets/img/attraction/city/嘉義市.webp' },
-        { name: '台南市', regionIds: [31], imageUrl: 'assets/img/attraction/city/台南市.jpg' },
+        { name: '臺南市', regionIds: [31], imageUrl: 'assets/img/attraction/city/台南市.jpg' },
         { name: '高雄市', regionIds: [30], imageUrl: 'assets/img/attraction/city/高雄市.jpg' },
-        { name: '屏東縣', regionIds: [34], imageUrl: 'assets/img/attraction/city/屏東縣.avif' },
+        { name: '屏東縣', regionIds: [34], imageUrl: 'assets/img/attraction/city/屏東縣.jpg' },
       ]
     },
     {
@@ -100,7 +100,7 @@ export class AttractionsHomeComponent implements OnInit, OnDestroy {
       description: '壯觀的太魯閣峽谷、美麗的花東縱谷，以及台東都蘭山、綠島等，是享受大自然洗禮的最佳去處。',
       cities: [
         { name: '花蓮縣', regionIds: [40], imageUrl: 'assets/img/attraction/city/花蓮縣.jpg' },
-        { name: '台東縣', regionIds: [41], imageUrl: 'assets/img/attraction/city/台東縣.jpg' },
+        { name: '臺東縣', regionIds: [41], imageUrl: 'assets/img/attraction/city/台東縣.jpg' },
       ]
     },
     {
@@ -110,7 +110,7 @@ export class AttractionsHomeComponent implements OnInit, OnDestroy {
       cities: [
         { name: '澎湖縣', regionIds: [50], imageUrl: 'assets/img/attraction/city/澎湖縣.jpg' },
         { name: '金門縣', regionIds: [51], imageUrl: 'assets/img/attraction/city/金門縣.jpg' },
-        { name: '連江縣', regionIds: [52], imageUrl: 'assets/img/attraction/city/連江縣.jpg' },
+        { name: '連江縣(馬祖)', regionIds: [52], imageUrl: 'assets/img/attraction/city/連江縣.jpg' },
       ]
     },
   ];

@@ -12,20 +12,26 @@ import { PostDetailDto } from '../../interface/PostDetailDto';
 })
 export class AuthorInfoSidebar {
   constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) { }
-  @Input() post?: PostDetailDto;
-  authorID: string = "";
+  @Input() authorID?: string = "";
+  AuthorInfo: any;
   isFollowing = false;
-  // ngOnInit(): void {
-  //   if (this.post?.authorID)
-  //     this.authorID = this.post?.authorID;
-  //   this.Serve.getIsFollowing(this.authorID).subscribe(d => this.isFollowing = d);
-  // }
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['post']?.currentValue?.authorID) {
-      this.authorID = changes['post'].currentValue.authorID;
+
+  ngOnInit(): void {
+
+    if (this.authorID) {
+      this.Serve.getAuthorUserInfo(this.authorID).subscribe(d => {
+        this.AuthorInfo = d;
+      }
+      );
       this.Serve.getIsFollowing(this.authorID).subscribe(d => this.isFollowing = d);
     }
   }
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   if (changes['post']?.currentValue?.authorID) {
+  //     this.authorID = changes['post'].currentValue.authorID;
+  //     this.Serve.getIsFollowing(this.authorID).subscribe(d => this.isFollowing = d);
+  //   }
+  // }
 
 
   ToFollow() {
@@ -42,6 +48,10 @@ export class AuthorInfoSidebar {
 
   goToMemderPage(memderID: string): void {
     this.router.navigate(['Board', 'user', memderID]);
+  }
+
+  goToMain(): void {
+    this.router.navigate(['Board', 'Main']);
   }
 
   toBlock(memderID?: string) {

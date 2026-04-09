@@ -107,12 +107,16 @@ export const routes: Routes = [
       },
       //創建手帳簿
       {
-        path: 'creatJournal',
+        path: 'creatJournal/:id',
         loadComponent: () => import('./Board/creat-journal/creat-journal').then(m => m.CreatJournal),
       },
       {
         path: 'detail/:id',
         loadComponent: () => import('./Board/post-detail/post-detail').then(m => m.PostDetail),
+      },
+      {
+        path: 'JournalDetail/:id',
+        loadComponent: () => import('./Board/journal-detail/journal-detail').then(m => m.JournalDetail),
       },
       //私人(可編輯)
       {
@@ -124,6 +128,16 @@ export const routes: Routes = [
         path: 'user/:id',
         loadComponent: () => import('./Board/user-articles-page/user-articles-page').then(m => m.UserArticlesPage),
       },
+      //訪客
+      {
+        path: 'Visitors',
+        loadComponent: () => import('./Board/visitors/visitors').then(m => m.Visitors),
+      },
+      {
+        path: 'MyFollow',
+        loadComponent: () => import('./Board/my-follow/my-follow').then(m => m.MyFollow),
+      },
+
       //404
       {
         path: '404',

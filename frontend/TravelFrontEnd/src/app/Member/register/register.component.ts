@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-register',
@@ -72,7 +73,11 @@ export class RegisterComponent implements OnInit {
 
     // 1. 防呆：信箱格式不對，不給寄
     if (!emailControl || emailControl.invalid) {
-      alert('請先輸入正確格式的 Email！');
+
+      Swal.fire({
+        icon: "warning",
+        title: "請先輸入正確格式的 Email！",
+      });
       emailControl?.markAsTouched();
       return;
     }
@@ -93,7 +98,11 @@ export class RegisterComponent implements OnInit {
         // 🔥 寄信成功！立刻啟動 60 秒倒數計時防連點
         this.startCountdown(60);
 
-        alert(res.message || '驗證碼已寄出，請前往信箱查看！');
+        Swal.fire({
+          title: res.message || '驗證碼已寄出，請前往信箱查看！',
+          icon: "info"
+        });
+
       },
       error: (err) => {
         this.isSendingCode = false;
@@ -134,7 +143,10 @@ export class RegisterComponent implements OnInit {
   verifyCode(): void {
     const email = this.registerForm.get('email')?.value;
     if (!this.verificationCodeInput || this.verificationCodeInput.length !== 6) {
-      alert('請輸入完整的 6 位數驗證碼！');
+      Swal.fire({
+        title: '請輸入完整的 6 位數驗證碼！',
+        icon: "warning"
+      });
       return;
     }
 
@@ -146,7 +158,11 @@ export class RegisterComponent implements OnInit {
         this.isVerifyingCode = false;
         this.isEmailVerified = true;
         this.registerForm.get('email')?.disable();
-        alert('信箱驗證成功！請繼續填寫下方資料完成註冊。');
+
+        Swal.fire({
+          title: '信箱驗證成功！請繼續填寫下方資料完成註冊。',
+          icon: "success"
+        });
       },
       error: (err) => {
         this.isVerifyingCode = false;
@@ -157,7 +173,11 @@ export class RegisterComponent implements OnInit {
 
   onSubmit(): void {
     if (!this.isEmailVerified) {
-      alert('請先完成 Email 信箱驗證！');
+      Swal.fire({
+        title: '請先完成 Email 信箱驗證！',
+        icon: "warning"
+      });
+
       return;
     }
 
@@ -187,7 +207,10 @@ export class RegisterComponent implements OnInit {
     this.authService.register(formData).subscribe({
       next: (res: any) => {
         this.isLoading = false;
-        alert('註冊成功！即將跳轉至登入頁面。');
+        Swal.fire({
+          title: '註冊成功！即將跳轉至登入頁面。',
+          icon: "success"
+        });
         this.router.navigate(['/login']);
       },
       error: (err: any) => {

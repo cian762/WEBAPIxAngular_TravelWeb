@@ -1,15 +1,150 @@
-<div class="host-body">
+<div class="host-body" (mousedown)="selectedId = undefined">
   <div class="d-flex justify-content-evenly">
-    <div>
-      <button type="button" class="btn btn-primary" (click)="onSave()">儲存</button>
+
+
+    <!-- 左欄 -->
+    <div class=" right-panel">
+      <div class="panel-card">
+        <div class="panel-card-header">
+          <h5 class="panel-card-title">文章詳情</h5>
+        </div>
+        <div class="panel-card-body">
+          <!-- 標題 -->
+          <div class="mb-3">
+            <label class="form-label my-title">文章標題</label>
+            <textarea type="text" class="form-control" [(ngModel)]="journalUpdate.title" placeholder="請輸入標題"></textarea>
+          </div>
+
+          <!-- 封面 -->
+          <div class="mb-3">
+            <label class="form-label my-title">文章封面</label>
+            @if(!viewCover){
+            <label class="upload-label" style="cursor: pointer;">
+              點擊上傳圖片 <i class="bi bi-images ms-1"></i>
+              <input type="file" (change)="onCoverSelected($event)" accept="image/*" class="visually-hidden">
+            </label>
+            }
+            @else {
+            <div class="view-cover-container">
+              <button class="remove-cover-btn" (click)="removeCover()"><i class="ri-close-circle-fill"></i></button>
+              <img [src]="viewCover" class="view-cover">
+            </div>
+            }
+
+          </div>
+
+          <!-- 標籤選項 -->
+          <section id="sec3">
+            <div class="mb-5">
+              <label for="exampleFormControlTextarea1" class="form-label my-title">標籤</label>
+
+              <div class="row">
+                <label for="exampleFormControlTextarea1" class="form-label">已加入:</label>
+                <div class="tags">
+                  @for(tag of tagList ; track tag.tagId){
+                  <button (click)="removeTag(tag.tagId)" class="tag-btn m-1"><i
+                      [class]="tag.icon"></i>&nbsp;{{tag.tagName}}&nbsp;<i class="ri-close-large-line"></i></button>
+                  }
+                </div>
+              </div>
+              <div class="row">
+                <div class="search-form" (submit)="$event.preventDefault()">
+                  <div class="my-3">
+                    <div class="search-box">
+                      <input placeholder="搜尋標籤" name="search" type="text" (focus)="onFocus($event)"
+                        (blur)="onBlur($event);" (input)="onSeach($event)">
+                      <button type="button"><i class="fa fa-search"></i></button>
+                    </div>
+                    @if(filteredTags.length > 0){ <ul class="my-dropdown-menu">
+                      @for(tag of filteredTags; track tag.tagId) {
+                      <li class="dropdown-item" (click)="addTag(tag.tagId); $event.stopPropagation()">{{ tag.tagName
+                        }}
+                        <i class="ri-add-large-line"></i>
+                      </li>
+                      }
+                    </ul>}
+                  </div>
+                </div>
+
+                <p>最近加入:</p>
+                <div class="tags">
+                  @for(tag of removeTagList ; track tag.tagId){
+                  <button (click)="addTag(tag.tagId)" class="tag-btn m-1"><i
+                      [class]="tag.icon"></i>&nbsp;{{tag.tagName}}&nbsp;<i class="ri-add-large-line"></i></button>
+                  }
+                </div>
+              </div>
+
+            </div>
+
+
+          </section>
+          <!-- 地區選項 -->
+          <section id="sec4">
+            <div class="mb-3">
+              <label class="form-label my-title">標註地區</label>
+              <select class="custom-select" [(ngModel)]="cityId" (ngModelChange)="onCityChange()">
+                <option [value]="null">請選擇縣市</option>
+                @for (city of regions; track city.regionId) {
+                <option [value]="city.regionId">{{ city.regionName }}</option>
+                }
+              </select>
+            </div>
+
+            @if (cityId) {
+            <div class="mb-3">
+              <select class="custom-select" [(ngModel)]="distId">
+                <option [value]="null">請選擇鄉鎮市區</option>
+                @for (dist of currentDists; track dist.regionId) {
+                <option [value]="dist.regionId">{{ dist.regionName }}</option>
+                }
+              </select>
+            </div>
+            }
+          </section>
+
+          <!-- 文章權限 -->
+          <div class="mb-5">
+            <label class="form-label my-title">文章權限</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span [style.color]="journalUpdate.status === 0 ? '#777777' : '#ffffff'">私人</span>
+              <label class="toggle">
+                <input type="checkbox" [checked]="journalUpdate.status === 1"
+                  (change)="journalUpdate.status = $any($event.target).checked ? 1 : 0">
+                <span class="slider"></span>
+              </label>
+              <span [style.color]="journalUpdate.status === 1 ? '#777777' : '#ffffff'">公開</span>
+            </div>
+          </div>
+
+          <!-- 刪除與儲存 -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between">
+              <button type="button" class="genric-btn danger-border radius" (click)="onDelete()">刪除文章</button>
+              <button type="button" class="genric-btn info radius" (click)="onSave()">儲存</button>
+            </div>
+          </div>
+
+
+
+
+
+        </div>
+      </div>
     </div>
 
-    <div class="ground">
-      @for (item of itemBox; track item.id; let i = $index) {
-      <div class="cube" [style.width.px]="item.width" [style.height.px]="item.height"
-        [style.z-index]="itemBox.length - i" [style.left.px]="item.x" [style.top.px]="item.y"
-        (mousedown)="startDrag($event, item)">
 
+
+    <!-- 中欄 -->
+    <div class="ground">
+      @for (item of itemBoxs; track item.id;) {
+
+      <div class="cube" [style.width.px]="item.width" [style.height.px]="item.height"
+        [style.z-index]="itemBoxs.length - item.zIndex" [style.left.px]="item.x" [style.top.px]="item.y"
+        [class.selected]="selectedId === item.id"
+        (mousedown)="selectedId = item.id; startDrag($event, item) ;$event.stopPropagation()">
+
+        @if (selectedId === item.id) {
         <div class="controller top-left"
           (mousedown)="startResize($event, 'top-left', item.id); $event.stopPropagation()">
         </div>
@@ -19,32 +154,41 @@
           (mousedown)="startResize($event, 'bottom-left', item.id); $event.stopPropagation()"></div>
         <div class="controller bottom-right"
           (mousedown)="startResize($event, 'bottom-right', item.id); $event.stopPropagation()"></div>
+        }
+
+
         @if (item.type===1) {
         <img [src]="item.content" width="100%" height="100%">
         }
         @else if (item.type===0) {
-        <textarea class="box-textarea">{{item.content}}</textarea>
+        <textarea class="box-textarea" [(ngModel)]="item.content" [readonly]="item.editing !== true"
+          (dblclick)="item.editing = true; $event.stopPropagation()"
+          (mousedown)="item.editing ? $event.stopPropagation() : null" (blur)="item.editing = false">
+  </textarea>
         }
 
       </div>
       }
     </div>
+
+
+    <!-- 右欄 -->
     <div class=" right-panel">
       <div class="panel-card">
         <div class="panel-card-header">
-          <h5 class="panel-card-title">圖片列</h5>
-          <button class="upload-btn" (click)="triggerListUpload(1)" title="上傳圖片">
+          <h5 class="panel-card-title">物件箱</h5>
+          <button class="upload-btn" (click)="triggerListUpload(1)" title="上傳圖片" multiple>
             <i class="ri-upload-2-line"></i>
           </button>
-          <button class="upload-btn" (click)="triggerListUpload(0)" title="新增文字"></button>
+          <button class="upload-btn" (click)="triggerListUpload(0)" title="新增文字"><i class="ri-font-color"></i></button>
           <input #listFileInput type="file" accept="image/*" multiple style="display:none"
             (change)="onFileSelected($event)" />
         </div>
         <!-- 空白提示 -->
-        @if (imageFileList.length === 0) {
+        @if (itemBoxs.length === 0) {
         <div class="list-empty" CdkDropList>
           <i class="ri-image-line list-empty-icon"></i>
-          <p>尚無圖片</p>
+          <p>尚無物件</p>
         </div>}
 
         @else {
@@ -52,21 +196,28 @@
         <table class="table table-hover img-table">
           <thead>
             <tr>
-              <th>圖層</th>
-              <th>圖檔</th>
+              <th>#</th>
+              <th>縮圖</th>
+              <th></th>
               <th></th>
             </tr>
           </thead>
-          <tbody cdkDropList cdkDropList [cdkDropListData]="itemBox" (cdkDropListDropped)="drop($event)">
-            <!-- (click)="insertFromList(item)"  *ngFor="let item of imageList; let i = index" [class.row-active]="selectedImageId === item.id"
-              title="點擊插入編輯器"-->
-            @for (item of itemBox; track item.id; let i = $index) {
+          <tbody cdkDropList cdkDropList [cdkDropListData]="itemBoxs" (cdkDropListDropped)="drop($event)">
+            @for (item of itemBoxs; track item.id; let i = $index) {
             <tr cdkDrag>
               <td class="td-index">{{$index}}</td>
-              <td class="td-thumb">
+
+              @if(item.type==1){<td class="td-thumb">
                 <img [src]="item.content" class="row-thumb" />
-                <span class="row-name"></span>
               </td>
+              <td></td>
+              }
+              @else {
+              <td class="td-thumb">
+                <img src="assets/css/Board/font-color.png" class="row-thumb" />
+              </td>
+              <td>{{item.content.length > 10 ? item.content.slice(0, 10) + '...' : item.content}}</td>
+              }
               <td class="td-action">
                 <button class="row-delete" (click)="removeFromList(item.id, $event)" title="移除">
                   <i class="ri-close-line"></i>
@@ -78,5 +229,12 @@
 
       </div>
     </div>
+
+
+
+
+
+
+
   </div>
 </div>

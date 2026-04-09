@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-profile',
@@ -68,7 +69,10 @@ export class ProfileComponent implements OnInit {
         this.userProfile.complaints = data.complaints || [];
       },
       error: (err) => {
-        alert('無法取得會員資料，請重新登入');
+        Swal.fire({
+          icon: "error",
+          title: "無法取得會員資料，請重新登入",
+        });
         localStorage.removeItem('isLoggedIn');
         this.authService.authState$.next(false);
         this.router.navigate(['/login']);
@@ -107,11 +111,17 @@ export class ProfileComponent implements OnInit {
           } else if (type === 'cover' && res.backgroundUrl) {
             this.userProfile.coverUrl = res.backgroundUrl;
           }
-          alert('圖片更新成功！');
+          Swal.fire({
+            title: "圖片更新成功！",
+            icon: "success",
+          });
         },
         error: (err) => {
           console.error(err);
-          alert('圖片更新失敗，請稍後再試。');
+          Swal.fire({
+            icon: "error",
+            title: "圖片更新失敗，請稍後再試。",
+          });
         }
       });
 
@@ -119,17 +129,45 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+
+
+
   onLogout(): void {
-    if (confirm('確定要登出嗎？')) {
-      this.authService.logout().subscribe({
-        next: () => {
-          this.router.navigate(['/login']);
-        },
-        error: (err) => {
-          this.router.navigate(['/login']);
-        }
-      });
-    }
+
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: "btn btn-success",
+        cancelButton: "btn btn-danger me-5"
+      },
+      buttonsStyling: false
+    });
+
+    swalWithBootstrapButtons.fire({
+      title: "是否登出帳號?",
+      text: "將會跳轉到登入頁面",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "確認登出",
+      cancelButtonText: "取消登出",
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        swalWithBootstrapButtons.fire({
+          title: "已登出",
+          icon: "success",
+          timer: 1000
+        });
+
+        this.authService.logout().subscribe({
+          next: () => {
+            this.router.navigate(['/login']);
+          },
+          error: (err) => {
+            this.router.navigate(['/login']);
+          }
+        });
+      }
+    });
   }
 
   // ==========================================
@@ -138,39 +176,89 @@ export class ProfileComponent implements OnInit {
 
   // 👤 取消追隨
   unfollowUser(memberId: string): void {
-    if (confirm(`確定要取消追隨 ${memberId} 嗎？`)) {
-      this.authService.toggleFollow(memberId).subscribe({
-        next: (res: any) => {
-          alert(res.message); // 顯示後端回傳的成功訊息
 
-          // 🔥 神奇魔法：從畫面上直接濾掉(刪除)這個人，不用重新打 API 拿整個清單！
-          this.userProfile.followingList = this.userProfile.followingList.filter(
-            (f: any) => f.memberId !== memberId
-          );
-        },
-        error: (err: any) => {
-          alert(err.error?.message || '取消追隨失敗，請稍後再試');
-        }
-      });
-    }
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: "btn btn-success",
+        cancelButton: "btn btn-danger me-5"
+      },
+      buttonsStyling: false
+    });
+
+    swalWithBootstrapButtons.fire({
+      title: `確定要取消追隨 ${memberId} 嗎？`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "確定取消",
+      cancelButtonText: "保留追蹤",
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.toggleFollow(memberId).subscribe({
+          next: (res: any) => {
+            Swal.fire({
+              title: res.message,
+              icon: "success",
+            });
+
+            // 🔥 神奇魔法：從畫面上直接濾掉(刪除)這個人，不用重新打 API 拿整個清單！
+            this.userProfile.followingList = this.userProfile.followingList.filter(
+              (f: any) => f.memberId !== memberId
+            );
+          },
+          error: (err: any) => {
+            Swal.fire({
+              title: err.error?.message || '取消追隨失敗，請稍後再試',
+              icon: "error",
+            });
+          }
+        });
+      }
+    });
   }
 
   // 🚫 解除封鎖
   unblockUser(blockedId: string): void {
-    if (confirm(`確定要解除對 ${blockedId} 的封鎖嗎？`)) {
-      this.authService.toggleBlock(blockedId).subscribe({
-        next: (res: any) => {
-          alert(res.message); // 顯示後端回傳的成功訊息
 
-          // 🔥 一樣的神奇魔法：從畫面上直接把這個人移出黑名單！
-          this.userProfile.blackList = this.userProfile.blackList.filter(
-            (b: any) => b.blockedId !== blockedId
-          );
-        },
-        error: (err: any) => {
-          alert(err.error?.message || '解除封鎖失敗，請稍後再試');
-        }
-      });
-    }
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: "btn btn-success",
+        cancelButton: "btn btn-danger me-5"
+      },
+      buttonsStyling: false
+    });
+
+    swalWithBootstrapButtons.fire({
+      title: `確定要解除對 ${blockedId} 的封鎖嗎？`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "解除封鎖",
+      cancelButtonText: "維持封鎖",
+      reverseButtons: true
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+        this.authService.toggleBlock(blockedId).subscribe({
+          next: (res: any) => {
+            Swal.fire({
+              title: res.message,
+              icon: "success",
+            });
+
+            // 🔥 一樣的神奇魔法：從畫面上直接把這個人移出黑名單！
+            this.userProfile.blackList = this.userProfile.blackList.filter(
+              (b: any) => b.blockedId !== blockedId
+            );
+          },
+          error: (err: any) => {
+            Swal.fire({
+              title: err.error?.message || '解除封鎖失敗，請稍後再試',
+              icon: "error",
+            });
+          }
+        });
+      }
+    });
   }
 }
+

@@ -9,12 +9,18 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { SearchBridge } from '../../Services/search-bridge';
 export interface photoitem {
   id: number;
   Url: string;
   needFiletoUpload?: File;
 }
-
+const categoryMap: Record<string, string> = {
+  'Article': '文章',
+  'Activity': '活動',
+  'Attraction': '景點',
+  'Product': '行程商品'
+};
 
 var cloudinary: any;
 declare var $: any;
@@ -34,7 +40,7 @@ export class CreatPost implements OnInit, OnDestroy {
   cloudName = "daobwcaga"; // replace with your own cloud name
   uploadPreset = "ml_default"; // replace with your own upload preset
 
-  constructor(private Serve: BoardServe, private route: ActivatedRoute, private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router,) { }
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router, private searchBridge: SearchBridge,) { }
   private observer!: IntersectionObserver;
   @ViewChild('textarea') textareaRef!: ElementRef;
 
@@ -70,6 +76,10 @@ export class CreatPost implements OnInit, OnDestroy {
   regions: any[] = [];
   selectedRegionId?: number;
   dists: any[] = [];
+
+  displayResults: any[] = [];
+  showSuggestions = false;    // 控制下拉選單顯示
+  suggestions: any[] = [];
 
   form = new FormGroup({
     title: new FormControl(),
@@ -123,7 +133,13 @@ export class CreatPost implements OnInit, OnDestroy {
 
 
     });
-
+    // 訂閱橋樑，首頁搜尋框一推資料，這裡就會自動更新
+    this.searchBridge.currentResults$.subscribe(data => {
+      this.displayResults = data.map(item => ({
+        ...item,
+        categoryName: categoryMap[item.category as keyof typeof categoryMap] || item.category
+      }));
+    });
 
   }
 
@@ -151,7 +167,7 @@ export class CreatPost implements OnInit, OnDestroy {
     this.form.reset({
       title: post.title,
       content: post.contents,
-      status: post.status,
+      status: post.status === 1,
 
     });
     setTimeout(() => {
@@ -241,7 +257,7 @@ export class CreatPost implements OnInit, OnDestroy {
       id: this.id,
       title: formValue.title ?? null,
       photoUrl: this.coverUrl ?? null,
-      status: Number(formValue.status || 0), // 確保一定是數字 0-255，不要給空值
+      status: formValue.status ? 1 : 0,
       content: formValue.content ?? null,
       regionId: this.selectedRegionId ?? null,
       photoUrlList: this.photoUrlList ?? null
@@ -301,6 +317,13 @@ export class CreatPost implements OnInit, OnDestroy {
       id: index
     }));
   }
+  removePhoto(id: number) {
+    const currentIdx = this.photoList.findIndex(p => p.id === id);
+    this.photoList = this.photoList.filter(p => p.id !== id);
+    const next = this.photoList[currentIdx] ?? this.photoList[currentIdx - 1] ?? this.photoList[0];
+    this.selectedIndex = next?.id;
+  }
+
 
   async isUploadSuccess(id: number, para: any) {
     try {
@@ -458,5 +481,23 @@ export class CreatPost implements OnInit, OnDestroy {
       }
     });
 
+  }
+
+
+  onProductSearch() {
+    const term = this.searchControl.value;
+
+    // 1. 基本檢查：如果沒打字就不執行
+    if (!term || term.trim() === '') {
+      this.searchBridge.pushData([]); // 清空搜尋結果
+      this.showSuggestions = false;   // 關閉提示選單
+      return;
+    }
+  }
+  searchControl = new FormControl('');
+  selectSuggestion(s: any) {
+    this.searchControl.setValue(s.title); // 直接取 title
+    this.showSuggestions = false;
+    this.onProductSearch();
   }
 }

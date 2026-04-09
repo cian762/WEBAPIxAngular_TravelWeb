@@ -58,7 +58,7 @@
 
         <!-- 縮圖列 -->
         <div class="thumb-row" *ngIf="imageCount > 1">
-          <img *ngFor="let img of attraction.images; let i = index" [src]="'https://localhost:7285' + img"
+          <img *ngFor="let img of attraction.images; let i = index" [src]="baseUrl2 + img"
             [class.active]="currentImgIdx === i" (click)="currentImgIdx = i"
             onerror="this.src='https://placehold.co/100x100?text=No+Image'" [alt]="attraction.name">
         </div>
@@ -186,8 +186,7 @@
           <!-- 圖片 + 說明 -->
           <div class="activity-intro__images" *ngIf="attraction.productImages?.length">
             <div class="activity-intro__img-item" *ngFor="let img of attraction.productImages">
-              <img [src]="'https://localhost:7285' + img.imagePath" [alt]="img.caption || ''"
-                class="activity-intro__img"
+              <img [src]="baseUrl2 + img.imagePath" [alt]="img.caption || ''" class="activity-intro__img"
                 onerror="this.src='https://placehold.co/800x500?text=No+Image';this.onerror=null;">
               <p class="activity-intro__caption" *ngIf="img.caption">
                 ▲ {{ img.caption }}
@@ -195,6 +194,66 @@
             </div>
           </div>
         </div>
+
+        <!-- [YJ] 旅客評論 ══════════════════════════════════════ -->
+        <div class="review-section" *ngIf="activeTab === 'tickets'">
+          <div class="review-section__header">
+            <span class="ts-section-bar"></span>
+            <h3 class="ts-section-title">旅客評論</h3>
+            <div class="review-avg" *ngIf="reviewCount > 0">
+              <span class="review-avg__score">{{ avgRating }}</span>
+              <span class="review-avg__max">/5</span>
+              <span class="review-avg__count">（{{ reviewCount }} 則評論）</span>
+            </div>
+            <!-- 留下評價按鈕（永遠顯示） -->
+            <button class="review-write-btn" *ngIf="!showReviewForm" (click)="onReviewBtnClick()">
+              ✏️ 留下評價
+            </button>
+          </div>
+
+          <!-- 撰寫評論表單（原地展開）-->
+          <div class="review-form" *ngIf="showReviewForm">
+            <div class="review-form__stars">
+              <span class="review-form__label">評分：</span>
+              <span *ngFor="let s of [1,2,3,4,5]" class="review-star-btn" [class.active]="newReview.rating >= s"
+                (click)="newReview.rating = s">★</span>
+            </div>
+            <input class="review-form__input" [(ngModel)]="newReview.title" placeholder="評論標題（必填）" maxlength="100">
+            <textarea class="review-form__textarea" [(ngModel)]="newReview.comment" placeholder="分享您的旅遊體驗（必填）"
+              rows="4"></textarea>
+            <div class="review-form__actions">
+              <button class="review-form__cancel" (click)="showReviewForm = false">取消</button>
+              <button class="review-form__submit" (click)="submitReview()" [disabled]="submitting">
+                {{ submitting ? '送出中...' : '送出評論' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 評論列表 -->
+          <div class="review-empty" *ngIf="reviewCount === 0">
+            目前還沒有評論，成為第一個留下評論的旅客吧！
+          </div>
+
+          <div class="review-list" *ngIf="reviewCount > 0">
+            <div class="review-card" *ngFor="let r of reviews">
+              <div class="review-card__top">
+                <img class="review-card__avatar" [src]="r.avatarUrl || 'https://placehold.co/40x40?text=YJ'"
+                  onerror="this.src='https://placehold.co/40x40?text=YJ'">
+                <div class="review-card__meta">
+                  <span class="review-card__name">{{ r.memberName || r.memberId }}</span>
+                  <span class="review-card__date">{{ r.createdAt | date:'yyyy-MM-dd' }}</span>
+                </div>
+                <div class="review-card__stars">
+                  <span *ngFor="let s of starArray(r.rating)" class="star filled">★</span>
+                  <span *ngFor="let s of emptyStarArray(r.rating)" class="star empty">☆</span>
+                </div>
+              </div>
+              <div class="review-card__title" *ngIf="r.title">{{ r.title }}</div>
+              <div class="review-card__comment" *ngIf="r.comment">{{ r.comment }}</div>
+            </div>
+          </div>
+        </div>
+        <!-- [YJ] 旅客評論 end ══════════════════════════════════ -->
 
         <!-- 你可能也喜歡 -->
         <div class="ts-related" *ngIf="relatedTickets.length > 0">
@@ -206,7 +265,7 @@
             <div class="ts-related__track">
               <div class="ts-related__card" *ngFor="let t of relatedTickets" (click)="goToRelated(t.attractionId)">
                 <div class="ts-related__img-wrap">
-                  <img [src]="'https://localhost:7285' + t.mainImage" [alt]="t.name"
+                  <img [src]="baseUrl2 + t.mainImage" [alt]="t.name"
                     onerror="this.src='https://placehold.co/280x180?text=No+Image';this.onerror=null;">
                   <span class="ts-related__type-badge" *ngIf="t.ticketTypeName">
                     {{ t.ticketTypeName }}
@@ -242,7 +301,7 @@
         <div class="nearby-grid" *ngIf="nearbyAttractions.length > 0">
           <div class="nearby-card" *ngFor="let a of nearbyAttractions" (click)="goToNearby(a.attractionId)">
             <div class="nearby-card__img-wrap">
-              <img [src]="'https://localhost:7285' + a.mainImage" [alt]="a.name"
+              <img [src]="baseUrl2 + a.mainImage" [alt]="a.name"
                 onerror="this.src='https://placehold.co/300x200?text=No+Image';this.onerror=null;">
             </div>
             <div class="nearby-card__body">

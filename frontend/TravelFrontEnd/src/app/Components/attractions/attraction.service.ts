@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Attraction, AttractionType } from './attraction.models';
+import { environment } from '../../../environments/environment';
 
 export interface AttractionProduct {
   productId: number;
@@ -50,10 +51,21 @@ export interface StockResult {
   productCode: string;
   remainingStock: number;
 }
+// [YJ]
+export interface ReviewItem {
+  reviewId: number;
+  memberId: string;
+  memberName: string | null;
+  avatarUrl: string | null;
+  rating: number;
+  title: string | null;
+  comment: string | null;
+  createdAt: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AttractionService {
-  private apiUrl = 'https://localhost:7276/api';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) { }
 
@@ -169,6 +181,38 @@ export class AttractionService {
       `${this.apiUrl}/AttractionProduct/my-favorites`
     ).pipe(catchError(() => of([])));
   }
+
+  // [YJ] ── 評論相關 ──────────────────────────────────────
+
+  /** 取得景點評論列表 */
+  getAttractionReviews(attractionId: number): Observable<{
+    attractionId: number;
+    averageRating: number;
+    totalCount: number;
+    reviews: ReviewItem[];
+  }> {
+    return this.http.get<any>(
+      `${this.apiUrl}/AttractionReview/${attractionId}`
+    ).pipe(catchError(() => of({ attractionId, averageRating: 0, totalCount: 0, reviews: [] })));
+  }
+
+  /** 確認目前會員是否可評論 */
+  canReview(attractionId: number): Observable<{ canReview: boolean; reason: string }> {
+    return this.http.get<{ canReview: boolean; reason: string }>(
+      `${this.apiUrl}/AttractionReview/${attractionId}/can-review`
+    ).pipe(catchError(() => of({ canReview: false, reason: 'error' })));
+  }
+
+  /** 送出評論 */
+  submitReview(dto: { attractionId: number; rating: number; title: string; comment: string }):
+    Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/AttractionReview`, dto
+    );
+  }
+
+
+
 
   // 取得五大頂層地區（北/中/南/東/離島）
   getTopRegions(): Observable<{ regionId: number; regionName: string }[]> {

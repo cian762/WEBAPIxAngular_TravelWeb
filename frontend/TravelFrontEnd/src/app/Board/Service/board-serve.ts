@@ -5,6 +5,8 @@ import { PostDetailDto } from '../interface/PostDetailDto';
 import { switchMap } from 'rxjs/operators';
 import { CommentsDTO } from '../interface/CommentsDTO';
 import { environment } from '../../../environments/environment';
+import { JournalElementDTO, JournalUpDateDTO } from '../interface/JournalElementDTO';
+import { JournalDetailDTO } from '../interface/JournalDetailDTO';
 
 @Injectable({
   providedIn: 'root',
@@ -17,9 +19,16 @@ export class BoardServe {
   baseUrl: string = environment.apiBaseUrl;
   private apiUrl = this.baseUrl;
 
+  getArtcleForVister() {
+    return this.http.get<ArticleData[]>(`${this.apiUrl}/Board/Articles/Visitors`)
+  }
 
   getArticleAPI(para: number) {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/Bypage/${para}`);
+  }
+
+  getActicleByTrending() {
+    return this.http.get(`${this.apiUrl}/Board/Articles/trending`);
   }
 
   getArticleByUserAPI(para: number) {
@@ -54,6 +63,17 @@ export class BoardServe {
   getArticleByCollect(page: number, authorId?: string) {
     return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/articlesByCollect?page=1`)
   }
+
+  getArticlesByFollowed() {
+    return this.http.get<ArticleResponse>(`${this.apiUrl}/Board/Articles/articlesByFollowed?page=1`)
+
+  }
+
+  getFollowed() {
+    return this.http.get(`${this.apiUrl}/Board/ArticlePermissions/myFollow`)
+  }
+
+
 
   getArticleDetailAPI(para: number) {
     return this.http.get<PostDetailDto>(`${this.apiUrl}/Post/${para}`);
@@ -103,6 +123,26 @@ export class BoardServe {
       `${this.apiUrl}/Post/${id}`, para);
   }
 
+  getJournalAPI(id: number) {
+    return this.http.get<JournalUpDateDTO>(
+      `${this.apiUrl}/Board/Journals/${id}`);
+  }
+
+  getJournalDetailAPI(id: number) {
+    return this.http.get<JournalDetailDTO>(
+      `${this.apiUrl}/Board/Journals/JournalDetail/${id}`);
+  }
+
+  postJournalAPI() {
+    return this.http.post<number>(
+      `${this.apiUrl}/Board/Journals`, null);
+  }
+
+  putJournalAPI(id: number, para: JournalUpDateDTO) {
+    return this.http.put(
+      `${this.apiUrl}/Board/Journals/${id}`, para);
+  }
+
   getNewActivity() {
     return this.http.get(`${this.apiUrl}/ActivityInfo/NewActivity`)
   }
@@ -112,6 +152,10 @@ export class BoardServe {
   }
   getAuthorUser(para: string) {
     return this.http.get(`${this.apiUrl}/Board/Articles/authorUser?authorID=${para}`)
+  }
+
+  getAuthorUserInfo(para: string) {
+    return this.http.get(`${this.apiUrl}/Board/Articles/getAuthorUserInfo?authorID=${para}`)
   }
 
 
@@ -147,6 +191,18 @@ export class BoardServe {
     return this.http.delete(`${this.apiUrl}/Board/Comments/DeleteComment?commentID=${id}`)
   }
 
+  postLogView(id: number) {
+    return this.http.post(`${this.apiUrl}/Board/UserActivityLogs/${id}/view`, null)
+  }
+
+  getProduct(id: number) {
+    return this.http.get(`${this.apiUrl}/GlobalSearch/getProduct?articleId=${id}`)
+  }
+
+
+  getAuthorsbyKeyword(id: string) {
+    return this.http.get(`${this.apiUrl}/Board/ArticlePermissions/searchAuthors?keyword=${id}`)
+  }
 
 }
 

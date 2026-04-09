@@ -28,6 +28,8 @@
 
         public List<string?> Images { get; set; } = new List<string?>();
 
+        public int CommentCount { get; set; } = 0;
+
         public int SellCount { get; set; } = 0;
 
     }
