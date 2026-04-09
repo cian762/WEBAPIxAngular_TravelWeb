@@ -148,10 +148,13 @@
 
           <!-- Thumbnail -->
           <div class="card-thumb">
-            <img [src]="'https://maps.googleapis.com/maps/api/place/photo?maxwidth=80&photoreference=placeholder'"
-              [alt]="item.attractionName"
-              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-            <div class="thumb-fallback">{{ (item.attractionName || '?')[0] }}</div>
+
+            <div class="thumb-glass-base">
+              <svg viewBox="0 0 24 24" class="modern-pin">
+                <path
+                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+            </div>
           </div>
 
           <!-- Main info -->
