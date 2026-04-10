@@ -53,19 +53,19 @@ namespace TravelWeb_API.Controllers
             {
                 //TODO 記得切換
                 // 成功就帶 paySuccess=true
-                return Redirect("http://localhost:4200/app/?paySuccess=true");
+                //return Redirect("http://localhost:4200/app/?paySuccess=true");
 
                 //部署用下面這個
-                //return Redirect("https://taiwanstory.site/app/?paySuccess=true");
+                return Redirect("https://taiwanstory.site/app/?paySuccess=true");
             }
             else
             {
                 //TODO 記得切換
                 // 失敗就帶 paySuccess=false
-                return Redirect("http://localhost:4200/app/?paySuccess=false");
+                //return Redirect("http://localhost:4200/app/?paySuccess=false");
 
                 //部署用下面這個
-                //return Redirect("https://taiwanstory.site/app/?paySuccess=false");
+                return Redirect("https://taiwanstory.site/app/?paySuccess=false");
             }
         }
         //綠界回傳

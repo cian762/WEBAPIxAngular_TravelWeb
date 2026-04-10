@@ -1,6 +1,7 @@
 import { Component, EventEmitter, inject, Input, OnDestroy, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PersonalCommentService } from '../../Service/personal-comment-service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-user-comment-form',
@@ -50,6 +51,16 @@ export class UserCommentForm implements OnDestroy {
     this.imagePreviews = [];
 
   }
+
+
+  keyInData() {
+    this.commentForm.patchValue({
+      title: '這邊美不勝收',
+      comment: '景色很漂亮，活動安排也很順暢，整體體驗非常不錯。',
+      rating: 5
+    });
+  }
+
 
   closeModal(): void {
     this.closed.emit();
@@ -117,6 +128,13 @@ export class UserCommentForm implements OnDestroy {
     }).subscribe({
       next: (res) => {
         console.log('送出成功', res);
+
+        Swal.fire({
+          title: "完成評論新增",
+          icon: "success",
+          timer: 1000,
+        });
+
         this.commentEmit.emit();
         this.closed.emit();
         this.restForm();

@@ -220,7 +220,7 @@
             </div>
             <div class="meta-item">
               <i class="bi bi-bag-check"></i>
-              <span>已售 1,250+</span>
+              <span>已售 {{activityInfo.sellCount}} 個商品</span>
             </div>
           </div>
         </div>
@@ -479,7 +479,7 @@
           <hr>
           }
           } @else {
-          <p class="text-center fs-3">目前尚未有任何評論</p>
+
           }
         </div>
       </section>
@@ -492,12 +492,16 @@
 
         <form class="report-form">
           <label class="form-label">個人 Email <span class="text-danger">*</span></label>
-          <input type="text" class="form-control mb-3" placeholder="請填入個人電子郵件">
+          <input type="text" name="email" class="form-control mb-3" placeholder="請填入個人電子郵件" [(ngModel)]="email">
 
           <label class="form-label">請描述您遇到的問題 <span class="text-danger">*</span></label>
-          <textarea class="form-control mb-3" rows="5" placeholder="例如：活動資訊錯誤、地圖位置有誤、票券內容與實際不符..."></textarea>
+          <textarea name="comment" class="form-control mb-3" rows="5" placeholder="例如：活動資訊錯誤、地圖位置有誤、票券內容與實際不符..."
+            [(ngModel)]="comment"></textarea>
 
-          <button class="btn btn-danger">送出回報</button>
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-primary me-2" (click)="keyInData()">快填資料</button>
+            <button type="button" class="btn btn-danger" (click)="onSubmit()">送出回報</button>
+          </div>
         </form>
       </section>
 
@@ -559,7 +563,6 @@
                       </span>
                       <span class="rating-block__text">({{ suggest.commentCount }})</span>
                     </div>
-                    <div class="booking-text">已售 320+</div>
                   </div>
 
                   <div class="activity-card__bottom mt-3 d-flex justify-content-between">
@@ -597,7 +600,7 @@
     </div>
 
     <!-- 側邊欄 -->
-    <div class="col-lg-3">
+    <div class="col-lg-3 d-none d-lg-block">
       <aside class="side-nav card-section sticky-sidebar">
         <h2 class="side-nav-title">快速導覽</h2>
         <ul class="side-nav-list">

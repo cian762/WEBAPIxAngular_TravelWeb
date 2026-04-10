@@ -1,0 +1,1 @@
+import{V as o,j as e}from"./chunk-VDUJBJKS.js";var a=class t{searchSource=new e([]);currentResults$=this.searchSource.asObservable();constructor(){}pushData(r){this.searchSource.next(r)}static \u0275fac=function(c){return new(c||t)};static \u0275prov=o({token:t,factory:t.\u0275fac,providedIn:"root"})};export{a};

@@ -22,45 +22,45 @@
     </div>
 
     <div class="status-banner" [ngClass]="{
-        'status-banner--success': result?.message === '票券可使用',
-        'status-banner--used': result?.message === '票券已使用',
-        'status-banner--expired': result?.message === '票券已過期',
-        'status-banner--error': result?.message !== '票券可使用' && result?.message !== '票券已使用' && result?.message !== '票券已過期'
+        'status-banner--success': result.message === '票券可使用',
+        'status-banner--used': result.message === '票券已使用',
+        'status-banner--expired': result.message === '票券已過期',
+        'status-banner--error': result.message !== '票券可使用' && result.message !== '票券已使用' && result.message !== '票券已過期'
       }">
       <div class="status-title">驗證結果</div>
-      <div class="status-message">{{ result?.message || '尚未驗證票券' }}</div>
+      <div class="status-message">{{ result.message || '尚未驗證票券' }}</div>
     </div>
 
     <div class="ticket-info">
       <div class="info-row">
         <span class="info-label">商品代碼</span>
-        <span class="info-value">{{ result?.productCode || '—' }}</span>
+        <span class="info-value">{{ result.productCode || '—' }}</span>
       </div>
 
       <div class="info-row">
         <span class="info-label">商品名稱</span>
-        <span class="info-value">{{ result?.productName || '—' }}</span>
+        <span class="info-value">{{ result.productName || '—' }}</span>
       </div>
 
       <div class="info-row">
         <span class="info-label">票券狀態</span>
         <span class="info-value">
           {{
-          result?.message === '票券可使用' ? '未使用' :
-          result?.message === '票券已使用' ? '已使用' :
-          result?.message || '—'
+          result.message === '票券可使用' ? '未使用' :
+          result.message === '票券已使用' ? '已使用' :
+          result.message || '—'
           }}
         </span>
       </div>
 
       <div class="info-row">
         <span class="info-label">過期日</span>
-        <span class="info-value">{{ result?.expiredDate || '無期限' }}</span>
+        <span class="info-value">{{ result.expiredDate || '無期限' }}</span>
       </div>
 
       <div class="info-row">
         <span class="info-label">使用日期</span>
-        <span class="info-value">{{ (result?.useAt | date:'yyyy/MM/dd HH:mm') || '尚未使用' }}</span>
+        <span class="info-value">{{ (result.useAt | date:'yyyy/MM/dd HH:mm') || '尚未使用' }}</span>
       </div>
     </div>
 
@@ -70,7 +70,7 @@
         請先與持票者口頭確認後，再執行核銷。
       </p>
 
-      <button class="redeem-btn" (click)="redeemQRcode(token)" [disabled]="result?.message !== '票券可使用'">
+      <button class="redeem-btn" (click)="redeemQRcode(token)" [disabled]="result.message !== '票券可使用'">
         確認核銷 QRCode
       </button>
     </div>

@@ -79,7 +79,7 @@ export class AttractionsHomeComponent implements OnInit, OnDestroy {
         { name: '臺中市', regionIds: [20], imageUrl: 'assets/img/attraction/city/台中市.jpg' },
         { name: '彰化縣', regionIds: [22], imageUrl: 'assets/img/attraction/city/彰化縣.jpg' },
         { name: '南投縣', regionIds: [23], imageUrl: 'assets/img/attraction/city/南投縣.webp' },
-        { name: '雲林縣', regionIds: [24], imageUrl: 'assets/img/attraction/city/雲林縣.avif' },
+        { name: '雲林縣', regionIds: [24], imageUrl: 'assets/img/attraction/city/雲林縣.jpg' },
       ]
     },
     {
@@ -91,7 +91,7 @@ export class AttractionsHomeComponent implements OnInit, OnDestroy {
         { name: '嘉義市', regionIds: [32], imageUrl: 'assets/img/attraction/city/嘉義市.webp' },
         { name: '臺南市', regionIds: [31], imageUrl: 'assets/img/attraction/city/台南市.jpg' },
         { name: '高雄市', regionIds: [30], imageUrl: 'assets/img/attraction/city/高雄市.jpg' },
-        { name: '屏東縣', regionIds: [34], imageUrl: 'assets/img/attraction/city/屏東縣.avif' },
+        { name: '屏東縣', regionIds: [34], imageUrl: 'assets/img/attraction/city/屏東縣.jpg' },
       ]
     },
     {

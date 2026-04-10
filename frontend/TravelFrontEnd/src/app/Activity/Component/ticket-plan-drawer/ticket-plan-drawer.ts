@@ -7,7 +7,7 @@ import { AddToCartDto } from '../../../trip/models/orderMd.model';
 
 @Component({
   selector: 'app-ticket-plan-drawer',
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './ticket-plan-drawer.html',
   styleUrl: './ticket-plan-drawer.css',
 })
