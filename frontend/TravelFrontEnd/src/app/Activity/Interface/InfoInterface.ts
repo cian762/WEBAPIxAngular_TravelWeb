@@ -13,4 +13,5 @@ export interface ActivityInfoInterface {
   officialLink: string,
   images: string[]
   commentCount: number,
+  sellCount: number,
 }

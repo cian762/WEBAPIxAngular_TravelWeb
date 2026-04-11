@@ -148,11 +148,16 @@ export class InfoCard implements AfterViewInit, OnDestroy, OnInit {
     this.loadCards(1);
   }
 
+  private getCalendarMonthCount(): number {
+    return window.innerWidth <= 767 ? 1 : 2;
+  }
+
+
   ngAfterViewInit(): void {
     this.fpInstance = flatpickr(this.calendarHost.nativeElement, {
       inline: true,
       mode: 'range',
-      showMonths: 2,
+      showMonths: this.getCalendarMonthCount(),
       minDate: 'today',
       dateFormat: 'Y-m-d',
       disableMobile: true,

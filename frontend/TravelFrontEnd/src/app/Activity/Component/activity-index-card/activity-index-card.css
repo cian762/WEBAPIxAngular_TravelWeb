@@ -28,9 +28,11 @@
 .article-card__image img,
 .product-card__image img,
 .package-card__image img {
-  height: 220px;
   width: 100%;
-  object-fit: fill;
+  height: 220px;
+  object-fit: cover;
+  /* 原本 fill 會讓圖片變形，改 cover 比較適合卡片 */
+  display: block;
 }
 
 .badge {
@@ -77,6 +79,13 @@
   margin: 0 0 10px;
   font-size: 1.15rem;
   line-height: 1.4;
+
+  /* 讓標題最多顯示兩行，比較整齊 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 3.2rem;
 }
 
 .travel-card p,
@@ -91,10 +100,11 @@
 .article-card__footer,
 .product-card__footer,
 .package-card__footer {
-  margin-top: 16px;
+  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 .score {
@@ -106,14 +116,106 @@
   font-size: 1.05rem;
   font-weight: 800;
   color: #111827;
+  white-space: nowrap;
 }
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
 }
 
 .pointer {
   cursor: pointer;
+  min-width: 0;
+}
+
+.product-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pointer:hover .product-card {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.1);
+}
+
+.product-card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== RWD ===== */
+
+/* 大平板 / 小桌機 */
+@media (max-width: 1200px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 平板 */
+@media (max-width: 992px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .travel-card__image img,
+  .article-card__image img,
+  .product-card__image img,
+  .package-card__image img {
+    height: 200px;
+  }
+}
+
+/* 手機 */
+@media (max-width: 576px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .travel-card__body,
+  .article-card__body,
+  .product-card__body,
+  .package-card__body {
+    padding: 16px;
+  }
+
+  .travel-card h3,
+  .article-card h3,
+  .product-card h3,
+  .package-card h3 {
+    font-size: 1rem;
+    min-height: auto;
+  }
+
+  .travel-card__image img,
+  .article-card__image img,
+  .product-card__image img,
+  .package-card__image img {
+    height: 190px;
+  }
+
+  .article-card__footer,
+  .product-card__footer,
+  .package-card__footer {
+    gap: 8px;
+  }
+
+  .score,
+  .price {
+    font-size: 0.95rem;
+  }
+
+  .badge {
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
 }

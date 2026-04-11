@@ -65,6 +65,15 @@ export class Order implements OnInit {
     });
   }
 
+  KeyInData() {
+    this.orderForm.patchValue({
+      contactName: '陳先生',
+      contactEmail: 'chenguanfu4@gmail.com',
+      contactPhone: '0975123456',
+      customerNote: '寫一點訂單備註',
+      agreeTerms: true,
+    });
+  }
 
   initForm() {
     this.orderForm = this.fb.group({
