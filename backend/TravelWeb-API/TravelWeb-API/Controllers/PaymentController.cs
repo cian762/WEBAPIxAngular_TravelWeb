@@ -48,25 +48,22 @@ namespace TravelWeb_API.Controllers
             //1.取得綠界回傳的狀態碼
             string rtnCode = collection["RtnCode"]!;
 
-            //2.判斷成功與否並導回不同的參數
-            if (rtnCode == "1")
-            {
-                //TODO 記得切換
-                // 成功就帶 paySuccess=true
-                return Redirect("http://localhost:4200/app/?paySuccess=true");
-
-                //部署用下面這個
-                //return Redirect("https://taiwanstory.site/app/?paySuccess=true");
-            }
-            else
-            {
-                //TODO 記得切換
-                // 失敗就帶 paySuccess=false
-                return Redirect("http://localhost:4200/app/?paySuccess=false");
-
-                //部署用下面這個
-                //return Redirect("https://taiwanstory.site/app/?paySuccess=false");
-            }
+            //地端版
+            string targetUrl = (rtnCode == "1")
+              ? "http://localhost:4200/app/?paySuccess=true"
+              : "http://localhost:4200/app/?paySuccess=false";
+            // 直接定義好要回去的網址部屬版
+            //string targetUrl = (rtnCode == "1")
+            //    ? "https://taiwanstory.site/app/?paySuccess=true"
+            //    : "https://taiwanstory.site/app/?paySuccess=false";
+            // 這是目前串接綠界最推薦、最無腦的解決方案
+            // 讓瀏覽器執行一段 JS 進行跳轉，這會視為「同站導向」，Cookie 100% 會帶回去
+            return Content($@"
+                <html>
+                <script>
+                    window.location.href = '{targetUrl}';
+                </script>
+                </html>", "text/html");
         }
         //綠界回傳
         [HttpPost("EcpayReturn")]
