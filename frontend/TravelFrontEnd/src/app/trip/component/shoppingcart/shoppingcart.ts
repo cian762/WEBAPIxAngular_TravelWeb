@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
 import { CartItem } from '../../models/creatshopping.model';
 import { AttractionService } from '../../../Components/attractions/attraction.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, timer } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({

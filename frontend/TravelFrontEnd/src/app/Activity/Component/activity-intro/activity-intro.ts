@@ -465,7 +465,8 @@ export class ActivityIntro implements OnInit, AfterViewInit {
           Swal.fire({
             icon: "warning",
             title: "請確認登入狀態",
-            timer: 1000
+            timer: 1000,
+            showConfirmButton: false,
           });
           this.router.navigate(['login'], { queryParams: { returnUrl: this.router.url } });
           return;

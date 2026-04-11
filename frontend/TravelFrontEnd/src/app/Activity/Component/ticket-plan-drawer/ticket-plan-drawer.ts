@@ -4,6 +4,7 @@ import { ticketInfoInterface } from '../../Interface/ticketInfoInterface';
 import { CreateShoppingCart } from '../../../trip/services/create-shopping-cart';
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";//連結購物車用
 import { AddToCartDto } from '../../../trip/models/orderMd.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-ticket-plan-drawer',
@@ -59,6 +60,13 @@ export class TicketPlanDrawer {
     console.log(purchase);
     this.cartService.addToCart(purchase).subscribe((data) => {
       console.log(data);
+      Swal.fire({
+        title: "已新增至購物車",
+        text: `${purchase.productName} x ${purchase.quantity}`,
+        icon: "success",
+        timer: 1000,
+        showConfirmButton: false,
+      });
     });
     this.close();
   }

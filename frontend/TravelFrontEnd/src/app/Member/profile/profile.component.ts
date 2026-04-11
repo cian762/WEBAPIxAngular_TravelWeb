@@ -155,7 +155,8 @@ export class ProfileComponent implements OnInit {
         swalWithBootstrapButtons.fire({
           title: "已登出",
           icon: "success",
-          timer: 1000
+          timer: 1000,
+          showConfirmButton: false,
         });
 
         this.authService.logout().subscribe({

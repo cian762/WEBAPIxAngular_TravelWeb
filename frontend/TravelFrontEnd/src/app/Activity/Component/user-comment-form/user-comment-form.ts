@@ -125,22 +125,24 @@ export class UserCommentForm implements OnDestroy {
       comment: this.commentForm.controls.comment.value,
       rating: this.commentForm.controls.rating.value,
       reviewImages: this.commentForm.controls.images.value
-    }).subscribe({
-      next: (res) => {
-        console.log('送出成功', res);
+    })
+      .subscribe({
+        next: (res) => {
+          console.log('送出成功', res);
 
-        Swal.fire({
-          title: "完成評論新增",
-          icon: "success",
-          timer: 1000,
-        });
+          Swal.fire({
+            title: "完成評論新增",
+            icon: "success",
+            timer: 1000,
+            showConfirmButton: false,
+          });
 
-        this.commentEmit.emit();
-        this.closed.emit();
-        this.restForm();
-      },
-      error: (err) => { console.log('送出失敗', err); }
-    }
-    )
+          this.commentEmit.emit();
+          this.closed.emit();
+          this.restForm();
+        },
+        error: (err) => { console.log('送出失敗', err); }
+      }
+      )
   }
 }

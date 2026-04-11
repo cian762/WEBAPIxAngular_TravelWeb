@@ -55,7 +55,9 @@ export class LoginComponent {
         Swal.fire({
           title: "登入成功！歡迎回來",
           icon: "success",
-          draggable: true
+          draggable: true,
+          showConfirmButton: false,
+          timer: 1000,
         });
 
         const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/profile';
