@@ -68,7 +68,11 @@ export class IndexItinerary implements AfterViewInit {
     });
 
   }
-
+  expression() {
+    this.ItineraryName = '測試行程';
+    this.startDateTime = '2026-04-17T10:00';
+    this.endDateTime = '2026-04-18T09:00';
+  }
 
   startDateTime: string = '';
   endDateTime: string = '';
@@ -114,6 +118,7 @@ export class IndexItinerary implements AfterViewInit {
         error: (err) => {
           console.error('錯誤:', err);
           this.toast.error('建立失敗');
+          this.isLoading = false;
         }
       });
   }
@@ -163,6 +168,7 @@ export class IndexItinerary implements AfterViewInit {
         error: (err) => {
           console.error('錯誤:', err);
           this.toast.error('建立失敗');
+          this.isLoading = false;
         }
       });
 
