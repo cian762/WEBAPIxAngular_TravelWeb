@@ -1,10 +1,11 @@
 <div class="host-body">
+  <button class="float-btn" (click)="Demo()">Demo</button>
   <div class="editor-panel ">
     <form [formGroup]="form">
       <!-- 上傳圖片區 -->
       <section id="sec1">
         <div class="mb-5">
-          @if (!this.photoList[this.coverIndex]) {
+          @if (!(this.photoList.length>=1)) {
           <div class="mb-3">
             <label class="upload-label" style="cursor: pointer;">
               點擊上傳圖片 <i class="bi bi-images ms-1"></i>
@@ -21,8 +22,7 @@
                 <a class="genric-btn info radius set-cover-btn">封面</a>
                 }
                 @else {
-                <a class="remove-photo-btn"><i class="ri-close-circle-line"
-                    (click)="removePhoto(selectedIndex)"></i></a>
+                <a class="remove-photo-btn"><i class="ri-close-circle-line" (click)="removePhoto()"></i></a>
                 <a (click)="selectCover()" class="genric-btn info-border radius set-cover-btn">設定為封面</a>
                 }
               </div>

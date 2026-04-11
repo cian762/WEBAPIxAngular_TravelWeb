@@ -554,3 +554,23 @@ input:checked+.slider::before {
 }
 
 /* ===========以上為權限下拉式選單之樣式=========== */
+
+
+.float-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50px;
+  z-index: 999;
+  width: 50px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px dashed #00000057;
+  background-color: transparent;
+  color: #00000057;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}

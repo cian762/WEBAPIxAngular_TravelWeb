@@ -68,11 +68,13 @@ export class PopularPost implements OnInit {
   // }
 
   goToDetail(id: number, type: number): void {
+    const baseUrl = document.querySelector('base')?.getAttribute('href') || '/';
+
     if (type === 0) {
-      this.router.navigate(['Board', 'detail', id]);
+      window.location.href = `${baseUrl}Board/detail/${id}`;
     }
     else if (type === 1) {
-      this.router.navigate(['Board', 'JournalDetail', id]);
+      window.location.href = `${baseUrl}Board/JournalDetail/${id}`;
     }
   }
 

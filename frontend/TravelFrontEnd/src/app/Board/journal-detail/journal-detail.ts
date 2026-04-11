@@ -32,6 +32,7 @@ export class JournalDetail implements OnInit {
       this.Serve.getJournalDetailAPI(this.id).subscribe({
         next: (d) => {
           {
+            this.Serve.postLogView(this.id).subscribe();
             this.journal = d;
           }
         },
