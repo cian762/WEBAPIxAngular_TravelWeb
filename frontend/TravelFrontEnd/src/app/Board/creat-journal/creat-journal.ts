@@ -460,13 +460,135 @@ export class CreatJournal implements OnInit {
   }
 
   get currentDists() {
-    return this.regions.find(r => r.regionId === this.cityId)?.dist ?? [];
+    return this.regions.find(r => r.regionId == Number(this.cityId))?.dist ?? [];
   }
 
   onCityChange() {
     this.distId = undefined;
   }
-}
 
+  Demo() {
+    this.journalUpdate.title = "單獨為夜市美食發一篇";
+    this.addTag(5);
+    this.addTag(13);
+    this.cityId = 10;
+    this.distId = 1004;
+  }
+  DemoB() {
+    this.itemBoxs = [];
+    const El: any = [
+      {
+        "page": 1,
+        "posX": 420,
+        "posY": 860,
+        "rotation": 0,
+        "zindex": 1,
+        "elementType": 0,
+        "content": "珍珠奶茶\n壓軸",
+        "width": 80,
+        "height": 50
+      },
+      {
+        "page": 1,
+        "posX": 380,
+        "posY": 800,
+        "rotation": 0,
+        "zindex": 2,
+        "elementType": 1,
+        "content": "https://res.cloudinary.com/daobwcaga/image/upload/v1775893858/p0211_s_rdcdf3.png",
+        "width": 160,
+        "height": 160
+      },
+      {
+        "page": 1,
+        "posX": 470,
+        "posY": 520,
+        "rotation": 0,
+        "zindex": 3,
+        "elementType": 1,
+        "content": "https://res.cloudinary.com/daobwcaga/image/upload/v1775893858/%E6%89%8B%E5%B8%B3%E7%B0%BF_%E9%A5%92%E6%B2%B3%E5%A4%9C%E5%B8%82%E7%BE%8E%E9%A3%9F%E7%AF%87_4_frchge.jpg",
+        "width": 270,
+        "height": 410
+      },
+      {
+        "page": 1,
+        "posX": 280,
+        "posY": 480,
+        "rotation": 0,
+        "zindex": 4,
+        "elementType": 0,
+        "content": "饒河夜市聚集了多樣的傳統與創新小吃，每一攤都有其特色。",
+        "width": 170,
+        "height": 80
+      },
+      {
+        "page": 1,
+        "posX": 240,
+        "posY": 430,
+        "rotation": 0,
+        "zindex": 5,
+        "elementType": 1,
+        "content": "https://res.cloudinary.com/daobwcaga/image/upload/v1775893858/p0203_s_rmabcw.png",
+        "width": 250,
+        "height": 180
+      },
+      {
+        "page": 1,
+        "posX": 20,
+        "posY": 740,
+        "rotation": 0,
+        "zindex": 6,
+        "elementType": 1,
+        "content": "https://res.cloudinary.com/daobwcaga/image/upload/v1775893861/%E6%89%8B%E5%B8%B3%E7%B0%BF_%E9%A5%92%E6%B2%B3%E5%A4%9C%E5%B8%82%E7%BE%8E%E9%A3%9F%E7%AF%87_3_fojiai.jpg",
+        "width": 340,
+        "height": 220
+      },
+      {
+        "page": 1,
+        "posX": 450,
+        "posY": 50,
+        "rotation": 0,
+        "zindex": 7,
+        "elementType": 1,
+        "content": "https://res.cloudinary.com/daobwcaga/image/upload/v1775893864/%E6%89%8B%E5%B8%B3%E7%B0%BF_%E9%A5%92%E6%B2%B3%E5%A4%9C%E5%B8%82%E7%BE%8E%E9%A3%9F%E7%AF%87_2_y2tmuy.jpg",
+        "width": 290,
+        "height": 440
+      },
+      {
+        "page": 1,
+        "posX": 20,
+        "posY": 280,
+        "rotation": 0,
+        "zindex": 8,
+        "elementType": 1,
+        "content": "https://res.cloudinary.com/daobwcaga/image/upload/v1775893859/%E6%89%8B%E5%B8%B3%E7%B0%BF_%E9%A5%92%E6%B2%B3%E5%A4%9C%E5%B8%82%E7%BE%8E%E9%A3%9F%E7%AF%87_1_qixfud.jpg",
+        "width": 280,
+        "height": 410
+      },
+      {
+        "page": 1,
+        "posX": 20,
+        "posY": 50,
+        "rotation": 0,
+        "zindex": 9,
+        "elementType": 0,
+        "content": "單獨為夜市美食發一篇\n\n最愛的甜不辣攤位，現煮現賣，湯頭鮮美，搭配各式醬料，口感軟嫩彈牙。\n皮薄餡多的小籠包，湯汁豐富，咬下即能感受到肉香與湯汁的結合。\n牛肉麵湯頭濃郁、牛肉軟嫩，麵條吸附湯汁，整體風味平衡。",
+        "width": 400,
+        "height": 200
+      }
+    ];
+    this.itemBoxs = El.map((el: any) => ({
+      id: this.nextId++,
+      zIndex: el.zindex,
+      type: el.elementType,
+      content: el.content,
+      width: el.width,
+      height: el.height,
+      x: el.posX,
+      y: el.posY,
+    }));
+
+  }
+}
 // (cdkDragEnded)="onDragEnd($event)"
 //     (click)="onClick(image)"

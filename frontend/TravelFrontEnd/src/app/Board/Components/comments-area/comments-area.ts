@@ -31,7 +31,6 @@ export class CommentsArea implements OnInit {
   parentComment? = "";
   selectedImage?: string = undefined;
   selectedImageFile?: File;
-  ImageURL?: string;
   showPreview: boolean = false;
 
   async postComment(contents: string) {
@@ -42,8 +41,9 @@ export class CommentsArea implements OnInit {
         Swal.showLoading();
       }
     });
+    let ImageURL = undefined;
     if (this.selectedImageFile) {
-      this.ImageURL = await this._Cserve.uploadImage(this.selectedImageFile);
+      ImageURL = await this._Cserve.uploadImage(this.selectedImageFile);
       console.log("上傳", this.parent, this.selectedImageFile);
     }
 
@@ -51,7 +51,7 @@ export class CommentsArea implements OnInit {
       articleID: this.id,
       contents: contents,
       parentID: this.parent !== undefined ? this.parent : null,
-      commentPhoto: this.ImageURL
+      commentPhoto: ImageURL
     }
     console.log(CommentDto);
     this.Serve.postCommentAPI(CommentDto).subscribe(({
@@ -122,7 +122,13 @@ export class CommentsArea implements OnInit {
     if (comment) comment.isLiked = !comment.isLiked;
   }
 
+  Demo() {
+    this.contents = "電影般的場景";
 
+  }
+  DemoB() {
+    this.contents = "夜晚白天都是不同風味~";
+  }
 
 }
 

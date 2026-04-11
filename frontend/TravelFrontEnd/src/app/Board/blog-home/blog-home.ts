@@ -207,7 +207,7 @@ export class BlogHome implements OnInit, AfterViewInit {
   }
 
   get districts() {
-    return this.regions?.find(r => r.regionId === this.selectedCityId)?.dist ?? [];
+    return this.regions?.find(r => r.regionId == Number(this.selectedCityId))?.dist ?? [];
   }
 
   initRegion() {
