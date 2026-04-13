@@ -99,6 +99,35 @@
   font-weight: 600;
 }
 
+
+/* flatpickr 手機版優化 */
+.calendar-box__body .flatpickr-calendar.inline {
+  box-shadow: none;
+  width: auto;
+  max-width: 100%;
+}
+
+.calendar-box__body .flatpickr-months,
+.calendar-box__body .dayContainer,
+.calendar-box__body .flatpickr-days {
+  max-width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .calendar-box__body .flatpickr-calendar.inline {
+    font-size: 0.9rem;
+  }
+
+  .calendar-box__body .flatpickr-day {
+    max-width: 38px;
+    height: 38px;
+    line-height: 38px;
+  }
+}
+
+
+
+
 /* Result Meta */
 .result-meta {
   display: flex;
@@ -373,7 +402,7 @@
 .hero-banner {
   position: relative;
   overflow: hidden;
-  padding: 20px 20px;
+  padding: 32px 20px;
   background:
     radial-gradient(circle at 18% 30%, rgba(255, 193, 118, 0.20), transparent 22%),
     radial-gradient(circle at 82% 18%, rgba(92, 163, 255, 0.14), transparent 24%),
@@ -408,25 +437,42 @@
 }
 
 .hero-banner__container {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 32px;
 }
 
 .hero-banner__content {
-  width: 42%;
+  flex: 0 0 42%;
+  max-width: 42%;
+}
+
+.hero-banner__title {
+  font-size: 2.4rem;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.hero-banner__content p {
+  margin-bottom: 0;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #4b5563;
 }
 
 .hero-banner__carousel {
-  width: 58%;
+  flex: 0 0 58%;
+  max-width: 58%;
   border-radius: 24px;
   overflow: hidden;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
 }
 
-.hero-banner__carousel .carousel-inner {
-  height: 340px;
-}
-
+.hero-banner__carousel .carousel-inner,
 .hero-banner__carousel .carousel-item {
   height: 340px;
 }
@@ -436,6 +482,106 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* ===== 平板 ===== */
+@media (max-width: 991.98px) {
+  .hero-banner {
+    padding: 28px 16px;
+  }
+
+  .hero-banner__container {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .hero-banner__content,
+  .hero-banner__carousel {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .hero-banner__content {
+    text-align: center;
+  }
+
+  .hero-banner__title {
+    font-size: 2rem;
+  }
+
+  .hero-banner__content p {
+    font-size: 1rem;
+  }
+
+  .hero-banner__carousel .carousel-inner,
+  .hero-banner__carousel .carousel-item {
+    height: 300px;
+  }
+}
+
+/* ===== 手機 ===== */
+@media (max-width: 767.98px) {
+  .hero-banner {
+    padding: 24px 12px;
+  }
+
+  .hero-banner__container {
+    gap: 20px;
+  }
+
+  .hero-banner__title {
+    font-size: 1.7rem;
+    line-height: 1.35;
+  }
+
+  .hero-banner__content p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .hero-banner__carousel {
+    border-radius: 18px;
+  }
+
+  .hero-banner__carousel .carousel-inner,
+  .hero-banner__carousel .carousel-item {
+    height: 220px;
+  }
+
+  .hero-banner::before {
+    width: 180px;
+    height: 180px;
+    left: -20px;
+    top: 10px;
+  }
+
+  .hero-banner::after {
+    width: 200px;
+    height: 200px;
+    right: -30px;
+    top: 30px;
+  }
+}
+
+/* ===== 小手機 ===== */
+@media (max-width: 575.98px) {
+  .hero-banner__title {
+    font-size: 1.45rem;
+  }
+
+  .hero-banner__content p {
+    font-size: 0.9rem;
+  }
+
+  .hero-banner__carousel .carousel-inner,
+  .hero-banner__carousel .carousel-item {
+    height: 190px;
+  }
+
+  .hero-banner__carousel .carousel-control-prev-icon,
+  .hero-banner__carousel .carousel-control-next-icon {
+    transform: scale(0.8);
+  }
 }
 
 

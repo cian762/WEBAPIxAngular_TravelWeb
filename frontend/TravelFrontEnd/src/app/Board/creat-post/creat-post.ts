@@ -317,7 +317,9 @@ export class CreatPost implements OnInit, OnDestroy {
       id: index
     }));
   }
-  removePhoto(id: number) {
+
+  removePhoto() {
+    let id = this.selectedIndex;
     const currentIdx = this.photoList.findIndex(p => p.id === id);
     this.photoList = this.photoList.filter(p => p.id !== id);
     const next = this.photoList[currentIdx] ?? this.photoList[currentIdx - 1] ?? this.photoList[0];
@@ -499,5 +501,22 @@ export class CreatPost implements OnInit, OnDestroy {
     this.searchControl.setValue(s.title); // 直接取 title
     this.showSuggestions = false;
     this.onProductSearch();
+  }
+
+  Demo() {
+    this.form.get("title")?.patchValue("日月潭的靜與遠");
+    this.form.get("content")?.patchValue(`日月潭的景色，總帶著一種不張揚的深度。湖面平穩時，倒映著山與天的輪廓，讓人分不清界線；起霧時，遠方逐漸隱去，只留下層層疊疊的灰與綠。
+
+沿著湖畔行走，腳步自然放慢。水聲、風聲與偶爾傳來的人聲交錯，形成一種不干擾卻持續存在的背景。這樣的環境，使人更容易注意到細節，也更容易沉入自己的思緒之中。
+
+      不同時間的日月潭，有不同的樣貌。清晨偏向清冷，午後逐漸明朗，傍晚則帶著些許收斂與沉靜。光線的變化，不只是視覺差異，也改變了整體的氛圍與節奏。
+
+      這裡不強調刺激或熱鬧，而是以一種穩定而持續的方式存在。停留片刻，往往能感受到比風景更長久的餘韻。
+「<a href="https://www.flickr.com/photos/67415843@N05/14300650994" title = "IMG_12110_Shuishalian" > IMG_12110_Shuishalian < /a>」 <a href="https:/ / www.flickr.com / photos / 67415843@N05 / "> (由 Mark 高維隆 製作)</a>, <a href="https://creativecommons.org/licenses/by/2.0/deed.zh-hant" rel="license noopener noreferrer">CC BY 2.0</a>
+      `);
+    this.addTag(1027);
+    this.addTag(6);
+    this.addTag(14);
+
   }
 }

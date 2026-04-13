@@ -519,8 +519,10 @@
 }
 
 /* 推薦用分頁 Css */
+/* ===== 推薦活動 RWD Slider ===== */
 .suggestion-section {
   position: relative;
+  overflow: hidden;
 }
 
 .suggestion-header {
@@ -534,18 +536,18 @@
   overflow: hidden;
   width: 100%;
   padding: 0 28px;
-  /* 留給左右按鈕一點呼吸空間 */
 }
 
 .suggestion-track {
   display: flex;
-  transition: transform 0.5s ease;
+  transition: transform 0.45s ease;
   will-change: transform;
   margin: 0 -12px;
 }
 
 .suggestion-item {
   flex: 0 0 33.3333%;
+  max-width: 33.3333%;
   padding: 0 12px;
   box-sizing: border-box;
   min-width: 0;
@@ -565,12 +567,65 @@
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
 }
 
+.activity-card__image-wrap {
+  overflow: hidden;
+}
+
+.activity-card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #f3f4f6;
+  display: block;
+}
+
+.activity-card__body {
+  min-width: 0;
+  word-break: break-word;
+}
+
+.activity-card__title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8em;
+  line-height: 1.4;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.activity-card__date,
+.activity-card__stats,
+.activity-card__bottom,
+.activity-card__footer {
+  min-width: 0;
+  word-break: break-word;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-item {
+  background: #eff6ff;
+  color: #2563eb;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
 .slider-side-btn {
   position: absolute;
   top: 52%;
   transform: translateY(-50%);
   z-index: 10;
-
   width: 54px;
   height: 54px;
   border: none;
@@ -578,17 +633,10 @@
   background: rgba(255, 255, 255, 0.96);
   color: #243b53;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease,
-    opacity 0.25s ease;
-
+  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
@@ -601,11 +649,6 @@
 .slider-side-btn:hover:not(:disabled) {
   transform: translateY(-50%) scale(1.06);
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.22);
-  background: #ffffff;
-}
-
-.slider-side-btn:active:not(:disabled) {
-  transform: translateY(-50%) scale(0.98);
 }
 
 .slider-side-btn:disabled {
@@ -622,13 +665,99 @@
   right: -6px;
 }
 
-.activity-card__body,
-.activity-card__footer,
-.activity-card__title,
-.activity-card__date,
-.activity-card__bottom {
-  min-width: 0;
-  word-break: break-word;
+/* ===== 平板 ===== */
+@media (max-width: 991.98px) {
+  .suggestion-slider {
+    padding: 0 20px;
+  }
+
+  .suggestion-track {
+    margin: 0 -10px;
+  }
+
+  .suggestion-item {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding: 0 10px;
+  }
+
+  .activity-card__image {
+    height: 180px;
+  }
+
+  .activity-card__bottom {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+
+  .slider-side-btn {
+    width: 46px;
+    height: 46px;
+  }
+
+  .slider-side-btn--left {
+    left: 0;
+  }
+
+  .slider-side-btn--right {
+    right: 0;
+  }
+}
+
+/* ===== 手機 ===== */
+@media (max-width: 767.98px) {
+  .suggestion-header {
+    margin-bottom: 1rem;
+  }
+
+  .suggestion-slider {
+    padding: 0;
+  }
+
+  .suggestion-track {
+    margin: 0;
+  }
+
+  .suggestion-item {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .activity-card__image {
+    height: 210px;
+  }
+
+  .activity-card__body {
+    padding: 16px;
+  }
+
+  .activity-card__title {
+    font-size: 1rem;
+  }
+
+  .activity-card__date,
+  .activity-card__stats,
+  .activity-card__bottom {
+    font-size: 0.88rem;
+  }
+
+  .slider-side-btn {
+    display: none;
+  }
+}
+
+/* ===== 小手機 ===== */
+@media (max-width: 575.98px) {
+  .activity-card__image {
+    height: 190px;
+  }
+
+  .tag-item {
+    font-size: 0.72rem;
+    padding: 4px 8px;
+  }
 }
 
 .skel {

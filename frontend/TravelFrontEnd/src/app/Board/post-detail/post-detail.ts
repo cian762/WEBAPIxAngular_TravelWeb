@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { BoardServe } from '../Service/board-serve';
 import { PostDetailDto } from '../interface/PostDetailDto';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -12,6 +12,10 @@ import { AuthorInfoSidebar } from "../Components/author-info-sidebar/author-info
 import localeZhTw from '@angular/common/locales/zh-Hant';
 import { DatePipe, registerLocaleData } from '@angular/common';
 import Swal from 'sweetalert2';
+import { ArticleData } from '../interface/ArticleData';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CloudinaryServe } from '../Service/cloudinary-serve';
+import { reportLog } from '../Components/article-list/article-list';
 
 registerLocaleData(localeZhTw);
 interface ArticleTag {
@@ -22,18 +26,27 @@ interface ArticleTag {
 
 @Component({
   selector: 'app-post-detail',
-  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton, PopularPost, TagClouds, PostCatgories, AuthorInfoSidebar, DatePipe,],
+  imports: [RouterModule, Sidebar, CommentsArea, CreateArticleButton, PopularPost, TagClouds, PostCatgories, AuthorInfoSidebar, DatePipe, ReactiveFormsModule],
   templateUrl: './post-detail.html',
   styleUrl: './post-detail.css',
 })
 export class PostDetail implements OnInit {
-  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router) { };
+  constructor(private Serve: BoardServe, private route: ActivatedRoute, private router: Router, private _CloudinaryServe: CloudinaryServe) { };
   id = 0;
   selectedIndex = 0;
   allPhotoList: string[] = [];
   TagsList: ArticleTag[] = [];
   post?: PostDetailDto;
   product?: any;
+  @ViewChild('fileInput') fileInput!: ElementRef;
+
+  reportTarget?: PostDetailDto;
+  reportForm = new FormGroup({
+    violationType: new FormControl('', Validators.required),
+    reportDetails: new FormControl('')
+  });
+  reportImageFile?: File;
+  reportPhotoView?: string;
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
@@ -137,6 +150,70 @@ export class PostDetail implements OnInit {
     } else {
       console.error('找不到對應路由或 ID', item);
     }
+  }
+
+  openReport() {
+    if (this.post) {
+      this.reportTarget = this.post;
+    }
+  }
+
+  async ReportArticle() {
+    if (this.reportForm.invalid) return;
+    Swal.fire({
+      title: "上傳中...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    if (this.reportTarget) {
+      let imageUrl = null;
+      if (this.reportImageFile) {
+        imageUrl = await this._CloudinaryServe.uploadImage(this.reportImageFile);
+      }
+
+      const log: reportLog = {
+        TargetID: this.id,
+        ViolationType: Number(this.reportForm.value.violationType) ?? 0,
+        Reason: this.reportForm.value.reportDetails ?? undefined,
+        Photo: imageUrl,
+      }
+
+      console.log(log);
+
+      this.Serve.postReport(log).subscribe(
+        {
+          next: (d) => {
+            Swal.fire({
+              text: "檢舉成功!",
+              icon: "success",
+              showConfirmButton: false,
+              timer: 1500
+            });
+            this.ReportFormReset();
+          },
+          error: (err) => {
+            // 失敗
+            console.error(err);
+          }
+        });
+    }
+  }
+
+  onFileChange(event: any) {
+    const file = event.target.files[0];
+    this.reportImageFile = file;
+    this.reportPhotoView = URL.createObjectURL(file);
+  }
+  ReportFormReset() {
+    this.reportTarget = undefined;
+    this.reportPhotoView = undefined;
+    this.reportImageFile = undefined;
+    this.reportForm.reset({ violationType: '' });
+    this.fileInput.nativeElement.value = '';
+    const modalEl = document.getElementById('ReportBackdrop');
+    (window as any).bootstrap.Modal.getInstance(modalEl)?.hide();
   }
 }
 //  class="reaction-item" [class.liked]="post?.isLike"

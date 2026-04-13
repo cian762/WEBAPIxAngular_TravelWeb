@@ -11,6 +11,7 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { PersonalCommentService } from '../../Service/personal-comment-service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-edit-comment-form',
@@ -150,6 +151,13 @@ export class EditCommentForm implements OnChanges, OnDestroy {
       .subscribe({
         next: (res) => {
           console.log('修改成功', res);
+
+          Swal.fire({
+            title: "完成評論修改",
+            icon: "success",
+            timer: 1000,
+          });
+
           this.saved.emit();
           this.closed.emit();
         },

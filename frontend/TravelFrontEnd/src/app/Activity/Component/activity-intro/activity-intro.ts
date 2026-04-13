@@ -1,7 +1,7 @@
 import { AuthService } from './../../../Member/services/auth.service';
 import { reviewResponseDTO } from './../../Interface/reviewResonseDTO';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivityInfoService } from '../../Service/activity-info-service';
 import { ActivityInfoInterface } from '../../Interface/InfoInterface';
 import { productInfoInterface } from '../../Interface/productIntroInterface';
@@ -49,6 +49,7 @@ export class ActivityIntro implements OnInit, AfterViewInit {
     images: [],
     regions: [],
     commentCount: 0,
+    sellCount: 0,
   };
 
   productInfoCollection: productInfoInterface[] = [{
@@ -85,6 +86,7 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
 
   ngOnInit(): void {
+    this.updateCardsPerView();
     this.activatedRoute.params.pipe(
       tap(() => {
         this.isPageLoading = true;
@@ -463,9 +465,11 @@ export class ActivityIntro implements OnInit, AfterViewInit {
           Swal.fire({
             icon: "warning",
             title: "請確認登入狀態",
-            timer: 500
+            timer: 1000,
+            showConfirmButton: false,
           });
-          this.router.navigate(['login']);
+          this.router.navigate(['login'], { queryParams: { returnUrl: this.router.url } });
+          return;
         }
         console.log('res', res);
         this.isModalOpen = !this.isModalOpen;
@@ -514,17 +518,39 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
   //個人刪除評論使用的方法
   deletePersonalComment(activityId: number): void {
-    this.personalCommentService.deletePersonalComment(activityId)
-      .subscribe({
-        next: (res) => {
-          console.log('刪除成功', res);
-          //刪除後再觸發 refresh 方法;
-          this.refreshPersonalComment();
-        },
-        error: (err) => {
-          console.log('刪除失敗', err);
-        }
-      });
+    Swal.fire({
+      title: "是否要刪除此評論?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "確認刪除",
+      cancelButtonText: "取消"
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      this.personalCommentService.deletePersonalComment(activityId)
+        .subscribe({
+          next: (res) => {
+            Swal.fire({
+              title: "已刪除評論",
+              icon: "success"
+            });
+
+            this.refreshPersonalComment();
+            console.log('刪除成功', res);
+          },
+          error: (err) => {
+            Swal.fire({
+              title: "刪除失敗",
+              text: "請稍後再試",
+              icon: "error"
+            });
+
+            console.log('刪除失敗', err);
+          }
+        });
+    });
   }
 
 
@@ -555,15 +581,36 @@ export class ActivityIntro implements OnInit, AfterViewInit {
 
 
   //推薦分頁邏輯
-  currentIndex = 0;
   cardsPerView = 3;
+  cardWidthPercent = 100 / this.cardsPerView;
+  currentIndex = 0;
 
-  get cardWidthPercent(): number {
-    return 100 / this.cardsPerView;
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateCardsPerView();
+  }
+
+  private updateCardsPerView(): void {
+    const width = window.innerWidth;
+
+    if (width < 768) {
+      this.cardsPerView = 1;
+    } else if (width < 992) {
+      this.cardsPerView = 2;
+    } else {
+      this.cardsPerView = 3;
+    }
+
+    this.cardWidthPercent = 100 / this.cardsPerView;
+
+    const maxIndex = Math.max(0, this.suggestionCollection.length - this.cardsPerView);
+    if (this.currentIndex > maxIndex) {
+      this.currentIndex = maxIndex;
+    }
   }
 
   next(): void {
-    const maxIndex = this.suggestionCollection.length - this.cardsPerView;
+    const maxIndex = Math.max(0, this.suggestionCollection.length - this.cardsPerView);
     if (this.currentIndex < maxIndex) {
       this.currentIndex++;
     }
@@ -574,6 +621,56 @@ export class ActivityIntro implements OnInit, AfterViewInit {
       this.currentIndex--;
     }
   }
+
+
+  email: string = "";
+  comment: string = "";
+
+  onSubmit() {
+
+    console.log(this.email);
+    console.log(this.comment);
+
+    if (this.email === "" && this.comment === "") {
+      Swal.fire({
+        position: "center",
+        icon: "warning",
+        title: "請完整填入資訊",
+        showConfirmButton: false,
+        timer: 1500
+      });
+      return;
+    }
+
+    if (!this.email.includes("@")) {
+      Swal.fire({
+        position: "center",
+        icon: "warning",
+        title: "請填入正確Email格式",
+        showConfirmButton: false,
+        timer: 1500
+      });
+      return;
+    }
+
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "感謝您提供的問題回報",
+      showConfirmButton: false,
+      timer: 1500
+    });
+
+    this.email = "";
+    this.comment = "";
+  }
+
+  keyInData() {
+    this.email = "abc123@gmail.com";
+    this.comment = "活動日期已經有更新，請管理員協助修改";
+  }
+
+
 }
 
 

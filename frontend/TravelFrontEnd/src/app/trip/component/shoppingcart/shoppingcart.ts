@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { CreateShoppingCart } from '../../services/create-shopping-cart';
 import { CartItem } from '../../models/creatshopping.model';
 import { AttractionService } from '../../../Components/attractions/attraction.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, timer } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -21,10 +21,44 @@ export class Shoppingcart implements OnInit {
   private router = inject(Router);
   private attractionSvc = inject(AttractionService);
 
-  cartItems: CartItem[] = []; // 使用強型別介面
+  cartItems: CartItem[] = [];
   isLoading: boolean = true;
   totalAmount: number = 0;
 
+  // [YJ] 勾選功能
+  selectedIds = new Set<number>();
+
+  toggleSelect(cartId: number): void {
+    if (this.selectedIds.has(cartId)) {
+      this.selectedIds.delete(cartId);
+    } else {
+      this.selectedIds.add(cartId);
+    }
+  }
+
+  toggleSelectAll(): void {
+    if (this.isAllSelected) {
+      this.selectedIds.clear();
+    } else {
+      this.cartItems.forEach(item => this.selectedIds.add(item.cartId));
+    }
+  }
+
+  get isAllSelected(): boolean {
+    return this.cartItems.length > 0 &&
+      this.cartItems.every(item => this.selectedIds.has(item.cartId));
+  }
+
+  get selectedTotal(): number {
+    return this.cartItems
+      .filter(item => this.selectedIds.has(item.cartId))
+      .reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+  // [YJ] 勾選功能 end
 
   ngOnInit(): void {
     this.fetchCartData();
@@ -34,10 +68,10 @@ export class Shoppingcart implements OnInit {
   fetchCartData() {
     this.isLoading = true;
 
-    // 💡 直接呼叫 Service，後端已經把所有 ID (TargetId) 準備好了
     this.cartService.getCart().subscribe({
       next: (data: CartItem[]) => {
         this.cartItems = data;
+        this.selectedIds = new Set(data.map((i: CartItem) => i.cartId)); // 預設全選
         this.calculateTotal();
         this.isLoading = false;
       },
@@ -62,7 +96,6 @@ export class Shoppingcart implements OnInit {
       cancelButtonText: '取消'
     }).then((result) => {
       if (result.isConfirmed) {
-        // 顯示載入中
         Swal.showLoading();
 
         this.cartService.removeItems([cartIds], [productCode]).subscribe({
@@ -77,11 +110,9 @@ export class Shoppingcart implements OnInit {
       }
     });
   }
+
   // 3. 更換票種直接先刪除
-  // 3. 更換票種 (優化版：合併處理邏輯)
   ItemSwitch(cartIds: number, productCode: string) {
-    // 這裡建議不要用 confirm，因為 goEdit 已經點擊了，通常代表 user 確定要改
-    // 如果一定要提示，建議用輕量一點的提示
     this.cartService.removeItems([cartIds], [productCode]).subscribe({
       next: () => {
         this.fetchCartData();
@@ -90,8 +121,7 @@ export class Shoppingcart implements OnInit {
     });
   }
 
-  // 3. 更新數量 (如果你畫面上有 + / - 按鈕)
-  // 3. 更新數量 (增加錯誤處理的彈窗)
+  // 4. 更新數量
   changeQuantity(item: CartItem, newQty: number) {
     if (newQty < 1) return;
 
@@ -107,7 +137,6 @@ export class Shoppingcart implements OnInit {
         }
       },
       error: (err) => {
-        // 回滾數量
         item.quantity = oldQty;
         this.calculateTotal();
         Swal.fire({
@@ -120,28 +149,38 @@ export class Shoppingcart implements OnInit {
       }
     });
   }
-  //購物車打包給訂單用
+
+  // 5. 前往下單（只送勾選的）
   goToOrder() {
-    // 假設你的購物車資料存在 this.cartItems
-    // 這裡要把資料打包，格式要跟你的 OrderComponent 接收的一致
+    if (this.selectedIds.size === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: '請至少勾選一項商品',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      return;
+    }
+
     const checkoutPayload = {
-      directBuyItems: this.cartItems.map(item => ({
-        productCode: item.productCode,
-        productName: item.productName,
-        quantity: item.quantity,
-        ticketCategoryId: item.ticketCategoryId,
-        price: item.price,
-        cartId: item.cartId, // 這是為了之後刪除用的
-        coverImage: item.coverImage, // 讓訂單頁能顯示圖片
-        targetId: item.targetId
-      }))
+      directBuyItems: this.cartItems
+        .filter(item => this.selectedIds.has(item.cartId))
+        .map(item => ({
+          productCode: item.productCode,
+          productName: item.productName,
+          quantity: item.quantity,
+          ticketCategoryId: item.ticketCategoryId,
+          price: item.price,
+          cartId: item.cartId,
+          coverImage: item.coverImage,
+          targetId: item.targetId
+        }))
     };
     console.log('準備帶走的資料:', checkoutPayload);
-    // 使用 router.navigate 並透過 state 傳資料
     this.router.navigate(['/order'], { state: { data: checkoutPayload } });
   }
 
-  // 編輯：導回景點詳情頁售票區
+  // 6. 編輯：導回景點詳情頁售票區
   goEdit(item: CartItem) {
     Swal.fire({
       title: '重新選擇',
@@ -152,7 +191,6 @@ export class Shoppingcart implements OnInit {
       if (result.isConfirmed) {
         this.cartService.removeItems([item.cartId], [item.productCode]).subscribe({
           next: () => {
-            // 刪除成功後再導航
             const id = item.targetId;
             const code = item.productCode || '';
 
@@ -170,7 +208,8 @@ export class Shoppingcart implements OnInit {
       }
     });
   }
-  // 4. 計算總價
+
+  // 7. 計算總價
   calculateTotal() {
     this.totalAmount = this.cartItems.reduce(
       (sum: number, item: CartItem) => sum + (item.price * item.quantity), 0

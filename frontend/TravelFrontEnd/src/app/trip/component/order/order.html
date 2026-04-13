@@ -28,7 +28,10 @@
         <p class="text-muted mb-4" style="font-size: 0.875rem;"><i class="bi bi-lock-fill me-1"></i> 我們保護您的隱私安全。</p>
 
         <form [formGroup]="orderForm" (ngSubmit)="onCheckout()">
-          <p class="text-danger mb-2" style="font-size: 0.75rem;">* 必填欄位</p>
+          <div class="d-flex align-items-center justify-content-between">
+            <p class="text-danger mb-2" style="font-size: 0.75rem;">* 必填欄位</p>
+            <button type="button" class="btn btn-primary ms-2 mb-2" (click)="KeyInData()">快填資料</button>
+          </div>
 
           <div class="row">
             <div class="col-md-6 mb-3">

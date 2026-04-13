@@ -2,6 +2,7 @@
 using TravelWeb_API.DTO.ActivityDTO;
 using TravelWeb_API.Models.ActivityModel;
 using TravelWeb_API.Models.MemberSystem;
+using TravelWeb_API.Models.TripProduct;
 using TravelWeb_API.Models.TripProduct.TripDTO;
 
 namespace TravelWeb_API.Services
@@ -10,28 +11,41 @@ namespace TravelWeb_API.Services
     {
         private readonly ActivityDbContext _activityDbContext;
         private readonly MemberSystemContext _memberDbContext;
-        public ActivityInfoService(ActivityDbContext activityDbContext, MemberSystemContext memberSystemContext)
+        private readonly TripDbContext _tripDbContext;
+        public ActivityInfoService(ActivityDbContext activityDbContext, MemberSystemContext memberSystemContext, TripDbContext tripDbContext)
         {
             _activityDbContext = activityDbContext;
             _memberDbContext = memberSystemContext;
+            _tripDbContext = tripDbContext;
         }
 
         public async Task<ActivityInfoResponseDTO?> GetSpecificActivityInfo(int activityId)
         {
-            var check = await _activityDbContext.Activities.AnyAsync(a => a.ActivityId == activityId);
+            var target = await _activityDbContext.Activities
+     .FirstOrDefaultAsync(a => a.ActivityId == activityId);
 
-            if (!check) return null;
+            if (target == null)
+                return null;
+
+            var productCodes = await _activityDbContext.ActivityTicketDetails
+                .Where(at => at.ActivityId == activityId)
+                .Select(at => at.ProductCode)
+                .Where(code => code != null)
+                .ToListAsync();
+
+            var productCount = await _tripDbContext.OrderItems
+                .Where(oi => oi.ProductCode != null && productCodes.Contains(oi.ProductCode))
+                .CountAsync();
 
             var result = await _activityDbContext.Activities
                 .AsNoTracking()
-                .Include(a=>a.Reviews)
                 .Where(a => a.ActivityId == activityId)
                 .Select(a => new ActivityInfoResponseDTO
                 {
                     ActivityId = a.ActivityId,
                     Title = a.Title,
-                    Regions = a.Regions.Select(a => a.RegionName).ToList(),
-                    Types = a.Types.Select(a => a.ActivityType).ToList()!,
+                    Regions = a.Regions.Select(r => r.RegionName).ToList(),
+                    Types = a.Types.Select(t => t.ActivityType).ToList()!,
                     Description = a.Description,
                     StartTime = a.StartTime,
                     EndTime = a.EndTime,
@@ -40,17 +54,13 @@ namespace TravelWeb_API.Services
                     Latitude = a.Latitude,
                     Propaganda = a.Propaganda,
                     OfficialLink = a.OfficialLink,
-                    CommentCount = a.Reviews.Where(r=>r.IsSoftDeleted == false).Count(),
-                    Images = a.ActivityImages.Select(a => a.ImageUrl).ToList(),
+                    CommentCount = a.Reviews.Count(r => r.IsSoftDeleted == false),
+                    Images = a.ActivityImages.Select(i => i.ImageUrl).ToList(),
+                    SellCount = productCount
                 })
                 .FirstOrDefaultAsync();
 
-            var target = await _activityDbContext.Activities
-                .Where(a => a.ActivityId == activityId)
-                .FirstOrDefaultAsync();
-
-            target!.ViewCount += 1;
-
+            target.ViewCount += 1;
             await _activityDbContext.SaveChangesAsync();
 
             return result;

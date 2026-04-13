@@ -61,7 +61,20 @@
               <a class="other-item">{{post?.commentCount}}則留言 <span class="lnr lnr-bubble"></span></a>
               <!-- 更多 -->
               <div class="post-location">
-                <button class="btn-more"><i class="ri-more-fill"></i></button>
+                <button class="btn-more" data-bs-toggle="dropdown" aria-expanded="false"
+                  (click)="$event.stopPropagation()"><i class="ri-more-fill"></i></button>
+                <ul class="dropdown-menu" style="position: fixed;">
+                  <li><a class="dropdown-item" (click)="$event.stopPropagation()">分享貼文</a></li>
+                  <li><a class="dropdown-item" (click)="$event.stopPropagation()">複製留言</a></li>
+                  @if(true){
+                  <!-- Angular 裡綁定 data-* 屬性要用 [attr.屬性名稱] -->
+                  <li><a data-bs-toggle="modal" data-bs-target="#ReportBackdrop" (click)="openReport()"
+                      class="dropdown-item">檢舉</a></li>
+                  }
+                  @else {
+
+                  }
+                </ul>
               </div>
             </div>
           </div>
@@ -110,3 +123,60 @@
   </div>
 </section>
 <!-- End post-content Area -->
+
+
+
+
+
+
+
+<!-- 檢舉彈窗 -->
+<div class="modal fade" id="ReportBackdrop" data-bs-backdrop="static" tabindex="-1"
+  aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">檢舉文章「{{reportTarget?.title}}」</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+          (click)="ReportFormReset()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="mb-3">
+            <div class="row">
+              <div class=" col-6">
+              </div>
+              <form [formGroup]="reportForm">
+                <div class=" col-6">
+                  <label class="form-label">違規類型</label>
+                  <select formControlName="violationType" class="form-select">
+                    <option value="" disabled selected>請選擇違規類型</option>
+                    <option value="0">我就是不喜歡</option>
+                    <option value="1">霸凌或擾人的聯繫</option>
+                    <option value="2">自殺、自殘或飲食失調</option>
+                    <option value="3">暴力、仇恨或剝削</option>
+                    <option value="4">販售或推廣管制商品</option>
+                    <option value="5">裸露或性行為</option>
+                    <option value="6">詐騙、詐欺或垃圾訊息</option>
+                    <option value="7">不實資訊</option>
+                    <option value="8">智慧財產權</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">詳細說明</label>
+                  <textarea formControlName="reportDetails" class="form-control" id="ReportDetails" rows="3"></textarea>
+                </div>
+              </form>
+              <div class="mb-3">
+                <label for="formFile" class="form-label" #fileInput>上傳圖片</label>
+                <input type="file" class="form-control" (change)="onFileChange($event)">
+              </div>
+              <!-- <div><img [src]="reportPhotoView"></div> -->
+            </div>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-danger" (click)="ReportArticle()">檢舉</button>
+          </div>
+        </div>
+      </div>
+    </div>
